@@ -1,0 +1,28 @@
+[package]
+name = "sushii-2"
+version = "0.1.0"
+authors = ["drklee3 <derrick@dlee.dev>"]
+edition = "2018"
+
+[dependencies]
+darkredis = "0.7"
+dashmap = "3.11"
+dotenv = "0.15"
+futures = "0.3"
+num_cpus = "1.13"
+tracing = "0.1"
+
+[dependencies.tokio]
+version = "0.2"
+features = ["macros", "rt-core"]
+
+[dependencies.sqlx]
+version = "0.4.0-beta.1"
+default-features = false
+features = [ "runtime-tokio", "macros", "postgres" ]
+
+[dependencies.twilight]
+git = "https://github.com/twilight-rs/twilight.git"
+branch = "trunk"
+default-features = false
+features = ["all", "native", "simd-json", "command-parser"]
