@@ -4,24 +4,24 @@ use twilight::gateway::Event;
 use twilight::model::gateway::payload::MessageCreate;
 
 use crate::error::Result;
-use crate::model::command::{Command, CommandBuilder};
+use crate::model::{command::{Command, CommandBuilder}, commands::{Commands, CommandsBuilder}};
 use crate::model::context::SushiiContext;
-use crate::utils::guards::is_bot;
+use crate::utils::guards;
 
 mod admin;
 mod text;
 mod user;
 
-pub fn create_command_parser<'a>() -> Parser<'a> {
-    let mut config = CommandParserConfig::new();
+pub fn create_commands<'a>() -> Commands<'a> {
+    let cmds = CommandsBuilder::new()
+        .add_command(CommandBuilder::new("ping").build())
+        .add_command(CommandBuilder::new("avatar").guild_only(true).build())
+        .add_command(CommandBuilder::new("shutdown").owners_only(true).build())
+        .build();
 
-    config.add_command("echo", false);
-    config.add_command("avatar", false);
-    config.add_command("ping", false);
-    config.add_command("shutdown", false);
-    config.add_prefix("");
+    tracing::info!("Commands added: {:#?}", cmds.parser.config().commands());
 
-    Parser::new(config)
+    cmds
 }
 
 /*
@@ -53,15 +53,42 @@ pub async fn handle_command<'a>(
 
     let full_command = &msg.content[prefix.len()..];
 
-    if let Some(cmd) = ctx.command_parser.parse(full_command) {
-        match cmd.name {
-            // "ping" => text::ping(msg, ctx).await?,
-            "avatar" => user::avatar(msg, ctx).await?,
-            // crate::utils::macros::command!("shutdown", admin::shutdown),
-            "shutdown" => admin::shutdown(msg, ctx).await?,
+    tracing::info!("Found command: {}", full_command);
 
-            _ => {}
+
+    // Parse command
+    let cmd = match ctx.commands.parser.parse(full_command) {
+        Some(c) => c,
+        None => {
+            tracing::info!("No parse match found: {}", full_command);
+            return Ok(())
         }
+    };
+
+    {
+        // Get command meta info (permissions, info, help, etc)
+        let cmd_meta = match ctx.commands.command_list.get(cmd.name) {
+            Some(m) => m,
+            None => {
+                tracing::warn!("Failed to get command meta info: {}", cmd.name);
+                return Ok(());
+            }
+        };
+    
+        tracing::info!("Found command meta info: {:#?}", *cmd_meta);
+
+        if !guards::does_pass(msg, &cmd_meta, &ctx).await {
+            return Ok(());
+        }
+    }
+
+    match cmd.name {
+        "ping" => text::ping(msg, ctx).await?,
+        "avatar" => user::avatar(msg, ctx).await?,
+        // crate::utils::macros::command!("shutdown", admin::shutdown),
+        "shutdown" => admin::shutdown(msg, ctx).await?,
+
+        _ => {}
     }
 
     Ok(())
@@ -74,10 +101,6 @@ pub async fn handle_event<'a>(
 ) -> Result<()> {
     match event {
         Event::MessageCreate(msg) => {
-            if is_bot(msg) {
-                return Ok(());
-            }
-
             if msg.author.id.0 != 150443906511667200 {
                 return Ok(());
             }

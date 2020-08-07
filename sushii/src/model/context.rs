@@ -4,7 +4,7 @@ use twilight::{
     cache::InMemoryCache, command_parser::Parser, gateway::Cluster, http::Client as HttpClient,
 };
 
-use crate::model::{command::Command, sushii_config::SushiiConfig};
+use crate::model::{command::Command, sushii_config::SushiiConfig, commands::Commands};
 
 #[derive(Clone)]
 pub struct SushiiContext<'a> {
@@ -13,6 +13,6 @@ pub struct SushiiContext<'a> {
     pub cluster: Cluster,
     pub http: HttpClient,
     pub pool: sqlx::PgPool,
-    pub command_parser: Parser<'a>,
-    // pub commands: Arc<dashmap::DashMap<String, Command>>,
+    // pub command_parser: Parser<'a>,
+    pub commands: Commands<'a>,
 }

@@ -24,16 +24,22 @@ use crate::error::Result;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let token = env::var("DISCORD_TOKEN")?;
+    // install global subscriber configured based on RUST_LOG envvar.
+    tracing_subscriber::fmt().init();
+
+    let sushii_conf = model::sushii_config::SushiiConfig::new_from_env().expect("failed to make config");
+
+    // The http client is seperate from the gateway
+    let http = HttpClient::new(&sushii_conf.discord_token);
 
     let pool = PgPoolOptions::new()
         .max_connections(5)
-        .connect(&env::var("DATABASE_URL")?)
+        .connect(&sushii_conf.database_url)
         .await?;
 
     let scheme = ShardScheme::Auto;
 
-    let config = ClusterConfig::builder(&token)
+    let config = ClusterConfig::builder(&sushii_conf.discord_token)
         .shard_scheme(scheme)
         .intents(Some(
             GatewayIntents::GUILDS
@@ -56,9 +62,6 @@ async fn main() -> Result<()> {
         cluster_spawn.up().await;
     });
 
-    // The http client is seperate from the gateway
-    let http = HttpClient::new(&token);
-
     let cache_config = InMemoryConfigBuilder::new()
         .event_types(
             EventType::MESSAGE_CREATE
@@ -69,15 +72,13 @@ async fn main() -> Result<()> {
         .build();
     let cache = InMemoryCache::from(cache_config);
 
-    let sushii_conf = model::sushii_config::SushiiConfig::new_from_env()?;
-
     let ctx = Arc::new(model::context::SushiiContext {
         config: Arc::new(sushii_conf),
         cache: cache.clone(),
         cluster: cluster.clone(),
         http: http.clone(),
         pool: pool.clone(),
-        command_parser: handlers::commands::create_command_parser(),
+        commands: handlers::commands::create_commands(),
         // commands: Arc::new(handlers::commands::get_commands()),
     });
 

@@ -12,8 +12,12 @@ pub type Result<T> = StdResult<T, Error>;
 
 #[derive(Debug)]
 pub enum Error {
-    Dotenv(DotenvError),
+    // Sushii errors
     Sushii(String),
+    UserError(String),
+    IsBot,
+    // Crate errors
+    Dotenv(DotenvError),
     /// `env::VarError`
     Var(VarError),
     /// `std::io` error
@@ -71,12 +75,14 @@ impl From<SqlxError> for Error {
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         match *self {
+            Error::IsBot => write!(f, "IsBot"),
+            Error::Sushii(ref inner) => inner.fmt(f),
+            Error::UserError(ref inner) => inner.fmt(f),
             Error::Dotenv(ref inner) => inner.fmt(f),
             Error::CreateMessage(ref inner) => inner.fmt(f),
             Error::Gateway(ref inner) => inner.fmt(f),
             Error::Io(ref inner) => inner.fmt(f),
             Error::Sqlx(ref inner) => inner.fmt(f),
-            Error::Sushii(ref inner) => inner.fmt(f),
             Error::Twilight(ref inner) => inner.fmt(f),
             Error::Var(ref inner) => inner.fmt(f),
         }
