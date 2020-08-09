@@ -3,17 +3,17 @@ use std::sync::Arc;
 use twilight::command_parser::{CommandParserConfig, Parser};
 use dashmap::DashMap;
 
-use crate::model::command::Command;
+use crate::model::command_info::CommandInfo;
 
 #[derive(Clone, Debug)]
 pub struct Commands<'a> {
     pub parser: Parser<'a>,
-    pub command_list: Arc<DashMap<String, Command>>,
+    pub command_list: Arc<DashMap<String, CommandInfo>>,
 }
 
 pub struct CommandsBuilder<'a> {
     parser_config: CommandParserConfig<'a>,
-    command_list: DashMap<String, Command>,
+    command_list: DashMap<String, CommandInfo>,
 }
 
 impl<'a> CommandsBuilder<'a> {
@@ -28,7 +28,7 @@ impl<'a> CommandsBuilder<'a> {
         }
     }
 
-    pub fn add_command(mut self, cmd: Command) -> Self {
+    pub fn add_command(mut self, cmd: CommandInfo) -> Self {
         tracing::debug!("Adding command: {:#?}", cmd);
         self.parser_config.add_command(cmd.name.clone(), false);
         self.command_list.insert(cmd.name.clone(), cmd);

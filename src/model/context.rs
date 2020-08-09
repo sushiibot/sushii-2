@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use twilight::{
-    cache::InMemoryCache, command_parser::Parser, gateway::Cluster, http::Client as HttpClient,
+    cache::InMemoryCache, gateway::Cluster, http::Client as HttpClient,
 };
 
-use crate::model::{command::Command, sushii_config::SushiiConfig, commands::Commands};
+use crate::model::{sushii_config::SushiiConfig, commands::Commands};
 
 #[derive(Clone)]
 pub struct SushiiContext<'a> {

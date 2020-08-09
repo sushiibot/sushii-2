@@ -2,7 +2,7 @@ use std::sync::Arc;
 use twilight::model::channel::message::Message;
 
 use crate::model::context::SushiiContext;
-use crate::model::command::Command;
+use crate::model::command_info::CommandInfo;
 use crate::error::{Error, Result};
 
 pub fn is_bot(msg: &Message) -> bool {
@@ -17,7 +17,7 @@ pub fn is_guild(msg: &Message) -> bool {
     msg.guild_id.is_some()
 }
 
-pub async fn does_pass<'a>(msg: &Message, cmd_meta: &Command, ctx: &Arc<SushiiContext<'a>>) -> bool {
+pub async fn does_pass<'a>(msg: &Message, cmd_meta: &CommandInfo, ctx: &Arc<SushiiContext<'a>>) -> bool {
     match check_guards(msg, cmd_meta, ctx) {
         Ok(()) => true,
         Err(e) => {
@@ -39,7 +39,7 @@ pub async fn respond_err<'a>(msg: &Message, ctx: &Arc<SushiiContext<'a>>, err: E
     Ok(())
 }
 
-pub fn check_guards(msg: &Message, cmd_meta: &Command, ctx: &Arc<SushiiContext>) -> Result<()> {
+pub fn check_guards(msg: &Message, cmd_meta: &CommandInfo, ctx: &Arc<SushiiContext>) -> Result<()> {
     if is_bot(msg) {
         return Err(Error::IsBot);
     }

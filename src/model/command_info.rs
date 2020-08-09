@@ -1,20 +1,7 @@
-use futures::future::BoxFuture;
-use std::boxed::Box;
-use std::future::Future;
-use std::ops::Fn;
-use std::pin::Pin;
-use std::sync::Arc;
-
-use twilight::gateway::Event;
-use twilight::model::channel::message::Message;
-use twilight::model::gateway::payload::MessageCreate;
 use twilight::model::guild::Permissions;
 
-use crate::error::Error;
-use crate::model::context::SushiiContext;
-
 #[derive(Debug)]
-pub struct Command {
+pub struct CommandInfo {
     pub name: String,
     pub description: Option<String>,
     pub help: Option<String>,
@@ -25,11 +12,11 @@ pub struct Command {
 }
 
 #[derive(Debug)]
-pub struct CommandBuilder(Command);
+pub struct CommandInfoBuilder(CommandInfo);
 
-impl CommandBuilder {
+impl CommandInfoBuilder {
     pub fn new(name: impl Into<String>) -> Self {
-        CommandBuilder(Command {
+        CommandInfoBuilder(CommandInfo {
             name: name.into(),
             description: None,
             help: None,
@@ -70,7 +57,7 @@ impl CommandBuilder {
         self
     }
 
-    pub fn build(self) -> Command {
+    pub fn build(self) -> CommandInfo {
         self.0
     }
 }

@@ -1,5 +1,4 @@
 use sqlx::postgres::PgPoolOptions;
-use std::env;
 use std::sync::Arc;
 use tokio::stream::StreamExt;
 use twilight::{
