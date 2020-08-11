@@ -13,7 +13,7 @@ use crate::model::{
 use crate::model::context::SushiiContext;
 use crate::utils::guards;
 
-mod admin;
+mod owner;
 mod text;
 mod user;
 mod moderation;
@@ -69,10 +69,14 @@ async fn exec_command<'a>(
         "ping" => text::ping(msg, ctx).await?,
         "avatar" => user::avatar(msg, ctx).await?,
         // crate::utils::macros::command!("shutdown", admin::shutdown),
-        "shutdown" => admin::shutdown(msg, ctx).await?,
         "prune" => moderation::chat::prune(msg, ctx, &cmd.arguments).await?,
 
-        _ => {}
+        // Owner commands
+        "shutdown" => owner::shutdown(msg, ctx).await?,
+
+        _ => {
+            tracing::error!("Command parsed but isn't executed: {}", cmd.name);
+        }
     }
 
     Ok(())

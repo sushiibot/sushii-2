@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug)]
+#[derive(Deserialize, Default, Serialize, sqlx::FromRow, Clone, Debug)]
 pub struct GuildConfig {
     pub id: i64,
     pub prefix: Option<String>,
@@ -18,4 +18,13 @@ pub struct GuildConfig {
     pub mute_role: Option<i64>,
     pub max_mention: Option<i32>,
     pub disabled_channels: Option<Vec<i64>>,
+}
+
+impl GuildConfig {
+    pub fn new(id: i64) -> Self {
+        GuildConfig {
+            id,
+            ..Default::default()
+        }
+    }
 }

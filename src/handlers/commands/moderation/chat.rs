@@ -12,6 +12,8 @@ pub async fn prune<'a>(msg: &Message, ctx: Arc<SushiiContext<'a>>, args: &Argume
         .parse::<u64>()
         .map_err(|_| Error::UserError("Invalid input, please give a number".into()))?;
 
+    // Should try to use cached messages if possible but twilight cache messages
+    // aren't public and likely won't want to cache up to 100 messages per channel anyways
     let messages: Vec<MessageId> = ctx.http
         .channel_messages(msg.channel_id)
         .limit(num_messages)?
