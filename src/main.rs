@@ -73,6 +73,7 @@ async fn main() -> Result<()> {
 
     let ctx = Arc::new(model::context::SushiiContext {
         config: Arc::new(sushii_conf),
+        sushii_cache: model::sushii_cache::SushiiCache::default(),
         cache: cache.clone(),
         cluster: cluster.clone(),
         http: http.clone(),
@@ -100,6 +101,7 @@ async fn handle_event<'a>(
     event: (u64, Event),
     ctx: Arc<model::context::SushiiContext<'a>>,
 ) -> Result<()> {
+    handlers::middleware::handle_event(event.0, &event.1, ctx.clone()).await?;
     handlers::commands::handle_event(event.0, &event.1, ctx.clone()).await?;
 
     match event {

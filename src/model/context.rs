@@ -4,11 +4,12 @@ use twilight::{
     cache::InMemoryCache, gateway::Cluster, http::Client as HttpClient,
 };
 
-use crate::model::{sushii_config::SushiiConfig, commands::Commands};
+use super::{sushii_config::SushiiConfig, commands::Commands, sushii_cache::SushiiCache};
 
 #[derive(Clone)]
 pub struct SushiiContext<'a> {
     pub config: Arc<SushiiConfig>,
+    pub sushii_cache: SushiiCache,
     pub cache: InMemoryCache,
     pub cluster: Cluster,
     pub http: HttpClient,

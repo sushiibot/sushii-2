@@ -289,6 +289,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "dashmap"
+version = "4.0.0-rc6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "308a6703be2d759cb5fb7b80a23547fe73a8d5ebf70d3a4ca7f0ef4c0bfc2265"
+dependencies = [
+ "once_cell",
+]
+
+[[package]]
 name = "digest"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1353,6 +1362,7 @@ version = "1.0.57"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "164eacbdb13512ec2745fb09d51fd5b22b0d65ed294a1dcf7285a360c80a675c"
 dependencies = [
+ "indexmap",
  "itoa",
  "ryu",
  "serde",
@@ -1496,6 +1506,7 @@ dependencies = [
  "bitflags",
  "byteorder",
  "bytes",
+ "chrono",
  "crossbeam-channel",
  "crossbeam-queue",
  "crossbeam-utils",
@@ -1516,6 +1527,8 @@ dependencies = [
  "parking_lot",
  "percent-encoding",
  "rand",
+ "serde",
+ "serde_json",
  "sha-1 0.9.1",
  "sha2",
  "smallvec",
@@ -1539,6 +1552,7 @@ dependencies = [
  "heck",
  "proc-macro2",
  "quote",
+ "serde_json",
  "sqlx-core",
  "sqlx-rt",
  "syn",
@@ -1578,12 +1592,15 @@ name = "sushii-2"
 version = "0.1.0"
 dependencies = [
  "darkredis",
- "dashmap",
+ "dashmap 4.0.0-rc6",
  "dotenv",
  "futures",
  "num_cpus",
+ "serde",
+ "serde_json",
  "sqlx",
  "tokio",
+ "toml",
  "tracing",
  "tracing-subscriber",
  "twilight",
@@ -1723,6 +1740,15 @@ dependencies = [
  "log",
  "pin-project-lite",
  "tokio",
+]
+
+[[package]]
+name = "toml"
+version = "0.5.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ffc92d160b1eef40665be3a05630d003936a3bc7da7421277846c2613e92c71a"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -1868,7 +1894,7 @@ source = "git+https://github.com/twilight-rs/twilight.git?branch=trunk#81d43da31
 dependencies = [
  "async-trait",
  "bitflags",
- "dashmap",
+ "dashmap 3.11.10",
  "futures-util",
  "tracing",
  "twilight-cache-trait",
@@ -1900,7 +1926,7 @@ dependencies = [
  "async-trait",
  "async-tungstenite",
  "bitflags",
- "dashmap",
+ "dashmap 3.11.10",
  "flate2",
  "futures-channel",
  "futures-util",
@@ -1953,7 +1979,7 @@ name = "twilight-standby"
 version = "0.1.0"
 source = "git+https://github.com/twilight-rs/twilight.git?branch=trunk#81d43da319e6984f933dcd1568681ee303298be1"
 dependencies = [
- "dashmap",
+ "dashmap 3.11.10",
  "futures-channel",
  "futures-util",
  "tracing",
