@@ -38,6 +38,8 @@ async fn insert_config_query(guild_id: u64, pool: sqlx::PgPool) {
         .await {
             tracing::error!("Failed to insert guild config: {}", e);
         }
+
+    tracing::info!(guild_id, "Inserted new guild config");
 }
 
 async fn cache_guild_config_query<'a>(guild_id: u64, ctx: &Arc<SushiiContext<'a>>) -> Result<GuildConfig> {
