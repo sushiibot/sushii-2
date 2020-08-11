@@ -19,7 +19,9 @@ fn parse_id_array(s: &str) -> Vec<u64> {
 
 impl SushiiConfig {
     pub fn new_from_env() -> Result<Self> {
-        dotenv::dotenv().ok();
+        if let Err(e) = dotenv::dotenv() {
+            tracing::warn!("Failed to read .env file: {}", e);
+        }
 
         Ok(SushiiConfig {
             discord_token: dotenv::var("DISCORD_TOKEN")?,

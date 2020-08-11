@@ -1,0 +1,8 @@
+Dockerfile
+
+**/target
+
+**/.git
+**/.github
+**/.gitignore
+.env
