@@ -4,7 +4,7 @@ use twilight::gateway::Event;
 use twilight::model::channel::message::Message;
 use twilight::model::gateway::payload::MessageCreate;
 use twilight::model::guild::Permissions as Perm;
-use twilight::command_parser::Command;
+use twilight::command_parser::Arguments;
 
 use crate::error::{Error, Result};
 use crate::model::{
@@ -29,7 +29,7 @@ pub trait CommandExec: Sync {
         Box::new(Self::default())
     }
 
-    async fn execute<'a>(&self, msg: &Message, ctx: Arc<SushiiContext<'a>>) -> Result<()>;
+    async fn execute<'a>(&self, msg: &Message, ctx: Arc<SushiiContext<'a>>, args: &Arguments<'a>) -> Result<()>;
 }
 
 impl Debug for (dyn CommandExec + std::marker::Send + 'static) {
@@ -46,16 +46,19 @@ pub fn create_commands<'a>() -> Commands<'a> {
             .build()
         )
         .add_command(CommandInfoBuilder::new("avatar")
+            .exec(user::Avatar::new())
             .guild_only(true)
             .help("Gets avatar of a user, default yourself")
             .usage("(user)")
             .build()
         )
         .add_command(CommandInfoBuilder::new("shutdown")
+            .exec(owner::Shutdown::new())
             .owners_only(true)
             .build()
         )
         .add_command(CommandInfoBuilder::new("prune")
+            .exec(moderation::chat::Prune::new())
             .required_permissions(Permissions::from_permission(Perm::BAN_MEMBERS)
                 .build()
             ).build()
@@ -158,7 +161,7 @@ pub async fn handle_command<'a>(
         None => return Err(Error::Sushii(format!("Missing command exec function: {}", &cmd.name))),
     };
 
-    if let Err(e) = exec.execute(msg, ctx.clone()).await {
+    if let Err(e) = exec.execute(msg, ctx.clone(), &cmd_match.arguments).await {
         match e {
             Error::UserError(e) => {
                 ctx.http
