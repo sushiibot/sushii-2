@@ -1,4 +1,5 @@
 use twilight::model::guild::Permissions;
+use crate::handlers::commands::CommandExec;
 
 #[derive(Debug)]
 pub struct CommandInfo {
@@ -8,7 +9,8 @@ pub struct CommandInfo {
     pub usage: Option<String>,
     pub owners_only: bool,
     pub required_permissions: Option<Permissions>,
-    pub guild_only: bool
+    pub guild_only: bool,
+    pub exec: Option<Box<dyn CommandExec + Send>>,
 }
 
 #[derive(Debug)]
@@ -23,7 +25,8 @@ impl CommandInfoBuilder {
             usage: None,
             owners_only: false,
             required_permissions: None,
-            guild_only: false
+            guild_only: false,
+            exec: None,
         })
     }
 
@@ -57,7 +60,16 @@ impl CommandInfoBuilder {
         self
     }
 
+    pub fn exec(mut self, exec: Box<dyn CommandExec + Send>) -> Self {
+        self.0.exec.replace(exec);
+        self
+    }
+
     pub fn build(self) -> CommandInfo {
+        if self.0.exec.is_none() {
+            tracing::error!("Missing exec function for command: {}", self.0.name);
+        }
+
         self.0
     }
 }

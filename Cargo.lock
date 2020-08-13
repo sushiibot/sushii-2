@@ -1591,6 +1591,7 @@ checksum = "502d53007c02d7605a05df1c1a73ee436952781653da5d0bf57ad608f66932c1"
 name = "sushii-2"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "darkredis",
  "dashmap 4.0.0-rc6",
  "dotenv",

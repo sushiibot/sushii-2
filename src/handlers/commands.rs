@@ -1,5 +1,7 @@
 use std::sync::Arc;
+use std::fmt::Debug;
 use twilight::gateway::Event;
+use twilight::model::channel::message::Message;
 use twilight::model::gateway::payload::MessageCreate;
 use twilight::model::guild::Permissions as Perm;
 use twilight::command_parser::Command;
@@ -13,15 +15,34 @@ use crate::model::{
 use crate::model::context::SushiiContext;
 use crate::utils::guards;
 
+use async_trait::async_trait;
+
 mod owner;
 mod text;
 mod user;
 mod moderation;
 
+#[async_trait]
+pub trait CommandExec: Sync {
+    // Default ::new() just returns a boxed of Self
+    fn new() -> Box<Self> where Self: Sized + Default {
+        Box::new(Self::default())
+    }
+
+    async fn execute<'a>(&self, msg: &Message, ctx: Arc<SushiiContext<'a>>) -> Result<()>;
+}
+
+impl Debug for (dyn CommandExec + std::marker::Send + 'static) {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "CommandExec")
+    }
+}
+
 pub fn create_commands<'a>() -> Commands<'a> {
     let cmds = CommandsBuilder::new()
         .add_command(CommandInfoBuilder::new("ping")
             .description("pong")
+            .exec(text::Ping::new())
             .build()
         )
         .add_command(CommandInfoBuilder::new("avatar")
@@ -60,6 +81,7 @@ pub fn get_commands() -> dashmap::DashMap<String, Command> {
 */
 
 // Only returns Error if it isn't a user showing error: system errors
+/*
 async fn exec_command<'a>(
     cmd: &Command<'a>,
     msg: &Box<MessageCreate>,
@@ -81,18 +103,22 @@ async fn exec_command<'a>(
 
     Ok(())
 }
+*/
 
 pub async fn handle_command<'a>(
     msg: &Box<MessageCreate>,
     ctx: Arc<SushiiContext<'a>>,
 ) -> Result<()> {
-    let prefix = &ctx.config.default_prefix;
+    let guild_conf = msg.guild_id.and_then(|g| ctx.sushii_cache.guilds.get(&g));
+
+    // If guild && guild.prefix, use guild prefix, else use default_prefix
+    let prefix = &guild_conf.and_then(|c| c.prefix.clone()).unwrap_or_else(|| ctx.config.default_prefix.clone());
 
     if msg.content.len() <= prefix.len() {
         return Ok(());
     }
 
-    if !msg.content.starts_with(prefix) {
+    if !msg.content.starts_with(&prefix[..]) {
         return Ok(());
     }
 
@@ -101,7 +127,7 @@ pub async fn handle_command<'a>(
     tracing::info!("Found command: {}", full_command);
 
     // Parse command
-    let cmd = match ctx.commands.parser.parse(full_command) {
+    let cmd_match = match ctx.commands.parser.parse(full_command) {
         Some(c) => c,
         None => {
             tracing::info!("No parse match found: {}", full_command);
@@ -109,26 +135,30 @@ pub async fn handle_command<'a>(
         }
     };
 
-    {
-        // Get command meta info (permissions, info, help, etc)
-        // Want to drop the ctx borrow after checking guards so that command takes ownership
-        let cmd_meta = match ctx.commands.command_list.get(cmd.name) {
-            Some(m) => m,
-            None => {
-                tracing::warn!("Failed to get command meta info: {}", cmd.name);
-                return Ok(());
-            }
-        };
 
-        tracing::info!("Found command meta info: {:#?}", *cmd_meta);
-
-        // Check for guards: permissions, guild, owner, etc
-        if !guards::does_pass(msg, &cmd_meta, &ctx).await {
+    // Get command meta info (permissions, info, help, etc)
+    // Want to drop the ctx borrow after checking guards so that command takes ownership
+    let cmd = match ctx.commands.command_list.get(cmd_match.name) {
+        Some(m) => m,
+        None => {
+            tracing::warn!("Failed to get command meta info: {}", cmd_match.name);
             return Ok(());
         }
+    };
+
+    tracing::info!("Found command meta info: {:#?}", *cmd);
+
+    // Check for guards: permissions, guild, owner, etc
+    if !guards::does_pass(msg, &cmd, &ctx).await {
+        return Ok(());
     }
 
-    if let Err(e) = exec_command(&cmd, msg, ctx.clone()).await {
+    let exec = match &cmd.exec {
+        Some(e) => e,
+        None => return Err(Error::Sushii(format!("Missing command exec function: {}", &cmd.name))),
+    };
+
+    if let Err(e) = exec.execute(msg, ctx.clone()).await {
         match e {
             Error::UserError(e) => {
                 ctx.http
@@ -136,7 +166,7 @@ pub async fn handle_command<'a>(
                     .content(e)?
                     .await?;
             }
-            _ => tracing::error!(?msg, cmd = cmd.name, "Failed to run command: {}", e),
+            _ => return Err(e.into()),
         }
     }
 
