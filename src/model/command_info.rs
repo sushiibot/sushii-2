@@ -8,7 +8,7 @@ pub struct CommandInfo {
     pub help: Option<String>,
     pub usage: Option<String>,
     pub owners_only: bool,
-    pub required_permissions: Option<Permissions>,
+    pub required_permissions: Permissions,
     pub guild_only: bool,
     pub exec: Option<Box<dyn CommandExec + Send>>,
 }
@@ -24,7 +24,7 @@ impl CommandInfoBuilder {
             help: None,
             usage: None,
             owners_only: false,
-            required_permissions: None,
+            required_permissions: Permissions::empty(),
             guild_only: false,
             exec: None,
         })
@@ -51,7 +51,7 @@ impl CommandInfoBuilder {
     }
 
     pub fn required_permissions(mut self, required_permissions: Permissions) -> Self {
-        self.0.required_permissions.replace(required_permissions);
+        self.0.required_permissions = required_permissions;
         self
     }
 

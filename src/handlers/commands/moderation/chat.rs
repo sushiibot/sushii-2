@@ -20,7 +20,7 @@ impl CommandExec for Prune {
             .map_err(|_| Error::UserError("Invalid input, please give a number".into()))?;
         
         if num_messages < 2 || num_messages > 100 {
-            return Err(Error::UserError("Number of messages must be between 2 and 100 (inclusive)"));
+            return Err(Error::UserError("Number of messages must be between 2 and 100 (inclusive)".into()));
         }
 
         // Should try to use cached messages if possible but twilight cache messages
