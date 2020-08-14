@@ -1,5 +1,6 @@
 use dotenv::Error as DotenvError;
 use sqlx::Error as SqlxError;
+use std::error::Error as StdError;
 use std::env::VarError;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::io::Error as IoError;
@@ -43,6 +44,12 @@ impl From<VarError> for Error {
 impl From<SqlxError> for Error {
     fn from(err: SqlxError) -> Error {
         Error::Sqlx(err)
+    }
+}
+
+impl StdError for Error {
+    fn source(&self) -> Option<&(dyn StdError + 'static)> {
+        Some(self)
     }
 }
 

@@ -1,8 +1,6 @@
 use sqlx::postgres::PgPoolOptions;
 
-use serenity::{
-    framework::StandardFramework, http::Http, prelude::*,
-};
+use serenity::{framework::StandardFramework, http::Http, prelude::*};
 use std::{collections::HashSet, sync::Arc};
 
 mod commands;
@@ -11,7 +9,7 @@ mod handler;
 mod hooks;
 // mod handlers;
 mod model;
-// mod utils;
+mod utils;
 
 use crate::error::Result;
 use crate::model::{
@@ -53,18 +51,19 @@ async fn main() -> Result<()> {
     // Create the framework
     let framework = StandardFramework::new()
         .configure(|c| {
-            c.owners(owners).prefix("s!").dynamic_prefix(|ctx, msg| {
-                Box::pin(async move {
-                    let data = ctx.data.read().await;
-                    let sushii_ctx = data.get::<SushiiContext>().unwrap();
-
-                    msg.guild_id
-                        .and_then(|g| sushii_ctx.sushii_cache.guilds.get(&g))
-                        .and_then(|c| c.prefix.clone())
+            c.owners(owners)
+                .prefix(&sushii_ctx.config.default_prefix)
+                .dynamic_prefix(|ctx, msg| {
+                    Box::pin(async move {
+                        utils::guild_config::get_cached_guild_config(&ctx, &msg)
+                            .await
+                            .and_then(|c| c.prefix.clone())
+                    })
                 })
-            })
         })
         .before(hooks::before)
+        .after(hooks::after)
+        .on_dispatch_error(hooks::dispatch_error)
         .group(&commands::META_GROUP)
         .group(&commands::moderation::MODERATION_GROUP)
         .group(&commands::OWNER_GROUP);
@@ -88,40 +87,3 @@ async fn main() -> Result<()> {
 
     Ok(())
 }
-
-/*
-async fn handle_event<'a>(
-    event: (u64, Event),
-    ctx: Arc<model::context::SushiiContext<'a>>,
-) -> Result<()> {
-    handlers::middleware::handle_event(event.0, &event.1, ctx.clone()).await?;
-    handlers::commands::handle_event(event.0, &event.1, ctx.clone()).await?;
-
-    match event {
-        (id, Event::ShardConnected(_)) => {
-            println!("ShardConnected: {}", id);
-        }
-        (id, Event::ShardConnecting(_)) => {
-            println!("ShardConnecting: {}", id);
-        }
-        (id, Event::ShardDisconnected(_)) => {
-            println!("ShardDisconnected: {}", id);
-        }
-        (id, Event::ShardIdentifying(_)) => {
-            println!("ShardIdentifying: {}", id);
-        }
-        (id, Event::ShardReconnecting(_)) => {
-            println!("ShardReconnecting: {}", id);
-        }
-        (id, Event::ShardPayload(_)) => {
-            println!("ShardPayload: {}", id);
-        }
-        (id, Event::ShardResuming(_)) => {
-            println!("ShardResuming: {}", id);
-        }
-        _ => {}
-    }
-
-    Ok(())
-}
-*/
