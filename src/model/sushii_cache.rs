@@ -1,5 +1,5 @@
+use serenity::model::id::GuildId;
 use std::sync::Arc;
-use twilight::model::id::GuildId;
 
 use super::sql::guild;
 

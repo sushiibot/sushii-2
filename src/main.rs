@@ -1,102 +1,95 @@
 use sqlx::postgres::PgPoolOptions;
-use std::sync::Arc;
-use tokio::stream::StreamExt;
-use twilight::{
-    cache::{
-        twilight_cache_inmemory::config::{EventType, InMemoryConfigBuilder},
-        InMemoryCache,
-    },
-    gateway::{
-        cluster::{config::ShardScheme, Cluster, ClusterConfig},
-        Event,
-    },
-    http::Client as HttpClient,
-    model::gateway::GatewayIntents,
-};
 
+use serenity::{
+    framework::StandardFramework, http::Http, prelude::*,
+};
+use std::{collections::HashSet, sync::Arc};
+
+mod commands;
 mod error;
-mod handlers;
+mod handler;
+mod hooks;
+// mod handlers;
 mod model;
-mod utils;
+// mod utils;
 
 use crate::error::Result;
+use crate::model::{
+    context::SushiiContext, shardmanager::ShardManagerContainer, sushii_cache::SushiiCache,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // install global subscriber configured based on RUST_LOG envvar.
     tracing_subscriber::fmt().init();
 
-    let sushii_conf = model::sushii_config::SushiiConfig::new_from_env().expect("failed to make config");
-
-    // The http client is seperate from the gateway
-    let http = HttpClient::new(&sushii_conf.discord_token);
+    let sushii_conf =
+        model::sushii_config::SushiiConfig::new_from_env().expect("failed to make config");
 
     let pool = PgPoolOptions::new()
         .max_connections(5)
         .connect(&sushii_conf.database_url)
         .await?;
 
-    let scheme = ShardScheme::Auto;
-
-    let config = ClusterConfig::builder(&sushii_conf.discord_token)
-        .shard_scheme(scheme)
-        .intents(Some(
-            GatewayIntents::GUILDS
-                | GatewayIntents::GUILD_MEMBERS
-                | GatewayIntents::GUILD_BANS
-                | GatewayIntents::GUILD_PRESENCES
-                | GatewayIntents::GUILD_MESSAGES
-                | GatewayIntents::GUILD_MESSAGE_REACTIONS
-                | GatewayIntents::DIRECT_MESSAGES
-                | GatewayIntents::DIRECT_MESSAGE_REACTIONS,
-        ))
-        .build();
-
-    // Start up the cluster
-    let cluster = Cluster::new(config).await?;
-
-    let cluster_spawn = cluster.clone();
-
-    tokio::spawn(async move {
-        cluster_spawn.up().await;
-    });
-
-    let cache_config = InMemoryConfigBuilder::new()
-        .event_types(
-            EventType::MESSAGE_CREATE
-                | EventType::MESSAGE_DELETE
-                | EventType::MESSAGE_DELETE_BULK
-                | EventType::MESSAGE_UPDATE,
-        )
-        .build();
-    let cache = InMemoryCache::from(cache_config);
-
-    let ctx = Arc::new(model::context::SushiiContext {
+    let sushii_ctx = SushiiContext {
         config: Arc::new(sushii_conf),
-        sushii_cache: model::sushii_cache::SushiiCache::default(),
-        cache: cache.clone(),
-        cluster: cluster.clone(),
-        http: http.clone(),
+        sushii_cache: SushiiCache::default(),
         pool: pool.clone(),
-        commands: handlers::commands::create_commands(),
-        // commands: Arc::new(handlers::commands::get_commands()),
-    });
+    };
 
-    let mut events = cluster.events().await;
-    // Startup an event loop for each event in the event stream
-    while let Some(event) = events.next().await {
-        if let Err(e) = cache.update(&event.1).await {
-            tracing::error!("Failed to cache event: {}", e);
+    let http = Http::new_with_token(&sushii_ctx.config.discord_token);
+
+    // We will fetch your bot's owners and id
+    let (owners, _bot_id) = match http.get_current_application_info().await {
+        Ok(info) => {
+            let mut owners = HashSet::new();
+            owners.insert(info.owner.id);
+
+            (owners, info.id)
         }
+        Err(why) => panic!("Could not access application info: {:?}", why),
+    };
 
-        let ctx = ctx.clone();
-        // Spawn a new task to handle the event
-        tokio::spawn(handle_event(event, ctx));
+    // Create the framework
+    let framework = StandardFramework::new()
+        .configure(|c| {
+            c.owners(owners).prefix("s!").dynamic_prefix(|ctx, msg| {
+                Box::pin(async move {
+                    let data = ctx.data.read().await;
+                    let sushii_ctx = data.get::<SushiiContext>().unwrap();
+
+                    msg.guild_id
+                        .and_then(|g| sushii_ctx.sushii_cache.guilds.get(&g))
+                        .and_then(|c| c.prefix.clone())
+                })
+            })
+        })
+        .before(hooks::before)
+        .group(&commands::META_GROUP)
+        .group(&commands::moderation::MODERATION_GROUP)
+        .group(&commands::OWNER_GROUP);
+
+    let mut client = Client::new(&sushii_ctx.config.discord_token)
+        .framework(framework)
+        .event_handler(handler::Handler)
+        .await
+        .expect("Err creating client");
+
+    // Add data to client
+    {
+        let mut data = client.data.write().await;
+        data.insert::<SushiiContext>(sushii_ctx);
+        data.insert::<ShardManagerContainer>(client.shard_manager.clone());
+    }
+
+    if let Err(why) = client.start().await {
+        tracing::error!("Client error: {:?}", why);
     }
 
     Ok(())
 }
 
+/*
 async fn handle_event<'a>(
     event: (u64, Event),
     ctx: Arc<model::context::SushiiContext<'a>>,
@@ -131,3 +124,4 @@ async fn handle_event<'a>(
 
     Ok(())
 }
+*/

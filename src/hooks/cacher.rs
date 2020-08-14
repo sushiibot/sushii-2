@@ -1,21 +1,23 @@
-use std::sync::Arc;
-use twilight::model::channel::message::Message;
-
 use crate::error::{Error, Result};
 use crate::model::context::SushiiContext;
 use crate::model::sql::guild::GuildConfig;
+use serenity::model::prelude::*;
+use serenity::prelude::*;
 
-pub async fn cache_guild_config<'a>(msg: &Message, ctx: &Arc<SushiiContext<'a>>) {
+pub async fn cache_guild_config(ctx: &Context, msg: &Message) {
+    let data = ctx.data.read().await;
+    let sushii_ctx = data.get::<SushiiContext>().unwrap();
+
     let guild_id = match msg.guild_id {
         Some(i) => i,
         None => return,
     };
 
-    if ctx.sushii_cache.guilds.contains_key(&guild_id) {
+    if sushii_ctx.sushii_cache.guilds.contains_key(&guild_id) {
         return;
     }
 
-    let conf = match cache_guild_config_query(guild_id.0, &ctx).await {
+    let conf = match cache_guild_config_query(&sushii_ctx, guild_id.0).await {
         Ok(c) => c,
         Err(e) => {
             tracing::error!(?msg, "Failed to fetch config: {}", e);
@@ -23,26 +25,12 @@ pub async fn cache_guild_config<'a>(msg: &Message, ctx: &Arc<SushiiContext<'a>>)
         }
     };
 
-    ctx.sushii_cache.guilds.insert(guild_id, conf);
+    sushii_ctx.sushii_cache.guilds.insert(guild_id, conf);
 
     tracing::info!(guild_id = guild_id.0, "Cached guild config");
 }
 
-async fn insert_config_query(guild_id: u64, pool: sqlx::PgPool) {
-    if let Err(e) = sqlx::query!(r#"
-            INSERT INTO guild_configs
-                VALUES ($1)
-        "#,
-        guild_id as i64)
-        .execute(&pool)
-        .await {
-            tracing::error!(guild_id, "Failed to insert guild config: {}", e);
-        }
-
-    tracing::info!(guild_id, "Inserted new guild config");
-}
-
-async fn cache_guild_config_query<'a>(guild_id: u64, ctx: &Arc<SushiiContext<'a>>) -> Result<GuildConfig> {
+async fn cache_guild_config_query(ctx: &SushiiContext, guild_id: u64) -> Result<GuildConfig> {
     let conf_result = sqlx::query_as!(GuildConfig, r#"
             SELECT *
               FROM guild_configs
@@ -69,4 +57,18 @@ async fn cache_guild_config_query<'a>(guild_id: u64, ctx: &Arc<SushiiContext<'a>
 
     // res is ok now
     Ok(conf_result.unwrap())
+}
+
+async fn insert_config_query(guild_id: u64, pool: sqlx::PgPool) {
+    if let Err(e) = sqlx::query!(r#"
+            INSERT INTO guild_configs
+                VALUES ($1)
+        "#,
+        guild_id as i64)
+        .execute(&pool)
+        .await {
+            tracing::error!(guild_id, "Failed to insert guild config: {}", e);
+        }
+
+    tracing::info!(guild_id, "Inserted new guild config");
 }
