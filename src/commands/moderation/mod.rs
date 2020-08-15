@@ -7,6 +7,6 @@ use chat::*;
 use settings::*;
 
 #[group]
-#[commands(prefix, prune)]
+#[commands(prefix, prune, settings)]
 #[required_permissions("BAN_MEMBERS")]
 pub struct Moderation;

@@ -18,12 +18,12 @@ pub async fn dispatch_error(context: &Context, msg: &Message, error: DispatchErr
             let s = format!("Need {} arguments, but only got {}.", min, given);
 
             let _ = msg.channel_id.say(&context, &s).await;
-        },
+        }
         DispatchError::TooManyArguments { max, given } => {
             let s = format!("Max arguments allowed is {}, but got {}.", max, given);
 
             let _ = msg.channel_id.say(&context, &s).await;
-        },
+        }
         _ => tracing::warn!("Unhandled dispatch error: {:?}", error),
     }
 }

@@ -11,11 +11,8 @@ mod model;
 mod utils;
 
 use crate::error::Result;
-use crate::keys::{ShardManagerContainer, DbPool};
-use crate::model::{
-    sushii_cache::SushiiCache,
-    sushii_config::SushiiConfig
-};
+use crate::keys::{DbPool, ShardManagerContainer};
+use crate::model::{sushii_cache::SushiiCache, sushii_config::SushiiConfig};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -45,7 +42,6 @@ async fn main() -> Result<()> {
     let framework = StandardFramework::new()
         .configure(|c| {
             c.owners(owners)
-                .prefix(&sushii_conf.default_prefix)
                 .dynamic_prefix(|ctx, msg| {
                     Box::pin(async move {
                         utils::guild_config::get_cached_guild_config(&ctx, &msg)

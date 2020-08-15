@@ -1,4 +1,4 @@
-use serenity::framework::standard::{Args, macros::command, CommandResult};
+use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
@@ -11,7 +11,10 @@ async fn prune(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         Ok(n) => n,
         Err(_) => {
             msg.channel_id
-                .say(&ctx.http, "Error: Invalid number of messages, must be between 2 and 99 (inclusive)")
+                .say(
+                    &ctx.http,
+                    "Error: Invalid number of messages, must be between 2 and 99 (inclusive)",
+                )
                 .await?;
 
             return Ok(());
@@ -22,13 +25,17 @@ async fn prune(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     // command isn't counted
     if num_messages < 2 || num_messages > 99 {
         msg.channel_id
-            .say(&ctx.http, "Error: Number of messages must be between 2 and 99 (inclusive)")
+            .say(
+                &ctx.http,
+                "Error: Number of messages must be between 2 and 99 (inclusive)",
+            )
             .await?;
 
         return Ok(());
     }
 
-    let messages: Vec<MessageId> = msg.channel_id
+    let messages: Vec<MessageId> = msg
+        .channel_id
         .messages(&ctx.http, |r| r.limit(num_messages + 1))
         .await?
         .iter()

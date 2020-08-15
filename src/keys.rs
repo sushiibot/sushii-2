@@ -1,14 +1,11 @@
-use std::sync::Arc;
 use serenity::{
     client::bridge::gateway::ShardManager,
     prelude::{Mutex, TypeMapKey},
 };
 use sqlx::PgPool;
+use std::sync::Arc;
 
-pub use crate::model::{
-    sushii_cache::SushiiCache,
-    sushii_config::SushiiConfig
-};
+pub use crate::model::{sushii_cache::SushiiCache, sushii_config::SushiiConfig};
 
 impl TypeMapKey for SushiiCache {
     type Value = SushiiCache;

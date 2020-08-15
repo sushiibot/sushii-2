@@ -1,8 +1,4 @@
-use serenity::{
-    async_trait,
-    prelude::*,
-    model::prelude::*,
-};
+use serenity::{async_trait, model::prelude::*, prelude::*};
 
 pub mod mod_log;
 
@@ -18,7 +14,5 @@ impl EventHandler for Handler {
         tracing::info!("Resumed");
     }
 
-    async fn guild_ban_addition(&self, _ctx: Context, _guild_id: GuildId, _banned_user: User) {
-
-    }
+    async fn guild_ban_addition(&self, _ctx: Context, _guild_id: GuildId, _banned_user: User) {}
 }

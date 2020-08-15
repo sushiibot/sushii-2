@@ -28,7 +28,9 @@ impl SushiiConfig {
             owner_ids: parse_id_array(&dotenv::var("OWNER_IDS").unwrap_or_else(|_| "".into())),
             database_url: dotenv::var("DATABASE_URL")?,
             default_prefix: dotenv::var("DEFAULT_PREFIX")?,
-            blocked_users: parse_id_array(&dotenv::var("BLOCKED_USERS").unwrap_or_else(|_| "".into())),
+            blocked_users: parse_id_array(
+                &dotenv::var("BLOCKED_USERS").unwrap_or_else(|_| "".into()),
+            ),
             lastfm_key: dotenv::var("LASTFM_KEY").unwrap_or_else(|_| "".into()),
         })
     }

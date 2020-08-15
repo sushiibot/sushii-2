@@ -4,6 +4,24 @@ use crate::model::sql::guild::GuildConfig;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
+pub async fn get_cached_guild_config_respond(ctx: &Context, msg: &Message) -> Result<GuildConfig> {
+    let conf = get_cached_guild_config(&ctx, msg).await;
+
+    if conf.is_none() {
+        if let Err(e) = msg
+            .channel_id
+            .say(&ctx.http, "Failed to get the guild config :(")
+            .await
+        {
+            tracing::error!(?msg, "Failed to send message: {}", e);
+        }
+
+        tracing::warn!(?msg, "Failed to get guild config");
+    }
+
+    conf.ok_or(Error::Sushii("Failed to get guild config".into()))
+}
+
 // TODO: Try reducing clones? Not entirely sure about multiple clones for every message
 // Returns None even if something failed, not just that the config wasn't found.
 pub async fn get_cached_guild_config(ctx: &Context, msg: &Message) -> Option<GuildConfig> {
@@ -30,9 +48,7 @@ pub async fn get_cached_guild_config(ctx: &Context, msg: &Message) -> Option<Gui
 
     // Log before insert since insert takes ownership
     tracing::info!(guild_id = guild_id.0, ?conf, "Cached guild config");
-    sushii_cache
-        .guilds
-        .insert(guild_id, conf.clone());
+    sushii_cache.guilds.insert(guild_id, conf.clone());
 
     Some(conf)
 }
@@ -89,9 +105,16 @@ async fn insert_default_config_query(guild_id: u64, pool: sqlx::PgPool) {
 
 pub async fn upsert_config(ctx: &Context, conf: &GuildConfig) -> Result<()> {
     let data = ctx.data.read().await;
-    let pool = data.get::<DbPool>().unwrap();
 
-    upsert_config_query(conf, pool).await
+    let pool = data.get::<DbPool>().unwrap();
+    let sushii_cache = data.get::<SushiiCache>().unwrap();
+
+    // Update db
+    upsert_config_query(conf, pool).await?;
+    // Update cache
+    sushii_cache.guilds.insert(GuildId(conf.id as u64), conf.clone());
+
+    Ok(())
 }
 
 async fn upsert_config_query(conf: &GuildConfig, pool: &sqlx::PgPool) -> Result<()> {
