@@ -7,16 +7,29 @@ use serenity::prelude::*;
 #[usage("[num messages]")]
 #[only_in("guild")]
 async fn prune(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    let num_messages = args
-        .single::<u64>()
-        .map_err(|_| "Invalid input, please give a number".to_string())?;
+    let num_messages = match args.single::<u64>() {
+        Ok(n) => n,
+        Err(_) => {
+            msg.channel_id
+                .say(&ctx.http, "Error: Invalid number of messages, must be between 2 and 99 (inclusive)")
+                .await?;
 
-    if num_messages < 2 || num_messages > 100 {
-        return Err("Number of messages must be between 2 and 100 (inclusive)".into());
+            return Ok(());
+        }
+    };
+
+    // Can delete 100, but we want to + 1 later so that the message invoking this
+    // command isn't counted
+    if num_messages < 2 || num_messages > 99 {
+        msg.channel_id
+            .say(&ctx.http, "Error: Number of messages must be between 2 and 99 (inclusive)")
+            .await?;
+
+        return Ok(());
     }
 
     let messages: Vec<MessageId> = msg.channel_id
-        .messages(&ctx.http, |r| r.limit(num_messages))
+        .messages(&ctx.http, |r| r.limit(num_messages + 1))
         .await?
         .iter()
         .map(|m| m.id)

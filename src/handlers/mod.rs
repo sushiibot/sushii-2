@@ -1,8 +1,10 @@
 use serenity::{
     async_trait,
-    model::{event::ResumedEvent, gateway::Ready},
     prelude::*,
+    model::prelude::*,
 };
+
+pub mod mod_log;
 
 pub struct Handler;
 
@@ -14,5 +16,9 @@ impl EventHandler for Handler {
 
     async fn resume(&self, _: Context, _: ResumedEvent) {
         tracing::info!("Resumed");
+    }
+
+    async fn guild_ban_addition(&self, ctx: Context, guild_id: GuildId, banned_user: User) {
+
     }
 }

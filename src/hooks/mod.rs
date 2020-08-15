@@ -29,8 +29,10 @@ pub async fn dispatch_error(context: &Context, msg: &Message, error: DispatchErr
 }
 
 #[hook]
-pub async fn after(ctx: &Context, msg: &Message, _: &str, error: Result<(), CommandError>) {
+pub async fn after(_: &Context, msg: &Message, _: &str, error: Result<(), CommandError>) {
+    // Don't respond to users here? can't determine error types and I don't want to
+    // respond with all errors, possibly leaking extra info
     if let Err(e) = error {
-        let _ = msg.channel_id.say(&ctx, format!("Error: {}", e)).await;
+        tracing::error!(?msg, %e, "Error running command");
     }
 }
