@@ -10,7 +10,7 @@ pub struct SushiiConfig {
 }
 
 fn parse_id_array(s: &str) -> Vec<u64> {
-    s.split(",")
+    s.split(',')
         .collect::<Vec<&str>>()
         .iter()
         .filter_map(|u| u.parse::<u64>().ok())
@@ -25,11 +25,11 @@ impl SushiiConfig {
 
         Ok(SushiiConfig {
             discord_token: dotenv::var("DISCORD_TOKEN")?,
-            owner_ids: parse_id_array(&dotenv::var("OWNER_IDS").unwrap_or("".into())),
+            owner_ids: parse_id_array(&dotenv::var("OWNER_IDS").unwrap_or_else(|_| "".into())),
             database_url: dotenv::var("DATABASE_URL")?,
             default_prefix: dotenv::var("DEFAULT_PREFIX")?,
-            blocked_users: parse_id_array(&dotenv::var("BLOCKED_USERS").unwrap_or("".into())),
-            lastfm_key: dotenv::var("LASTFM_KEY").unwrap_or("".into()),
+            blocked_users: parse_id_array(&dotenv::var("BLOCKED_USERS").unwrap_or_else(|_| "".into())),
+            lastfm_key: dotenv::var("LASTFM_KEY").unwrap_or_else(|_| "".into()),
         })
     }
 }

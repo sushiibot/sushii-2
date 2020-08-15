@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
                     Box::pin(async move {
                         utils::guild_config::get_cached_guild_config(&ctx, &msg)
                             .await
-                            .and_then(|c| c.prefix.clone())
+                            .and_then(|c| c.prefix)
                     })
                 })
         })

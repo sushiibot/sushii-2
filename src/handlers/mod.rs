@@ -18,7 +18,7 @@ impl EventHandler for Handler {
         tracing::info!("Resumed");
     }
 
-    async fn guild_ban_addition(&self, ctx: Context, guild_id: GuildId, banned_user: User) {
+    async fn guild_ban_addition(&self, _ctx: Context, _guild_id: GuildId, _banned_user: User) {
 
     }
 }

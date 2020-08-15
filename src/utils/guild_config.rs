@@ -135,7 +135,7 @@ async fn upsert_config_query(conf: &GuildConfig, pool: &sqlx::PgPool) -> Result<
         conf.mute_role,
         conf.max_mention,
         // Needs &[i64] instead of Vec<i64>
-        conf.disabled_channels.as_ref().map(|v| v.as_slice()),
+        conf.disabled_channels.as_deref(),
     )
     .execute(pool)
     .await?;
