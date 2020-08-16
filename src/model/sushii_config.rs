@@ -1,5 +1,6 @@
 use crate::error::Result;
 
+#[derive(Debug, Clone)]
 pub struct SushiiConfig {
     pub discord_token: String,
     pub owner_ids: Vec<u64>,

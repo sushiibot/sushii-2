@@ -4,8 +4,8 @@ use crate::model::sql::guild::GuildConfig;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
-pub async fn get_cached_guild_config_respond(ctx: &Context, msg: &Message) -> Result<GuildConfig> {
-    let conf = get_cached_guild_config(&ctx, msg).await;
+pub async fn get_guild_conf_respond(ctx: &Context, msg: &Message) -> Result<GuildConfig> {
+    let conf = get_guild_conf_from_msg(&ctx, msg).await;
 
     if conf.is_none() {
         if let Err(e) = msg
@@ -22,13 +22,25 @@ pub async fn get_cached_guild_config_respond(ctx: &Context, msg: &Message) -> Re
     conf.ok_or(Error::Sushii("Failed to get guild config".into()))
 }
 
+pub async fn get_guild_conf_from_msg(ctx: &Context, msg: &Message) -> Option<GuildConfig> {
+    get_guild_conf(ctx, Some(msg), None).await
+}
+
+pub async fn get_guild_conf_from_id(ctx: &Context, guild_id: &GuildId) -> Option<GuildConfig> {
+    get_guild_conf(ctx, None, Some(guild_id)).await
+}
+
 // TODO: Try reducing clones? Not entirely sure about multiple clones for every message
 // Returns None even if something failed, not just that the config wasn't found.
-pub async fn get_cached_guild_config(ctx: &Context, msg: &Message) -> Option<GuildConfig> {
+pub async fn get_guild_conf(
+    ctx: &Context,
+    msg: Option<&Message>,
+    guild_id: Option<&GuildId>,
+) -> Option<GuildConfig> {
+    let guild_id = guild_id.or(msg.and_then(|m| m.guild_id.as_ref()))?;
+
     let data = ctx.data.read().await;
     let sushii_cache = data.get::<SushiiCache>().unwrap();
-
-    let guild_id = msg.guild_id?;
 
     if sushii_cache.guilds.contains_key(&guild_id) {
         return sushii_cache
@@ -48,7 +60,7 @@ pub async fn get_cached_guild_config(ctx: &Context, msg: &Message) -> Option<Gui
 
     // Log before insert since insert takes ownership
     tracing::info!(guild_id = guild_id.0, ?conf, "Cached guild config");
-    sushii_cache.guilds.insert(guild_id, conf.clone());
+    sushii_cache.guilds.insert(*guild_id, conf.clone());
 
     Some(conf)
 }
@@ -112,7 +124,9 @@ pub async fn upsert_config(ctx: &Context, conf: &GuildConfig) -> Result<()> {
     // Update db
     upsert_config_query(conf, pool).await?;
     // Update cache
-    sushii_cache.guilds.insert(GuildId(conf.id as u64), conf.clone());
+    sushii_cache
+        .guilds
+        .insert(GuildId(conf.id as u64), conf.clone());
 
     Ok(())
 }

@@ -41,14 +41,13 @@ async fn main() -> Result<()> {
     // Create the framework
     let framework = StandardFramework::new()
         .configure(|c| {
-            c.owners(owners)
-                .dynamic_prefix(|ctx, msg| {
-                    Box::pin(async move {
-                        utils::guild_config::get_cached_guild_config(&ctx, &msg)
-                            .await
-                            .and_then(|c| c.prefix)
-                    })
+            c.owners(owners).dynamic_prefix(|ctx, msg| {
+                Box::pin(async move {
+                    utils::guild_config::get_guild_conf_from_msg(&ctx, &msg)
+                        .await
+                        .and_then(|c| c.prefix)
                 })
+            })
         })
         .before(hooks::before)
         .after(hooks::after)
