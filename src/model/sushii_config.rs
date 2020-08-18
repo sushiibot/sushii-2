@@ -14,7 +14,7 @@ fn parse_id_array(s: &str) -> Vec<u64> {
     s.split(',')
         .collect::<Vec<&str>>()
         .iter()
-        .filter_map(|u| u.parse::<u64>().ok())
+        .filter_map(|u| u.trim().parse::<u64>().ok())
         .collect()
 }
 
@@ -35,4 +35,12 @@ impl SushiiConfig {
             lastfm_key: dotenv::var("LASTFM_KEY").unwrap_or_else(|_| "".into()),
         })
     }
+}
+
+#[test]
+fn parses_array() {
+    let expected = vec![123, 456, 789];
+    assert_eq!(parse_id_array("123,456,789"), expected);
+    assert_eq!(parse_id_array("123, 456, 789"), expected);
+    assert_eq!(parse_id_array("123, 456   , 789         "), expected);
 }
