@@ -35,7 +35,11 @@ async fn main() -> Result<()> {
 
             (owners, info.id)
         }
-        Err(why) => panic!("Could not access application info: {:?}", why),
+        Err(why) => {
+            tracing::error!("Could not access application info: {:?}", why);
+            // Well yes, but actually no
+            return Ok(());
+        }
     };
 
     // Create the framework
