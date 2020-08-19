@@ -18,6 +18,7 @@ pub trait GuildConfigDb {
 
     async fn cache(&self, ctx: &Context) -> bool;
     async fn save(&self, ctx: &Context) -> Result<()>;
+    fn save_bg(&self, ctx: &Context);
 }
 
 #[derive(Deserialize, Default, Serialize, sqlx::FromRow, Clone, Debug)]
@@ -86,13 +87,19 @@ impl GuildConfigDb for GuildConfig {
 
         // Not in cache, fetch from database
         let pool = data.get::<DbPool>().unwrap();
-        let conf = match cache_guild_config_query(&pool, guild_id.0).await {
-            Ok(c) => c,
-            Err(e) => {
-                tracing::error!(?msg, "Failed to fetch config: {}", e);
-                return Err(e);
-            }
-        };
+        let conf = get_guild_config_query(&pool, guild_id.0).await
+            .or_else(|err| {
+                // If row isn't found, create new and save
+                if let Error::Sqlx(sqlx::Error::RowNotFound) = err {
+                    let new_conf = GuildConfig::new(guild_id.0 as i64);
+                    new_conf.save_bg(&ctx);
+
+                    Ok(new_conf)
+                } else {
+                    tracing::error!(?msg, "Failed to fetch config: {}", err);
+                    Err(err)
+                }
+            })?;
 
         sushii_cache.guilds.insert(*guild_id, conf.clone());
         tracing::info!(guild_id = guild_id.0, ?conf, "Cached guild config");
@@ -110,12 +117,30 @@ impl GuildConfigDb for GuildConfig {
 
     /// Saves config to database
     async fn save(&self, ctx: &Context) -> Result<()> {
-        upsert_config(ctx, self).await
+        let data = ctx.data.read().await;
+        let pool = data.get::<DbPool>().unwrap();
+
+        // Update db and cache
+        upsert_config_query(self, pool).await?;
+        let _ = self.cache(&ctx);
+
+        Ok(())
+    }
+
+    /// Saves config in the background, does NOT respond with an error but does log errors
+    fn save_bg(&self, ctx: &Context) {
+        let conf = self.clone();
+        let ctx = ctx.clone();
+        tokio::spawn(async move {
+            if let Err(e) = conf.save(&ctx).await {
+                tracing::error!("Failed to save config in background: {}", e);
+            }
+        });
     }
 }
 
-async fn cache_guild_config_query(pool: &sqlx::PgPool, guild_id: u64) -> Result<GuildConfig> {
-    let conf_result = sqlx::query_as!(
+async fn get_guild_config_query(pool: &sqlx::PgPool, guild_id: u64) -> Result<GuildConfig> {
+    sqlx::query_as!(
         GuildConfig,
         r#"
             SELECT *
@@ -125,59 +150,8 @@ async fn cache_guild_config_query(pool: &sqlx::PgPool, guild_id: u64) -> Result<
         guild_id as i64
     )
     .fetch_one(pool)
-    .await;
-
-    if let Err(e) = conf_result {
-        match e {
-            // If not found, insert default config
-            sqlx::Error::RowNotFound => {
-                let pool = pool.clone();
-
-                // Create new config in background and just return default immediately
-                tokio::spawn(async move { insert_default_config_query(guild_id, pool) });
-
-                return Ok(GuildConfig::new(guild_id as i64));
-            }
-
-            _ => return Err(Error::Sqlx(e)),
-        }
-    }
-
-    // res is ok now
-    Ok(conf_result.unwrap())
-}
-
-async fn insert_default_config_query(guild_id: u64, pool: sqlx::PgPool) {
-    if let Err(e) = sqlx::query!(
-        r#"
-            INSERT INTO guild_configs
-                 VALUES ($1)
-        "#,
-        guild_id as i64
-    )
-    .execute(&pool)
     .await
-    {
-        tracing::error!(guild_id, "Failed to insert guild config: {}", e);
-    }
-
-    tracing::info!(guild_id, "Inserted new guild config");
-}
-
-pub async fn upsert_config(ctx: &Context, conf: &GuildConfig) -> Result<()> {
-    let data = ctx.data.read().await;
-
-    let pool = data.get::<DbPool>().unwrap();
-    let sushii_cache = data.get::<SushiiCache>().unwrap();
-
-    // Update db
-    upsert_config_query(conf, pool).await?;
-    // Update cache
-    sushii_cache
-        .guilds
-        .insert(GuildId(conf.id as u64), conf.clone());
-
-    Ok(())
+    .map_err(Into::into)
 }
 
 async fn upsert_config_query(conf: &GuildConfig, pool: &sqlx::PgPool) -> Result<()> {
@@ -188,8 +162,7 @@ async fn upsert_config_query(conf: &GuildConfig, pool: &sqlx::PgPool) -> Result<
                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
             ON CONFLICT (id)
               DO UPDATE 
-                    SET 
-                        prefix            = $2,
+                    SET prefix            = $2,
                         name              = $3,
                         join_msg          = $4,
                         join_react        = $5,
@@ -224,9 +197,7 @@ async fn upsert_config_query(conf: &GuildConfig, pool: &sqlx::PgPool) -> Result<
         conf.disabled_channels.as_deref(),
     )
     .execute(pool)
-    .await?;
-
-    tracing::info!(?conf, "Upsert guild config");
-
-    Ok(())
+    .await
+    .map(|_| ())
+    .map_err(Into::into)
 }
