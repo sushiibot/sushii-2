@@ -1,5 +1,5 @@
-use crate::model::sql::mod_log::*;
 use crate::error::Result;
+use crate::model::sql::mod_log::*;
 use crate::utils::{self, guild_config, sushii_config};
 use serenity::{model::prelude::*, prelude::*};
 
@@ -28,13 +28,16 @@ async fn _guild_ban_addition(ctx: &Context, guild_id: &GuildId, banned_user: &Us
     // check if a ban command was used instead of discord right click ban
     // add the action to the database if not pendings
     let mut mod_log_entry = {
-        let pending = ModLogEntry::get_pending_entry(&ctx, "ban", guild_id.0, banned_user.id.0).await?;
+        let pending =
+            ModLogEntry::get_pending_entry(&ctx, "ban", guild_id.0, banned_user.id.0).await?;
 
         match pending {
             Some(entry) => entry,
-            None => ModLogEntry::new("ban", false, guild_id.0, &banned_user)
-                .save(&ctx)
-                .await?
+            None => {
+                ModLogEntry::new("ban", false, guild_id.0, &banned_user)
+                    .save(&ctx)
+                    .await?
+            }
         }
     };
 

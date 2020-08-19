@@ -8,6 +8,7 @@ mod handlers;
 mod hooks;
 mod keys;
 mod model;
+mod prelude;
 mod utils;
 
 use crate::error::Result;

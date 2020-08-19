@@ -74,7 +74,8 @@ impl Db for ModLogEntry {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
-        get_pending_entry_query(pool, mod_action, guild_id, target_id).await
+        get_pending_entry_query(pool, mod_action, guild_id, target_id)
+            .await
             .map(|entry| Some(entry))
             .or_else(|err| {
                 // If row isn't found, don't return an error
@@ -155,4 +156,14 @@ async fn add_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Resul
     .fetch_one(pool)
     .await
     .map_err(Into::into)
+}
+
+#[test]
+fn new_mod_log_entry() {
+    let entry = ModLogEntry::new("ban", false, 1234, &User::default());
+
+    // https://docs.rs/serenity/0.9.0-rc.0/src/serenity/model/user.rs.html#409-426
+    assert_eq!(entry.user_id, 210);
+    assert_eq!(entry.user_tag, "test#1432");
+    assert_eq!(entry.case_id, -1);
 }
