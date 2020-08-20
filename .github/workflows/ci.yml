@@ -33,13 +33,17 @@ jobs:
               uses: actions-rs/cargo@v1
               with:
                   command: build
-                  args: --release
 
             - name: Test sushii
               uses: actions-rs/cargo@v1
               with:
                   command: test
-                  args: --release
+
+            - name: Install sqlx-cli
+              run: cargo install --version=0.1.0-beta.1 sqlx-cli --no-default-features --features postgres
+
+            - name: Check sqlx queries
+              run: cargo sqlx prepare --check
 
             - name: Upload artifacts
               if: matrix.toolchain == 'stable'
