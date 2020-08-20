@@ -1,0 +1,298 @@
+{
+  "db": "PostgreSQL",
+  "4f8256e2b08c75280f04e77c345abeb08f296556161b72dab39a71b78a25331b": {
+    "query": "\n            INSERT INTO guild_configs\n                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)\n            ON CONFLICT (id)\n              DO UPDATE \n                    SET prefix            = $2,\n                        name              = $3,\n                        join_msg          = $4,\n                        join_react        = $5,\n                        leave_msg         = $6,\n                        msg_channel       = $7,\n                        role_channel      = $8,\n                        role_config       = $9,\n                        invite_guard      = $10,\n                        log_msg           = $11,\n                        log_mod           = $12,\n                        log_member        = $13,\n                        mute_role         = $14,\n                        max_mention       = $15,\n                        disabled_channels = $16\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "Int8",
+          "Int8",
+          "Jsonb",
+          "Bool",
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int4",
+          "Int8Array"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "6f06b01e8606a8e5b958100f3cbaae946bdfe70e35aaf6b5e5e5900ce13a03f4": {
+    "query": "\n            SELECT *\n              FROM guild_configs\n             WHERE id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "prefix",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "join_msg",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "join_react",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "leave_msg",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "msg_channel",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 7,
+          "name": "role_channel",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "role_config",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 9,
+          "name": "invite_guard",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 10,
+          "name": "log_msg",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 11,
+          "name": "log_mod",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 12,
+          "name": "log_member",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 13,
+          "name": "mute_role",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 14,
+          "name": "max_mention",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 15,
+          "name": "disabled_channels",
+          "type_info": "Int8Array"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  "995d70b0726a2fd8e6b981e78f94db592863587d75eaf3cae49f54890a3b0772": {
+    "query": "\n            INSERT INTO mod_logs\n                 VALUES ($1, (\n                            SELECT MAX(case_id) + 1\n                              FROM mod_logs\n                             WHERE guild_id = $1\n                        ), $2, $3, $4, $5, $6, $7, $8, $9)\n              RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "case_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "action",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "action_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "user_tag",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "executor_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "reason",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "msg_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Timestamp",
+          "Bool",
+          "Int8",
+          "Text",
+          "Int8",
+          "Text",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  "df8bc72513bca3b02a3012e5eb9ef7e0a82785d65ba3fdbdd75adc324eaf2327": {
+    "query": "\n            SELECT *\n              FROM mod_logs\n             WHERE guild_id = $1\n               AND user_id = $2\n               AND action = $3\n               AND pending = true\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "case_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "action",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "action_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "user_tag",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "executor_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "reason",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "msg_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ]
+    }
+  }
+}

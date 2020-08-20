@@ -25,7 +25,7 @@ features = ["macros", "rt-core"]
 [dependencies.sqlx]
 version = "0.4.0-beta.1"
 default-features = false
-features = [ "runtime-tokio", "macros", "postgres", "json", "chrono" ]
+features = [ "runtime-tokio", "macros", "postgres", "json", "chrono", "offline" ]
 
 [dependencies.serenity]
 version = "0.9.0-rc.0"
