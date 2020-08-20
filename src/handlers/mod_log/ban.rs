@@ -1,6 +1,6 @@
 use crate::error::Result;
-use crate::model::sql::{guild::*, mod_log::*};
-use crate::utils::{self, sushii_config};
+use crate::model::{sql::{guild::*, mod_log::*}, sushii_config::*};
+use crate::utils;
 use serenity::{model::prelude::*, prelude::*};
 
 async fn get_user_or_bot(ctx: &Context, id: Option<i64>) -> User {
@@ -48,7 +48,7 @@ async fn _guild_ban_addition(ctx: &Context, guild_id: &GuildId, banned_user: &Us
 
         let prefix = match guild_conf.and_then(|c| c.prefix) {
             Some(p) => p,
-            None => sushii_config::get(&ctx).await.default_prefix,
+            None => SushiiConfig::get(&ctx).await.default_prefix,
         };
 
         let default_reason = format!("Responsible moderator: Please use `{}reason {} [reason]` to set a reason for this case.", prefix, mod_log_entry.case_id);

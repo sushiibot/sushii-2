@@ -26,7 +26,7 @@ async fn prefix(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     if new_prefix.is_empty() {
         let current_prefix = match &conf.prefix {
             Some(p) => p.clone(),
-            None => SushiiConfig::get(&ctx).await.default_prefix
+            None => SushiiConfig::get(&ctx).await.default_prefix,
         };
 
         msg.channel_id

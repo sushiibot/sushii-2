@@ -13,7 +13,11 @@ mod utils;
 
 use crate::error::Result;
 use crate::keys::{DbPool, ShardManagerContainer};
-use crate::model::{sushii_cache::SushiiCache, sushii_config::SushiiConfig, sql::guild::{GuildConfig, GuildConfigDb}};
+use crate::model::{
+    sql::guild::{GuildConfig, GuildConfigDb},
+    sushii_cache::SushiiCache,
+    sushii_config::SushiiConfig,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {

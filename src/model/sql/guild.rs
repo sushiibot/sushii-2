@@ -59,17 +59,15 @@ impl GuildConfigDb for GuildConfig {
     }
 
     /// Gets a GuildConfig from a message, and responds in channel if no guild is found
-    async fn from_msg_or_respond(
-        ctx: &Context,
-        msg: &Message,
-    ) -> Result<GuildConfig> {
+    async fn from_msg_or_respond(ctx: &Context, msg: &Message) -> Result<GuildConfig> {
         match GuildConfig::from_msg(ctx, msg).await? {
             Some(conf) => Ok(conf),
             None => {
                 if let Err(e) = msg
                     .channel_id
                     .say(&ctx.http, "Failed to get the guild config :(")
-                    .await {
+                    .await
+                {
                     tracing::error!(?msg, "Failed to send message: {}", e);
                 }
 
@@ -110,7 +108,8 @@ impl GuildConfigDb for GuildConfig {
 
         // Not in cache, fetch from database
         let pool = data.get::<DbPool>().unwrap();
-        let conf = get_guild_config_query(&pool, guild_id.0).await
+        let conf = get_guild_config_query(&pool, guild_id.0)
+            .await
             .or_else(|err| {
                 // If row isn't found, create new and save
                 if let Error::Sqlx(sqlx::Error::RowNotFound) = err {
@@ -135,7 +134,9 @@ impl GuildConfigDb for GuildConfig {
         let data = ctx.data.read().await;
         let sushii_cache = data.get::<SushiiCache>().unwrap();
 
-        sushii_cache.guilds.insert(GuildId(self.id as u64), self.clone())
+        sushii_cache
+            .guilds
+            .insert(GuildId(self.id as u64), self.clone())
     }
 
     /// Saves config to database
