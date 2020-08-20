@@ -9,7 +9,7 @@ use crate::error::{Error, Result};
 use crate::keys::DbPool;
 
 #[async_trait]
-pub trait Db {
+pub trait ModLogEntryDb {
     async fn get_pending_entry(
         ctx: &Context,
         mod_action: &str,
@@ -60,7 +60,7 @@ impl ModLogEntry {
 }
 
 #[async_trait]
-impl Db for ModLogEntry {
+impl ModLogEntryDb for ModLogEntry {
     /// Fetches a pending ModLogEntry. Returns Err if something failed, None if
     /// not found. This is because we want to stop if something failed, but
     /// continue if not found, so a not found "error" should not be treated as

@@ -1,7 +1,7 @@
 use serenity::prelude::TypeMapKey;
 use std::sync::Arc;
 
-use super::{sushii_cache::SushiiCache, sushii_config::SushiiConfig};
+use super::{SushiiCache, SushiiConfig};
 
 #[derive(Clone)]
 pub struct SushiiContext {

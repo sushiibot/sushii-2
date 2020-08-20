@@ -1,5 +1,5 @@
 use crate::error::Result;
-use crate::model::{sql::{guild::*, mod_log::*}, sushii_config::*};
+use crate::model::{sql::*, sushii_config::*};
 use crate::utils;
 use serenity::{model::prelude::*, prelude::*};
 

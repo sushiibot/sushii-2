@@ -1,4 +1,6 @@
-use serenity::{framework::StandardFramework, http::Http, prelude::*};
+use serenity::{
+    client::bridge::gateway::GatewayIntents, framework::StandardFramework, http::Http, prelude::*,
+};
 use sqlx::postgres::PgPoolOptions;
 use std::collections::HashSet;
 
@@ -14,9 +16,8 @@ mod utils;
 use crate::error::Result;
 use crate::keys::{DbPool, ShardManagerContainer};
 use crate::model::{
-    sql::guild::{GuildConfig, GuildConfigDb},
-    sushii_cache::SushiiCache,
-    sushii_config::SushiiConfig,
+    sql::{GuildConfig, GuildConfigDb},
+    SushiiCache, SushiiConfig,
 };
 
 #[tokio::main]
@@ -67,6 +68,14 @@ async fn main() -> Result<()> {
         .group(&commands::OWNER_GROUP);
 
     let mut client = Client::new(&sushii_conf.discord_token)
+        .intents(
+            GatewayIntents::GUILDS
+                | GatewayIntents::GUILD_MEMBERS
+                | GatewayIntents::GUILD_BANS
+                | GatewayIntents::GUILD_MESSAGES
+                | GatewayIntents::GUILD_MESSAGE_REACTIONS
+                | GatewayIntents::DIRECT_MESSAGES,
+        )
         .framework(framework)
         .event_handler(handlers::Handler)
         .await
