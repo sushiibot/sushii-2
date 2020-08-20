@@ -8,6 +8,7 @@ use crate::prelude::*;
 #[async_trait]
 pub trait GuildConfigDb {
     async fn from_msg(ctx: &Context, msg: &Message) -> Result<Option<GuildConfig>>;
+    async fn from_msg_or_respond(ctx: &Context, msg: &Message) -> Result<GuildConfig>;
     async fn from_id(ctx: &Context, guild_id: &GuildId) -> Result<Option<GuildConfig>>;
 
     async fn get(
@@ -55,6 +56,28 @@ impl GuildConfigDb for GuildConfig {
     /// Gets a GuildConfig from a given message
     async fn from_msg(ctx: &Context, msg: &Message) -> Result<Option<GuildConfig>> {
         GuildConfig::get(ctx, Some(msg), None).await
+    }
+
+    /// Gets a GuildConfig from a message, and responds in channel if no guild is found
+    async fn from_msg_or_respond(
+        ctx: &Context,
+        msg: &Message,
+    ) -> Result<GuildConfig> {
+        match GuildConfig::from_msg(ctx, msg).await? {
+            Some(conf) => Ok(conf),
+            None => {
+                if let Err(e) = msg
+                    .channel_id
+                    .say(&ctx.http, "Failed to get the guild config :(")
+                    .await {
+                    tracing::error!(?msg, "Failed to send message: {}", e);
+                }
+
+                tracing::warn!(?msg, "Failed to get guild config");
+
+                Err(Error::Sushii("Failed to get guild config".into()))
+            }
+        }
     }
 
     /// Gets a Guildconfig from a guild id
@@ -128,6 +151,7 @@ impl GuildConfigDb for GuildConfig {
     }
 
     /// Saves config in the background, does NOT respond with an error but does log errors
+    /// Mainly used because this isn't an async fn, can be used in or_else
     fn save_bg(&self, ctx: &Context) {
         let conf = self.clone();
         let ctx = ctx.clone();

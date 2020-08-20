@@ -1,4 +1,12 @@
+use serenity::async_trait;
+use serenity::prelude::*;
+
 use crate::error::Result;
+
+#[async_trait]
+pub trait SushiiConfigDb {
+    async fn get(ctx: &Context) -> SushiiConfig;
+}
 
 #[derive(Debug, Clone)]
 pub struct SushiiConfig {
@@ -34,6 +42,17 @@ impl SushiiConfig {
             ),
             lastfm_key: dotenv::var("LASTFM_KEY").unwrap_or_else(|_| "".into()),
         })
+    }
+}
+
+#[async_trait]
+impl SushiiConfigDb for SushiiConfig {
+    async fn get(ctx: &Context) -> Self {
+        let data = ctx.data.read().await;
+
+        data.get::<SushiiConfig>()
+            .expect("Context data is missing SushiiConfig")
+            .clone()
     }
 }
 

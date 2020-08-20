@@ -13,7 +13,7 @@ mod utils;
 
 use crate::error::Result;
 use crate::keys::{DbPool, ShardManagerContainer};
-use crate::model::{sushii_cache::SushiiCache, sushii_config::SushiiConfig};
+use crate::model::{sushii_cache::SushiiCache, sushii_config::SushiiConfig, sql::guild::{GuildConfig, GuildConfigDb}};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -48,8 +48,9 @@ async fn main() -> Result<()> {
         .configure(|c| {
             c.owners(owners).dynamic_prefix(|ctx, msg| {
                 Box::pin(async move {
-                    utils::guild_config::get_guild_conf_from_msg(&ctx, &msg)
+                    GuildConfig::from_msg(&ctx, &msg)
                         .await
+                        .ok()? // Just return None no error
                         .and_then(|c| c.prefix)
                 })
             })

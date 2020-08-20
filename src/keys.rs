@@ -5,7 +5,10 @@ use serenity::{
 use sqlx::PgPool;
 use std::sync::Arc;
 
-pub use crate::model::{sushii_cache::SushiiCache, sushii_config::SushiiConfig};
+pub use crate::model::{
+    sushii_cache::SushiiCache,
+    sushii_config::{SushiiConfig, SushiiConfigDb}
+};
 
 impl TypeMapKey for SushiiCache {
     type Value = SushiiCache;

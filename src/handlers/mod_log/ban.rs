@@ -1,6 +1,6 @@
 use crate::error::Result;
-use crate::model::sql::mod_log::*;
-use crate::utils::{self, guild_config, sushii_config};
+use crate::model::sql::{guild::*, mod_log::*};
+use crate::utils::{self, sushii_config};
 use serenity::{model::prelude::*, prelude::*};
 
 async fn get_user_or_bot(ctx: &Context, id: Option<i64>) -> User {
@@ -44,7 +44,7 @@ async fn _guild_ban_addition(ctx: &Context, guild_id: &GuildId, banned_user: &Us
     let executor_user = get_user_or_bot(&ctx, mod_log_entry.executor_id).await;
 
     if mod_log_entry.reason.is_none() {
-        let guild_conf = guild_config::get_guild_conf_from_id(&ctx, guild_id).await;
+        let guild_conf = GuildConfig::from_id(&ctx, guild_id).await?;
 
         let prefix = match guild_conf.and_then(|c| c.prefix) {
             Some(p) => p,
