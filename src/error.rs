@@ -1,4 +1,5 @@
 use dotenv::Error as DotenvError;
+use serenity::Error as SerenityError;
 use sqlx::Error as SqlxError;
 use std::env::VarError;
 use std::error::Error as StdError;
@@ -12,8 +13,8 @@ pub type Result<T> = StdResult<T, Error>;
 pub enum Error {
     // Sushii errors
     Sushii(String),
-    UserError(String),
     // Crate errors
+    Serenity(SerenityError),
     Dotenv(DotenvError),
     /// `env::VarError`
     Var(VarError),
@@ -21,6 +22,12 @@ pub enum Error {
     Io(IoError),
     /// `sqlx` error
     Sqlx(SqlxError),
+}
+
+impl From<SerenityError> for Error {
+    fn from(err: SerenityError) -> Error {
+        Error::Serenity(err)
+    }
 }
 
 impl From<DotenvError> for Error {
@@ -58,8 +65,8 @@ impl Display for Error {
         match *self {
             // Sushii
             Error::Sushii(ref inner) => inner.fmt(f),
-            Error::UserError(ref inner) => inner.fmt(f),
             // Crates
+            Error::Serenity(ref inner) => inner.fmt(f),
             Error::Dotenv(ref inner) => inner.fmt(f),
             Error::Io(ref inner) => inner.fmt(f),
             Error::Sqlx(ref inner) => inner.fmt(f),

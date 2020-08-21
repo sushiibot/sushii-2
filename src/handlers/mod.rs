@@ -17,4 +17,8 @@ impl EventHandler for Handler {
     async fn guild_ban_addition(&self, ctx: Context, guild_id: GuildId, banned_user: User) {
         mod_log::ban::guild_ban_addition(&ctx, &guild_id, &banned_user).await;
     }
+
+    async fn guild_ban_removal(&self, ctx: Context, guild_id: GuildId, unbanned_user: User) {
+        mod_log::unban::guild_ban_removal(&ctx, &guild_id, &unbanned_user).await;
+    }
 }
