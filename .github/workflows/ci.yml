@@ -38,10 +38,3 @@ jobs:
               uses: actions-rs/cargo@v1
               with:
                   command: test
-
-            - name: Upload artifacts
-              if: matrix.toolchain == 'stable'
-              uses: actions/checkout@v2
-              with:
-                  name: sushii2-${{github.run_id}}
-                  path: ./target/release/sushii-2
