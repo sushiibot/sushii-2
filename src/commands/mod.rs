@@ -1,10 +1,10 @@
 use serenity::framework::standard::macros::group;
 
-pub mod groups;
-
+pub mod help;
 pub mod meta;
 pub mod moderation;
 pub mod owner;
+pub mod roles;
 
 use self::meta::*;
 use self::owner::*;

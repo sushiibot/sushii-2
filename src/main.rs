@@ -17,7 +17,8 @@ use crate::error::Result;
 use crate::keys::{DbPool, ShardManagerContainer};
 use crate::model::{
     sql::{GuildConfig, GuildConfigDb},
-    SushiiCache, SushiiConfig,
+    SushiiCache,
+    {SushiiConfig, SushiiConfigDb},
 };
 
 #[tokio::main]
@@ -53,18 +54,27 @@ async fn main() -> Result<()> {
         .configure(|c| {
             c.owners(owners).dynamic_prefix(|ctx, msg| {
                 Box::pin(async move {
-                    GuildConfig::from_msg(&ctx, &msg)
-                        .await
-                        .ok()? // Just return None no error
-                        .and_then(|c| c.prefix)
+                    let sushii_conf = SushiiConfig::get(&ctx).await;
+
+                    match GuildConfig::from_msg(&ctx, &msg).await {
+                        Ok(conf) => conf
+                            .and_then(|c| c.prefix)
+                            .or_else(|| Some(sushii_conf.default_prefix.clone())),
+                        Err(e) => {
+                            tracing::error!(?msg, "Failed to get guild config: {}", e);
+                            None
+                        }
+                    }
                 })
             })
         })
         .before(hooks::before)
         .after(hooks::after)
         .on_dispatch_error(hooks::dispatch_error)
+        .help(&commands::help::HELP_CMD)
         .group(&commands::META_GROUP)
         .group(&commands::moderation::MODERATION_GROUP)
+        .group(&commands::roles::ROLES_GROUP)
         .group(&commands::OWNER_GROUP);
 
     let mut client = Client::new(&sushii_conf.discord_token)
@@ -74,7 +84,8 @@ async fn main() -> Result<()> {
                 | GatewayIntents::GUILD_BANS
                 | GatewayIntents::GUILD_MESSAGES
                 | GatewayIntents::GUILD_MESSAGE_REACTIONS
-                | GatewayIntents::DIRECT_MESSAGES,
+                | GatewayIntents::DIRECT_MESSAGES
+                | GatewayIntents::GUILD_PRESENCES
         )
         .framework(framework)
         .event_handler(handlers::Handler)

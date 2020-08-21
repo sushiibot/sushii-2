@@ -5,7 +5,7 @@ use serenity::async_trait;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::keys::DbPool;
 
 #[async_trait]
@@ -76,21 +76,17 @@ impl ModLogEntryDb for ModLogEntry {
 
         get_pending_entry_query(pool, mod_action, guild_id, target_id)
             .await
-            .map(|entry| Some(entry))
-            .or_else(|err| {
-                // If row isn't found, don't return an error
-                if let Error::Sqlx(sqlx::Error::RowNotFound) = err {
-                    Ok(None)
-                } else {
-                    tracing::error!(
-                        mod_action,
-                        guild_id,
-                        target_id,
-                        "Failed to query pending mod log entry: {}",
-                        err
-                    );
-                    Err(err)
-                }
+            .map_err(|err| {
+                // Do not need to handle row not found error since using fetch_optional
+                tracing::error!(
+                    mod_action,
+                    guild_id,
+                    target_id,
+                    "Failed to query pending mod log entry: {}",
+                    err
+                );
+
+                err
             })
     }
 
@@ -109,7 +105,7 @@ async fn get_pending_entry_query(
     mod_action: &str,
     guild_id: u64,
     target_id: u64,
-) -> Result<ModLogEntry> {
+) -> Result<Option<ModLogEntry>> {
     sqlx::query_as!(
         ModLogEntry,
         r#"
@@ -124,7 +120,7 @@ async fn get_pending_entry_query(
         target_id as i64,
         mod_action
     )
-    .fetch_one(pool)
+    .fetch_optional(pool)
     .await
     .map_err(Into::into)
 }

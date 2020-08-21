@@ -17,8 +17,9 @@ pub trait GuildConfigDb {
         guild_id: Option<&GuildId>,
     ) -> Result<Option<GuildConfig>>;
 
-    async fn cache(&self, ctx: &Context) -> bool;
+    async fn cache(&self, ctx: &Context);
     async fn save(&self, ctx: &Context) -> Result<()>;
+    async fn save_db(&self, ctx: &Context) -> Result<()>;
     fn save_bg(&self, ctx: &Context);
 }
 
@@ -108,45 +109,61 @@ impl GuildConfigDb for GuildConfig {
 
         // Not in cache, fetch from database
         let pool = data.get::<DbPool>().unwrap();
-        let conf = get_guild_config_query(&pool, guild_id.0)
+        let conf = match get_guild_config_query(&pool, guild_id.0)
             .await
-            .or_else(|err| {
-                // If row isn't found, create new and save
-                if let Error::Sqlx(sqlx::Error::RowNotFound) = err {
-                    let new_conf = GuildConfig::new(guild_id.0 as i64);
-                    new_conf.save_bg(&ctx);
+            .map_err(|e| {
+                tracing::error!(
+                    ?msg,
+                    ?guild_id,
+                    "Failed to get guild config from database: {}",
+                    e
+                );
 
-                    Ok(new_conf)
-                } else {
-                    tracing::error!(?msg, "Failed to fetch config: {}", err);
-                    Err(err)
+                e
+            })? {
+            Some(c) => c,
+            None => {
+                let new_conf = GuildConfig::new(guild_id.0 as i64);
+
+                if let Err(e) = new_conf.save_db(&ctx).await {
+                    tracing::error!("Failed to save new guild config: {}", e);
                 }
-            })?;
 
-        sushii_cache.guilds.insert(*guild_id, conf.clone());
-        tracing::info!(guild_id = guild_id.0, ?conf, "Cached guild config");
+                new_conf
+            }
+        };
+
+        conf.cache(&ctx).await;
 
         Ok(Some(conf))
     }
 
     /// Updates config in the cache
-    async fn cache(&self, ctx: &Context) -> bool {
+    async fn cache(&self, ctx: &Context) {
         let data = ctx.data.read().await;
         let sushii_cache = data.get::<SushiiCache>().unwrap();
 
         sushii_cache
             .guilds
-            .insert(GuildId(self.id as u64), self.clone())
+            .insert(GuildId(self.id as u64), self.clone());
+
+        tracing::info!(config = ?self, "Cached guild config");
     }
 
     /// Saves config to database
-    async fn save(&self, ctx: &Context) -> Result<()> {
+    async fn save_db(&self, ctx: &Context) -> Result<()> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
         // Update db and cache
         upsert_config_query(self, pool).await?;
-        let _ = self.cache(&ctx);
+        Ok(())
+    }
+
+    /// Saves config to both database and cache
+    async fn save(&self, ctx: &Context) -> Result<()> {
+        self.save_db(&ctx).await?;
+        self.cache(&ctx).await;
 
         Ok(())
     }
@@ -164,7 +181,7 @@ impl GuildConfigDb for GuildConfig {
     }
 }
 
-async fn get_guild_config_query(pool: &sqlx::PgPool, guild_id: u64) -> Result<GuildConfig> {
+async fn get_guild_config_query(pool: &sqlx::PgPool, guild_id: u64) -> Result<Option<GuildConfig>> {
     sqlx::query_as!(
         GuildConfig,
         r#"
@@ -174,7 +191,7 @@ async fn get_guild_config_query(pool: &sqlx::PgPool, guild_id: u64) -> Result<Gu
         "#,
         guild_id as i64
     )
-    .fetch_one(pool)
+    .fetch_optional(pool)
     .await
     .map_err(Into::into)
 }

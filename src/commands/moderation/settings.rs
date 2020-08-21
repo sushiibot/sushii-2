@@ -1,12 +1,11 @@
-use crate::keys::*;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
+use crate::keys::*;
 use crate::model::sql::guild::*;
 
 #[command]
-#[only_in("guild")]
 async fn settings(ctx: &Context, msg: &Message) -> CommandResult {
     let conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
 
@@ -18,7 +17,6 @@ async fn settings(ctx: &Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
-#[only_in("guild")]
 async fn prefix(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let new_prefix = args.rest();
     let mut conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
