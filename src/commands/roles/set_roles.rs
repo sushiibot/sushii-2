@@ -8,7 +8,15 @@ use crate::model::sql::*;
 async fn set(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let mut conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
 
-    let roles_conf_str = args.rest();
+    let roles_conf_str = {
+        let mut r = args.rest();
+        // Remove codeblock backticks
+        r = r.trim_start_matches("```json");
+        r = r.trim_start_matches('`');
+        r = r.trim_end_matches('`');
+
+        r
+    };
 
     if roles_conf_str.is_empty() {
         msg.channel_id
@@ -34,7 +42,7 @@ async fn set(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                     &ctx.http,
                     format!(
                         "Error in roles config: {}\n\
-                    ```json\n{}\n```",
+                        ```json\n{}\n```",
                         e,
                         conf_str_arr.join("\n")
                     ),
