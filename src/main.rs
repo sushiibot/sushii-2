@@ -17,8 +17,7 @@ use crate::error::Result;
 use crate::keys::{DbPool, ShardManagerContainer};
 use crate::model::{
     sql::{GuildConfig, GuildConfigDb},
-    SushiiCache,
-    {SushiiConfig, SushiiConfigDb},
+    SushiiCache, {SushiiConfig, SushiiConfigDb},
 };
 
 #[tokio::main]
@@ -85,7 +84,7 @@ async fn main() -> Result<()> {
                 | GatewayIntents::GUILD_MESSAGES
                 | GatewayIntents::GUILD_MESSAGE_REACTIONS
                 | GatewayIntents::DIRECT_MESSAGES
-                | GatewayIntents::GUILD_PRESENCES
+                | GatewayIntents::GUILD_PRESENCES,
         )
         .framework(framework)
         .event_handler(handlers::Handler)
