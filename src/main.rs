@@ -14,7 +14,7 @@ mod prelude;
 mod utils;
 
 use crate::error::Result;
-use crate::keys::{DbPool, ShardManagerContainer, CacheAndHttpContainer};
+use crate::keys::{CacheAndHttpContainer, DbPool, ShardManagerContainer};
 use crate::model::{
     sql::{GuildConfig, GuildConfigDb},
     SushiiCache, {SushiiConfig, SushiiConfigDb},

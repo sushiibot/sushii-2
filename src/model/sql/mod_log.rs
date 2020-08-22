@@ -30,6 +30,8 @@ pub trait ModLogEntryDb {
         end: u64,
     ) -> Result<Vec<ModLogEntry>>;
 
+    async fn get_latest(ctx: &Context, guild_id: u64) -> Result<Option<ModLogEntry>>;
+
     async fn save(&self, ctx: &Context) -> Result<ModLogEntry>;
 }
 
@@ -130,6 +132,13 @@ impl ModLogEntryDb for ModLogEntry {
         get_range_entries_query(pool, guild_id, start, end).await
     }
 
+    async fn get_latest(ctx: &Context, guild_id: u64) -> Result<Option<ModLogEntry>> {
+        let data = ctx.data.read().await;
+        let pool = data.get::<DbPool>().unwrap();
+
+        get_latest_query(pool, guild_id).await
+    }
+
     /// Saves a ModLogEntry to the database. Returns a new one from the database
     /// with a valid case_id
     async fn save(&self, ctx: &Context) -> Result<Self> {
@@ -206,6 +215,23 @@ async fn get_range_entries_query(
         end as i64,
     )
     .fetch_all(pool)
+    .await
+    .map_err(Into::into)
+}
+
+async fn get_latest_query(pool: &sqlx::PgPool, guild_id: u64) -> Result<Option<ModLogEntry>> {
+    sqlx::query_as!(
+        ModLogEntry,
+        r#"
+              SELECT *
+                FROM mod_logs
+               WHERE guild_id = $1
+            ORDER BY case_id DESC
+               LIMIT 1
+        "#,
+        guild_id as i64,
+    )
+    .fetch_optional(pool)
     .await
     .map_err(Into::into)
 }
