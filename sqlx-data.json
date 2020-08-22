@@ -1,5 +1,81 @@
 {
   "db": "PostgreSQL",
+  "295f0e0d0ad26955c10feca52999e878fabbfa0a30fec8d5816ef97501d027f7": {
+    "query": "\n            SELECT *\n              FROM mod_logs\n             WHERE guild_id = $1\n               AND case_id >= $2\n               AND case_id <= $3\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "case_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "action",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "action_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "user_tag",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "executor_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "reason",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "msg_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ]
+    }
+  },
   "4f8256e2b08c75280f04e77c345abeb08f296556161b72dab39a71b78a25331b": {
     "query": "\n            INSERT INTO guild_configs\n                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)\n            ON CONFLICT (id)\n              DO UPDATE \n                    SET prefix            = $2,\n                        name              = $3,\n                        join_msg          = $4,\n                        join_react        = $5,\n                        leave_msg         = $6,\n                        msg_channel       = $7,\n                        role_channel      = $8,\n                        role_config       = $9,\n                        invite_guard      = $10,\n                        log_msg           = $11,\n                        log_mod           = $12,\n                        log_member        = $13,\n                        mute_role         = $14,\n                        max_mention       = $15,\n                        disabled_channels = $16\n        ",
     "describe": {
@@ -131,6 +207,81 @@
         true,
         true,
         true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  "748e4a3e44357dfeb7cac8de72dd14406bdd4eaea7780c0712ea5decac43eaee": {
+    "query": "\n            SELECT *\n              FROM mod_logs\n             WHERE guild_id = $1\n               AND user_id >= $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "case_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "action",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "action_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "user_tag",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "executor_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "reason",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "msg_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
         true,
         true,
         true
