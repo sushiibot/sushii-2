@@ -17,7 +17,18 @@ pub trait ModLogEntryDb {
         target_id: u64,
     ) -> Result<Option<ModLogEntry>>;
 
-    async fn get_entries(ctx: &Context, guild_id: u64, start: u64, end: u64) -> Result<Vec<ModLogEntry>>;
+    async fn get_user_entries(
+        ctx: &Context,
+        guild_id: u64,
+        user_id: u64,
+    ) -> Result<Vec<ModLogEntry>>;
+
+    async fn get_range_entries(
+        ctx: &Context,
+        guild_id: u64,
+        start: u64,
+        end: u64,
+    ) -> Result<Vec<ModLogEntry>>;
 
     async fn save(&self, ctx: &Context) -> Result<ModLogEntry>;
 }
@@ -92,7 +103,23 @@ impl ModLogEntryDb for ModLogEntry {
             })
     }
 
-    async fn get_entries(ctx: &Context, guild_id: u64, start: u64, end: u64) -> Result<Vec<Self>>{
+    async fn get_user_entries(
+        ctx: &Context,
+        guild_id: u64,
+        user_id: u64,
+    ) -> Result<Vec<ModLogEntry>> {
+        let data = ctx.data.read().await;
+        let pool = data.get::<DbPool>().unwrap();
+
+        get_user_entries_query(pool, guild_id, user_id).await
+    }
+
+    async fn get_range_entries(
+        ctx: &Context,
+        guild_id: u64,
+        start: u64,
+        end: u64,
+    ) -> Result<Vec<Self>> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
@@ -100,7 +127,7 @@ impl ModLogEntryDb for ModLogEntry {
         let start = std::cmp::min(start, end);
         let end = std::cmp::max(start, end);
 
-        get_entries_query(pool, guild_id, start, end).await
+        get_range_entries_query(pool, guild_id, start, end).await
     }
 
     /// Saves a ModLogEntry to the database. Returns a new one from the database
@@ -138,7 +165,28 @@ async fn get_pending_entry_query(
     .map_err(Into::into)
 }
 
-async fn get_entries_query(
+async fn get_user_entries_query(
+    pool: &sqlx::PgPool,
+    guild_id: u64,
+    user_id: u64,
+) -> Result<Vec<ModLogEntry>> {
+    sqlx::query_as!(
+        ModLogEntry,
+        r#"
+            SELECT *
+              FROM mod_logs
+             WHERE guild_id = $1
+               AND user_id >= $2
+        "#,
+        guild_id as i64,
+        user_id as i64,
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(Into::into)
+}
+
+async fn get_range_entries_query(
     pool: &sqlx::PgPool,
     guild_id: u64,
     start: u64,

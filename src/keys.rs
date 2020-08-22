@@ -1,6 +1,7 @@
 use serenity::{
     client::bridge::gateway::ShardManager,
     prelude::{Mutex, TypeMapKey},
+    CacheAndHttp,
 };
 use sqlx::PgPool;
 use std::sync::Arc;
@@ -25,4 +26,10 @@ pub struct ShardManagerContainer;
 
 impl TypeMapKey for ShardManagerContainer {
     type Value = Arc<Mutex<ShardManager>>;
+}
+
+pub struct CacheAndHttpContainer;
+
+impl TypeMapKey for CacheAndHttpContainer {
+    type Value = Arc<CacheAndHttp>;
 }

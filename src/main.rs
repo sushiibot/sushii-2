@@ -14,7 +14,7 @@ mod prelude;
 mod utils;
 
 use crate::error::Result;
-use crate::keys::{DbPool, ShardManagerContainer};
+use crate::keys::{DbPool, ShardManagerContainer, CacheAndHttpContainer};
 use crate::model::{
     sql::{GuildConfig, GuildConfigDb},
     SushiiCache, {SushiiConfig, SushiiConfigDb},
@@ -95,6 +95,7 @@ async fn main() -> Result<()> {
     {
         let mut data = client.data.write().await;
         data.insert::<ShardManagerContainer>(client.shard_manager.clone());
+        data.insert::<CacheAndHttpContainer>(client.cache_and_http.clone());
 
         data.insert::<SushiiConfig>(sushii_conf);
         data.insert::<SushiiCache>(SushiiCache::default());
