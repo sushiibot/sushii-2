@@ -17,6 +17,8 @@ pub trait ModLogEntryDb {
         target_id: u64,
     ) -> Result<Option<ModLogEntry>>;
 
+    async fn get_entries(ctx: &Context, guild_id: u64, start: u64, end: u64) -> Result<Vec<ModLogEntry>>;
+
     async fn save(&self, ctx: &Context) -> Result<ModLogEntry>;
 }
 
@@ -90,6 +92,17 @@ impl ModLogEntryDb for ModLogEntry {
             })
     }
 
+    async fn get_entries(ctx: &Context, guild_id: u64, start: u64, end: u64) -> Result<Vec<Self>>{
+        let data = ctx.data.read().await;
+        let pool = data.get::<DbPool>().unwrap();
+
+        // Enforce start / end ordering
+        let start = std::cmp::min(start, end);
+        let end = std::cmp::max(start, end);
+
+        get_entries_query(pool, guild_id, start, end).await
+    }
+
     /// Saves a ModLogEntry to the database. Returns a new one from the database
     /// with a valid case_id
     async fn save(&self, ctx: &Context) -> Result<Self> {
@@ -121,6 +134,30 @@ async fn get_pending_entry_query(
         mod_action
     )
     .fetch_optional(pool)
+    .await
+    .map_err(Into::into)
+}
+
+async fn get_entries_query(
+    pool: &sqlx::PgPool,
+    guild_id: u64,
+    start: u64,
+    end: u64,
+) -> Result<Vec<ModLogEntry>> {
+    sqlx::query_as!(
+        ModLogEntry,
+        r#"
+            SELECT *
+              FROM mod_logs
+             WHERE guild_id = $1
+               AND case_id >= $2
+               AND case_id <= $3
+        "#,
+        guild_id as i64,
+        start as i64,
+        end as i64,
+    )
+    .fetch_all(pool)
     .await
     .map_err(Into::into)
 }
