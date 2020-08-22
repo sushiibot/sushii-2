@@ -11,18 +11,15 @@ pub async fn guild_ban_handler(
 ) -> Result<()> {
     // check if a ban/unban command was used instead of discord right click ban
     // add the action to the database if not pendings
-    let mut entry = {
-        let pending = ModLogEntry::get_pending_entry(&ctx, action, guild_id.0, user.id.0).await?;
-
-        match pending {
+    let mut entry =
+        match ModLogEntry::get_pending_entry(&ctx, action, guild_id.0, user.id.0).await? {
             Some(entry) => entry,
             None => {
                 ModLogEntry::new(action, false, guild_id.0, &user)
                     .save(&ctx)
                     .await?
             }
-        }
-    };
+        };
 
     let executor_user = get_user_or_bot(&ctx, entry.executor_id).await;
     let guild_conf = match GuildConfig::from_id(&ctx, guild_id).await? {
@@ -39,9 +36,10 @@ pub async fn guild_ban_handler(
             None => SushiiConfig::get(&ctx).await.default_prefix,
         };
 
-        let default_reason = format!("Responsible moderator: Please use `{}reason {} [reason]` to set a reason for this case.", prefix, entry.case_id);
-
-        entry.reason.replace(default_reason);
+        entry.reason.replace(
+            format!("Responsible moderator: Please use `{}reason {} [reason]` to set a reason for this case.",
+                prefix, entry.case_id)
+        );
     }
 
     if let Some(channel_id) = guild_conf.log_mod {
@@ -54,7 +52,6 @@ pub async fn guild_ban_handler(
     }
 
     entry.pending = false;
-
     entry.save(&ctx).await?;
 
     Ok(())
