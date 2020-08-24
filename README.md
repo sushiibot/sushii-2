@@ -10,15 +10,15 @@ wip... again.
 
 Slimmed down feature set of original sushii-bot.
 
-* moderation tools
-    * ban / unban
-    * kick
-    * prune
-    * mute / unmute
-    * cases
-        * reason
-        * history
-    * roles
+* [ ] moderation tools
+    * [ ] ban / unban
+    * [ ] kick
+    * [x] prune
+    * [ ] mute / unmute
+    * [x] cases
+      * [x] reason
+      * [x] history
+    * [ ] roles
 * user
     * avatar
     * userinfo

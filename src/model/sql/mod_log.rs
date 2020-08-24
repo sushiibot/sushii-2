@@ -33,6 +33,7 @@ pub trait ModLogEntryDb {
     async fn get_latest(ctx: &Context, guild_id: u64) -> Result<Option<ModLogEntry>>;
 
     async fn save(&self, ctx: &Context) -> Result<ModLogEntry>;
+    async fn delete(&self, ctx: &Context) -> Result<()>;
 }
 
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug)]
@@ -146,6 +147,13 @@ impl ModLogEntryDb for ModLogEntry {
         let pool = data.get::<DbPool>().unwrap();
 
         add_mod_action_query(&pool, self).await
+    }
+
+    async fn delete(&self, ctx: &Context) -> Result<()> {
+        let data = ctx.data.read().await;
+        let pool = data.get::<DbPool>().unwrap();
+
+        delete_mod_action_query(&pool, self).await
     }
 }
 
@@ -263,6 +271,24 @@ async fn add_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Resul
     .fetch_one(pool)
     .await
     .map_err(Into::into)
+}
+
+async fn delete_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Result<()> {
+    sqlx::query!(
+        r#"
+            DELETE FROM mod_logs
+                  WHERE guild_id = $1
+                    AND case_id = $2
+                    AND user_id = $3
+        "#,
+        entry.guild_id,
+        entry.case_id,
+        entry.user_id,
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
 }
 
 #[test]

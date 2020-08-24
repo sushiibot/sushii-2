@@ -56,6 +56,7 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     // Single case ID
     } else if let Ok(num) = range_str.parse::<u64>() {
+        // Just use the same start / end
         (Some(num), Some(num))
 
     // Latest
