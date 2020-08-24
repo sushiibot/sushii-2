@@ -362,6 +362,20 @@
       ]
     }
   },
+  "8f8536d9774186566005742fbf3374513194ec9581b602fa67f930c6bc67bc74": {
+    "query": "\n            DELETE FROM mod_logs\n                  WHERE guild_id = $1\n                    AND case_id = $2\n                    AND user_id = $3\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "995d70b0726a2fd8e6b981e78f94db592863587d75eaf3cae49f54890a3b0772": {
     "query": "\n            INSERT INTO mod_logs\n                 VALUES ($1, (\n                            SELECT MAX(case_id) + 1\n                              FROM mod_logs\n                             WHERE guild_id = $1\n                        ), $2, $3, $4, $5, $6, $7, $8, $9)\n              RETURNING *\n        ",
     "describe": {
