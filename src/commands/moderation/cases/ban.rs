@@ -1,6 +1,6 @@
 use lazy_static::lazy_static;
 use regex::Regex;
-use serenity::framework::standard::{macros::command, Args, CommandResult, Delimiter};
+use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::error::Error as ModelError;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
@@ -148,6 +148,8 @@ async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
 #[test]
 fn parses_id_and_reason() {
+    use serenity::framework::standard::Delimiter;
+
     let ids_exp = vec![145764790046818304, 193163974471188480, 151018674793349121];
     let reason_exp = "some reason text";
 
