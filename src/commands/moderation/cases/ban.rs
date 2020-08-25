@@ -1,6 +1,6 @@
 use lazy_static::lazy_static;
 use regex::Regex;
-use serenity::framework::standard::{macros::command, Args, CommandResult};
+use serenity::framework::standard::{macros::command, Args, CommandResult, Delimiter};
 use serenity::model::error::Error as ModelError;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
@@ -11,18 +11,7 @@ use std::fmt::Write;
 use crate::keys::CacheAndHttpContainer;
 use crate::model::sql::{ModLogEntry, ModLogEntryDb};
 
-#[command]
-#[only_in("guild")]
-async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    let guild_id = match msg.guild_id {
-        Some(id) => id,
-        None => {
-            msg.channel_id.say(&ctx.http, "No guild found").await?;
-
-            return Ok(());
-        }
-    };
-
+fn parse_id_reason(args: Args) -> (Vec<u64>, String) {
     lazy_static! {
         // Can overflow, so need to handle later
         static ref RE: Regex = Regex::new(r"\d{18,19}").unwrap();
@@ -41,7 +30,24 @@ async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             acc
         });
 
-    let reason = &ids_and_reason[end..].trim();
+    let reason = ids_and_reason[end..].trim().to_string();
+
+    (ids, reason)
+}
+
+#[command]
+#[only_in("guild")]
+async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+    let guild_id = match msg.guild_id {
+        Some(id) => id,
+        None => {
+            msg.channel_id.say(&ctx.http, "No guild found").await?;
+
+            return Ok(());
+        }
+    };
+
+    let (ids, reason) = parse_id_reason(args);
 
     let mut bans = match guild_id.bans(&ctx.http).await {
         Ok(val) => val.iter().map(|x| x.user.id.0).collect::<HashSet<u64>>(),
@@ -138,4 +144,28 @@ async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     msg.channel_id.say(&ctx.http, "Banned").await?;
 
     Ok(())
+}
+
+#[test]
+fn parses_id_and_reason() {
+    let ids_exp = vec![145764790046818304, 193163974471188480, 151018674793349121];
+    let reason_exp = "some reason text";
+
+    let input_strs = vec![
+        // Comma separated
+        "145764790046818304,193163974471188480,151018674793349121 some reason text",
+        // Space separated
+        "145764790046818304 193163974471188480 151018674793349121 some reason text",
+        // Random chars in middle
+        "145764790046818304   193163974471188480 aoweifjf 151018674793349121 some reason text",
+    ];
+
+    for s in input_strs {
+        let args = Args::new(s, &[Delimiter::Single(' ')]);
+
+        let (ids, reason) = parse_id_reason(args);
+
+        assert_eq!(ids, ids_exp);
+        assert_eq!(reason, reason_exp);
+    }
 }
