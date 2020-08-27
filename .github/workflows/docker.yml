@@ -1,0 +1,44 @@
+name: Docker
+
+on:
+    push:
+        tags:
+            - v*
+
+env:
+    IMAGE_NAME: sushii-2
+
+jobs:
+    push:
+        # Ensure test job passes before pushing image.
+        # needs: test
+        runs-on: ubuntu-latest
+        if: github.event_name == 'push'
+        steps:
+            - uses: actions/checkout@v2
+            - name: Build image
+              run: docker build . --file Dockerfile --tag $IMAGE_NAME
+            - name: Set Docker Tags
+              id: set_tags
+              run: |
+                  # Strip git ref prefix from version
+                  TAGS=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+                  # Strip "v" prefix from tag name
+                  [[ "${{ github.ref }}" == "refs/tags/"* ]] && TAGS=$(echo $TAGS | sed -e 's/^v//')
+
+                  # Add stable and latest tag to tagged versions
+                  [ "$TAGS" != "master" ] && TAGS=${TAGS},stable,latest
+
+                  echo "::set-output name=tags::$TAGS"
+                  echo "Docker image tags: $TAGS"
+                  echo ${{ steps.set_tags.outputs.tags }}
+            - name: Push image to GitHub Packages
+              uses: docker/build-push-action@v1
+              with:
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
+                  registry: docker.pkg.github.com
+                  repository: drklee3/sushii-2/sushii-2
+                  tags: ${{ steps.set_tags.outputs.tags }}
+                  add_git_labels: true
