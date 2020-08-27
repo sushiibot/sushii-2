@@ -8,14 +8,14 @@ WORKDIR /sources
 # copy over manifests
 COPY ./Cargo.lock ./Cargo.toml ./
 # cargo is a dir and COPY copies dir contents
-COPY ./cargo ./cargo
+COPY ./.cargo ./.cargo
 
 # cache dependencies
 RUN cargo build --release
 RUN rm src/*.rs
 
 # copy source tree, test files, migrations, etc
-COPY ./src ./tests ./
+COPY ./src ./src
 
 # build for release, remove dummy compiled files
 RUN rm ./target/release/deps/*sushii-2*
