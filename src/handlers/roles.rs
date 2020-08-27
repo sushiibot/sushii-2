@@ -9,7 +9,10 @@ use regex::{Regex, RegexBuilder};
 
 use crate::error::Result;
 use crate::keys::CacheAndHttpContainer;
-use crate::model::sql::{guild_roles::{GuildRole, GuildRoles}, GuildConfig, GuildConfigDb};
+use crate::model::sql::{
+    guild_roles::{GuildRole, GuildRoles},
+    GuildConfig, GuildConfigDb,
+};
 
 #[derive(Eq, PartialEq)]
 enum RoleActionKind {
@@ -75,7 +78,10 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
     }
 
     if !RE.is_match(&msg.content) {
-        msg.channel_id.say(&ctx.http, "You can add a role with `+role name` or remove a role with `-role name`.  Use `-all` to remove all roles");
+        msg
+            .channel_id
+            .say(&ctx.http, "You can add a role with `+role name` or remove a role with `-role name`.  Use `-all` to remove all roles")
+            .await;
         return Ok(());
     }
 
@@ -198,9 +204,9 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
             if action.kind == RoleActionKind::Add {
                 // If member already has it
                 if cur_group_roles.contains(&role.primary_id) {
-                    let _ = write!(
+                    let _ = writeln!(
                         errors_str,
-                        "You already have the `{}` role\n",
+                        "You already have the `{}` role",
                         action.role_name
                     );
 
@@ -209,9 +215,9 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
 
                 // Check limits and if primary or secondary
                 if cur_group_roles.len() >= conf_group.limit as usize {
-                    let _ = write!(
+                    let _ = writeln!(
                         errors_str,
-                        "Cannot add `{}`, role group {} has limit of {} roles\n",
+                        "Cannot add `{}`, role group {} has limit of {} roles",
                         action.role_name, group_name, conf_group.limit
                     );
 
@@ -242,9 +248,9 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
                         .map_or(false, |id| cur_group_roles.contains(&id));
 
                 if !has_role {
-                    let _ = write!(
+                    let _ = writeln!(
                         errors_str,
-                        "You don't have the `{}` role\n",
+                        "You don't have the `{}` role",
                         action.role_name
                     );
                 }
@@ -265,9 +271,9 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
     let mut s = String::new();
 
     if !added_role_names.is_empty() {
-        let _ = write!(
+        let _ = writeln!(
             s,
-            "Added roles: {}\n",
+            "Added roles: {}",
             added_role_names
                 .iter()
                 .map(ToString::to_string)
@@ -277,9 +283,9 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
     }
 
     if !removed_role_names.is_empty() {
-        let _ = write!(
+        let _ = writeln!(
             s,
-            "Removed roles: {}\n",
+            "Removed roles: {}",
             removed_role_names
                 .iter()
                 .map(ToString::to_string)

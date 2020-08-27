@@ -6,9 +6,9 @@ use serenity::Error;
 use std::collections::HashSet;
 use std::fmt::Write;
 
+use super::utils::parse_id_reason;
 use crate::keys::CacheAndHttpContainer;
 use crate::model::sql::{ModLogEntry, ModLogEntryDb};
-use super::utils::parse_id_reason;
 
 #[command]
 #[only_in("guild")]
