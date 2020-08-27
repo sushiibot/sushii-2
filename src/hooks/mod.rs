@@ -4,8 +4,23 @@ use serenity::framework::standard::DispatchError;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
+use crate::model::sql::{GuildConfig, GuildConfigDb};
+
 #[hook]
-pub async fn before(_ctx: &Context, msg: &Message, cmd_name: &str) -> bool {
+pub async fn before(ctx: &Context, msg: &Message, cmd_name: &str) -> bool {
+    let role_channel = GuildConfig::from_msg(&ctx, &msg)
+        .await
+        .ok()
+        .unwrap_or(None)
+        .and_then(|c| c.role_channel);
+
+    if let Some(channel) = role_channel {
+        if msg.channel_id == channel as u64 {
+            tracing::debug!(?msg, "Skipped command in role channel");
+            return false;
+        }
+    }
+
     tracing::info!(author = %msg.author.tag(), %msg.content, "Running command {}", cmd_name);
 
     true

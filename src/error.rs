@@ -1,4 +1,5 @@
 use dotenv::Error as DotenvError;
+use serde_json::Error as SerdeJsonError;
 use serenity::Error as SerenityError;
 use sqlx::Error as SqlxError;
 use std::env::VarError;
@@ -14,14 +15,18 @@ pub enum Error {
     // Sushii errors
     Sushii(String),
     // Crate errors
-    Serenity(SerenityError),
     Dotenv(DotenvError),
-    /// `env::VarError`
-    Var(VarError),
-    /// `std::io` error
     Io(IoError),
-    /// `sqlx` error
+    Json(SerdeJsonError),
+    Serenity(SerenityError),
     Sqlx(SqlxError),
+    Var(VarError),
+}
+
+impl From<SerdeJsonError> for Error {
+    fn from(err: SerdeJsonError) -> Error {
+        Error::Json(err)
+    }
 }
 
 impl From<SerenityError> for Error {
@@ -66,9 +71,10 @@ impl Display for Error {
             // Sushii
             Error::Sushii(ref inner) => inner.fmt(f),
             // Crates
-            Error::Serenity(ref inner) => inner.fmt(f),
             Error::Dotenv(ref inner) => inner.fmt(f),
             Error::Io(ref inner) => inner.fmt(f),
+            Error::Json(ref inner) => inner.fmt(f),
+            Error::Serenity(ref inner) => inner.fmt(f),
             Error::Sqlx(ref inner) => inner.fmt(f),
             Error::Var(ref inner) => inner.fmt(f),
         }
