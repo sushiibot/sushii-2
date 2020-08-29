@@ -14,17 +14,19 @@ COPY ./.cargo ./.cargo
 RUN cargo build --release
 RUN rm src/*.rs
 
-# copy source tree, test files, migrations, etc
+# copy source tree, migrations, sqlx data
 COPY ./src ./src
+COPY ./migrations ./migrations
+COPY ./sqlx-data.json ./sqlx-data.json
 
 # build for release, remove dummy compiled files
-RUN rm ./target/release/deps/*sushii-2*
+RUN rm ./target/release/deps/*sushii_2*
 
 RUN cargo test --release
 RUN cargo build --release
 
 ## Final base image with only the picatch binary
 FROM debian:buster-slim
-COPY --from=back /sources/target/release/sushii-2 /sushii-2
+COPY --from=build /sources/target/release/sushii-2 /sushii-2
 
 ENTRYPOINT ["/sushii-2"]
