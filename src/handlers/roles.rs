@@ -1,11 +1,12 @@
 use serenity::{model::prelude::*, prelude::*};
-
 use lazy_static::lazy_static;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
 use std::vec::Vec;
-
+use std::time::Duration;
+use tokio::time::delay_for;
 use regex::{Regex, RegexBuilder};
+use futures::join;
 
 use crate::error::Result;
 use crate::keys::CacheAndHttpContainer;
@@ -81,7 +82,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
         msg
             .channel_id
             .say(&ctx.http, "You can add a role with `+role name` or remove a role with `-role name`.  Use `-all` to remove all roles")
-            .await;
+            .await?;
         return Ok(());
     }
 
@@ -307,6 +308,33 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
             "There were errors while updating your roles:\n{}",
             errors_str
         );
+    }
+
+    let sent_msg = msg.channel_id.say(&ctx.http, &s).await;
+
+    if let Err(e) = sent_msg.as_ref() {
+        tracing::warn!(message=%s, "Failed to send role message: {}", e);
+    };
+
+    // Delete messages after 10 seconds
+    delay_for(Duration::from_secs(10)).await;
+
+    if let Ok(sent_msg) = sent_msg {
+        // Run both delete futures concurrently instead of in series
+        // try_join! better for Results but still want to try deleting both as
+        // try_join! short circuits and returns immediately on any Error
+        let (recv_res, sent_res) = join!(msg.delete(&cache_http), sent_msg.delete(&cache_http));
+
+        if let Err(e) = recv_res {
+            tracing::warn!(?msg, "Failed to delete received message: {}", e);
+        }
+
+        if let Err(e) = sent_res {
+            tracing::warn!(message=%s, "Failed to delete sent message: {}", e);
+        }
+    } else {
+        // Role message failed sooo just delete user's message
+        msg.delete(&cache_http).await?;
     }
 
     Ok(())
