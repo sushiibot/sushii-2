@@ -1,4 +1,6 @@
 pub mod context;
+pub mod metrics;
+pub mod moderation;
 pub mod sql;
 pub mod sushii_cache;
 pub mod sushii_config;
