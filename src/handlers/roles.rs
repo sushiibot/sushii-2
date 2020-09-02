@@ -1,12 +1,12 @@
-use serenity::{model::prelude::*, prelude::*};
+use futures::join;
 use lazy_static::lazy_static;
+use regex::{Regex, RegexBuilder};
+use serenity::{model::prelude::*, prelude::*};
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
-use std::vec::Vec;
 use std::time::Duration;
+use std::vec::Vec;
 use tokio::time::delay_for;
-use regex::{Regex, RegexBuilder};
-use futures::join;
 
 use crate::error::Result;
 use crate::keys::CacheAndHttpContainer;
@@ -78,11 +78,19 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
             .unwrap();
     }
 
+    let data = &ctx.data.read().await;
+    let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
+
     if !RE.is_match(&msg.content) {
-        msg
+        let sent_msg = msg
             .channel_id
             .say(&ctx.http, "You can add a role with `+role name` or remove a role with `-role name`.  Use `-all` to remove all roles")
             .await?;
+
+        delay_for(Duration::from_secs(10)).await;
+
+        sent_msg.delete(&cache_http).await?;
+
         return Ok(());
     }
 
@@ -97,7 +105,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
             } else {
                 RoleActionKind::Remove
             };
-            let role_name = caps.get(2).map(|m| m.as_str().to_owned()).unwrap();
+            let role_name = caps.get(2).map(|m| m.as_str().to_lowercase()).unwrap();
 
             RoleAction {
                 index,
@@ -109,9 +117,6 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
 
     // Should remove all roles
     let is_reset = msg.content == "clear" || msg.content == "reset";
-
-    let data = &ctx.data.read().await;
-    let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
 
     let member = guild.member(&cache_http, msg.author.id).await?;
 
@@ -154,10 +159,10 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
     }
 
     // Config roles: map from role name -> (role, group_name)
-    let mut role_name_map: HashMap<&str, (&GuildRole, &str)> = HashMap::new();
+    let mut role_name_map: HashMap<String, (&GuildRole, &str)> = HashMap::new();
     for (group_name, group) in &role_config.groups {
         for (role_name, role) in &group.roles {
-            role_name_map.insert(role_name.trim(), (&role, &group_name));
+            role_name_map.insert(role_name.to_lowercase(), (&role, &group_name));
         }
     }
 
@@ -249,11 +254,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
                         .map_or(false, |id| cur_group_roles.contains(&id));
 
                 if !has_role {
-                    let _ = writeln!(
-                        errors_str,
-                        "You don't have the `{}` role",
-                        action.role_name
-                    );
+                    let _ = writeln!(errors_str, "You don't have the `{}` role", action.role_name);
                 }
 
                 cur_group_roles.remove(&role.primary_id);
@@ -309,6 +310,17 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
             errors_str
         );
     }
+
+    guild
+        .edit_member(&ctx.http, msg.author.id, |m| {
+            m.roles(
+                &member_all_roles
+                    .iter()
+                    .map(|i| RoleId(*i))
+                    .collect::<Vec<RoleId>>(),
+            )
+        })
+        .await;
 
     let sent_msg = msg.channel_id.say(&ctx.http, &s).await;
 
