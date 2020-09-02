@@ -12,9 +12,9 @@ use std::fmt::Write;
 use std::result::Result as StdResult;
 use std::sync::Arc;
 
-use crate::error::Result;
+use crate::error::{Error as SushiiError, Result};
 use crate::keys::CacheAndHttpContainer;
-use crate::model::sql::{ModLogEntry, ModLogEntryDb};
+use crate::model::sql::{GuildConfig, GuildConfigDb, ModLogEntry, ModLogEntryDb};
 
 #[derive(Debug)]
 pub enum ModActionType {
@@ -62,6 +62,7 @@ pub trait ModActionExecutorDb {
         cache_http: &Arc<CacheAndHttp>,
         user: &User,
         guild_id: &GuildId,
+        guild_conf: &GuildConfig,
     ) -> StdResult<(), Error>;
     async fn execute(mut self, ctx: &Context, guild_id: &GuildId) -> Result<()>;
 }
@@ -115,29 +116,43 @@ impl ModActionExecutorDb for ModActionExecutor {
         cache_http: &Arc<CacheAndHttp>,
         user: &User,
         guild_id: &GuildId,
+        guild_conf: &GuildConfig,
     ) -> StdResult<(), Error> {
         match self.action {
             ModActionType::Ban => {
                 if let Some(reason) = &self.reason {
                     guild_id
                         .ban_with_reason(&ctx.http, user, 7u8, &reason)
-                        .await?
+                        .await?;
                 } else {
-                    guild_id.ban(&ctx.http, user, 7u8).await?
-                };
+                    guild_id.ban(&ctx.http, user, 7u8).await?;
+                }
             }
             ModActionType::Unban => {
                 guild_id.unban(&ctx.http, user).await?;
             }
             ModActionType::Kick => {
                 if let Some(reason) = &self.reason {
-                    guild_id.kick_with_reason(&ctx.http, user, &reason).await?
+                    guild_id.kick_with_reason(&ctx.http, user, &reason).await?;
                 } else {
-                    guild_id.kick(&ctx.http, user).await?
-                };
+                    guild_id.kick(&ctx.http, user).await?;
+                }
             }
-            ModActionType::Mute => {}
-            ModActionType::Unmute => {}
+            ModActionType::Mute => {
+                // Mute commands should check if mute role exists before running ::execute()
+                if let Some(role_id) = guild_conf.mute_role {
+                    let mut member = guild_id.member(&cache_http, user).await?;
+
+                    member.add_role(&ctx.http, role_id as u64).await?;
+                }
+            }
+            ModActionType::Unmute => {
+                if let Some(role_id) = guild_conf.mute_role {
+                    let mut member = guild_id.member(&cache_http, user).await?;
+
+                    member.remove_role(&ctx.http, role_id as u64).await?;
+                }
+            }
         }
 
         Ok(())
@@ -146,6 +161,10 @@ impl ModActionExecutorDb for ModActionExecutor {
     async fn execute(mut self, ctx: &Context, guild_id: &GuildId) -> Result<()> {
         let data = &ctx.data.read().await;
         let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
+
+        let guild_conf = GuildConfig::from_id(&ctx, guild_id)
+            .await?
+            .ok_or_else(|| SushiiError::Sushii("No guild found".into()))?;
 
         let action_str = self.action.to_string();
         let action_past_str = self.action.to_past_tense();
@@ -192,7 +211,9 @@ impl ModActionExecutorDb for ModActionExecutor {
                 }
             };
 
-            let res = self.execute_user(&ctx, &cache_http, &user, &guild_id).await;
+            let res = self
+                .execute_user(&ctx, &cache_http, &user, &guild_id, &guild_conf)
+                .await;
 
             match res {
                 Err(Error::Model(ModelError::InvalidPermissions(permissions))) => {
@@ -207,12 +228,8 @@ impl ModActionExecutorDb for ModActionExecutor {
                         tracing::error!("Failed to delete entry: {}", e);
                     }
                 }
-                Err(_) => {
-                    let _ = writeln!(
-                        s,
-                        ":question: {} - Error: There was an unknown error trying to {} this user.",
-                        &user_tag_id, &action_str
-                    );
+                Err(e) => {
+                    let _ = writeln!(s, ":question: {} - Error: {}", &user_tag_id, &e);
                     if let Err(e) = entry.delete(&ctx).await {
                         tracing::error!("Failed to delete entry: {}", e);
                     }
