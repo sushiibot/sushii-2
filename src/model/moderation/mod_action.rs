@@ -71,7 +71,7 @@ pub trait ModActionExecutorDb {
 pub struct ModActionExecutor {
     pub action: ModActionType,
     pub target_users: Vec<u64>,
-    pub exclude_users: Option<HashSet<u64>>,
+    pub exclude_users: HashSet<u64>,
     pub reason: Option<String>,
 }
 
@@ -84,7 +84,7 @@ impl ModActionExecutor {
         Self {
             action,
             target_users,
-            exclude_users: None,
+            exclude_users: HashSet::new(),
             reason: reason.map(Into::into),
         }
     }
@@ -95,14 +95,15 @@ impl ModActionExecutor {
         Self {
             action,
             target_users,
-            exclude_users: None,
+            exclude_users: HashSet::new(),
             reason,
         }
     }
 
     pub fn exclude_users<I: IntoIterator<Item = u64>>(mut self, exclude_users: I) -> Self {
-        self.exclude_users
-            .replace(exclude_users.into_iter().collect());
+        exclude_users.into_iter().for_each(|id| {
+            self.exclude_users.insert(id);
+        });
         self
     }
 }
@@ -183,15 +184,13 @@ impl ModActionExecutorDb for ModActionExecutor {
 
             let user_tag_id = format!("`{} ({})`", user.tag(), user.id.0);
 
-            if let Some(users) = self.exclude_users.as_ref() {
-                if users.contains(&id) {
-                    let _ = writeln!(
-                        s,
-                        ":x: {} - Error: User is already {}",
-                        user_tag_id, &action_past_str
-                    );
-                    continue;
-                }
+            if self.exclude_users.contains(&id) {
+                let _ = writeln!(
+                    s,
+                    ":x: {} - Error: User is already {}",
+                    user_tag_id, &action_past_str
+                );
+                continue;
             }
 
             let entry = match ModLogEntry::new(&self.action.to_string(), true, guild_id.0, &user)
@@ -237,9 +236,7 @@ impl ModActionExecutorDb for ModActionExecutor {
                 Ok(_) => {
                     let _ = writeln!(s, ":hammer: {} {}.", &user_tag_id, &action_past_str);
                     // add the action to hashset to prevent dupe actions
-                    if let Some(set) = self.exclude_users.as_mut() {
-                        set.insert(id);
-                    }
+                    self.exclude_users.insert(id);
                 }
             }
         }
