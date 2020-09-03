@@ -6,7 +6,7 @@ use crate::model::moderation::{ModActionExecutor, ModActionExecutorDb, ModAction
 
 #[command]
 #[only_in("guild")]
-async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+async fn mute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let guild_id = match msg.guild_id {
         Some(id) => id,
         None => {
@@ -16,17 +16,7 @@ async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         }
     };
 
-    let bans = match guild_id.bans(&ctx.http).await {
-        Ok(val) => val.iter().map(|x| x.user.id.0).collect::<Vec<u64>>(),
-        Err(e) => {
-            tracing::warn!("Failed to get guild bans: {}", e);
-
-            Vec::new()
-        }
-    };
-
-    ModActionExecutor::from_args(args, ModActionType::Ban)
-        .exclude_users(bans)
+    ModActionExecutor::from_args(args, ModActionType::Mute)
         .execute(&ctx, &guild_id)
         .await?;
 
@@ -35,7 +25,7 @@ async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
 #[command]
 #[only_in("guild")]
-async fn unban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+async fn unmute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let guild_id = match msg.guild_id {
         Some(id) => id,
         None => {
@@ -45,7 +35,7 @@ async fn unban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         }
     };
 
-    ModActionExecutor::from_args(args, ModActionType::Unban)
+    ModActionExecutor::from_args(args, ModActionType::Unmute)
         .execute(&ctx, &guild_id)
         .await?;
 
