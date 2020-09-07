@@ -9,4 +9,5 @@ pub use self::{
     context::SushiiContext,
     sushii_cache::SushiiCache,
     sushii_config::{SushiiConfig, SushiiConfigDb},
+    metrics::Metrics,
 };

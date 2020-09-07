@@ -76,19 +76,6 @@ pub struct ModActionExecutor {
 }
 
 impl ModActionExecutor {
-    pub fn new<S: Into<String>>(
-        action: ModActionType,
-        target_users: Vec<u64>,
-        reason: Option<S>,
-    ) -> Self {
-        Self {
-            action,
-            target_users,
-            exclude_users: HashSet::new(),
-            reason: reason.map(Into::into),
-        }
-    }
-
     pub fn from_args(args: Args, action: ModActionType) -> Self {
         let (target_users, reason) = parse_id_reason(args);
 

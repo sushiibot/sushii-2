@@ -311,7 +311,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
         );
     }
 
-    guild
+    if let Err(e) = guild
         .edit_member(&ctx.http, msg.author.id, |m| {
             m.roles(
                 &member_all_roles
@@ -320,7 +320,10 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
                     .collect::<Vec<RoleId>>(),
             )
         })
-        .await;
+        .await {
+            msg.channel_id.say(&ctx.http, "Failed to modify your roles :(").await?;
+            tracing::warn!(?msg, "Failed to edit member: {}", e);
+        }
 
     let sent_msg = msg.channel_id.say(&ctx.http, &s).await;
 

@@ -6,7 +6,7 @@ use serenity::{
 use sqlx::PgPool;
 use std::sync::Arc;
 
-pub use crate::model::{SushiiCache, SushiiConfig, SushiiConfigDb};
+pub use crate::model::{SushiiCache, SushiiConfig, SushiiConfigDb, Metrics};
 
 impl TypeMapKey for SushiiCache {
     type Value = SushiiCache;
@@ -14,6 +14,10 @@ impl TypeMapKey for SushiiCache {
 
 impl TypeMapKey for SushiiConfig {
     type Value = SushiiConfig;
+}
+
+impl TypeMapKey for Metrics {
+    type Value = Arc<Metrics>;
 }
 
 pub struct DbPool;
