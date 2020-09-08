@@ -282,8 +282,8 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
                     continue;
                 }
 
-                // Check limits and if primary or secondary
-                if cur_group_roles.len() >= conf_group.limit as usize {
+                // Check limits if limit is set to greater than 0 (0 is disabled)
+                if conf_group.limit > 0 && cur_group_roles.len() >= conf_group.limit as usize {
                     let entry = over_limit_roles
                         .entry(group_name.clone())
                         .or_insert(Vec::new());

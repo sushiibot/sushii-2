@@ -13,6 +13,8 @@ pub struct GuildRole {
 
 #[derive(Deserialize, Default, Serialize, Clone, Debug)]
 pub struct GuildGroup {
+    /// Limit default is 0 which means disabled
+    #[serde(default)]]
     pub limit: u64,
     pub roles: HashMap<String, GuildRole>,
 }

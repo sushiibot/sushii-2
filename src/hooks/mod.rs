@@ -50,8 +50,7 @@ pub async fn dispatch_error(ctx: &Context, msg: &Message, error: DispatchError) 
 
 #[hook]
 pub async fn after(ctx: &Context, msg: &Message, _: &str, error: Result<(), CommandError>) {
-    // Don't respond to users here? can't determine error types and I don't want to
-    // respond with all errors, possibly leaking extra info
+    // Errors here are only from sushii errors, not user input errors
     if let Err(e) = error {
         tracing::error!(?msg, %e, "Error running command");
         let _ = msg.channel_id.say(&ctx, "Something went wrong while running this command :(").await;
