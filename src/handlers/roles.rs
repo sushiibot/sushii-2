@@ -15,12 +15,13 @@ use crate::model::sql::{
     GuildConfig, GuildConfigDb,
 };
 
-#[derive(Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 enum RoleActionKind {
     Add,
     Remove,
 }
 
+#[derive(Debug)]
 struct RoleAction {
     pub index: usize,
     pub kind: RoleActionKind,
@@ -28,21 +29,66 @@ struct RoleAction {
 }
 
 pub async fn message(ctx: &Context, msg: &Message) {
-    if let Err(e) = _message(ctx, msg).await {
-        tracing::error!(?msg, "Failed to handle roles message: {}", e);
+    match _message(ctx, msg).await {
+        Ok(msg_string) => {
+            let msg_string = match msg_string {
+                Some(s) => s,
+                None => return,
+            };
+
+            let sent_msg = msg.channel_id.say(&ctx.http, &msg_string).await;
+
+            if let Err(e) = sent_msg.as_ref() {
+                tracing::warn!(message=%msg_string, "Failed to send role message: {}", e);
+            };
+
+            // Delete messages after 10 seconds
+            delay_for(Duration::from_secs(10)).await;
+
+            let data = &ctx.data.read().await;
+            let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
+
+            if let Ok(sent_msg) = sent_msg {
+                // Run both delete futures concurrently instead of in series
+                // try_join! better for Results but still want to try deleting both as
+                // try_join! short circuits and returns immediately on any Error
+                let (recv_res, sent_res) = join!(msg.delete(&cache_http), sent_msg.delete(&cache_http));
+
+                if let Err(e) = recv_res {
+                    tracing::warn!(?msg, "Failed to delete received message: {}", e);
+                }
+
+                if let Err(e) = sent_res {
+                    tracing::warn!(message=%msg_string, "Failed to delete sent message: {}", e);
+                }
+            } else {
+                // Role message failed sooo just delete user's message
+                let _ = msg.delete(&cache_http).await;
+            }
+
+        },
+        Err(e) => {
+            delay_for(Duration::from_secs(5)).await;
+            tracing::error!(?msg, "Failed to handle roles message: {}", e);
+
+            let data = &ctx.data.read().await;
+            let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
+
+            let _ = msg.delete(&cache_http).await;
+        }
     }
 }
 
-pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
+pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
     // ignore self and bots
     if msg.author.bot {
-        return Ok(());
+        return Ok(None);
     }
 
     let guild = match msg.guild(&ctx.cache).await {
         Some(g) => g,
         None => {
-            return Ok(());
+            return Ok(None);
         }
     };
 
@@ -50,24 +96,24 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
         Some(c) => c,
         None => {
             tracing::error!(?msg, "No guild config found while handling roles");
-            return Ok(());
+            return Ok(None);
         }
     };
 
     // get configs
     let role_config: GuildRoles = match guild_conf.role_config {
         Some(c) => serde_json::from_value(c)?,
-        None => return Ok(()),
+        None => return Ok(None),
     };
 
     let role_channel = match guild_conf.role_channel {
         Some(c) => c,
-        None => return Ok(()),
+        None => return Ok(None),
     };
 
     // check if in correct channel
     if msg.channel_id.0 != role_channel as u64 {
-        return Ok(());
+        return Ok(None);
     }
 
     // searching for multiple role assignments
@@ -81,17 +127,8 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
     let data = &ctx.data.read().await;
     let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
 
-    if !RE.is_match(&msg.content) {
-        let sent_msg = msg
-            .channel_id
-            .say(&ctx.http, "You can add a role with `+role name` or remove a role with `-role name`.  Use `-all` to remove all roles")
-            .await?;
-
-        delay_for(Duration::from_secs(10)).await;
-
-        sent_msg.delete(&cache_http).await?;
-
-        return Ok(());
+    if !RE.is_match(&msg.content) || msg.content != "clear" || msg.content != "reset" {
+        return Ok(Some("You can add a role with `+role name` or remove a role with `-role name`.  Use `clear` or `reset` to remove all roles".into()))
     }
 
     // Vec<("+/-", "role name")
@@ -105,7 +142,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
             } else {
                 RoleActionKind::Remove
             };
-            let role_name = caps.get(2).map(|m| m.as_str().to_lowercase()).unwrap();
+            let role_name = caps.get(2).map(|m| m.as_str().trim().to_lowercase()).unwrap();
 
             RoleAction {
                 index,
@@ -162,18 +199,18 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
     let mut role_name_map: HashMap<String, (&GuildRole, &str)> = HashMap::new();
     for (group_name, group) in &role_config.groups {
         for (role_name, role) in &group.roles {
-            role_name_map.insert(role_name.to_lowercase(), (&role, &group_name));
+            role_name_map.insert(role_name.trim().to_lowercase(), (&role, &group_name));
         }
     }
 
     let mut errors_str = String::new();
 
+    tracing::info!(?role_actions, "role_actions");
+
     // Not the actual "dedupe" but more to check if a user is adding/removing a
-    // same role. Not really efficient using a Vec since some items in arbitrary
-    // positions will be removed and the rest of the right elements will be
-    // shifted over.  However, this shouldn't happen very often -- big
-    // assumption that users will have proper inputs
-    let mut role_actions_deduped: Vec<RoleAction> = Vec::new();
+    // same role.
+    let mut role_actions_deduped_map: HashMap<String, RoleAction> = HashMap::new();
+
     for action in role_actions {
         let opposite_kind = if action.kind == RoleActionKind::Add {
             RoleActionKind::Remove
@@ -183,17 +220,27 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
 
         // Remove the opposite action for same roles
         // eg: If there's already a +role1, adding a -role1 will remove the +role1 and vice versa
-        if let Some(index) = role_actions_deduped
-            .iter()
-            .position(|e| e.role_name == action.role_name && e.kind == opposite_kind)
-        {
-            role_actions_deduped.remove(index);
+        // If there's a +role1, adding +role1 will just keep the first one
+        if let Some(val) = role_actions_deduped_map.get(&action.role_name) {
+            tracing::info!(?action, ?val, "Found duplicate role");
+
+            // Remove existing if there's an opposite
+            if val.kind == opposite_kind {
+                role_actions_deduped_map.remove(&action.role_name);
+            }
+
+            // Don't do anything if there's a same
             continue;
         }
 
         // No existing same role, now can add it
-        role_actions_deduped.push(action);
+        role_actions_deduped_map.insert(action.role_name.clone(), action);
     }
+
+    let mut role_actions_deduped: Vec<&RoleAction> = role_actions_deduped_map.values().collect();
+    role_actions_deduped.sort_by(|a, b| a.index.cmp(&b.index));
+
+    tracing::info!(?role_actions_deduped, "role_actions_deduped");
 
     let mut added_role_names = Vec::new();
     let mut removed_role_names = Vec::new();
@@ -246,7 +293,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
                 // the user's role to update to, as this may include roles
                 // not in the role config
                 member_all_roles.insert(id_to_add);
-                added_role_names.push(action.role_name);
+                added_role_names.push(&action.role_name);
             } else {
                 let has_role = cur_group_roles.contains(&role.primary_id)
                     || role
@@ -255,6 +302,8 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
 
                 if !has_role {
                     let _ = writeln!(errors_str, "You don't have the `{}` role", action.role_name);
+
+                    continue;
                 }
 
                 cur_group_roles.remove(&role.primary_id);
@@ -265,7 +314,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
                     member_all_roles.remove(&secondary_id);
                 }
 
-                removed_role_names.push(action.role_name);
+                removed_role_names.push(&action.role_name);
             }
         }
     }
@@ -325,32 +374,5 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
             tracing::warn!(?msg, "Failed to edit member: {}", e);
         }
 
-    let sent_msg = msg.channel_id.say(&ctx.http, &s).await;
-
-    if let Err(e) = sent_msg.as_ref() {
-        tracing::warn!(message=%s, "Failed to send role message: {}", e);
-    };
-
-    // Delete messages after 10 seconds
-    delay_for(Duration::from_secs(10)).await;
-
-    if let Ok(sent_msg) = sent_msg {
-        // Run both delete futures concurrently instead of in series
-        // try_join! better for Results but still want to try deleting both as
-        // try_join! short circuits and returns immediately on any Error
-        let (recv_res, sent_res) = join!(msg.delete(&cache_http), sent_msg.delete(&cache_http));
-
-        if let Err(e) = recv_res {
-            tracing::warn!(?msg, "Failed to delete received message: {}", e);
-        }
-
-        if let Err(e) = sent_res {
-            tracing::warn!(message=%s, "Failed to delete sent message: {}", e);
-        }
-    } else {
-        // Role message failed sooo just delete user's message
-        msg.delete(&cache_http).await?;
-    }
-
-    Ok(())
+    Ok(Some(s))
 }
