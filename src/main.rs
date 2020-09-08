@@ -18,8 +18,7 @@ use crate::error::Result;
 use crate::keys::{CacheAndHttpContainer, DbPool, ShardManagerContainer};
 use crate::model::{
     sql::{GuildConfig, GuildConfigDb},
-    SushiiCache, {SushiiConfig, SushiiConfigDb},
-    Metrics,
+    Metrics, SushiiCache, {SushiiConfig, SushiiConfigDb},
 };
 
 #[tokio::main]
@@ -33,7 +32,7 @@ async fn main() -> Result<()> {
         .max_connections(5)
         .connect(&sushii_conf.database_url)
         .await?;
-    
+
     let metrics = Metrics::new();
 
     let http = Http::new_with_token(&sushii_conf.discord_token);

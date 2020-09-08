@@ -67,7 +67,8 @@ pub async fn message(ctx: &Context, msg: &Message) {
                 // Run both delete futures concurrently instead of in series
                 // try_join! better for Results but still want to try deleting both as
                 // try_join! short circuits and returns immediately on any Error
-                let (recv_res, sent_res) = join!(msg.delete(&cache_http), sent_msg.delete(&cache_http));
+                let (recv_res, sent_res) =
+                    join!(msg.delete(&cache_http), sent_msg.delete(&cache_http));
 
                 if let Err(e) = recv_res {
                     tracing::warn!(?msg, "Failed to delete received message: {}", e);
@@ -80,8 +81,7 @@ pub async fn message(ctx: &Context, msg: &Message) {
                 // Role message failed sooo just delete user's message
                 let _ = msg.delete(&cache_http).await;
             }
-
-        },
+        }
         Err(e) => {
             delay_for(Duration::from_secs(5)).await;
             tracing::error!(?msg, "Failed to handle roles message: {}", e);
@@ -143,7 +143,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
     let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
 
     if !RE.is_match(&msg.content) && msg.content != "clear" && msg.content != "reset" {
-        return Ok(Some("You can add a role with `+role name` or remove a role with `-role name`.  Use `clear` or `reset` to remove all roles".into()))
+        return Ok(Some("You can add a role with `+role name` or remove a role with `-role name`.  Use `clear` or `reset` to remove all roles".into()));
     }
 
     // Vec<("+/-", "role name")
@@ -157,7 +157,10 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
             } else {
                 RoleActionKind::Remove
             };
-            let role_name = caps.get(2).map(|m| m.as_str().trim().to_lowercase()).unwrap();
+            let role_name = caps
+                .get(2)
+                .map(|m| m.as_str().trim().to_lowercase())
+                .unwrap();
 
             RoleAction {
                 index,
@@ -281,7 +284,9 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
 
                 // Check limits and if primary or secondary
                 if cur_group_roles.len() >= conf_group.limit as usize {
-                    let entry = over_limit_roles.entry(group_name.clone()).or_insert(Vec::new());
+                    let entry = over_limit_roles
+                        .entry(group_name.clone())
+                        .or_insert(Vec::new());
                     entry.push(action.role_name.clone());
 
                     continue;
@@ -371,10 +376,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
 
     // Check if there are over limit roles
     if !over_limit_roles.is_empty() {
-        let _ = write!(
-            s,
-            "Cannot add roles that exceed role group limits: ",
-        );
+        let _ = write!(s, "Cannot add roles that exceed role group limits: ",);
     }
 
     for (group_name, role_names) in &over_limit_roles {
@@ -393,7 +395,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
 
     // After all checks if the responding string is empty then all previous ones are empty
     if s.is_empty() && !is_reset {
-        return Ok(Some("Couldn't modify your roles. You can add a role with `+role name` or remove a role with `-role name`.  Use `clear` or `reset` to remove all roles".into()))
+        return Ok(Some("Couldn't modify your roles. You can add a role with `+role name` or remove a role with `-role name`.  Use `clear` or `reset` to remove all roles".into()));
     }
 
     if let Err(e) = guild
@@ -405,10 +407,13 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
                     .collect::<Vec<RoleId>>(),
             )
         })
-        .await {
-            msg.channel_id.say(&ctx.http, "Failed to modify your roles :(").await?;
-            tracing::warn!(?msg, "Failed to edit member: {}", e);
-        }
+        .await
+    {
+        msg.channel_id
+            .say(&ctx.http, "Failed to modify your roles :(")
+            .await?;
+        tracing::warn!(?msg, "Failed to edit member: {}", e);
+    }
 
     if is_reset {
         return Ok(Some("Your roles have been reset.".into()));
