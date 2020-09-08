@@ -28,6 +28,14 @@ struct RoleAction {
     pub role_name: String,
 }
 
+fn pluralize(s: &str, qty: usize) -> String {
+    if qty > 1 {
+        return format!("{}s", s);
+    }
+
+    s.into()
+}
+
 fn vec_to_code_string<S: AsRef<str>, I: IntoIterator<Item = S>>(v: I) -> String {
     v.into_iter()
         .map(|s| format!("`{}`", s.as_ref()))
@@ -134,7 +142,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
     let data = &ctx.data.read().await;
     let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
 
-    if !RE.is_match(&msg.content) || msg.content != "clear" || msg.content != "reset" {
+    if !RE.is_match(&msg.content) && msg.content != "clear" && msg.content != "reset" {
         return Ok(Some("You can add a role with `+role name` or remove a role with `-role name`.  Use `clear` or `reset` to remove all roles".into()))
     }
 
@@ -276,14 +284,6 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
                     let entry = over_limit_roles.entry(group_name.clone()).or_insert(Vec::new());
                     entry.push(action.role_name.clone());
 
-                    /*
-                    let _ = writeln!(
-                        errors_str,
-                        "Cannot add `{}`, role group {} has limit of {} roles",
-                        action.role_name, group_name, conf_group.limit
-                    );
-                    */
-
                     continue;
                 }
 
@@ -331,17 +331,11 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
 
     let mut s = String::new();
 
-    if is_reset {
-        return Ok(Some("Your roles have been reset.".into()));
-    } else if added_role_names.is_empty() && removed_role_names.is_empty()
-    {
-        return Ok(Some("Couldn't modify your roles".into()));
-    }
-
     if !added_role_names.is_empty() {
         let _ = writeln!(
             s,
-            "Added roles: {}",
+            "Added {}: {}",
+            pluralize("role", added_role_names.len()),
             vec_to_code_string(added_role_names)
         );
     }
@@ -349,8 +343,29 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
     if !removed_role_names.is_empty() {
         let _ = writeln!(
             s,
-            "Removed roles: {}",
+            "Removed {}: {}",
+            pluralize("role", removed_role_names.len()),
             vec_to_code_string(removed_role_names)
+        );
+    }
+
+    // Respond attempt to add role user already has
+    if !added_existing_roles.is_empty() {
+        let _ = writeln!(
+            s,
+            "You already have the following {} so they were not added: {}",
+            pluralize("role", added_existing_roles.len()),
+            vec_to_code_string(added_existing_roles)
+        );
+    }
+
+    // Respond attempt to remove role user doens't have
+    if !removed_missing_roles.is_empty() {
+        let _ = writeln!(
+            s,
+            "Cannot remove {} you do not have: {}",
+            pluralize("role", removed_missing_roles.len()),
+            vec_to_code_string(removed_missing_roles)
         );
     }
 
@@ -366,14 +381,20 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
         if let Some(group) = &role_config.groups.get(&group_name[..]) {
             let _ = write!(
                 s,
-                "{} ({} group has a limit of {} roles)",
+                "{} (`{}` group has a limit of `{}` {})\n",
                 vec_to_code_string(role_names),
                 group_name,
-                group.limit
+                group.limit,
+                pluralize("role", group.limit as usize),
             );
         }
     }
     // End over limit roles
+
+    // After all checks if the responding string is empty then all previous ones are empty
+    if s.is_empty() && !is_reset {
+        return Ok(Some("Couldn't modify your roles. You can add a role with `+role name` or remove a role with `-role name`.  Use `clear` or `reset` to remove all roles".into()))
+    }
 
     if let Err(e) = guild
         .edit_member(&ctx.http, msg.author.id, |m| {
@@ -388,6 +409,10 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
             msg.channel_id.say(&ctx.http, "Failed to modify your roles :(").await?;
             tracing::warn!(?msg, "Failed to edit member: {}", e);
         }
+
+    if is_reset {
+        return Ok(Some("Your roles have been reset.".into()));
+    }
 
     Ok(Some(s))
 }
