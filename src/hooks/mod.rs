@@ -27,27 +27,33 @@ pub async fn before(ctx: &Context, msg: &Message, cmd_name: &str) -> bool {
 }
 
 #[hook]
-pub async fn dispatch_error(context: &Context, msg: &Message, error: DispatchError) {
+pub async fn dispatch_error(ctx: &Context, msg: &Message, error: DispatchError) {
     match error {
         DispatchError::NotEnoughArguments { min, given } => {
-            let s = format!("Need {} arguments, but only got {}.", min, given);
+            let s = format!("This command needs {} arguments, only got {}.", min, given);
 
-            let _ = msg.channel_id.say(&context, &s).await;
+            let _ = msg.channel_id.say(&ctx, &s).await;
         }
         DispatchError::TooManyArguments { max, given } => {
             let s = format!("Max arguments allowed is {}, but got {}.", max, given);
 
-            let _ = msg.channel_id.say(&context, &s).await;
+            let _ = msg.channel_id.say(&ctx, &s).await;
+        },
+        DispatchError::LackingPermissions(permissions) => {
+            let s = format!("You do not have permissions to use this command, requires: `{}`", permissions);
+
+            let _ = msg.channel_id.say(&ctx, &s).await;
         }
         _ => tracing::warn!("Unhandled dispatch error: {:?}", error),
     }
 }
 
 #[hook]
-pub async fn after(_: &Context, msg: &Message, _: &str, error: Result<(), CommandError>) {
+pub async fn after(ctx: &Context, msg: &Message, _: &str, error: Result<(), CommandError>) {
     // Don't respond to users here? can't determine error types and I don't want to
     // respond with all errors, possibly leaking extra info
     if let Err(e) = error {
         tracing::error!(?msg, %e, "Error running command");
+        let _ = msg.channel_id.say(&ctx, "Something went wrong while running this command :(").await;
     }
 }

@@ -7,7 +7,7 @@ pub mod sushii_config;
 
 pub use self::{
     context::SushiiContext,
+    metrics::Metrics,
     sushii_cache::SushiiCache,
     sushii_config::{SushiiConfig, SushiiConfigDb},
-    metrics::Metrics,
 };
