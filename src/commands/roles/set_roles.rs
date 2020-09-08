@@ -1,6 +1,7 @@
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use serde_json::value::Value;
 
 use crate::model::sql::*;
 
@@ -24,23 +25,41 @@ fn error_pointed_str(s: &str, line: usize, col: usize) -> String {
 async fn set(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let mut conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
 
-    let roles_conf_str = {
-        let mut r = args.rest();
-        // Remove codeblock backticks
-        r = r.trim_start_matches("```json");
-        r = r.trim_start_matches("```toml");
-        r = r.trim_start_matches('`');
-        r = r.trim_end_matches('`');
+    let roles_conf = match parse_config(&args.rest()) {
+        Err(e) => {
+            let _ = msg.channel_id.say(&ctx.http, &e).await?;
 
-        r.trim()
+            return Ok(());
+        },
+        Ok(c) => c,
+    };
+
+    conf.role_config.replace(roles_conf);
+
+    conf.save(&ctx).await?;
+
+    msg.channel_id
+        .say(&ctx.http, "Updated the roles configuration")
+        .await?;
+
+    Ok(())
+}
+
+fn parse_config(input_str: &str) -> Result<Value, String> {
+    let roles_conf_str = {
+        let mut input_str = input_str;
+
+        // Remove codeblock backticks
+        input_str = input_str.trim_start_matches("```json");
+        input_str = input_str.trim_start_matches("```toml");
+        input_str = input_str.trim_start_matches('`');
+        input_str = input_str.trim_end_matches('`');
+
+        input_str.trim()
     };
 
     if roles_conf_str.is_empty() {
-        msg.channel_id
-            .say(&ctx.http, "Please provide a roles config")
-            .await?;
-
-        return Ok(());
+        return Err("Please provide a roles config".into());
     }
 
     let config_type_hint = if roles_conf_str.starts_with('{') {
@@ -51,7 +70,7 @@ async fn set(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         None
     };
 
-    let roles_conf = if let Some(hint) = config_type_hint {
+    if let Some(hint) = config_type_hint {
         let roles_conf = match hint {
             ConfigType::Json => serde_json::from_str::<GuildRoles>(&roles_conf_str)
                 .map(serde_json::to_value)
@@ -62,7 +81,7 @@ async fn set(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                         e,
                         error_pointed_str(roles_conf_str, e.line(), e.column())
                     )
-                }),
+                })?,
             ConfigType::Toml => toml::from_str::<GuildRoles>(&roles_conf_str)
                 .map(serde_json::to_value)
                 .map_err(|e| {
@@ -76,39 +95,87 @@ async fn set(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                     } else {
                         "Invalid toml configuration".to_string()
                     }
-                }),
+                })?,
         };
 
-        match roles_conf {
-            Err(e) => {
-                msg.channel_id
-                    .say(&ctx.http, e)
-                    .await?;
-
-                return Ok(());
-            },
-            Ok(c) => {
-                // serde_json::value::to_value shouldn't fail if it successfully
-                // the serialized before, but returning early instead of
-                // unwrapping just in case 
-                c?
-            },
-        }
+        roles_conf.map_err(|_| "Failed to serialize configuration".into())
     } else {
-        msg.channel_id
-            .say(&ctx.http, "Please double check your configuratio")
-            .await?;
-        
-        return Ok(());
-    };
+        Err("Invalid roles configuration".into())
+    }
+}
 
-    conf.role_config.replace(roles_conf);
+#[test]
+fn parses_roles_config_from_json() {
+    let json_config_base = r#"{
+        "bias": {
+            "limit": 3,
+            "roles": {
+                "First Role": {
+                    "primary_id": 123
+                },
+                "Second Role": {
+                    "primary_id": 456,
+                    "secondary_id": 789
+                }
+            }
+        },
+        "extra": {
+            "roles": {
+                "Third Role": {
+                    "primary_id": 1011
+                }
+            }
+        }
+    }"#;
 
-    conf.save(&ctx).await?;
+    let configs = vec![
+        format!("```{}```", &json_config_base),
+        format!("`{}`", &json_config_base),
+        format!("```json{}```", &json_config_base),
+        format!("```json\n{}```", &json_config_base),
+        format!("```json{}`", &json_config_base),
+        json_config_base.to_string(),
+    ];
 
-    msg.channel_id
-        .say(&ctx.http, "Updated the roles configuration")
-        .await?;
+    for config in configs {
+        let c = parse_config(&config);
 
-    Ok(())
+        assert!(c.is_ok());
+    }
+}
+
+#[test]
+fn parses_roles_config_from_toml() {
+    let toml_config_base = r#"
+    [bias]
+    limit = 3
+
+    [bias.roles]
+    [bias.roles."First Role"]
+    primary_id = 123
+
+    [bias.roles."Second Role"]
+    primary_id = 456
+    secondary_id = 789
+
+    [extra]
+    [extra.roles]
+    [extra.roles."Third Role"]
+    primary_id = 1011
+    "#;
+
+    let configs = vec![
+        format!("```{}```", &toml_config_base),
+        format!("`{}`", &toml_config_base),
+        format!("```toml{}```", &toml_config_base),
+        format!("```toml\n{}```", &toml_config_base),
+        format!("```toml{}`", &toml_config_base),
+        toml_config_base.to_string(),
+    ];
+
+    for config in configs {
+        let c = parse_config(&config);
+
+        assert!(c.is_ok());
+    }
 }
