@@ -28,6 +28,13 @@ struct RoleAction {
     pub role_name: String,
 }
 
+fn vec_to_code_string<S: AsRef<str>, I: IntoIterator<Item = S>>(v: I) -> String {
+    v.into_iter()
+        .map(|s| format!("`{}`", s.as_ref()))
+        .collect::<Vec<String>>()
+        .join(", ")
+}
+
 pub async fn message(ctx: &Context, msg: &Message) {
     match _message(ctx, msg).await {
         Ok(msg_string) => {
@@ -203,8 +210,6 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
         }
     }
 
-    let mut errors_str = String::new();
-
     tracing::info!(?role_actions, "role_actions");
 
     // Not the actual "dedupe" but more to check if a user is adding/removing a
@@ -245,6 +250,10 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
     let mut added_role_names = Vec::new();
     let mut removed_role_names = Vec::new();
 
+    let mut added_existing_roles = Vec::new();
+    let mut removed_missing_roles = Vec::new();
+    let mut over_limit_roles = HashMap::new();
+
     for action in role_actions_deduped {
         if let Some((role, group_name)) = role_name_map.get(action.role_name.trim()) {
             // Member's current roles in this group
@@ -257,22 +266,23 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
             if action.kind == RoleActionKind::Add {
                 // If member already has it
                 if cur_group_roles.contains(&role.primary_id) {
-                    let _ = writeln!(
-                        errors_str,
-                        "You already have the `{}` role",
-                        action.role_name
-                    );
+                    added_existing_roles.push(&action.role_name[..]);
 
                     continue;
                 }
 
                 // Check limits and if primary or secondary
                 if cur_group_roles.len() >= conf_group.limit as usize {
+                    let entry = over_limit_roles.entry(group_name.clone()).or_insert(Vec::new());
+                    entry.push(action.role_name.clone());
+
+                    /*
                     let _ = writeln!(
                         errors_str,
                         "Cannot add `{}`, role group {} has limit of {} roles",
                         action.role_name, group_name, conf_group.limit
                     );
+                    */
 
                     continue;
                 }
@@ -293,7 +303,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
                 // the user's role to update to, as this may include roles
                 // not in the role config
                 member_all_roles.insert(id_to_add);
-                added_role_names.push(&action.role_name);
+                added_role_names.push(&action.role_name[..]);
             } else {
                 let has_role = cur_group_roles.contains(&role.primary_id)
                     || role
@@ -301,7 +311,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
                         .map_or(false, |id| cur_group_roles.contains(&id));
 
                 if !has_role {
-                    let _ = writeln!(errors_str, "You don't have the `{}` role", action.role_name);
+                    removed_missing_roles.push(&action.role_name[..]);
 
                     continue;
                 }
@@ -321,15 +331,18 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
 
     let mut s = String::new();
 
+    if is_reset {
+        return Ok(Some("Your roles have been reset.".into()));
+    } else if added_role_names.is_empty() && removed_role_names.is_empty()
+    {
+        return Ok(Some("Couldn't modify your roles".into()));
+    }
+
     if !added_role_names.is_empty() {
         let _ = writeln!(
             s,
             "Added roles: {}",
-            added_role_names
-                .iter()
-                .map(ToString::to_string)
-                .collect::<Vec<String>>()
-                .join(", ")
+            vec_to_code_string(added_role_names)
         );
     }
 
@@ -337,28 +350,30 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
         let _ = writeln!(
             s,
             "Removed roles: {}",
-            removed_role_names
-                .iter()
-                .map(ToString::to_string)
-                .collect::<Vec<String>>()
-                .join(", ")
+            vec_to_code_string(removed_role_names)
         );
     }
 
-    if is_reset {
-        s = "Your roles have been reset.".to_owned();
-    } else if added_role_names.is_empty() && removed_role_names.is_empty() && errors_str.is_empty()
-    {
-        s = "Couldn't modify your roles\n".to_owned();
-    }
-
-    if !errors_str.is_empty() {
+    // Check if there are over limit roles
+    if !over_limit_roles.is_empty() {
         let _ = write!(
             s,
-            "There were errors while updating your roles:\n{}",
-            errors_str
+            "Cannot add roles that exceed role group limits: ",
         );
     }
+
+    for (group_name, role_names) in &over_limit_roles {
+        if let Some(group) = &role_config.groups.get(&group_name[..]) {
+            let _ = write!(
+                s,
+                "{} ({} group has a limit of {} roles)",
+                vec_to_code_string(role_names),
+                group_name,
+                group.limit
+            );
+        }
+    }
+    // End over limit roles
 
     if let Err(e) = guild
         .edit_member(&ctx.http, msg.author.id, |m| {
