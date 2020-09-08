@@ -3,10 +3,10 @@ services:
     postgres:
         image: postgres:12
         restart: unless-stopped
-        environment:
-            POSTGRES_PASSWORD: Hunter2
+        env_file:
+            - .env.development
     sushii-2:
         image: docker.pkg.github.com/drklee3/sushii-2/sushii-2:master
         restart: unless-stopped
         volumes:
-            - /uh/somewhere/sushii:/
+            - ./sushii:/config
