@@ -6,4 +6,4 @@ docker-compose.yml
 **/.git
 **/.github
 **/.gitignore
-.env
+**/.env*
