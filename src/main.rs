@@ -93,6 +93,7 @@ async fn main() -> Result<()> {
         )
         .framework(framework)
         .event_handler(handlers::Handler)
+        .raw_event_handler(handlers::RawHandler)
         .await
         .expect("Err creating client");
 
@@ -102,14 +103,14 @@ async fn main() -> Result<()> {
         data.insert::<ShardManagerContainer>(client.shard_manager.clone());
         data.insert::<CacheAndHttpContainer>(client.cache_and_http.clone());
 
-        data.insert::<SushiiConfig>(sushii_conf.clone());
+        data.insert::<SushiiConfig>(Arc::clone(&sushii_conf));
         data.insert::<SushiiCache>(SushiiCache::default());
         data.insert::<DbPool>(pool);
-        data.insert::<Metrics>(metrics.clone());
+        data.insert::<Metrics>(Arc::clone(&metrics));
     }
 
     // Start hyper metrics server
-    tokio::spawn(metrics_server::start(sushii_conf.clone()));
+    tokio::spawn(metrics_server::start(Arc::clone(&sushii_conf), Arc::clone(&metrics)));
 
     if let Err(why) = client.start().await {
         tracing::error!("Client error: {:?}", why);

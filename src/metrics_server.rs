@@ -6,13 +6,13 @@ use hyper::{
 use prometheus::{Encoder, TextEncoder};
 use std::sync::Arc;
 
-use crate::model::SushiiConfig;
+use crate::model::{SushiiConfig, Metrics};
 
-async fn serve_req(_req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
+async fn serve_req(_req: Request<Body>, metrics: Arc<Metrics>) -> Result<Response<Body>, hyper::Error> {
     let encoder = TextEncoder::new();
 
     let mut buffer = vec![];
-    let metric_families = prometheus::gather();
+    let metric_families = metrics.registry.gather();
     encoder.encode(&metric_families, &mut buffer).unwrap();
 
     let response = Response::builder()
@@ -24,12 +24,16 @@ async fn serve_req(_req: Request<Body>) -> Result<Response<Body>, hyper::Error> 
     Ok(response)
 }
 
-pub async fn start(conf: Arc<SushiiConfig>) {
+pub async fn start(conf: Arc<SushiiConfig>, metrics: Arc<Metrics>) {
     let addr = ([127, 0, 0, 1], conf.metrics_port).into();
     tracing::info!("Metrics server listening on http://{}", addr);
 
-    let serve_future = Server::bind(&addr).serve(make_service_fn(|_| async {
-        Ok::<_, hyper::Error>(service_fn(serve_req))
+    let serve_future = Server::bind(&addr).serve(make_service_fn(move |_| {
+        let metrics = metrics.clone();
+
+        async move {
+            Ok::<_, hyper::Error>(service_fn(move |req| serve_req(req, metrics.clone())))
+        }
     }));
 
     if let Err(err) = serve_future.await {

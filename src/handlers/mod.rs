@@ -1,7 +1,10 @@
 use serenity::{async_trait, model::prelude::*, prelude::*};
 
 pub mod mod_log;
+pub mod raw_event_handler;
 pub mod roles;
+
+pub use raw_event_handler::RawHandler;
 
 pub struct Handler;
 

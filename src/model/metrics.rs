@@ -1,7 +1,8 @@
 use chrono::naive::NaiveDateTime;
 use chrono::offset::Utc;
-use prometheus::{IntCounterVec, Opts};
+use prometheus::{IntCounterVec, Opts, Registry};
 use prometheus_static_metric::make_static_metric;
+use serenity::{async_trait, model::prelude::*, prelude::*};
 
 make_static_metric! {
     pub label_enum UserType {
@@ -58,7 +59,14 @@ make_static_metric! {
     }
 }
 
+#[async_trait]
+pub trait MetricsAsync {
+    // Need our own trait since serenity's RawEventHandler doesn't use references
+    async fn raw_event(&self, ctx: &Context, event: &Event);
+}
+
 pub struct Metrics {
+    pub registry: Registry,
     pub start_time: NaiveDateTime,
     pub messages: MessageCounterVec,
     pub events: EventCounterVec,
@@ -74,10 +82,36 @@ impl Metrics {
             IntCounterVec::new(Opts::new("events", "Gateway events"), &["event_type"]).unwrap();
         let events_static_vec = EventCounterVec::from(&events_vec);
 
+        let registry = Registry::new_custom(Some("sushii".into()), None).unwrap();
+        registry.register(Box::new(messages_vec)).unwrap();
+        registry.register(Box::new(events_vec)).unwrap();
+
         Self {
+            registry,
             start_time: Utc::now().naive_local(),
             messages: messages_static_vec,
             events: events_static_vec,
+        }
+    }
+}
+
+#[async_trait]
+impl MetricsAsync for Metrics {
+    async fn raw_event(&self, ctx: &Context, event: &Event) {
+        match event {
+            Event::MessageCreate(MessageCreateEvent { message, .. }) => {
+                // Regular user
+                if !message.author.bot {
+                    self.messages.user.inc();
+                // Sushii messages
+                } else if message.is_own(&ctx.cache).await {
+                    self.messages.own.inc();
+                // Other bot messages
+                } else {
+                    self.messages.other_bot.inc();
+                }
+            }
+            _ => {}
         }
     }
 }
