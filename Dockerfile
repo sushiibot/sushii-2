@@ -29,4 +29,5 @@ RUN cargo build --release
 FROM debian:buster-slim
 COPY --from=build /sources/target/release/sushii-2 /config/sushii-2
 
+EXPOSE 9888
 ENTRYPOINT ["/config/sushii-2"]
