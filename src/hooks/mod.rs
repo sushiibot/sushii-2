@@ -38,9 +38,12 @@ pub async fn dispatch_error(ctx: &Context, msg: &Message, error: DispatchError) 
             let s = format!("Max arguments allowed is {}, but got {}.", max, given);
 
             let _ = msg.channel_id.say(&ctx, &s).await;
-        },
+        }
         DispatchError::LackingPermissions(permissions) => {
-            let s = format!("You do not have permissions to use this command, requires: `{}`", permissions);
+            let s = format!(
+                "You do not have permissions to use this command, requires: `{}`",
+                permissions
+            );
 
             let _ = msg.channel_id.say(&ctx, &s).await;
         }
@@ -53,6 +56,9 @@ pub async fn after(ctx: &Context, msg: &Message, _: &str, error: Result<(), Comm
     // Errors here are only from sushii errors, not user input errors
     if let Err(e) = error {
         tracing::error!(?msg, %e, "Error running command");
-        let _ = msg.channel_id.say(&ctx, "Something went wrong while running this command :(").await;
+        let _ = msg
+            .channel_id
+            .say(&ctx, "Something went wrong while running this command :(")
+            .await;
     }
 }

@@ -6,17 +6,8 @@ use crate::keys::*;
 use crate::model::sql::guild::*;
 
 #[command]
-async fn settings(ctx: &Context, msg: &Message) -> CommandResult {
-    let conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
-
-    msg.channel_id
-        .say(&ctx.http, format!("Guild settings:\n`{:#?}`", conf))
-        .await?;
-
-    Ok(())
-}
-
-#[command]
+#[only_in("guild")]
+#[required_permissions("MANAGE_GUILD")]
 async fn prefix(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let new_prefix = args.rest();
     let mut conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;

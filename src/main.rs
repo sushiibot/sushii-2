@@ -76,6 +76,7 @@ async fn main() -> Result<()> {
         .help(&commands::help::HELP_CMD)
         .group(&commands::META_GROUP)
         .group(&commands::moderation::MODERATION_GROUP)
+        .group(&commands::settings::SETTINGS_GROUP)
         .group(&commands::roles::ROLES_GROUP)
         .group(&commands::OWNER_GROUP);
 

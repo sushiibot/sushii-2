@@ -4,15 +4,16 @@ pub mod help;
 pub mod meta;
 pub mod moderation;
 pub mod owner;
+pub mod prefix;
 pub mod roles;
+pub mod settings;
 
-use self::meta::*;
-use self::owner::*;
+use self::{meta::*, owner::*, prefix::*};
 
 #[group]
 #[commands(quit)]
 pub struct Owner;
 
 #[group]
-#[commands(ping)]
+#[commands(prefix, ping)]
 pub struct Meta;

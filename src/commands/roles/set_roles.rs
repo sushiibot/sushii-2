@@ -1,7 +1,7 @@
+use serde_json::value::Value;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use serde_json::value::Value;
 
 use crate::model::sql::*;
 
@@ -30,7 +30,7 @@ async fn set(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             let _ = msg.channel_id.say(&ctx.http, &e).await?;
 
             return Ok(());
-        },
+        }
         Ok(c) => c,
     };
 
