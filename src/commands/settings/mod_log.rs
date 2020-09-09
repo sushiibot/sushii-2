@@ -24,13 +24,13 @@ async fn modlog(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     };
 
-    conf.role_channel.replace(channel_id as i64);
+    conf.log_mod.replace(channel_id as i64);
     conf.save(&ctx).await?;
 
     msg.channel_id
         .say(
             &ctx.http,
-            format!("Updated roles channel to <#{}>", channel_id),
+            format!("Updated mod log channel to <#{}>", channel_id),
         )
         .await?;
 
