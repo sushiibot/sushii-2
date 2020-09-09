@@ -8,26 +8,24 @@ wip... again.
 
 ## Features
 
-Slimmed down feature set of original sushii-bot.
+Slimmed down feature set of original sushii-bot with a focus on moderation tools
 
 * [ ] moderation tools
-    * [ ] ban / unban
-    * [ ] kick
+    * [x] ban / unban
+    * [x] kick
     * [x] prune
-    * [ ] mute / unmute
+    * [x] mute / unmute
     * [x] cases
       * [x] reason
       * [x] history
-    * [ ] roles
+    * [x] roles
+      * [x] json support
+      * [x] toml support
+    * [ ] settings
 * user
     * avatar
     * userinfo
     * notifications
-    * xp, ranking, activity, leaderboard
-    * rank
-    * rep
-    * fishy
-* last fm
 * tags
     * add
     * delete
