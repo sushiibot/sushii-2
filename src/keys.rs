@@ -13,7 +13,7 @@ impl TypeMapKey for SushiiCache {
 }
 
 impl TypeMapKey for SushiiConfig {
-    type Value = SushiiConfig;
+    type Value = Arc<SushiiConfig>;
 }
 
 impl TypeMapKey for Metrics {

@@ -33,7 +33,7 @@ pub async fn guild_ban_handler(
     if entry.reason.is_none() {
         let prefix = match guild_conf.prefix {
             Some(p) => p,
-            None => SushiiConfig::get(&ctx).await.default_prefix,
+            None => SushiiConfig::get(&ctx).await.default_prefix.clone(),
         };
 
         entry.reason.replace(

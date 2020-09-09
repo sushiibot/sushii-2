@@ -6,7 +6,7 @@ use hyper::{
 use prometheus::{Encoder, TextEncoder};
 use std::sync::Arc;
 
-use crate::model::Metrics;
+use crate::model::SushiiConfig;
 
 async fn serve_req(_req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
     let encoder = TextEncoder::new();
@@ -24,8 +24,8 @@ async fn serve_req(_req: Request<Body>) -> Result<Response<Body>, hyper::Error> 
     Ok(response)
 }
 
-pub async fn start(metrics: Arc<Metrics>) {
-    let addr = ([127, 0, 0, 1], 9888).into();
+pub async fn start(conf: Arc<SushiiConfig>) {
+    let addr = ([127, 0, 0, 1], conf.metrics_port).into();
     tracing::info!("Metrics server listening on http://{}", addr);
 
     let serve_future = Server::bind(&addr).serve(make_service_fn(|_| async {

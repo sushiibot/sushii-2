@@ -1,11 +1,12 @@
 use serenity::async_trait;
 use serenity::prelude::*;
+use std::sync::Arc;
 
 use crate::error::Result;
 
 #[async_trait]
 pub trait SushiiConfigDb {
-    async fn get(ctx: &Context) -> SushiiConfig;
+    async fn get(ctx: &Context) -> Arc<SushiiConfig>;
 }
 
 #[derive(Debug, Clone)]
@@ -16,6 +17,7 @@ pub struct SushiiConfig {
     pub default_prefix: String,
     pub blocked_users: Vec<u64>,
     pub lastfm_key: String,
+    pub metrics_port: u16,
 }
 
 fn parse_id_array(s: &str) -> Vec<u64> {
@@ -41,13 +43,17 @@ impl SushiiConfig {
                 &dotenv::var("BLOCKED_USERS").unwrap_or_else(|_| "".into()),
             ),
             lastfm_key: dotenv::var("LASTFM_KEY").unwrap_or_else(|_| "".into()),
+            metrics_port: dotenv::var("METRICS_PORT")
+                .ok()
+                .and_then(|x| x.parse().ok())
+                .unwrap_or(9888),
         })
     }
 }
 
 #[async_trait]
 impl SushiiConfigDb for SushiiConfig {
-    async fn get(ctx: &Context) -> Self {
+    async fn get(ctx: &Context) -> Arc<Self> {
         let data = ctx.data.read().await;
 
         data.get::<SushiiConfig>()

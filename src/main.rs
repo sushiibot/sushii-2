@@ -10,10 +10,10 @@ mod error;
 mod handlers;
 mod hooks;
 mod keys;
+mod metrics_server;
 mod model;
 mod prelude;
 mod utils;
-mod metrics_server;
 
 use crate::error::Result;
 use crate::keys::{CacheAndHttpContainer, DbPool, ShardManagerContainer};
@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
     // install global subscriber configured based on RUST_LOG envvar.
     tracing_subscriber::fmt().init();
 
-    let sushii_conf = SushiiConfig::new_from_env().expect("failed to make config");
+    let sushii_conf = Arc::new(SushiiConfig::new_from_env().expect("failed to make config"));
 
     let pool = PgPoolOptions::new()
         .max_connections(5)
@@ -102,14 +102,14 @@ async fn main() -> Result<()> {
         data.insert::<ShardManagerContainer>(client.shard_manager.clone());
         data.insert::<CacheAndHttpContainer>(client.cache_and_http.clone());
 
-        data.insert::<SushiiConfig>(sushii_conf);
+        data.insert::<SushiiConfig>(sushii_conf.clone());
         data.insert::<SushiiCache>(SushiiCache::default());
         data.insert::<DbPool>(pool);
         data.insert::<Metrics>(metrics.clone());
     }
 
     // Start hyper metrics server
-    tokio::spawn(metrics_server::start(metrics.clone()));
+    tokio::spawn(metrics_server::start(sushii_conf.clone()));
 
     if let Err(why) = client.start().await {
         tracing::error!("Client error: {:?}", why);

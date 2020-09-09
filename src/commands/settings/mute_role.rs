@@ -23,32 +23,26 @@ async fn muterole(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     let role_id = parse_role(role_str)
         .or_else(|| role_str.parse::<u64>().ok())
-        .or_else(|| guild.roles
-            .values()
-            .find(|&x| x.name == role_str)
-            .map(|x| x.id.0)
-        );
+        .or_else(|| {
+            guild
+                .roles
+                .values()
+                .find(|&x| x.name == role_str)
+                .map(|x| x.id.0)
+        });
 
     if let Some(id) = role_id {
         conf.mute_role.replace(id as i64);
         conf.save(&ctx).await?;
 
         msg.channel_id
-            .say(
-                &ctx.http,
-                format!("Updated mute role to ID {}", id),
-            )
+            .say(&ctx.http, format!("Updated mute role to ID {}", id))
             .await?;
     } else {
-        
         msg.channel_id
-            .say(
-                &ctx.http,
-                "Invalid role, give a role name, mention, or ID",
-            )
+            .say(&ctx.http, "Invalid role, give a role name, mention, or ID")
             .await?;
     }
-
 
     Ok(())
 }
