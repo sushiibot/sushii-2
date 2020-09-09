@@ -13,6 +13,7 @@ mod keys;
 mod model;
 mod prelude;
 mod utils;
+mod metrics_server;
 
 use crate::error::Result;
 use crate::keys::{CacheAndHttpContainer, DbPool, ShardManagerContainer};
@@ -33,7 +34,7 @@ async fn main() -> Result<()> {
         .connect(&sushii_conf.database_url)
         .await?;
 
-    let metrics = Metrics::new();
+    let metrics = Arc::new(Metrics::new());
 
     let http = Http::new_with_token(&sushii_conf.discord_token);
 
@@ -104,8 +105,11 @@ async fn main() -> Result<()> {
         data.insert::<SushiiConfig>(sushii_conf);
         data.insert::<SushiiCache>(SushiiCache::default());
         data.insert::<DbPool>(pool);
-        data.insert::<Metrics>(Arc::new(metrics));
+        data.insert::<Metrics>(metrics.clone());
     }
+
+    // Start hyper metrics server
+    tokio::spawn(metrics_server::start(metrics.clone()));
 
     if let Err(why) = client.start().await {
         tracing::error!("Client error: {:?}", why);

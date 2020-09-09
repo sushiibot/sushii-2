@@ -1582,6 +1582,7 @@ dependencies = [
  "dashmap",
  "dotenv",
  "futures",
+ "hyper",
  "lazy_static",
  "num_cpus",
  "prometheus",
