@@ -100,6 +100,8 @@ impl MetricsAsync for Metrics {
     async fn raw_event(&self, ctx: &Context, event: &Event) {
         match event {
             Event::MessageCreate(MessageCreateEvent { message, .. }) => {
+                self.events.message_create.inc();
+
                 // Regular user
                 if !message.author.bot {
                     self.messages.user.inc();
@@ -110,8 +112,45 @@ impl MetricsAsync for Metrics {
                 } else {
                     self.messages.other_bot.inc();
                 }
+            },
+            Event::ChannelCreate(_) => self.events.channel_create.inc(),
+            Event::ChannelDelete(_) => self.events.channel_delete.inc(),
+            Event::ChannelPinsUpdate(_) => self.events.channel_pins_update.inc(),
+            Event::ChannelUpdate(_) => self.events.channel_update.inc(),
+            Event::GuildBanAdd(_) => self.events.guild_ban_add.inc(),
+            Event::GuildBanRemove(_) => self.events.guild_ban_remove.inc(),
+            Event::GuildCreate(_) => self.events.guild_create.inc(),
+            Event::GuildDelete(_) => self.events.guild_delete.inc(),
+            Event::GuildEmojisUpdate(_) => self.events.guild_emojis_update.inc(),
+            Event::GuildIntegrationsUpdate(_) => self.events.guild_integrations_update.inc(),
+            Event::GuildMemberAdd(_) => self.events.guild_member_add.inc(),
+            Event::GuildMemberRemove(_) => self.events.guild_member_remove.inc(),
+            Event::GuildMemberUpdate(_) => self.events.guild_member_update.inc(),
+            Event::GuildMembersChunk(_) => self.events.guild_members_chunk.inc(),
+            Event::GuildRoleCreate(_) => self.events.guild_role_create.inc(),
+            Event::GuildRoleDelete(_) => self.events.guild_role_delete.inc(),
+            Event::GuildRoleUpdate(_) => self.events.guild_role_update.inc(),
+            Event::GuildUnavailable(_) => self.events.guild_unavailable.inc(),
+            Event::GuildUpdate(_) => self.events.guild_update.inc(),
+            Event::MessageDelete(_) => self.events.message_delete.inc(),
+            Event::MessageDeleteBulk(_) => self.events.message_delete_bulk.inc(),
+            Event::MessageUpdate(_) => self.events.message_update.inc(),
+            Event::PresenceUpdate(_) => self.events.presence_update.inc(),
+            Event::PresencesReplace(_) => self.events.presences_replace.inc(),
+            Event::ReactionAdd(_) => self.events.reaction_add.inc(),
+            Event::ReactionRemove(_) => self.events.reaction_remove.inc(),
+            Event::ReactionRemoveAll(_) => self.events.reaction_remove_all.inc(),
+            Event::Ready(_) => self.events.ready.inc(),
+            Event::Resumed(_) => self.events.resumed.inc(),
+            Event::TypingStart(_) => self.events.typing_start.inc(),
+            Event::UserUpdate(_) => self.events.user_update.inc(),
+            Event::VoiceStateUpdate(_) => self.events.voice_state_update.inc(),
+            Event::VoiceServerUpdate(_) => self.events.voice_server_update.inc(),
+            Event::WebhookUpdate(_) => self.events.webhook_update.inc(),
+            Event::Unknown(_) => self.events.unknown.inc(),
+            _ => {
+                tracing::warn!("Unhandled metrics event: {:?}", event);
             }
-            _ => {}
         }
     }
 }
