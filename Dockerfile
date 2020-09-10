@@ -27,7 +27,9 @@ RUN cargo build --release
 
 ## Final base image with only the picatch binary
 FROM debian:buster-slim
+
 WORKDIR /config
+RUN apt-get update && apt-get install -y libssl-dev && rm -rf /var/lib/apt/lists/*
 COPY --from=build /usr/src/sushii/target/release/sushii-2 /usr/local/bin/sushii-2
 
 EXPOSE 9888
