@@ -1,6 +1,7 @@
 use serenity::async_trait;
 use serenity::prelude::*;
 use std::sync::Arc;
+use std::env;
 
 use crate::error::Result;
 
@@ -31,19 +32,19 @@ fn parse_id_array(s: &str) -> Vec<u64> {
 impl SushiiConfig {
     pub fn new_from_env() -> Result<Self> {
         if let Err(e) = dotenv::dotenv() {
-            tracing::warn!("Failed to read .env file: {}", e);
+            tracing::warn!("Failed to read .env file ({}), checking if environment variables already exist", e);
         }
 
         Ok(SushiiConfig {
-            discord_token: dotenv::var("DISCORD_TOKEN")?,
-            owner_ids: parse_id_array(&dotenv::var("OWNER_IDS").unwrap_or_else(|_| "".into())),
-            database_url: dotenv::var("DATABASE_URL")?,
-            default_prefix: dotenv::var("DEFAULT_PREFIX")?,
+            discord_token: env::var("DISCORD_TOKEN")?,
+            owner_ids: parse_id_array(&env::var("OWNER_IDS").unwrap_or_else(|_| "".into())),
+            database_url: env::var("DATABASE_URL")?,
+            default_prefix: env::var("DEFAULT_PREFIX")?,
             blocked_users: parse_id_array(
-                &dotenv::var("BLOCKED_USERS").unwrap_or_else(|_| "".into()),
+                &env::var("BLOCKED_USERS").unwrap_or_else(|_| "".into()),
             ),
-            lastfm_key: dotenv::var("LASTFM_KEY").unwrap_or_else(|_| "".into()),
-            metrics_port: dotenv::var("METRICS_PORT")
+            lastfm_key: env::var("LASTFM_KEY").unwrap_or_else(|_| "".into()),
+            metrics_port: env::var("METRICS_PORT")
                 .ok()
                 .and_then(|x| x.parse().ok())
                 .unwrap_or(9888),

@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
     // install global subscriber configured based on RUST_LOG envvar.
     tracing_subscriber::fmt().init();
 
-    let sushii_conf = Arc::new(SushiiConfig::new_from_env().expect("failed to make config"));
+    let sushii_conf = Arc::new(SushiiConfig::new_from_env()?);
 
     let pool = PgPoolOptions::new()
         .max_connections(5)
