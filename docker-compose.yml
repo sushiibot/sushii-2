@@ -2,6 +2,7 @@ version: "3"
 services:
     grafana:
         image: grafana/grafana:7.1.5
+        container_name: grafana
         ports:
             - "3000:3000"
         volumes:
@@ -10,6 +11,7 @@ services:
             - web
     prometheus:
         image: prom/prometheus:v2.20.1
+        container_name: prometheus
         ports:
             - "9090:9090"
         volumes:
@@ -19,6 +21,7 @@ services:
             - web
     postgres:
         image: postgres:12
+        container_name: postgres
         restart: unless-stopped
         env_file:
             - .env
@@ -27,12 +30,22 @@ services:
         networks:
             - sushii_net
     sushii:
-        image: docker.pkg.github.com/drklee3/sushii-2/sushii-2:0.1.2
+        image: docker.pkg.github.com/drklee3/sushii-2/sushii-2:latest
+        container_name: sushii
         restart: unless-stopped
+        depends_on:
+            - postgres
+        expose:
+            - "9888"
+        logging:
+            driver: json-file
+            options:
+                max-size: "10m"
+                max-file: "3"
+                mode: non-blocking
+                max-buffer-size: 4m
         env_file:
             - .env
-        volumes:
-            - ~/docker/sushii:/config
         networks:
             - sushii_net
 networks:
