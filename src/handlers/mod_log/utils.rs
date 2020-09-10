@@ -114,7 +114,7 @@ async fn send_mod_log_entry(
                 e.timestamp(
                     mod_log_entry
                         .action_time
-                        .format("%Y-%m-%dT%H:%M:%S%")
+                        .format("%Y-%m-%dT%H:%M:%S")
                         .to_string(),
                 );
 
