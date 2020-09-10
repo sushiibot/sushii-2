@@ -27,7 +27,8 @@ RUN cargo build --release
 
 ## Final base image with only the picatch binary
 FROM debian:buster-slim
-COPY --from=build /sources/target/release/sushii-2 /config/sushii-2
+WORKDIR /config
+COPY --from=build /sources/target/release/sushii-2 ./sushii-2
 
 EXPOSE 9888
 ENTRYPOINT ["/config/sushii-2"]
