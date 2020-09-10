@@ -27,8 +27,7 @@ services:
         networks:
             - sushii_net
     sushii:
-        # image: docker.pkg.github.com/drklee3/sushii-2/sushii-2:master
-        build: .
+        image: docker.pkg.github.com/drklee3/sushii-2/sushii-2:0.1.1
         restart: unless-stopped
         env_file:
             - .env
