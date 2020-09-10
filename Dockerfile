@@ -2,8 +2,8 @@
 FROM rust:1.45 as build
 
 # create a new empty shell project
-RUN USER=root cargo new --bin sources
-WORKDIR /sources
+WORKDIR /usr/src/sushii
+RUN USER=root cargo init --bin
 
 # copy over manifests
 COPY ./Cargo.lock ./Cargo.toml ./
@@ -28,7 +28,7 @@ RUN cargo build --release
 ## Final base image with only the picatch binary
 FROM debian:buster-slim
 WORKDIR /config
-COPY --from=build /sources/target/release/sushii-2 .
+COPY --from=build /usr/src/sushii/target/release/sushii-2 /usr/local/bin/sushii-2
 
 EXPOSE 9888
-ENTRYPOINT ["/config/sushii-2"]
+ENTRYPOINT ["sushii-2"]
