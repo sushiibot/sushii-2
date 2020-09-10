@@ -1,12 +1,43 @@
 version: "3"
 services:
+    grafana:
+        image: grafana/grafana:7.1.5
+        ports:
+            - "3000:3000"
+        volumes:
+            - ./docker/grafana:/var/lib/grafana
+        networks:
+            - web
+    prometheus:
+        image: prom/prometheus:v2.20.1
+        ports:
+            - "9090:9090"
+        volumes:
+            - ./docker/prometheus:/etc/prometheus
+        networks:
+            - sushii_net
+            - web
     postgres:
         image: postgres:12
         restart: unless-stopped
         env_file:
-            - .env.development
-    sushii-2:
-        image: docker.pkg.github.com/drklee3/sushii-2/sushii-2:master
-        restart: unless-stopped
+            - .env
         volumes:
-            - ./sushii:/config
+            - ./docker/postgres:/var/lib/postgresql/data
+        networks:
+            - sushii_net
+    sushii:
+        # image: docker.pkg.github.com/drklee3/sushii-2/sushii-2:master
+        build: .
+        restart: unless-stopped
+        env_file:
+            - .env
+        volumes:
+            - ./docker/sushii:/config
+        networks:
+            - sushii_net
+networks:
+    web:
+        external: false
+    sushii_net:
+        external: false
