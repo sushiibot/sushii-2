@@ -91,7 +91,7 @@ async fn send_mod_log_entry(
 
                 e.field(
                     "User",
-                    format!("{}\n{}\n{}", user.mention(), user.tag(), user.id.0),
+                    format!("{}\n`{}`\n`{}`", user.mention(), user.tag(), user.id.0),
                     false,
                 );
                 e.field("Action", &mod_log_entry.action, false);
@@ -117,6 +117,8 @@ async fn send_mod_log_entry(
                         .format("%Y-%m-%dT%H:%M:%S")
                         .to_string(),
                 );
+
+                e.color(mod_log_entry.color());
 
                 e
             })

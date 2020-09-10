@@ -73,6 +73,17 @@ impl ModLogEntry {
             msg_id: None,
         }
     }
+
+    pub fn color(&self) -> u32 {
+        match self.action.as_ref() {
+            "ban" => 0xe74c3c,
+            "unban" => 0x2ecc71,
+            "mute" => 0xe67e22,
+            "unmute" => 0x1abc9c,
+            "kick" => 0xd35400,
+            _ => 0xe67e22,
+        }
+    }
 }
 
 #[async_trait]
