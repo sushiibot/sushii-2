@@ -2,6 +2,7 @@ use serenity::async_trait;
 use serenity::prelude::*;
 use std::sync::Arc;
 use std::env;
+use std::net::IpAddr;
 
 use crate::error::Result;
 
@@ -18,6 +19,7 @@ pub struct SushiiConfig {
     pub default_prefix: String,
     pub blocked_users: Vec<u64>,
     pub lastfm_key: String,
+    pub metrics_interface: IpAddr,
     pub metrics_port: u16,
 }
 
@@ -44,6 +46,11 @@ impl SushiiConfig {
                 &env::var("BLOCKED_USERS").unwrap_or_else(|_| "".into()),
             ),
             lastfm_key: env::var("LASTFM_KEY").unwrap_or_else(|_| "".into()),
+            // Default expose on 0.0.0.0 to let other Docker containers access
+            metrics_interface: env::var("METRICS_INTERFACE")
+                .ok()
+                .and_then(|x| x.parse().ok())
+                .unwrap_or_else(|| "0.0.0.0".parse().unwrap()),
             metrics_port: env::var("METRICS_PORT")
                 .ok()
                 .and_then(|x| x.parse().ok())

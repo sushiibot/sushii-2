@@ -25,7 +25,7 @@ async fn serve_req(_req: Request<Body>, metrics: Arc<Metrics>) -> Result<Respons
 }
 
 pub async fn start(conf: Arc<SushiiConfig>, metrics: Arc<Metrics>) {
-    let addr = ([127, 0, 0, 1], conf.metrics_port).into();
+    let addr = (conf.metrics_interface, conf.metrics_port).into();
     tracing::info!("Metrics server listening on http://{}", addr);
 
     let serve_future = Server::bind(&addr).serve(make_service_fn(move |_| {
