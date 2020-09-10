@@ -5,7 +5,7 @@ services:
         ports:
             - "3000:3000"
         volumes:
-            - ./docker/grafana:/var/lib/grafana
+            - ~/docker/grafana:/var/lib/grafana
         networks:
             - web
     prometheus:
@@ -13,7 +13,7 @@ services:
         ports:
             - "9090:9090"
         volumes:
-            - ./docker/prometheus:/etc/prometheus
+            - ~/docker/prometheus:/etc/prometheus
         networks:
             - sushii_net
             - web
@@ -23,7 +23,7 @@ services:
         env_file:
             - .env
         volumes:
-            - ./docker/postgres:/var/lib/postgresql/data
+            - ~/docker/postgres:/var/lib/postgresql/data
         networks:
             - sushii_net
     sushii:
@@ -33,7 +33,7 @@ services:
         env_file:
             - .env
         volumes:
-            - ./docker/sushii:/config
+            - ~/docker/sushii:/config
         networks:
             - sushii_net
 networks:
