@@ -52,6 +52,16 @@ impl ModActionType {
         }
         .into()
     }
+
+    pub fn to_emoji(&self) -> String {
+        match self {
+            ModActionType::Ban => ":hammer:",
+            ModActionType::Unban => ":hammer:",
+            ModActionType::Kick => ":boot:",
+            ModActionType::Mute => ":mute:",
+            ModActionType::Unmute => ":speaker:",
+        }.into()
+    }
 }
 
 #[async_trait]
@@ -221,7 +231,7 @@ impl ModActionExecutorDb for ModActionExecutor {
                     }
                 }
                 Ok(_) => {
-                    let _ = writeln!(s, ":hammer: {} {}.", &user_tag_id, &action_past_str);
+                    let _ = writeln!(s, "{} {} {}.", self.action.to_emoji(), &user_tag_id, &action_past_str);
                     // add the action to hashset to prevent dupe actions
                     self.exclude_users.insert(id);
                 }
