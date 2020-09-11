@@ -112,7 +112,7 @@ impl MetricsAsync for Metrics {
                 } else {
                     self.messages.other_bot.inc();
                 }
-            },
+            }
             Event::ChannelCreate(_) => self.events.channel_create.inc(),
             Event::ChannelDelete(_) => self.events.channel_delete.inc(),
             Event::ChannelPinsUpdate(_) => self.events.channel_pins_update.inc(),

@@ -60,7 +60,8 @@ impl ModActionType {
             ModActionType::Kick => ":boot:",
             ModActionType::Mute => ":mute:",
             ModActionType::Unmute => ":speaker:",
-        }.into()
+        }
+        .into()
     }
 }
 
@@ -231,7 +232,13 @@ impl ModActionExecutorDb for ModActionExecutor {
                     }
                 }
                 Ok(_) => {
-                    let _ = writeln!(s, "{} {} {}.", self.action.to_emoji(), &user_tag_id, &action_past_str);
+                    let _ = writeln!(
+                        s,
+                        "{} {} {}.",
+                        self.action.to_emoji(),
+                        &user_tag_id,
+                        &action_past_str
+                    );
                     // add the action to hashset to prevent dupe actions
                     self.exclude_users.insert(id);
                 }

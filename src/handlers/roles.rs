@@ -44,11 +44,31 @@ fn vec_to_code_string<S: AsRef<str>, I: IntoIterator<Item = S>>(v: I) -> String 
 }
 
 pub async fn message(ctx: &Context, msg: &Message) {
+    let guild_id = match msg.guild_id {
+        Some(id) => id,
+        None => return,
+    };
+
+    // Return if an error happens or if not in role channel
+    let role_channel = match GuildConfig::from_id(&ctx, &guild_id)
+        .await
+        .ok()
+        .flatten()
+        .and_then(|c| c.role_channel)
+    {
+        Some(c) => c,
+        None => return,
+    };
+
+    if msg.channel_id.0 != role_channel as u64 {
+        return;
+    }
+
     match _message(ctx, msg).await {
         Ok(msg_string) => {
             let msg_string = match msg_string {
                 Some(s) => s,
-                None => return,
+                None => return, // Not in role channel or failed some other pre-check
             };
 
             let sent_msg = msg.channel_id.say(&ctx.http, &msg_string).await;
@@ -83,6 +103,8 @@ pub async fn message(ctx: &Context, msg: &Message) {
             }
         }
         Err(e) => {
+            // This should only run if message sent in the role channel,
+            // otherwise sushii will delete any messages that have an error
             delay_for(Duration::from_secs(5)).await;
             tracing::error!(?msg, "Failed to handle roles message: {}", e);
 
@@ -121,6 +143,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
         None => return Ok(None),
     };
 
+    // Kind of redundant since already checked if in role channel before but oh well
     let role_channel = match guild_conf.role_channel {
         Some(c) => c,
         None => return Ok(None),

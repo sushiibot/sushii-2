@@ -1,8 +1,8 @@
 use serenity::async_trait;
 use serenity::prelude::*;
-use std::sync::Arc;
 use std::env;
 use std::net::IpAddr;
+use std::sync::Arc;
 
 use crate::error::Result;
 
@@ -34,7 +34,10 @@ fn parse_id_array(s: &str) -> Vec<u64> {
 impl SushiiConfig {
     pub fn new_from_env() -> Result<Self> {
         if let Err(e) = dotenv::dotenv() {
-            tracing::warn!("Failed to read .env file ({}), checking if environment variables already exist", e);
+            tracing::warn!(
+                "Failed to read .env file ({}), checking if environment variables already exist",
+                e
+            );
         }
 
         Ok(SushiiConfig {
@@ -42,9 +45,7 @@ impl SushiiConfig {
             owner_ids: parse_id_array(&env::var("OWNER_IDS").unwrap_or_else(|_| "".into())),
             database_url: env::var("DATABASE_URL")?,
             default_prefix: env::var("DEFAULT_PREFIX")?,
-            blocked_users: parse_id_array(
-                &env::var("BLOCKED_USERS").unwrap_or_else(|_| "".into()),
-            ),
+            blocked_users: parse_id_array(&env::var("BLOCKED_USERS").unwrap_or_else(|_| "".into())),
             lastfm_key: env::var("LASTFM_KEY").unwrap_or_else(|_| "".into()),
             // Default expose on 0.0.0.0 to let other Docker containers access
             metrics_interface: env::var("METRICS_INTERFACE")
