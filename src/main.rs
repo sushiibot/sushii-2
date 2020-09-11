@@ -34,6 +34,8 @@ async fn main() -> Result<()> {
         .connect(&sushii_conf.database_url)
         .await?;
 
+    sqlx::migrate!("./migrations").run(&pool).await?;
+
     let metrics = Arc::new(Metrics::new());
 
     let http = Http::new_with_token(&sushii_conf.discord_token);
@@ -110,7 +112,10 @@ async fn main() -> Result<()> {
     }
 
     // Start hyper metrics server
-    tokio::spawn(metrics_server::start(Arc::clone(&sushii_conf), Arc::clone(&metrics)));
+    tokio::spawn(metrics_server::start(
+        Arc::clone(&sushii_conf),
+        Arc::clone(&metrics),
+    ));
 
     if let Err(why) = client.start().await {
         tracing::error!("Client error: {:?}", why);

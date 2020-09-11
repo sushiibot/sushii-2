@@ -2,6 +2,7 @@ use dotenv::Error as DotenvError;
 use serde_json::Error as SerdeJsonError;
 use serenity::Error as SerenityError;
 use sqlx::Error as SqlxError;
+use sqlx::migrate::MigrateError;
 use std::env::VarError;
 use std::error::Error as StdError;
 use std::fmt::{Display, Formatter, Result as FmtResult};
@@ -20,6 +21,7 @@ pub enum Error {
     Json(SerdeJsonError),
     Serenity(SerenityError),
     Sqlx(SqlxError),
+    Migrate(MigrateError),
     Var(VarError),
 }
 
@@ -59,6 +61,12 @@ impl From<SqlxError> for Error {
     }
 }
 
+impl From<MigrateError> for Error {
+    fn from(err: MigrateError) -> Error {
+        Error::Migrate(err)
+    }
+}
+
 impl StdError for Error {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
         Some(self)
@@ -76,6 +84,7 @@ impl Display for Error {
             Error::Json(ref inner) => inner.fmt(f),
             Error::Serenity(ref inner) => inner.fmt(f),
             Error::Sqlx(ref inner) => inner.fmt(f),
+            Error::Migrate(ref inner) => inner.fmt(f),
             Error::Var(ref inner) => inner.fmt(f),
         }
     }

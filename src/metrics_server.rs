@@ -6,9 +6,12 @@ use hyper::{
 use prometheus::{Encoder, TextEncoder};
 use std::sync::Arc;
 
-use crate::model::{SushiiConfig, Metrics};
+use crate::model::{Metrics, SushiiConfig};
 
-async fn serve_req(_req: Request<Body>, metrics: Arc<Metrics>) -> Result<Response<Body>, hyper::Error> {
+async fn serve_req(
+    _req: Request<Body>,
+    metrics: Arc<Metrics>,
+) -> Result<Response<Body>, hyper::Error> {
     let encoder = TextEncoder::new();
 
     let mut buffer = vec![];
@@ -31,9 +34,7 @@ pub async fn start(conf: Arc<SushiiConfig>, metrics: Arc<Metrics>) {
     let serve_future = Server::bind(&addr).serve(make_service_fn(move |_| {
         let metrics = metrics.clone();
 
-        async move {
-            Ok::<_, hyper::Error>(service_fn(move |req| serve_req(req, metrics.clone())))
-        }
+        async move { Ok::<_, hyper::Error>(service_fn(move |req| serve_req(req, metrics.clone()))) }
     }));
 
     if let Err(err) = serve_future.await {
