@@ -376,86 +376,42 @@
       "nullable": []
     }
   },
-  "995d70b0726a2fd8e6b981e78f94db592863587d75eaf3cae49f54890a3b0772": {
-    "query": "\n            INSERT INTO mod_logs\n                 VALUES ($1, (\n                            SELECT MAX(case_id) + 1\n                              FROM mod_logs\n                             WHERE guild_id = $1\n                        ), $2, $3, $4, $5, $6, $7, $8, $9)\n              RETURNING *\n        ",
+  "c21922e25f5f0c46575cf26424dae12e94178a18ed335b7c276ebada820f2981": {
+    "query": "INSERT INTO guild_configs\n     VALUES ($1,  $2,  $3,  $4,  $5,  $6,  $7,  $8,  $9,  $10,\n             $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,\n             $21, $22, $23, $24, $25, $26, $27)\nON CONFLICT (id)\n    DO UPDATE \n        SET -- id = $1, Don't need to update ID \n            name              = $2,\n            prefix            = $3,\n            join_msg          = $4,\n            join_msg_enabled  = $5,\n            join_react        = $6,\n            leave_msg         = $7,\n            leave_msg_enabled = $8,\n            msg_channel       = $9,\n            role_channel      = $10,\n            role_config       = $11,\n            role_enabled      = $12,\n            invite_guard      = $13,\n            log_msg           = $14,\n            log_msg_enabled   = $15,\n            log_mod           = $16,\n            log_mod_enabled   = $17,\n            log_member        = $18,\n            mute_role         = $19,\n            mute_duration     = $20,\n            ban_dm_text       = $21,\n            ban_dm_enabled    = $22,\n            kick_dm_text      = $23,\n            kick_dm_enabled   = $24,\n            mute_dm_text      = $25,\n            mute_dm_enabled   = $26,\n            max_mention       = $27\n",
     "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "case_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "action",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "action_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "pending",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "user_tag",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "executor_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "reason",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 9,
-          "name": "msg_id",
-          "type_info": "Int8"
-        }
-      ],
+      "columns": [],
       "parameters": {
         "Left": [
           "Int8",
           "Text",
-          "Timestamp",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
           "Bool",
           "Int8",
-          "Text",
+          "Int8",
+          "Jsonb",
+          "Bool",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Int8",
           "Int8",
           "Text",
-          "Int8"
+          "Bool",
+          "Text",
+          "Bool",
+          "Text",
+          "Bool",
+          "Int4"
         ]
       },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true
-      ]
+      "nullable": []
     }
   },
   "df8bc72513bca3b02a3012e5eb9ef7e0a82785d65ba3fdbdd75adc324eaf2327": {

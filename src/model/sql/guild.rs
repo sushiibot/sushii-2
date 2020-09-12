@@ -26,21 +26,61 @@ pub trait GuildConfigDb {
 #[derive(Deserialize, Default, Serialize, sqlx::FromRow, Clone, Debug)]
 pub struct GuildConfig {
     pub id: i64,
-    pub prefix: Option<String>,
     pub name: Option<String>,
+    pub prefix: Option<String>,
+
+    /// Join message text
     pub join_msg: Option<String>,
+    pub join_msg_enabled: bool,
+
+    /// Join message reaction
     pub join_react: Option<String>,
+
+    /// Leave message text
     pub leave_msg: Option<String>,
+    pub leave_msg_enabled: bool,
+
+    /// Join / leave messages channel
     pub msg_channel: Option<i64>,
+
+    /// Role assignments
     pub role_channel: Option<i64>,
     pub role_config: Option<serde_json::Value>,
-    pub invite_guard: Option<bool>,
+    pub role_enabled: bool,
+
+    /// Auto delete invite links
+    pub invite_guard: bool,
+
+    /// Message deleted / edited log channel
     pub log_msg: Option<i64>,
+    pub log_msg_enabled: bool,
+
+    /// Moderation actions log channel
     pub log_mod: Option<i64>,
+    pub log_mod_enabled: bool,
+
+    /// Member join / leave log channel
     pub log_member: Option<i64>,
+
+    /// Mute role ID
     pub mute_role: Option<i64>,
+    /// Duration in seconds, default duration 1 day
+    pub mute_duration: i64,
+
+    /// Should DM user on ban
+    pub ban_dm_text: Option<String>,
+    pub ban_dm_enabled: bool,
+
+    /// Should DM user on kick
+    pub kick_dm_text: Option<String>,
+    pub kick_dm_enabled: bool,
+
+    /// Should DM user on mute
+    pub mute_dm_text: Option<String>,
+    pub mute_dm_enabled: bool,
+
+    /// Max number of unique mentions in a single message to auto mute
     pub max_mention: Option<i32>,
-    pub disabled_channels: Option<Vec<i64>>,
 }
 
 impl GuildConfig {
@@ -198,45 +238,34 @@ async fn get_guild_config_query(pool: &sqlx::PgPool, guild_id: u64) -> Result<Op
 
 async fn upsert_config_query(conf: &GuildConfig, pool: &sqlx::PgPool) -> Result<()> {
     // Bruh
-    sqlx::query!(
-        r#"
-            INSERT INTO guild_configs
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-            ON CONFLICT (id)
-              DO UPDATE 
-                    SET prefix            = $2,
-                        name              = $3,
-                        join_msg          = $4,
-                        join_react        = $5,
-                        leave_msg         = $6,
-                        msg_channel       = $7,
-                        role_channel      = $8,
-                        role_config       = $9,
-                        invite_guard      = $10,
-                        log_msg           = $11,
-                        log_mod           = $12,
-                        log_member        = $13,
-                        mute_role         = $14,
-                        max_mention       = $15,
-                        disabled_channels = $16
-        "#,
-        conf.id as i64,
-        conf.prefix,
+    sqlx::query_file!("sql/guild/upsert_guild_config.sql",
+        conf.id,
         conf.name,
+        conf.prefix,
         conf.join_msg,
+        conf.join_msg_enabled,
         conf.join_react,
         conf.leave_msg,
+        conf.leave_msg_enabled,
         conf.msg_channel,
         conf.role_channel,
         conf.role_config,
+        conf.role_enabled,
         conf.invite_guard,
         conf.log_msg,
+        conf.log_msg_enabled,
         conf.log_mod,
+        conf.log_mod_enabled,
         conf.log_member,
         conf.mute_role,
+        conf.mute_duration,
+        conf.ban_dm_text,
+        conf.ban_dm_enabled,
+        conf.kick_dm_text,
+        conf.kick_dm_enabled,
+        conf.mute_dm_text,
+        conf.mute_dm_enabled,
         conf.max_mention,
-        // Needs &[i64] instead of Vec<i64>
-        conf.disabled_channels.as_deref(),
     )
     .execute(pool)
     .await

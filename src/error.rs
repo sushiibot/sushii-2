@@ -1,8 +1,8 @@
 use dotenv::Error as DotenvError;
 use serde_json::Error as SerdeJsonError;
 use serenity::Error as SerenityError;
-use sqlx::Error as SqlxError;
 use sqlx::migrate::MigrateError;
+use sqlx::Error as SqlxError;
 use std::env::VarError;
 use std::error::Error as StdError;
 use std::fmt::{Display, Formatter, Result as FmtResult};
