@@ -76,33 +76,6 @@
       ]
     }
   },
-  "4f8256e2b08c75280f04e77c345abeb08f296556161b72dab39a71b78a25331b": {
-    "query": "\n            INSERT INTO guild_configs\n                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)\n            ON CONFLICT (id)\n              DO UPDATE \n                    SET prefix            = $2,\n                        name              = $3,\n                        join_msg          = $4,\n                        join_react        = $5,\n                        leave_msg         = $6,\n                        msg_channel       = $7,\n                        role_channel      = $8,\n                        role_config       = $9,\n                        invite_guard      = $10,\n                        log_msg           = $11,\n                        log_mod           = $12,\n                        log_member        = $13,\n                        mute_role         = $14,\n                        max_mention       = $15,\n                        disabled_channels = $16\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Text",
-          "Int8",
-          "Int8",
-          "Jsonb",
-          "Bool",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int4",
-          "Int8Array"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "5723dc52f0b9df937185fc46b0ce7315ea20de901b009d1bd66949749be99b60": {
     "query": "\n              SELECT *\n                FROM mod_logs\n               WHERE guild_id = $1\n            ORDER BY case_id DESC\n               LIMIT 1\n        ",
     "describe": {
@@ -203,63 +176,118 @@
         },
         {
           "ordinal": 4,
+          "name": "join_msg_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
           "name": "join_react",
           "type_info": "Text"
         },
         {
-          "ordinal": 5,
+          "ordinal": 6,
           "name": "leave_msg",
           "type_info": "Text"
         },
         {
-          "ordinal": 6,
+          "ordinal": 7,
+          "name": "leave_msg_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 8,
           "name": "msg_channel",
           "type_info": "Int8"
         },
         {
-          "ordinal": 7,
+          "ordinal": 9,
           "name": "role_channel",
           "type_info": "Int8"
         },
         {
-          "ordinal": 8,
+          "ordinal": 10,
           "name": "role_config",
           "type_info": "Jsonb"
         },
         {
-          "ordinal": 9,
+          "ordinal": 11,
+          "name": "role_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 12,
           "name": "invite_guard",
           "type_info": "Bool"
         },
         {
-          "ordinal": 10,
+          "ordinal": 13,
           "name": "log_msg",
           "type_info": "Int8"
         },
         {
-          "ordinal": 11,
+          "ordinal": 14,
+          "name": "log_msg_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 15,
           "name": "log_mod",
           "type_info": "Int8"
         },
         {
-          "ordinal": 12,
+          "ordinal": 16,
+          "name": "log_mod_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 17,
           "name": "log_member",
           "type_info": "Int8"
         },
         {
-          "ordinal": 13,
+          "ordinal": 18,
           "name": "mute_role",
           "type_info": "Int8"
         },
         {
-          "ordinal": 14,
-          "name": "max_mention",
-          "type_info": "Int4"
+          "ordinal": 19,
+          "name": "mute_duration",
+          "type_info": "Int8"
         },
         {
-          "ordinal": 15,
-          "name": "disabled_channels",
-          "type_info": "Int8Array"
+          "ordinal": 20,
+          "name": "ban_dm_text",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 21,
+          "name": "ban_dm_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 22,
+          "name": "kick_dm_text",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 23,
+          "name": "kick_dm_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 24,
+          "name": "mute_dm_text",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 25,
+          "name": "mute_dm_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 26,
+          "name": "max_mention",
+          "type_info": "Int4"
         }
       ],
       "parameters": {
@@ -272,17 +300,28 @@
         true,
         true,
         true,
+        false,
+        true,
+        true,
+        false,
         true,
         true,
         true,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
         true,
         true,
+        false,
         true,
+        false,
         true,
+        false,
         true,
-        true,
-        true,
-        true,
+        false,
         true
       ]
     }
