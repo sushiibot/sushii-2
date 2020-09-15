@@ -61,7 +61,7 @@ async fn off(ctx: &Context, msg: &Message) -> CommandResult {
     if !conf.log_mod_enabled {
         let _ = msg
             .channel_id
-            .say(&ctx.http, "Moderation logs are already off")
+            .say(&ctx.http, "Error: Moderation logs are already off")
             .await?;
 
         return Ok(());
@@ -72,7 +72,7 @@ async fn off(ctx: &Context, msg: &Message) -> CommandResult {
 
     let _ = msg
         .channel_id
-        .say(&ctx.http, "Turned off moderation logs")
+        .say(&ctx.http, "<:offline:316354467031416832> Turned off moderation logs")
         .await?;
 
     Ok(())
@@ -86,7 +86,7 @@ async fn on(ctx: &Context, msg: &Message) -> CommandResult {
     if conf.log_mod_enabled {
         let _ = msg
             .channel_id
-            .say(&ctx.http, "Moderation logs are already on")
+            .say(&ctx.http, "Error: Moderation logs are already on")
             .await?;
 
         return Ok(());
@@ -97,7 +97,7 @@ async fn on(ctx: &Context, msg: &Message) -> CommandResult {
 
     let _ = msg
         .channel_id
-        .say(&ctx.http, "Turned on moderation logs")
+        .say(&ctx.http, "<:online:316354435745972244> Turned on moderation logs")
         .await?;
 
     Ok(())
@@ -112,14 +112,14 @@ async fn toggle(ctx: &Context, msg: &Message) -> CommandResult {
     conf.save(&ctx).await?;
 
     let on_or_off = if conf.log_mod_enabled {
-        "on"
+        ("<:online:316354435745972244>", "on")
     } else {
-        "off"
+        ("<:offline:316354467031416832>", "off")
     };
 
     let _ = msg
         .channel_id
-        .say(&ctx.http, format!("Toggled moderation logs `{}`", on_or_off))
+        .say(&ctx.http, format!("{} Toggled moderation logs `{}`", on_or_off.0, on_or_off.1))
         .await?;
 
     Ok(())
