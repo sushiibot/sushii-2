@@ -43,7 +43,16 @@ pub async fn guild_ban_handler(
     };
 
     if let Some(channel_id) = guild_conf.log_mod {
-        match send_mod_log_entry(&ctx, channel_id, &entry, placeholder_reason, &executor_user, &user).await {
+        match send_mod_log_entry(
+            &ctx,
+            channel_id,
+            &entry,
+            placeholder_reason,
+            &executor_user,
+            &user,
+        )
+        .await
+        {
             Ok(msg) => {
                 entry.msg_id.replace(msg.id.0 as i64);
             }
@@ -99,10 +108,7 @@ async fn send_mod_log_entry(
                 // Reason shouldn't be a None but just to make sure
                 e.field(
                     "Reason",
-                    mod_log_entry
-                        .reason
-                        .clone()
-                        .unwrap_or(placeholder_reason),
+                    mod_log_entry.reason.clone().unwrap_or(placeholder_reason),
                     false,
                 );
 

@@ -72,7 +72,10 @@ async fn off(ctx: &Context, msg: &Message) -> CommandResult {
 
     let _ = msg
         .channel_id
-        .say(&ctx.http, "<:offline:316354467031416832> Turned off moderation logs")
+        .say(
+            &ctx.http,
+            "<:offline:316354467031416832> Turned off moderation logs",
+        )
         .await?;
 
     Ok(())
@@ -97,7 +100,10 @@ async fn on(ctx: &Context, msg: &Message) -> CommandResult {
 
     let _ = msg
         .channel_id
-        .say(&ctx.http, "<:online:316354435745972244> Turned on moderation logs")
+        .say(
+            &ctx.http,
+            "<:online:316354435745972244> Turned on moderation logs",
+        )
         .await?;
 
     Ok(())
@@ -119,7 +125,10 @@ async fn toggle(ctx: &Context, msg: &Message) -> CommandResult {
 
     let _ = msg
         .channel_id
-        .say(&ctx.http, format!("{} Toggled moderation logs `{}`", on_or_off.0, on_or_off.1))
+        .say(
+            &ctx.http,
+            format!("{} Toggled moderation logs `{}`", on_or_off.0, on_or_off.1),
+        )
         .await?;
 
     Ok(())

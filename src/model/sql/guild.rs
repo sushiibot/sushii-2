@@ -238,7 +238,8 @@ async fn get_guild_config_query(pool: &sqlx::PgPool, guild_id: u64) -> Result<Op
 
 async fn upsert_config_query(conf: &GuildConfig, pool: &sqlx::PgPool) -> Result<()> {
     // Bruh
-    sqlx::query_file!("sql/guild/upsert_guild_config.sql",
+    sqlx::query_file!(
+        "sql/guild/upsert_guild_config.sql",
         conf.id,
         conf.name,
         conf.prefix,
