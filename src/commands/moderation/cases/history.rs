@@ -99,7 +99,7 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
                     }
 
                     a.name(format!(
-                        "Case history for {} (ID: `{}`)",
+                        "Case history for {} (ID: {})",
                         target_user
                             .map(|u| u.tag())
                             .unwrap_or_else(|_| "user".to_string()),
