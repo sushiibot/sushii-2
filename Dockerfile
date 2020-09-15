@@ -14,9 +14,10 @@ COPY ./.cargo ./.cargo
 RUN cargo build --release
 RUN rm src/*.rs
 
-# copy source tree, migrations, sqlx data
+# copy source tree, migrations, queries, sqlx data
 COPY ./src ./src
 COPY ./migrations ./migrations
+COPY ./sql ./sql
 COPY ./sqlx-data.json ./sqlx-data.json
 
 # build for release, remove dummy compiled files
