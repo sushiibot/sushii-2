@@ -3,7 +3,7 @@ INSERT INTO guild_configs
              $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,
              $21, $22, $23, $24, $25, $26, $27)
 ON CONFLICT (id)
-    DO UPDATE 
+  DO UPDATE
         SET -- id = $1, Don't need to update ID 
             name              = $2,
             prefix            = $3,

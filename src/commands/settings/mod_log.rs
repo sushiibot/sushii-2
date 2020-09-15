@@ -56,6 +56,20 @@ async fn set(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 /// Turns off moderation log
 #[command]
 async fn off(ctx: &Context, msg: &Message) -> CommandResult {
+    let mut conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
+
+    if !conf.log_mod_enabled {
+        let _ = msg
+            .channel_id
+            .say(&ctx.http, "Moderation logs are already off")
+            .await?;
+
+        return Ok(());
+    }
+
+    conf.log_mod_enabled = false;
+    conf.save(&ctx).await?;
+
     let _ = msg
         .channel_id
         .say(&ctx.http, "Turned off moderation logs")
@@ -67,6 +81,20 @@ async fn off(ctx: &Context, msg: &Message) -> CommandResult {
 /// Turns on moderation log
 #[command]
 async fn on(ctx: &Context, msg: &Message) -> CommandResult {
+    let mut conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
+
+    if conf.log_mod_enabled {
+        let _ = msg
+            .channel_id
+            .say(&ctx.http, "Moderation logs are already on")
+            .await?;
+
+        return Ok(());
+    }
+
+    conf.log_mod_enabled = true;
+    conf.save(&ctx).await?;
+
     let _ = msg
         .channel_id
         .say(&ctx.http, "Turned on moderation logs")
@@ -78,9 +106,20 @@ async fn on(ctx: &Context, msg: &Message) -> CommandResult {
 /// Toggles moderation log
 #[command]
 async fn toggle(ctx: &Context, msg: &Message) -> CommandResult {
+    let mut conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
+
+    conf.log_mod_enabled = !conf.log_mod_enabled;
+    conf.save(&ctx).await?;
+
+    let on_or_off = if conf.log_mod_enabled {
+        "on"
+    } else {
+        "off"
+    };
+
     let _ = msg
         .channel_id
-        .say(&ctx.http, "Toggled moderation logs")
+        .say(&ctx.http, format!("Toggled moderation logs `{}`", on_or_off))
         .await?;
 
     Ok(())
