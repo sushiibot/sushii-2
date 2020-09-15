@@ -30,20 +30,20 @@ pub async fn guild_ban_handler(
         }
     };
 
-    if entry.reason.is_none() {
+    let placeholder_reason = if entry.reason.is_none() {
         let prefix = match guild_conf.prefix {
             Some(p) => p,
             None => SushiiConfig::get(&ctx).await.default_prefix.clone(),
         };
 
-        entry.reason.replace(
-            format!("Responsible moderator: Please use `{}reason {} [reason]` to set a reason for this case.",
-                prefix, entry.case_id)
-        );
-    }
+        format!("Responsible moderator: Please use `{}reason {} [reason]` to set a reason for this case.",
+            prefix, entry.case_id)
+    } else {
+        "".into()
+    };
 
     if let Some(channel_id) = guild_conf.log_mod {
-        match send_mod_log_entry(&ctx, channel_id, &entry, &executor_user, &user).await {
+        match send_mod_log_entry(&ctx, channel_id, &entry, placeholder_reason, &executor_user, &user).await {
             Ok(msg) => {
                 entry.msg_id.replace(msg.id.0 as i64);
             }
@@ -76,6 +76,7 @@ async fn send_mod_log_entry(
     ctx: &Context,
     channel_id: i64,
     mod_log_entry: &ModLogEntry,
+    placeholder_reason: String,
     executor_user: &User,
     user: &User,
 ) -> Result<Message> {
@@ -101,7 +102,7 @@ async fn send_mod_log_entry(
                     mod_log_entry
                         .reason
                         .clone()
-                        .unwrap_or_else(|| "N/A".to_string()),
+                        .unwrap_or(placeholder_reason),
                     false,
                 );
 
