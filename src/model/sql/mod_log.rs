@@ -74,6 +74,21 @@ impl ModLogEntry {
         }
     }
 
+    /// Sets the reason, accepts Option since it's easier when parsing for
+    /// reason returns an Option<String> and that value can be passed directly
+    /// in
+    pub fn reason(mut self, reason: &Option<String>) -> Self {
+        self.reason = reason.clone();
+
+        self
+    }
+
+    pub fn executor_id(mut self, executor_id: u64) -> Self {
+        self.executor_id.replace(executor_id as i64);
+
+        self
+    }
+
     pub fn color(&self) -> u32 {
         match self.action.as_ref() {
             "ban" => 0xe74c3c,
@@ -152,12 +167,18 @@ impl ModLogEntryDb for ModLogEntry {
     }
 
     /// Saves a ModLogEntry to the database. Returns a new one from the database
-    /// with a valid case_id
+    /// with a valid case_id if is new entry. Otherwise just returns the same self
     async fn save(&self, ctx: &Context) -> Result<Self> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
-        add_mod_action_query(&pool, self).await
+        // New cases via ::new() will have a -1 ID, cases that return from DB
+        // will have a >=0 ID
+        if self.case_id == -1 {
+            add_mod_action_query(&pool, self).await
+        } else {
+            update_mod_action_query(&pool, self).await
+        }
     }
 
     async fn delete(&self, ctx: &Context) -> Result<()> {
@@ -284,17 +305,50 @@ async fn add_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Resul
     .map_err(Into::into)
 }
 
+async fn update_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Result<ModLogEntry> {
+    sqlx::query_as!(
+        ModLogEntry,
+        r#"
+            UPDATE mod_logs
+               SET guild_id = $1,
+                   case_id = $2,
+                   action = $3,
+                   action_time = $4,
+                   pending = $5,
+                   user_id = $6,
+                   user_tag = $7,
+                   executor_id = $8,
+                   reason = $9,
+                   msg_id = $10
+             WHERE guild_id = $1
+               AND case_id = $2
+            RETURNING *
+        "#,
+        entry.guild_id,
+        entry.case_id,
+        entry.action,
+        entry.action_time,
+        entry.pending,
+        entry.user_id,
+        entry.user_tag,
+        entry.executor_id,
+        entry.reason,
+        entry.msg_id
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(Into::into)
+}
+
 async fn delete_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Result<()> {
     sqlx::query!(
         r#"
             DELETE FROM mod_logs
                   WHERE guild_id = $1
                     AND case_id = $2
-                    AND user_id = $3
         "#,
         entry.guild_id,
         entry.case_id,
-        entry.user_id,
     )
     .execute(pool)
     .await?;

@@ -17,7 +17,7 @@ async fn kick(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     };
 
     ModActionExecutor::from_args(args, ModActionType::Kick)
-        .execute(&ctx, &guild_id)
+        .execute(&ctx, &msg, &guild_id)
         .await?;
 
     Ok(())

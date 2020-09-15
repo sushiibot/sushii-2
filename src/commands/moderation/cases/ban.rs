@@ -27,7 +27,7 @@ async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     ModActionExecutor::from_args(args, ModActionType::Ban)
         .exclude_users(bans)
-        .execute(&ctx, &guild_id)
+        .execute(&ctx, &msg, &guild_id)
         .await?;
 
     Ok(())
@@ -46,7 +46,7 @@ async fn unban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     };
 
     ModActionExecutor::from_args(args, ModActionType::Unban)
-        .execute(&ctx, &guild_id)
+        .execute(&ctx, &msg, &guild_id)
         .await?;
 
     Ok(())

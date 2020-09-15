@@ -27,7 +27,7 @@ async fn mute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     }
 
     ModActionExecutor::from_args(args, ModActionType::Mute)
-        .execute(&ctx, &guild_id)
+        .execute(&ctx, &msg, &guild_id)
         .await?;
 
     Ok(())
@@ -55,7 +55,7 @@ async fn unmute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     }
 
     ModActionExecutor::from_args(args, ModActionType::Unmute)
-        .execute(&ctx, &guild_id)
+        .execute(&ctx, &msg, &guild_id)
         .await?;
 
     Ok(())

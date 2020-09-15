@@ -75,7 +75,7 @@ pub trait ModActionExecutorDb {
         guild_id: &GuildId,
         guild_conf: &GuildConfig,
     ) -> StdResult<(), Error>;
-    async fn execute(mut self, ctx: &Context, guild_id: &GuildId) -> Result<()>;
+    async fn execute(mut self, ctx: &Context, msg: &Message, guild_id: &GuildId) -> Result<()>;
 }
 
 #[derive(Debug)]
@@ -157,7 +157,7 @@ impl ModActionExecutorDb for ModActionExecutor {
         Ok(())
     }
 
-    async fn execute(mut self, ctx: &Context, guild_id: &GuildId) -> Result<()> {
+    async fn execute(mut self, ctx: &Context, msg: &Message, guild_id: &GuildId) -> Result<()> {
         let data = &ctx.data.read().await;
         let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
 
@@ -192,6 +192,8 @@ impl ModActionExecutorDb for ModActionExecutor {
             }
 
             let entry = match ModLogEntry::new(&self.action.to_string(), true, guild_id.0, &user)
+                .reason(&self.reason)
+                .executor_id(msg.author.id.0)
                 .save(&ctx)
                 .await
             {
@@ -244,6 +246,9 @@ impl ModActionExecutorDb for ModActionExecutor {
                 }
             }
         }
+
+        // Respond to user
+        let _ = msg.channel_id.say(&ctx.http, &s).await?;
 
         Ok(())
     }
