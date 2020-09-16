@@ -1,5 +1,5 @@
 -- Add migration script here
-CREATE TABLE IF NOT EXISTS guild_configs (
+CREATE TABLE guild_configs (
     id                  BIGINT PRIMARY KEY,
     name                TEXT,
     prefix              TEXT,
@@ -39,8 +39,8 @@ CREATE TABLE IF NOT EXISTS guild_configs (
 
     -- Mute role ID
     mute_role           BIGINT,
-    -- Duration in seconds, default duration 1 day
-    mute_duration       BIGINT DEFAULT 86400 NOT NULL,
+    -- Duration in seconds
+    mute_duration       BIGINT,
 
     -- Should DM user on ban
     ban_dm_text         TEXT,

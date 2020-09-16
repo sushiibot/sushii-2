@@ -1,3 +1,4 @@
+use chrono::Duration;
 use lazy_static::lazy_static;
 use regex::Regex;
 use serenity::async_trait;
@@ -14,7 +15,7 @@ use std::sync::Arc;
 
 use crate::error::{Error as SushiiError, Result};
 use crate::keys::CacheAndHttpContainer;
-use crate::model::sql::{GuildConfig, GuildConfigDb, ModLogEntry, ModLogEntryDb};
+use crate::model::sql::{GuildConfig, GuildConfigDb, ModLogEntry, ModLogEntryDb, Mute, MuteDb, delete_mute};
 
 #[derive(Debug)]
 pub enum ModActionType {
@@ -143,6 +144,16 @@ impl ModActionExecutorDb for ModActionExecutor {
                     let mut member = guild_id.member(&cache_http, user).await?;
 
                     member.add_role(&ctx.http, role_id as u64).await?;
+
+                    if let Err(e) = Mute::new(
+                        guild_id.0,
+                        user.id.0,
+                        guild_conf.mute_duration.map(|secs| Duration::seconds(secs)),
+                    )
+                    .save(&ctx)
+                    .await {
+                        tracing::error!("Failed to add new mute entry: {}", e);
+                    }
                 }
             }
             ModActionType::Unmute => {
@@ -150,6 +161,10 @@ impl ModActionExecutorDb for ModActionExecutor {
                     let mut member = guild_id.member(&cache_http, user).await?;
 
                     member.remove_role(&ctx.http, role_id as u64).await?;
+
+                    if let Err(e) = delete_mute(&ctx, guild_id.0, user.id.0).await {
+                        tracing::error!("Failed to delete mute entry: {}", e);
+                    }
                 }
             }
         }

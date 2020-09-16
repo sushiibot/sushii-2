@@ -353,6 +353,7 @@ async fn delete_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Re
     .execute(pool)
     .await?;
 
+    // Doesn't use .map_err(Into::into) here since it returns sqlx_core::postgres::done::PgDone
     Ok(())
 }
 

@@ -64,8 +64,8 @@ pub struct GuildConfig {
 
     /// Mute role ID
     pub mute_role: Option<i64>,
-    /// Duration in seconds, default duration 1 day
-    pub mute_duration: i64,
+    /// Duration in seconds
+    pub mute_duration: Option<i64>,
 
     /// Should DM user on ban
     pub ban_dm_text: Option<String>,
