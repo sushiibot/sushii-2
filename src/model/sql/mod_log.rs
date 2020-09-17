@@ -282,7 +282,7 @@ async fn add_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Resul
         r#"
             INSERT INTO mod_logs
                  VALUES ($1, (
-                            SELECT COALESCE(MAX(case_id) + 1, 0)
+                            SELECT COALESCE(MAX(case_id) + 1, 1)
                               FROM mod_logs
                              WHERE guild_id = $1
                         ), $2, $3, $4, $5, $6, $7, $8, $9)
