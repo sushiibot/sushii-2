@@ -40,7 +40,7 @@ async fn main() -> Result<()> {
 
     let http = Http::new_with_token(&sushii_conf.discord_token);
 
-    let (owners, _bot_id) = match http.get_current_application_info().await {
+    let (owners, bot_id) = match http.get_current_application_info().await {
         Ok(info) => {
             let mut owners = HashSet::new();
             owners.insert(info.owner.id);
@@ -57,7 +57,8 @@ async fn main() -> Result<()> {
     // Create the framework
     let framework = StandardFramework::new()
         .configure(|c| {
-            c.owners(owners).dynamic_prefix(|ctx, msg| {
+            c.owners(owners)
+            .dynamic_prefix(|ctx, msg| {
                 Box::pin(async move {
                     let sushii_conf = SushiiConfig::get(&ctx).await;
 
@@ -72,6 +73,7 @@ async fn main() -> Result<()> {
                     }
                 })
             })
+            .on_mention(Some(bot_id))
         })
         .before(hooks::before)
         .after(hooks::after)
