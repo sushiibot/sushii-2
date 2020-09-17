@@ -3,7 +3,7 @@ use serenity::{model::prelude::*, prelude::*};
 use crate::error::Result;
 use crate::model::{sql::*, sushii_config::*};
 
-pub async fn guild_ban_handler(
+pub async fn modlog_handler(
     ctx: &Context,
     guild_id: &GuildId,
     user: &User,
@@ -25,7 +25,7 @@ pub async fn guild_ban_handler(
     let guild_conf = match GuildConfig::from_id(&ctx, guild_id).await? {
         Some(c) => c,
         None => {
-            tracing::error!(?guild_id, ?user, "No guild config found while handling ban");
+            tracing::error!(?guild_id, ?user, "No guild config found while handling mod_log");
             return Ok(());
         }
     };
