@@ -257,17 +257,18 @@ impl ModActionExecutorDb for ModActionExecutor {
 pub fn parse_id_reason(args: Args) -> (Vec<u64>, Option<String>) {
     lazy_static! {
         // Can overflow, so need to handle later
-        static ref RE: Regex = Regex::new(r"\d{18,19}").unwrap();
+        static ref RE: Regex = Regex::new(r"(?:<@)?(\d{18,19})>?").unwrap();
     }
 
     let ids_and_reason = args.rest();
 
     let (ids, end) = RE
-        .find_iter(ids_and_reason)
-        .fold((Vec::new(), 0), |mut acc, id_match| {
-            if let Ok(id) = id_match.as_str().parse::<u64>() {
+        .captures_iter(ids_and_reason)
+        .fold((Vec::new(), 0), |mut acc, caps| {
+            if let Some(id) = caps.get(1).and_then(|m| m.as_str().parse::<u64>().ok()) {
                 acc.0.push(id);
-                acc.1 = id_match.end();
+                // First capture group is entire match so it must exist
+                acc.1 = caps.get(0).unwrap().end();
             }
 
             acc
@@ -296,6 +297,8 @@ fn parses_ids_and_reason() {
     let input_strs = vec![
         // Comma separated
         "145764790046818304,193163974471188480,151018674793349121 some reason text",
+        // Mentions
+        "<@145764790046818304> <@193163974471188480> <@151018674793349121> some reason text",
         // Space separated
         "145764790046818304 193163974471188480 151018674793349121 some reason text",
         // Random chars in middle
@@ -321,6 +324,8 @@ fn parses_ids_without_reason() {
     let input_strs = vec![
         // Comma separated
         "145764790046818304,193163974471188480,151018674793349121",
+        // Mentions
+        "<@145764790046818304> <@193163974471188480> <@151018674793349121>",
         // Space separated
         "145764790046818304 193163974471188480 151018674793349121 ",
         // Random chars in middle
