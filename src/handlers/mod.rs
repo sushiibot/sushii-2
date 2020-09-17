@@ -30,7 +30,12 @@ impl EventHandler for Handler {
         mod_log::ban::guild_ban_removal(&ctx, &guild_id, &unbanned_user).await;
     }
 
-    async fn guild_member_update(&self, ctx: Context, old_member: Option<Member>, new_member: Member) {
+    async fn guild_member_update(
+        &self,
+        ctx: Context,
+        old_member: Option<Member>,
+        new_member: Member,
+    ) {
         mod_log::mute::guild_member_update(&ctx, &old_member, &new_member).await;
     }
 

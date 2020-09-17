@@ -1,5 +1,5 @@
-use serenity::{model::prelude::*, prelude::*};
 use chrono::{offset::Utc, Duration};
+use serenity::{model::prelude::*, prelude::*};
 
 use super::utils::modlog_handler;
 use crate::error::Result;
@@ -11,7 +11,11 @@ pub async fn guild_member_addition(ctx: &Context, guild_id: &GuildId, mut member
     }
 }
 
-async fn _guild_member_addition(ctx: &Context, guild_id: &GuildId, member: &mut Member) -> Result<()> {
+async fn _guild_member_addition(
+    ctx: &Context,
+    guild_id: &GuildId,
+    member: &mut Member,
+) -> Result<()> {
     let mute = match Mute::from_id(&ctx, guild_id.0, member.user.id.0).await? {
         Some(m) => m,
         None => return Ok(()),
@@ -23,7 +27,9 @@ async fn _guild_member_addition(ctx: &Context, guild_id: &GuildId, member: &mut 
     if let Some(end) = mute.end_time {
         if now > end {
             ModLogEntry::new("unmute", true, guild_id.0, &member.user)
-                .reason(&Some("Automated Unmute: User re-joined after mute expired.".into()))
+                .reason(&Some(
+                    "Automated Unmute: User re-joined after mute expired.".into(),
+                ))
                 .save(&ctx)
                 .await?;
 
@@ -62,7 +68,11 @@ pub async fn guild_member_update(ctx: &Context, old_member: &Option<Member>, new
     }
 }
 
-async fn _guild_member_update(ctx: &Context, old_member: &Option<Member>, new_member: &Member) -> Result<()> {
+async fn _guild_member_update(
+    ctx: &Context,
+    old_member: &Option<Member>,
+    new_member: &Member,
+) -> Result<()> {
     let guild_conf = match GuildConfig::from_id(&ctx, &new_member.guild_id).await? {
         Some(c) => c,
         None => {
@@ -79,7 +89,7 @@ async fn _guild_member_update(ctx: &Context, old_member: &Option<Member>, new_me
     // If there isn't an prev member then we can't really compare if the role was just added
     let old_member = match old_member {
         Some(m) => m,
-        None => return Ok(())
+        None => return Ok(()),
     };
 
     let old_has_mute = old_member.roles.contains(&mute_role);

@@ -25,7 +25,11 @@ pub async fn modlog_handler(
     let guild_conf = match GuildConfig::from_id(&ctx, guild_id).await? {
         Some(c) => c,
         None => {
-            tracing::error!(?guild_id, ?user, "No guild config found while handling mod_log");
+            tracing::error!(
+                ?guild_id,
+                ?user,
+                "No guild config found while handling mod_log"
+            );
             return Ok(());
         }
     };

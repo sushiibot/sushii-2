@@ -7,5 +7,5 @@ pub use self::{
     guild::{GuildConfig, GuildConfigDb},
     guild_roles::GuildRoles,
     mod_log::{ModLogEntry, ModLogEntryDb},
-    mute::{Mute, MuteDb, delete_mute},
+    mute::{delete_mute, Mute, MuteDb},
 };
