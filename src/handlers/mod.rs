@@ -33,4 +33,8 @@ impl EventHandler for Handler {
     async fn guild_member_update(&self, ctx: Context, old_member: Option<Member>, new_member: Member) {
         mod_log::mute::guild_member_update(&ctx, &old_member, &new_member).await;
     }
+
+    async fn guild_member_addition(&self, ctx: Context, guild_id: GuildId, mut member: Member) {
+        mod_log::mute::guild_member_addition(&ctx, &guild_id, &mut member).await;
+    }
 }
