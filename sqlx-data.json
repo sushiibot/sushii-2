@@ -627,6 +627,42 @@
       "nullable": []
     }
   },
+  "9785fac5945545df686c0dec6088fe3762381a9db5c5768e2e726a1e52cb5baa": {
+    "query": "\n            SELECT *\n              FROM mutes\n             WHERE end_time > timezone('UTC', now())\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "start_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 3,
+          "name": "end_time",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
   "df8bc72513bca3b02a3012e5eb9ef7e0a82785d65ba3fdbdd75adc324eaf2327": {
     "query": "\n            SELECT *\n              FROM mod_logs\n             WHERE guild_id = $1\n               AND user_id = $2\n               AND action = $3\n               AND pending = true\n        ",
     "describe": {
@@ -687,88 +723,6 @@
           "Int8",
           "Int8",
           "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true
-      ]
-    }
-  },
-  "e0737d0c6b9c62566f80d70312413ed65f76493785bc07630fa5afaf365e4785": {
-    "query": "\n            INSERT INTO mod_logs\n                 VALUES ($1, (\n                            SELECT COALESCE(MAX(case_id) + 1, 0)\n                              FROM mod_logs\n                             WHERE guild_id = $1\n                        ), $2, $3, $4, $5, $6, $7, $8, $9)\n              RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "case_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "action",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "action_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "pending",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "user_tag",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "executor_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "reason",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 9,
-          "name": "msg_id",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Timestamp",
-          "Bool",
-          "Int8",
-          "Text",
-          "Int8",
-          "Text",
-          "Int8"
         ]
       },
       "nullable": [
