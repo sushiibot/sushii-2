@@ -17,6 +17,7 @@ pub struct Mute {
 #[async_trait]
 pub trait MuteDb {
     async fn from_id(ctx: &Context, guild_id: u64, user_id: u64) -> Result<Option<Mute>>;
+    async fn get_expired(ctx: &Context) -> Result<Vec<Mute>>;
 
     async fn save(&self, ctx: &Context) -> Result<Mute>;
     async fn delete(&self, ctx: &Context) -> Result<()>;
@@ -42,6 +43,13 @@ impl MuteDb for Mute {
         let pool = data.get::<DbPool>().unwrap();
 
         get_from_id_query(&pool, guild_id, user_id).await
+    }
+
+    async fn get_expired(ctx: &Context) -> Result<Vec<Mute>> {
+        let data = ctx.data.read().await;
+        let pool = data.get::<DbPool>().unwrap();
+
+        get_expired_query(&pool).await
     }
 
     async fn save(&self, ctx: &Context) -> Result<Self> {
@@ -76,6 +84,20 @@ async fn get_from_id_query(
         user_id as i64,
     )
     .fetch_optional(pool)
+    .await
+    .map_err(Into::into)
+}
+
+async fn get_expired_query(pool: &sqlx::PgPool) -> Result<Vec<Mute>> {
+    sqlx::query_as!(
+        Mute,
+        r#"
+            SELECT *
+              FROM mutes
+             WHERE end_time > timezone('UTC', now())
+        "#
+    )
+    .fetch_all(pool)
     .await
     .map_err(Into::into)
 }

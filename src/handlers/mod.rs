@@ -1,3 +1,4 @@
+use crate::tasks;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 
 pub mod mod_log;
@@ -10,8 +11,9 @@ pub struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn ready(&self, _: Context, ready: Ready) {
+    async fn ready(&self, ctx: Context, ready: Ready) {
         tracing::info!("Connected as {}", ready.user.name);
+        tasks::start(&ctx).await;
     }
 
     async fn resume(&self, _: Context, _: ResumedEvent) {

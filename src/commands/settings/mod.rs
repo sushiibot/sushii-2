@@ -1,11 +1,11 @@
 use serenity::framework::standard::macros::group;
 
+mod default;
 mod list;
 mod mod_log;
 mod mute_role;
-mod default;
 
-use self::{list::*, mod_log::*, mute_role::*, default::*};
+use self::{default::*, list::*, mod_log::*, mute_role::*};
 
 #[group]
 #[commands(list, modlog, muterole)]

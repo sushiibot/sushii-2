@@ -13,6 +13,7 @@ mod keys;
 mod metrics_server;
 mod model;
 mod prelude;
+mod tasks;
 mod utils;
 
 use crate::error::Result;
@@ -58,22 +59,22 @@ async fn main() -> Result<()> {
     let framework = StandardFramework::new()
         .configure(|c| {
             c.owners(owners)
-            .dynamic_prefix(|ctx, msg| {
-                Box::pin(async move {
-                    let sushii_conf = SushiiConfig::get(&ctx).await;
+                .dynamic_prefix(|ctx, msg| {
+                    Box::pin(async move {
+                        let sushii_conf = SushiiConfig::get(&ctx).await;
 
-                    match GuildConfig::from_msg(&ctx, &msg).await {
-                        Ok(conf) => conf
-                            .and_then(|c| c.prefix)
-                            .or_else(|| Some(sushii_conf.default_prefix.clone())),
-                        Err(e) => {
-                            tracing::error!(?msg, "Failed to get guild config: {}", e);
-                            None
+                        match GuildConfig::from_msg(&ctx, &msg).await {
+                            Ok(conf) => conf
+                                .and_then(|c| c.prefix)
+                                .or_else(|| Some(sushii_conf.default_prefix.clone())),
+                            Err(e) => {
+                                tracing::error!(?msg, "Failed to get guild config: {}", e);
+                                None
+                            }
                         }
-                    }
+                    })
                 })
-            })
-            .on_mention(Some(bot_id))
+                .on_mention(Some(bot_id))
         })
         .before(hooks::before)
         .after(hooks::after)

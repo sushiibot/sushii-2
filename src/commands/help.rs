@@ -14,6 +14,7 @@ use serenity::prelude::*;
 #[max_levenshtein_distance(3)]
 #[indention_prefix = "->"]
 #[lacking_permissions = "Hide"]
+#[embed_success_colour(ROHRKATZE_BLUE)]
 async fn help_cmd(
     context: &Context,
     msg: &Message,
