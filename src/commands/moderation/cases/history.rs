@@ -72,7 +72,7 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
     let mut s = String::new();
 
     for entry in &entries {
-        let _ = write!(s, "`[Case #{}] {}`", entry.case_id, entry.action);
+        let _ = write!(s, "`[Case #{}]` **{}**", entry.case_id, entry.action);
 
         if let Some(id) = entry.executor_id {
             let _ = write!(s, " by <@{}>", id);
