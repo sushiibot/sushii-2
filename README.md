@@ -14,6 +14,7 @@ Slimmed down feature set of original sushii-bot with a focus on moderation tools
     -   [x] ban / unban
     -   [x] kick
     -   [x] prune
+    -   [ ] warn
     -   [x] mute / unmute
         -   [ ] timed mutes
         -   [ ] mute users who joined in last x minutes

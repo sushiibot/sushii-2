@@ -269,18 +269,18 @@ pub fn parse_id_reason(args: Args) -> (Vec<u64>, Option<String>) {
 
     let ids_and_reason = args.rest();
 
-    let (mut ids, end) = RE
-        .captures_iter(ids_and_reason)
-        .enumerate()
-        .fold((Vec::new(), 0), |mut acc, (i, caps)| {
-            if let Some(id) = caps.get(1).and_then(|m| m.as_str().parse::<u64>().ok()) {
-                acc.0.push((i, id));
-                // First capture group is entire match so it must exist
-                acc.1 = caps.get(0).unwrap().end();
-            }
+    let (mut ids, end) =
+        RE.captures_iter(ids_and_reason)
+            .enumerate()
+            .fold((Vec::new(), 0), |mut acc, (i, caps)| {
+                if let Some(id) = caps.get(1).and_then(|m| m.as_str().parse::<u64>().ok()) {
+                    acc.0.push((i, id));
+                    // First capture group is entire match so it must exist
+                    acc.1 = caps.get(0).unwrap().end();
+                }
 
-            acc
-        });
+                acc
+            });
 
     // First sort by ID
     ids.sort_by(|a, b| a.1.cmp(&b.1));

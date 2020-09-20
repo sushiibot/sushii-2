@@ -7,7 +7,7 @@ use crate::model::sql::*;
 
 #[command]
 #[num_args(1)]
-async fn set_channel(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+async fn setchannel(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let mut conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
 
     let channel_id = match args.single::<String>().ok().and_then(parse_channel) {

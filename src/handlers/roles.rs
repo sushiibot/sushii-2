@@ -28,6 +28,15 @@ struct RoleAction {
     pub role_name: String,
 }
 
+struct CalculatedRoles<'a> {
+    pub member_new_all_roles: HashSet<u64>,
+    pub added_role_names: Vec<&'a str>,
+    pub removed_role_names: Vec<&'a str>,
+    pub added_existing_roles: Vec<&'a str>,
+    pub removed_missing_roles: Vec<&'a str>,
+    pub over_limit_roles: HashMap<&'a str, Vec<&'a str>>,
+}
+
 fn pluralize(s: &str, qty: usize) -> String {
     if qty > 1 {
         return format!("{}s", s);
@@ -116,62 +125,17 @@ pub async fn message(ctx: &Context, msg: &Message) {
     }
 }
 
-pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
-    // ignore self and bots
-    if msg.author.bot {
-        return Ok(None);
-    }
+// searching for multiple role assignments
+lazy_static! {
+    static ref RE: Regex = RegexBuilder::new(r"(-|\+)([\w ]+)")
+        .case_insensitive(true)
+        .build()
+        .unwrap();
+}
 
-    let guild = match msg.guild(&ctx.cache).await {
-        Some(g) => g,
-        None => {
-            return Ok(None);
-        }
-    };
-
-    let guild_conf = match GuildConfig::from_id(&ctx, &guild.id).await? {
-        Some(c) => c,
-        None => {
-            tracing::error!(?msg, "No guild config found while handling roles");
-            return Ok(None);
-        }
-    };
-
-    // get configs
-    let role_config: GuildRoles = match guild_conf.role_config {
-        Some(c) => serde_json::from_value(c)?,
-        None => return Ok(None),
-    };
-
-    // Kind of redundant since already checked if in role channel before but oh well
-    let role_channel = match guild_conf.role_channel {
-        Some(c) => c,
-        None => return Ok(None),
-    };
-
-    // check if in correct channel
-    if msg.channel_id.0 != role_channel as u64 {
-        return Ok(None);
-    }
-
-    // searching for multiple role assignments
-    lazy_static! {
-        static ref RE: Regex = RegexBuilder::new(r"(-|\+)([\w ]+)")
-            .case_insensitive(true)
-            .build()
-            .unwrap();
-    }
-
-    let data = &ctx.data.read().await;
-    let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
-
-    if !RE.is_match(&msg.content) && msg.content != "clear" && msg.content != "reset" {
-        return Ok(Some("You can add a role with `+role name` or remove a role with `-role name`.  Use `clear` or `reset` to remove all roles".into()));
-    }
-
+fn parse_role_actions(s: &str) -> Vec<RoleAction> {
     // Vec<("+/-", "role name")
-    let role_actions: Vec<RoleAction> = RE
-        .captures_iter(&msg.content)
+    RE.captures_iter(&s)
         .enumerate()
         .map(|(index, caps)| {
             // Should be safe to unwrap since both groups are required
@@ -191,15 +155,21 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
                 role_name,
             }
         })
-        .collect();
+        .collect()
+}
 
-    // Should remove all roles
-    let is_reset = msg.content == "clear" || msg.content == "reset";
-
-    let member = guild.member(&cache_http, msg.author.id).await?;
-
+fn categorize_member_roles<'a, I, R>(
+    role_config: &'a GuildRoles,
+    member_roles: I,
+    is_reset: bool,
+) -> (HashSet<u64>, HashMap<&'a str, HashSet<u64>>)
+where
+    I: IntoIterator<Item = R>,
+    R: Into<u64>,
+{
     // All roles of the member, this is modified on role add / remove
-    let mut member_all_roles: HashSet<u64> = member.roles.iter().map(|x| x.0).collect();
+    // Use iterator instead of member so it's easier to test
+    let mut member_all_roles: HashSet<u64> = member_roles.into_iter().map(|x| x.into()).collect();
 
     // Member roles that are in the role config <Category, Vec<role>>
     let mut member_config_roles: HashMap<&str, HashSet<u64>> = HashMap::new();
@@ -236,6 +206,12 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
         }
     }
 
+    (member_all_roles, member_config_roles)
+}
+
+fn build_role_name_map<'a>(
+    role_config: &'a GuildRoles,
+) -> HashMap<String, (&'a GuildRole, &'a str)> {
     // Config roles: map from role name -> (role, group_name)
     let mut role_name_map: HashMap<String, (&GuildRole, &str)> = HashMap::new();
     for (group_name, group) in &role_config.groups {
@@ -244,11 +220,15 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
         }
     }
 
-    tracing::info!(?role_actions, "role_actions");
+    role_name_map
+}
+
+fn dedupe_role_actions<'a>(role_actions: &'a Vec<RoleAction>) -> Vec<&'a RoleAction> {
+    tracing::debug!(?role_actions, "role_actions");
 
     // Not the actual "dedupe" but more to check if a user is adding/removing a
     // same role.
-    let mut role_actions_deduped_map: HashMap<String, RoleAction> = HashMap::new();
+    let mut role_actions_deduped_map: HashMap<&str, &RoleAction> = HashMap::new();
 
     for action in role_actions {
         let opposite_kind = if action.kind == RoleActionKind::Add {
@@ -260,12 +240,12 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
         // Remove the opposite action for same roles
         // eg: If there's already a +role1, adding a -role1 will remove the +role1 and vice versa
         // If there's a +role1, adding +role1 will just keep the first one
-        if let Some(val) = role_actions_deduped_map.get(&action.role_name) {
-            tracing::info!(?action, ?val, "Found duplicate role");
+        if let Some(val) = role_actions_deduped_map.get(action.role_name.as_str()) {
+            tracing::debug!(?action, ?val, "Found duplicate role");
 
             // Remove existing if there's an opposite
             if val.kind == opposite_kind {
-                role_actions_deduped_map.remove(&action.role_name);
+                role_actions_deduped_map.remove(action.role_name.as_str());
             }
 
             // Don't do anything if there's a same
@@ -273,14 +253,26 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
         }
 
         // No existing same role, now can add it
-        role_actions_deduped_map.insert(action.role_name.clone(), action);
+        role_actions_deduped_map.insert(&action.role_name, action);
     }
 
-    let mut role_actions_deduped: Vec<&RoleAction> = role_actions_deduped_map.values().collect();
+    let mut role_actions_deduped: Vec<&RoleAction> =
+        role_actions_deduped_map.into_iter().map(|r| r.1).collect();
+
     role_actions_deduped.sort_by(|a, b| a.index.cmp(&b.index));
 
-    tracing::info!(?role_actions_deduped, "role_actions_deduped");
+    tracing::debug!(?role_actions_deduped, "role_actions_deduped");
 
+    role_actions_deduped
+}
+
+fn calculate_roles<'a>(
+    role_config: &GuildRoles,
+    role_actions_deduped: Vec<&'a RoleAction>,
+    role_name_map: HashMap<String, (&'a GuildRole, &'a str)>,
+    mut member_all_roles: HashSet<u64>,
+    mut member_config_roles: HashMap<&'a str, HashSet<u64>>,
+) -> CalculatedRoles<'a> {
     let mut added_role_names = Vec::new();
     let mut removed_role_names = Vec::new();
 
@@ -300,7 +292,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
             if action.kind == RoleActionKind::Add {
                 // If member already has it
                 if cur_group_roles.contains(&role.primary_id) {
-                    added_existing_roles.push(&action.role_name[..]);
+                    added_existing_roles.push(action.role_name.as_str());
 
                     continue;
                 }
@@ -310,7 +302,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
                     let entry = over_limit_roles
                         .entry(group_name.clone())
                         .or_insert(Vec::new());
-                    entry.push(action.role_name.clone());
+                    entry.push(action.role_name.as_str());
 
                     continue;
                 }
@@ -331,7 +323,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
                 // the user's role to update to, as this may include roles
                 // not in the role config
                 member_all_roles.insert(id_to_add);
-                added_role_names.push(&action.role_name[..]);
+                added_role_names.push(action.role_name.as_str());
             } else {
                 let has_role = cur_group_roles.contains(&role.primary_id)
                     || role
@@ -339,7 +331,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
                         .map_or(false, |id| cur_group_roles.contains(&id));
 
                 if !has_role {
-                    removed_missing_roles.push(&action.role_name[..]);
+                    removed_missing_roles.push(action.role_name.as_str());
 
                     continue;
                 }
@@ -352,10 +344,31 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
                     member_all_roles.remove(&secondary_id);
                 }
 
-                removed_role_names.push(&action.role_name);
+                removed_role_names.push(action.role_name.as_str());
             }
         }
     }
+
+    CalculatedRoles {
+        // Just give the same HashSet ownership back I guess lol
+        member_new_all_roles: member_all_roles,
+        added_role_names,
+        removed_role_names,
+        added_existing_roles,
+        removed_missing_roles,
+        over_limit_roles,
+    }
+}
+
+fn format_response(role_config: &GuildRoles, calc_roles: &CalculatedRoles) -> String {
+    let CalculatedRoles {
+        added_role_names,
+        removed_role_names,
+        added_existing_roles,
+        removed_missing_roles,
+        over_limit_roles,
+        ..
+    } = calc_roles;
 
     let mut s = String::new();
 
@@ -402,7 +415,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
         let _ = write!(s, "Cannot add roles that exceed role group limits: ",);
     }
 
-    for (group_name, role_names) in &over_limit_roles {
+    for (group_name, role_names) in over_limit_roles {
         if let Some(group) = &role_config.groups.get(&group_name[..]) {
             let _ = write!(
                 s,
@@ -414,7 +427,80 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
             );
         }
     }
-    // End over limit roles
+
+    s
+}
+
+pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
+    // ignore self and bots
+    if msg.author.bot {
+        return Ok(None);
+    }
+
+    let guild = match msg.guild(&ctx.cache).await {
+        Some(g) => g,
+        None => {
+            return Ok(None);
+        }
+    };
+
+    let guild_conf = match GuildConfig::from_id(&ctx, &guild.id).await? {
+        Some(c) => c,
+        None => {
+            tracing::error!(?msg, "No guild config found while handling roles");
+            return Ok(None);
+        }
+    };
+
+    // get configs
+    let role_config: GuildRoles = match guild_conf.role_config {
+        Some(c) => serde_json::from_value(c)?,
+        None => return Ok(None),
+    };
+
+    // Kind of redundant since already checked if in role channel before but oh well
+    let role_channel = match guild_conf.role_channel {
+        Some(c) => c,
+        None => return Ok(None),
+    };
+
+    // check if in correct channel
+    if msg.channel_id.0 != role_channel as u64 {
+        return Ok(None);
+    }
+
+    let data = &ctx.data.read().await;
+    let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
+
+    if !RE.is_match(&msg.content) && msg.content != "clear" && msg.content != "reset" {
+        return Ok(Some("You can add a role with `+role name` or remove a role with `-role name`.  Use `clear` or `reset` to remove all roles".into()));
+    }
+
+    // Vec<("+/-", "role name")
+    let role_actions = parse_role_actions(&msg.content);
+
+    // Should remove all roles
+    let is_reset = msg.content == "clear" || msg.content == "reset";
+
+    let member = guild.member(&cache_http, msg.author.id).await?;
+
+    let (member_all_roles, member_config_roles) =
+        categorize_member_roles(&role_config, member.roles, is_reset);
+    let role_name_map = build_role_name_map(&role_config);
+
+    // Not the actual "dedupe" but more to check if a user is adding/removing a
+    // same role.
+    let role_actions_deduped = dedupe_role_actions(&role_actions);
+
+    let calc_roles = calculate_roles(
+        &role_config,
+        role_actions_deduped,
+        role_name_map,
+        member_all_roles,
+        member_config_roles,
+    );
+
+    let s = format_response(&role_config, &calc_roles);
 
     // After all checks if the responding string is empty then all previous ones are empty
     if s.is_empty() && !is_reset {
@@ -424,7 +510,8 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
     if let Err(e) = guild
         .edit_member(&ctx.http, msg.author.id, |m| {
             m.roles(
-                &member_all_roles
+                &calc_roles
+                    .member_new_all_roles
                     .iter()
                     .map(|i| RoleId(*i))
                     .collect::<Vec<RoleId>>(),
