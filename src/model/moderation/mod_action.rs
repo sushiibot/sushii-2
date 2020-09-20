@@ -23,6 +23,7 @@ pub enum ModActionType {
     Kick,
     Mute,
     Unmute,
+    Warn,
 }
 
 impl fmt::Display for ModActionType {
@@ -36,6 +37,7 @@ impl fmt::Display for ModActionType {
                 ModActionType::Kick => "kick",
                 ModActionType::Mute => "mute",
                 ModActionType::Unmute => "unmute",
+                ModActionType::Warn => "warn",
             }
         )
     }
@@ -49,6 +51,7 @@ impl ModActionType {
             ModActionType::Kick => "kicked",
             ModActionType::Mute => "muted",
             ModActionType::Unmute => "unmuted",
+            ModActionType::Warn => "warned",
         }
         .into()
     }
@@ -60,6 +63,7 @@ impl ModActionType {
             ModActionType::Kick => ":boot:",
             ModActionType::Mute => ":mute:",
             ModActionType::Unmute => ":speaker:",
+            ModActionType::Warn => ":warning:",
         }
         .into()
     }
@@ -151,6 +155,9 @@ impl ModActionExecutorDb for ModActionExecutor {
 
                     member.remove_role(&ctx.http, role_id as u64).await?;
                 }
+            }
+            ModActionType::Warn => {
+                // Warn does nothing other than make a mod log entry..?
             }
         }
 
@@ -262,17 +269,28 @@ pub fn parse_id_reason(args: Args) -> (Vec<u64>, Option<String>) {
 
     let ids_and_reason = args.rest();
 
-    let (ids, end) = RE
+    let (mut ids, end) = RE
         .captures_iter(ids_and_reason)
-        .fold((Vec::new(), 0), |mut acc, caps| {
+        .enumerate()
+        .fold((Vec::new(), 0), |mut acc, (i, caps)| {
             if let Some(id) = caps.get(1).and_then(|m| m.as_str().parse::<u64>().ok()) {
-                acc.0.push(id);
+                acc.0.push((i, id));
                 // First capture group is entire match so it must exist
                 acc.1 = caps.get(0).unwrap().end();
             }
 
             acc
         });
+
+    // First sort by ID
+    ids.sort_by(|a, b| a.1.cmp(&b.1));
+    // Dedupe by IDs
+    ids.dedup_by(|a, b| a.1.eq(&b.1));
+    // Sort by original order
+    ids.sort_by(|a, b| a.0.cmp(&b.0));
+
+    // Remove indexes
+    let ids = ids.into_iter().map(|id| id.1).collect();
 
     let reason = {
         let r = ids_and_reason[end..].trim().to_string();
@@ -287,57 +305,76 @@ pub fn parse_id_reason(args: Args) -> (Vec<u64>, Option<String>) {
     (ids, reason)
 }
 
-#[test]
-fn parses_ids_and_reason() {
+#[cfg(test)]
+mod tests {
+    use super::*;
     use serenity::framework::standard::Delimiter;
+    const IDS_EXP: &'static [u64] = &[145764790046818304, 193163974471188480, 151018674793349121];
+    const REASON_EXP: &str = "some reason text";
 
-    let ids_exp = vec![145764790046818304, 193163974471188480, 151018674793349121];
-    let reason_exp = Some("some reason text".to_string());
+    #[test]
+    fn parses_ids_and_reason() {
+        let input_strs = vec![
+            // Comma separated
+            "145764790046818304,193163974471188480,151018674793349121 some reason text",
+            // Mentions
+            "<@145764790046818304> <@193163974471188480> <@151018674793349121> some reason text",
+            // Space separated
+            "145764790046818304 193163974471188480 151018674793349121 some reason text",
+            // Random chars in middle
+            "145764790046818304   193163974471188480 aoweifjf 151018674793349121 some reason text",
+        ];
 
-    let input_strs = vec![
-        // Comma separated
-        "145764790046818304,193163974471188480,151018674793349121 some reason text",
-        // Mentions
-        "<@145764790046818304> <@193163974471188480> <@151018674793349121> some reason text",
-        // Space separated
-        "145764790046818304 193163974471188480 151018674793349121 some reason text",
-        // Random chars in middle
-        "145764790046818304   193163974471188480 aoweifjf 151018674793349121 some reason text",
-    ];
+        for s in input_strs {
+            let args = Args::new(s, &[Delimiter::Single(' ')]);
 
-    for s in input_strs {
-        let args = Args::new(s, &[Delimiter::Single(' ')]);
+            let (ids, reason) = parse_id_reason(args);
 
-        let (ids, reason) = parse_id_reason(args);
-
-        assert_eq!(ids, ids_exp);
-        assert_eq!(reason, reason_exp);
+            assert_eq!(ids, IDS_EXP);
+            assert_eq!(reason.unwrap(), REASON_EXP);
+        }
     }
-}
 
-#[test]
-fn parses_ids_without_reason() {
-    use serenity::framework::standard::Delimiter;
+    #[test]
+    fn parses_ids_without_reason() {
+        let input_strs = vec![
+            // Comma separated
+            "145764790046818304,193163974471188480,151018674793349121",
+            // Mentions
+            "<@145764790046818304> <@193163974471188480> <@151018674793349121>",
+            // Space separated
+            "145764790046818304 193163974471188480 151018674793349121 ",
+            // Random chars in middle
+            "145764790046818304   193163974471188480 aoweifjf 151018674793349121              ",
+        ];
 
-    let ids_exp = vec![145764790046818304, 193163974471188480, 151018674793349121];
+        for s in input_strs {
+            let args = Args::new(s, &[Delimiter::Single(' ')]);
 
-    let input_strs = vec![
-        // Comma separated
-        "145764790046818304,193163974471188480,151018674793349121",
-        // Mentions
-        "<@145764790046818304> <@193163974471188480> <@151018674793349121>",
-        // Space separated
-        "145764790046818304 193163974471188480 151018674793349121 ",
-        // Random chars in middle
-        "145764790046818304   193163974471188480 aoweifjf 151018674793349121              ",
-    ];
+            let (ids, reason) = parse_id_reason(args);
 
-    for s in input_strs {
-        let args = Args::new(s, &[Delimiter::Single(' ')]);
+            assert_eq!(ids, IDS_EXP);
+            assert!(reason.is_none());
+        }
+    }
 
-        let (ids, reason) = parse_id_reason(args);
+    #[test]
+    fn parse_ids_dedups() {
+        let input_strs = vec![
+            // Comma separated
+            "145764790046818304,193163974471188480,151018674793349121,151018674793349121,151018674793349121,151018674793349121",
+            // Mentions
+            "<@145764790046818304> <@193163974471188480> <@151018674793349121><@151018674793349121><@151018674793349121>",
+        ];
 
-        assert_eq!(ids, ids_exp);
-        assert!(reason.is_none());
+        for s in input_strs {
+            let args = Args::new(s, &[Delimiter::Single(' ')]);
+
+            let (ids, reason) = parse_id_reason(args);
+
+            assert_eq!(ids.len(), 3);
+            assert_eq!(ids, IDS_EXP);
+            assert!(reason.is_none());
+        }
     }
 }
