@@ -96,6 +96,7 @@ impl ModLogEntry {
             "mute" => 0xe67e22,
             "unmute" => 0x1abc9c,
             "kick" => 0xd35400,
+            "warn" => 0xf1c40f,
             _ => 0xe67e22,
         }
     }
