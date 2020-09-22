@@ -217,7 +217,10 @@ fn build_role_name_map<'a>(
     let mut role_name_map: HashMap<String, (&str, &GuildRole, &str)> = HashMap::new();
     for (group_name, group) in &role_config.groups {
         for (role_name, role) in &group.roles {
-            role_name_map.insert(role_name.trim().to_lowercase(), (&role_name, &role, &group_name));
+            role_name_map.insert(
+                role_name.trim().to_lowercase(),
+                (&role_name, &role, &group_name),
+            );
         }
     }
 
@@ -282,7 +285,8 @@ fn calculate_roles<'a>(
     let mut over_limit_roles: HashMap<&str, Vec<&str>> = HashMap::new();
 
     for action in role_actions_deduped {
-        if let Some((orig_role_name, role, group_name)) = role_name_map.get(action.role_name.trim()) {
+        if let Some((orig_role_name, role, group_name)) = role_name_map.get(action.role_name.trim())
+        {
             // Member's current roles in this group
             let cur_group_roles = member_config_roles
                 .entry(group_name)
@@ -616,7 +620,8 @@ mod tests {
         let role_actions = parse_role_actions(&s);
         let role_actions_deduped = dedupe_role_actions(&role_actions);
 
-        let (member_all_roles, member_config_roles) = categorize_member_roles(&role_config, roles, false);
+        let (member_all_roles, member_config_roles) =
+            categorize_member_roles(&role_config, roles, false);
         let role_name_map = build_role_name_map(&role_config);
 
         let calc_roles = calculate_roles(
@@ -641,7 +646,7 @@ mod tests {
                 added_role_names: vec!["FirstRole", "ThirdRole"],
                 removed_missing_roles: vec!["SecondRole"],
                 ..Default::default()
-            }
+            },
         );
     }
 
@@ -655,7 +660,7 @@ mod tests {
                 member_new_all_roles: [0, 1].iter().cloned().collect(),
                 added_role_names: vec!["FirstRole"],
                 ..Default::default()
-            }
+            },
         );
     }
 
@@ -669,7 +674,7 @@ mod tests {
                 member_new_all_roles: [1, 20].iter().cloned().collect(),
                 added_role_names: vec!["FirstRole", "SecondRole"],
                 ..Default::default()
-            }
+            },
         );
     }
 
@@ -682,9 +687,12 @@ mod tests {
             CalculatedRoles {
                 member_new_all_roles: [1, 20].iter().cloned().collect(),
                 added_role_names: vec!["FirstRole", "SecondRole"],
-                over_limit_roles: [("FirstGroup", vec!["ThirdRole"])].iter().cloned().collect(),
+                over_limit_roles: [("FirstGroup", vec!["ThirdRole"])]
+                    .iter()
+                    .cloned()
+                    .collect(),
                 ..Default::default()
-            }
+            },
         );
     }
 
@@ -696,9 +704,12 @@ mod tests {
             "+ThirdRole +NonExistantRole",
             CalculatedRoles {
                 member_new_all_roles: [1, 20].iter().cloned().collect(),
-                over_limit_roles: [("FirstGroup", vec!["ThirdRole"])].iter().cloned().collect(),
+                over_limit_roles: [("FirstGroup", vec!["ThirdRole"])]
+                    .iter()
+                    .cloned()
+                    .collect(),
                 ..Default::default()
-            }
+            },
         );
     }
 }

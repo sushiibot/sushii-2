@@ -1,4 +1,3 @@
-use serde_json::value::Value;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
@@ -34,7 +33,20 @@ async fn set(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         Ok(c) => c,
     };
 
-    conf.role_config.replace(roles_conf);
+    let conf_value = match serde_json::to_value(roles_conf) {
+        Ok(c) => c,
+        Err(e) => {
+            tracing::error!("Failed to serialize role configuration to value: {}", e);
+
+            msg.channel_id
+                .say(&ctx.http, "Failed to serialize configuration")
+                .await?;
+
+            return Ok(());
+        }
+    };
+
+    conf.role_config.replace(conf_value);
 
     conf.save(&ctx).await?;
 
@@ -45,7 +57,7 @@ async fn set(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     Ok(())
 }
 
-fn parse_config(input_str: &str) -> Result<Value, String> {
+fn parse_config(input_str: &str) -> Result<GuildRoles, String> {
     let roles_conf_str = {
         let mut input_str = input_str;
 
@@ -71,34 +83,28 @@ fn parse_config(input_str: &str) -> Result<Value, String> {
     };
 
     if let Some(hint) = config_type_hint {
-        let roles_conf = match hint {
-            ConfigType::Json => serde_json::from_str::<GuildRoles>(&roles_conf_str)
-                .map(serde_json::to_value)
-                .map_err(|e| {
+        match hint {
+            ConfigType::Json => serde_json::from_str::<GuildRoles>(&roles_conf_str).map_err(|e| {
+                format!(
+                    "Error in roles config: {}\n\
+                        ```json\n{}\n```",
+                    e,
+                    error_pointed_str(roles_conf_str, e.line(), e.column())
+                )
+            }),
+            ConfigType::Toml => toml::from_str::<GuildRoles>(&roles_conf_str).map_err(|e| {
+                if let Some((line, column)) = e.line_col() {
                     format!(
                         "Error in roles config: {}\n\
-                        ```json\n{}\n```",
-                        e,
-                        error_pointed_str(roles_conf_str, e.line(), e.column())
-                    )
-                })?,
-            ConfigType::Toml => toml::from_str::<GuildRoles>(&roles_conf_str)
-                .map(serde_json::to_value)
-                .map_err(|e| {
-                    if let Some((line, column)) = e.line_col() {
-                        format!(
-                            "Error in roles config: {}\n\
                             ```toml\n{}\n```",
-                            e,
-                            error_pointed_str(roles_conf_str, line, column)
-                        )
-                    } else {
-                        "Invalid toml configuration".to_string()
-                    }
-                })?,
-        };
-
-        roles_conf.map_err(|_| "Failed to serialize configuration".into())
+                        e,
+                        error_pointed_str(roles_conf_str, line, column)
+                    )
+                } else {
+                    "Invalid toml configuration".to_string()
+                }
+            }),
+        }
     } else {
         Err("Invalid roles configuration".into())
     }
