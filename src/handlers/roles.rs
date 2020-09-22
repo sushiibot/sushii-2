@@ -15,19 +15,20 @@ use crate::model::sql::{
     GuildConfig, GuildConfigDb,
 };
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 enum RoleActionKind {
     Add,
     Remove,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 struct RoleAction {
     pub index: usize,
     pub kind: RoleActionKind,
     pub role_name: String,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 struct CalculatedRoles<'a> {
     pub member_new_all_roles: HashSet<u64>,
     pub added_role_names: Vec<&'a str>,
@@ -211,12 +212,12 @@ where
 
 fn build_role_name_map<'a>(
     role_config: &'a GuildRoles,
-) -> HashMap<String, (&'a GuildRole, &'a str)> {
+) -> HashMap<String, (&str, &'a GuildRole, &'a str)> {
     // Config roles: map from role name -> (role, group_name)
-    let mut role_name_map: HashMap<String, (&GuildRole, &str)> = HashMap::new();
+    let mut role_name_map: HashMap<String, (&str, &GuildRole, &str)> = HashMap::new();
     for (group_name, group) in &role_config.groups {
         for (role_name, role) in &group.roles {
-            role_name_map.insert(role_name.trim().to_lowercase(), (&role, &group_name));
+            role_name_map.insert(role_name.trim().to_lowercase(), (&role_name, &role, &group_name));
         }
     }
 
@@ -269,19 +270,19 @@ fn dedupe_role_actions<'a>(role_actions: &'a Vec<RoleAction>) -> Vec<&'a RoleAct
 fn calculate_roles<'a>(
     role_config: &GuildRoles,
     role_actions_deduped: Vec<&'a RoleAction>,
-    role_name_map: HashMap<String, (&'a GuildRole, &'a str)>,
+    role_name_map: HashMap<String, (&'a str, &'a GuildRole, &'a str)>,
     mut member_all_roles: HashSet<u64>,
     mut member_config_roles: HashMap<&'a str, HashSet<u64>>,
 ) -> CalculatedRoles<'a> {
-    let mut added_role_names = Vec::new();
-    let mut removed_role_names = Vec::new();
+    let mut added_role_names: Vec<&str> = Vec::new();
+    let mut removed_role_names: Vec<&str> = Vec::new();
 
-    let mut added_existing_roles = Vec::new();
-    let mut removed_missing_roles = Vec::new();
-    let mut over_limit_roles = HashMap::new();
+    let mut added_existing_roles: Vec<&str> = Vec::new();
+    let mut removed_missing_roles: Vec<&str> = Vec::new();
+    let mut over_limit_roles: HashMap<&str, Vec<&str>> = HashMap::new();
 
     for action in role_actions_deduped {
-        if let Some((role, group_name)) = role_name_map.get(action.role_name.trim()) {
+        if let Some((orig_role_name, role, group_name)) = role_name_map.get(action.role_name.trim()) {
             // Member's current roles in this group
             let cur_group_roles = member_config_roles
                 .entry(group_name)
@@ -292,7 +293,7 @@ fn calculate_roles<'a>(
             if action.kind == RoleActionKind::Add {
                 // If member already has it
                 if cur_group_roles.contains(&role.primary_id) {
-                    added_existing_roles.push(action.role_name.as_str());
+                    added_existing_roles.push(orig_role_name);
 
                     continue;
                 }
@@ -302,7 +303,8 @@ fn calculate_roles<'a>(
                     let entry = over_limit_roles
                         .entry(group_name.clone())
                         .or_insert(Vec::new());
-                    entry.push(action.role_name.as_str());
+
+                    entry.push(orig_role_name);
 
                     continue;
                 }
@@ -323,7 +325,7 @@ fn calculate_roles<'a>(
                 // the user's role to update to, as this may include roles
                 // not in the role config
                 member_all_roles.insert(id_to_add);
-                added_role_names.push(action.role_name.as_str());
+                added_role_names.push(orig_role_name);
             } else {
                 let has_role = cur_group_roles.contains(&role.primary_id)
                     || role
@@ -331,7 +333,7 @@ fn calculate_roles<'a>(
                         .map_or(false, |id| cur_group_roles.contains(&id));
 
                 if !has_role {
-                    removed_missing_roles.push(action.role_name.as_str());
+                    removed_missing_roles.push(orig_role_name);
 
                     continue;
                 }
@@ -344,7 +346,7 @@ fn calculate_roles<'a>(
                     member_all_roles.remove(&secondary_id);
                 }
 
-                removed_role_names.push(action.role_name.as_str());
+                removed_role_names.push(orig_role_name);
             }
         }
     }
@@ -478,6 +480,9 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
 
     // Vec<("+/-", "role name")
     let role_actions = parse_role_actions(&msg.content);
+    // Not the actual "dedupe" but more to check if a user is adding/removing a
+    // same role.
+    let role_actions_deduped = dedupe_role_actions(&role_actions);
 
     // Should remove all roles
     let is_reset = msg.content == "clear" || msg.content == "reset";
@@ -487,10 +492,6 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
     let (member_all_roles, member_config_roles) =
         categorize_member_roles(&role_config, member.roles, is_reset);
     let role_name_map = build_role_name_map(&role_config);
-
-    // Not the actual "dedupe" but more to check if a user is adding/removing a
-    // same role.
-    let role_actions_deduped = dedupe_role_actions(&role_actions);
 
     let calc_roles = calculate_roles(
         &role_config,
@@ -530,4 +531,113 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
     }
 
     Ok(Some(s))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::sql::guild_roles::{GuildGroup, GuildRole, GuildRoles};
+
+    fn role_conf() -> GuildRoles {
+        GuildRoles {
+            groups: [
+                (
+                    "FirstGroup".to_string(),
+                    GuildGroup {
+                        limit: 3,
+                        roles: [
+                            (
+                                "FirstRole".to_string(),
+                                GuildRole {
+                                    primary_id: 123,
+                                    secondary_id: None,
+                                },
+                            ),
+                            (
+                                "SecondRole".to_string(),
+                                GuildRole {
+                                    primary_id: 456,
+                                    secondary_id: None,
+                                },
+                            ),
+                        ]
+                        .iter()
+                        .cloned()
+                        .collect(),
+                    },
+                ),
+                (
+                    "SecondGroup".to_string(),
+                    GuildGroup {
+                        limit: 0,
+                        roles: [(
+                            "ThirdRole".to_string(),
+                            GuildRole {
+                                primary_id: 789,
+                                secondary_id: Some(147),
+                            },
+                        )]
+                        .iter()
+                        .cloned()
+                        .collect(),
+                    },
+                ),
+            ]
+            .iter()
+            .cloned()
+            .collect(),
+        }
+    }
+
+    #[test]
+    fn parses_role_actions() {
+        let strs = vec![
+            "+doggo -catto +bunno -catto +catto -bun",
+            "+doggo -catto +bunno +catto -bun",
+        ];
+
+        for s in strs {
+            let role_actions = parse_role_actions(&s);
+            let role_actions_deduped = dedupe_role_actions(&role_actions);
+            assert_eq!(role_actions_deduped.len(), 3);
+        }
+    }
+
+    #[test]
+    fn calculates_roles() {
+        let role_config = role_conf();
+        // 2 ids that don't exist in role config
+        let roles = vec![0u64, 369u64];
+
+        let strs = vec![
+            "+FirstRole -SecondRole +ThirdRole +NonExistantRole",
+        ];
+
+        let calc_roles_exp = CalculatedRoles {
+            member_new_all_roles: [0, 369, 123, 789].iter().cloned().collect(),
+            added_role_names: vec!["FirstRole", "ThirdRole"],
+            removed_role_names: vec![],
+            added_existing_roles: vec![],
+            removed_missing_roles: vec!["SecondRole"],
+            over_limit_roles: HashMap::new(),
+        };
+
+        for s in strs {
+            let role_actions = parse_role_actions(&s);
+            let role_actions_deduped = dedupe_role_actions(&role_actions);
+
+            let (member_all_roles, member_config_roles) = categorize_member_roles(&role_config, roles.clone(), false);
+            let role_name_map = build_role_name_map(&role_config);
+
+            let calc_roles = calculate_roles(
+                &role_config,
+                role_actions_deduped,
+                role_name_map,
+                member_all_roles,
+                member_config_roles,
+            );
+
+            assert_eq!(calc_roles, calc_roles_exp);
+        }
+    }
 }
