@@ -38,13 +38,13 @@ async fn sendinfo(ctx: &Context, msg: &Message) -> CommandResult {
     }
 
     let s = format!(
-        "To add a role: `+name`
-To remove a role: `-name`
+        "Add a role: `+name`
+Remove a role: `-name`
 
 Multiple actions can be combined:
 `+first +second -third`
 
-To remove all roles: `clear` or `reset`
+Remove all roles: `clear` or `reset`
 
 {}
 **Examples**
@@ -55,6 +55,9 @@ To remove all roles: `clear` or `reset`
 
     if let Err(e) = ChannelId(role_channel)
         .send_message(&ctx.http, |m| {
+            // Just some zws's to make it easier to tell which message is a role help message
+            m.content("\u{200B}".repeat(5));
+
             m.embed(|e| {
                 e.title("Server Roles");
                 e.description(&s);
