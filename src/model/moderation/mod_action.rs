@@ -74,6 +74,7 @@ pub trait ModActionExecutorDb {
     async fn execute_user(
         &self,
         ctx: &Context,
+        msg: &Message,
         cache_http: &Arc<CacheAndHttp>,
         user: &User,
         guild_id: &GuildId,
@@ -116,6 +117,7 @@ impl ModActionExecutorDb for ModActionExecutor {
     async fn execute_user(
         &self,
         ctx: &Context,
+        msg: &Message,
         cache_http: &Arc<CacheAndHttp>,
         user: &User,
         guild_id: &GuildId,
@@ -125,7 +127,17 @@ impl ModActionExecutorDb for ModActionExecutor {
             ModActionType::Ban => {
                 if let Some(reason) = &self.reason {
                     guild_id
-                        .ban_with_reason(&ctx.http, user, 7u8, &reason)
+                        .ban_with_reason(
+                            &ctx.http,
+                            user,
+                            7u8,
+                            format!(
+                                "[Ban by user: {} (ID: {})] {}",
+                                &msg.author.tag(),
+                                &msg.author.id.0,
+                                &reason
+                            ),
+                        )
                         .await?;
                 } else {
                     guild_id.ban(&ctx.http, user, 7u8).await?;
@@ -136,7 +148,18 @@ impl ModActionExecutorDb for ModActionExecutor {
             }
             ModActionType::Kick => {
                 if let Some(reason) = &self.reason {
-                    guild_id.kick_with_reason(&ctx.http, user, &reason).await?;
+                    guild_id
+                        .kick_with_reason(
+                            &ctx.http,
+                            user,
+                            &format!(
+                                "[Kick by user: {} (ID: {})] {}",
+                                &msg.author.tag(),
+                                &msg.author.id.0,
+                                &reason
+                            )
+                        )
+                        .await?;
                 } else {
                     guild_id.kick(&ctx.http, user).await?;
                 }
@@ -174,6 +197,18 @@ impl ModActionExecutorDb for ModActionExecutor {
 
         let action_str = self.action.to_string();
         let action_past_str = self.action.to_past_tense();
+
+        let mut sent_msg = msg
+            .channel_id
+            .say(
+                &ctx,
+                format!(
+                    "Attempting to {} {} users...",
+                    action_str,
+                    &self.target_users.len()
+                ),
+            )
+            .await?;
 
         let mut s = String::new();
 
@@ -218,7 +253,7 @@ impl ModActionExecutorDb for ModActionExecutor {
             };
 
             let res = self
-                .execute_user(&ctx, &cache_http, &user, &guild_id, &guild_conf)
+                .execute_user(&ctx, &msg, &cache_http, &user, &guild_id, &guild_conf)
                 .await;
 
             match res {
@@ -254,8 +289,21 @@ impl ModActionExecutorDb for ModActionExecutor {
             }
         }
 
-        // Respond to user
-        let _ = msg.channel_id.say(&ctx.http, &s).await?;
+        // Respond to user -- edit previously sent message
+        let _ = sent_msg
+            .edit(&ctx, |m| {
+                m.embed(|e| {
+                    e.title(format!(
+                        "Attempted to {} {} users",
+                        action_str,
+                        &self.target_users.len()
+                    ));
+                    e.description(&s);
+
+                    e
+                })
+            })
+            .await?;
 
         Ok(())
     }
