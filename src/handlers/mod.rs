@@ -13,6 +13,10 @@ pub struct Handler;
 impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, ready: Ready) {
         tracing::info!("Connected as {}", ready.user.name);
+    }
+
+    async fn cache_ready(&self, ctx: Context, _: Vec<GuildId>) {
+        // Start tasks after cache has guild data
         tasks::start(&ctx).await;
     }
 
