@@ -11,7 +11,7 @@ pub struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn ready(&self, ctx: Context, ready: Ready) {
+    async fn ready(&self, _: Context, ready: Ready) {
         tracing::info!("Connected as {}", ready.user.name);
     }
 

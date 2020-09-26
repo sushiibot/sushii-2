@@ -1,4 +1,5 @@
 use dotenv::Error as DotenvError;
+use humantime::DurationError;
 use serde_json::Error as SerdeJsonError;
 use serenity::Error as SerenityError;
 use sqlx::migrate::MigrateError;
@@ -23,6 +24,7 @@ pub enum Error {
     Sqlx(SqlxError),
     Migrate(MigrateError),
     Var(VarError),
+    Duration(DurationError),
 }
 
 impl From<SerdeJsonError> for Error {
@@ -67,6 +69,12 @@ impl From<MigrateError> for Error {
     }
 }
 
+impl From<DurationError> for Error {
+    fn from(err: DurationError) -> Error {
+        Error::Duration(err)
+    }
+}
+
 impl StdError for Error {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
         Some(self)
@@ -86,6 +94,7 @@ impl Display for Error {
             Error::Sqlx(ref inner) => inner.fmt(f),
             Error::Migrate(ref inner) => inner.fmt(f),
             Error::Var(ref inner) => inner.fmt(f),
+            Error::Duration(ref inner) => inner.fmt(f),
         }
     }
 }

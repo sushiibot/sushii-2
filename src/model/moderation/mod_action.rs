@@ -157,7 +157,7 @@ impl ModActionExecutorDb for ModActionExecutor {
                                 &msg.author.tag(),
                                 &msg.author.id.0,
                                 &reason
-                            )
+                            ),
                         )
                         .await?;
                 } else {
