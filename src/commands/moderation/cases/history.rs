@@ -2,9 +2,9 @@ use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::utils::parse_mention;
+use std::collections::HashMap;
 use std::fmt::Write;
 
-use crate::keys::CacheAndHttpContainer;
 use crate::model::sql::{ModLogEntry, ModLogEntryDb};
 
 #[command]
@@ -85,10 +85,23 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
         let _ = write!(s, "\n");
     }
 
-    let data = &ctx.data.read().await;
-    let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
+    let action_counts = entries.iter().fold(HashMap::new(), |mut acc, case| {
+        let entry = acc.entry(&case.action).or_insert(0u64);
+        *entry += 1;
 
-    let target_user = UserId(user_id).to_user(&cache_http).await;
+        acc
+    });
+
+    let mut action_counts_vec: Vec<(&String, u64)> = action_counts.into_iter().collect();
+    action_counts_vec.sort_by_cached_key(|x| x.0.chars().rev().collect::<String>());
+
+    let action_counts_string = action_counts_vec
+        .iter()
+        .map(|case| format!("{} - {}", case.0, case.1))
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    let target_user = UserId(user_id).to_user(&ctx).await;
 
     msg.channel_id
         .send_message(&ctx.http, |m| {
@@ -110,6 +123,7 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
                 });
 
                 e.description(&s);
+                e.field("Summary", action_counts_string, false);
                 e.color(0xe67e22);
 
                 e
