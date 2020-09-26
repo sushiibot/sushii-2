@@ -7,7 +7,7 @@ use serenity::utils::parse_role;
 use crate::model::sql::*;
 
 #[command]
-#[sub_commands(role, duration)]
+#[sub_commands(role, defaultduration)]
 async fn mute(ctx: &Context, msg: &Message) -> CommandResult {
     let _ = msg
         .channel_id
@@ -21,6 +21,8 @@ async fn mute(ctx: &Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
+#[description("Sets the mute role")]
+#[usage("[role mention, ID, or name]")]
 async fn role(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let guild = match msg.guild(&ctx.cache).await {
         Some(g) => g,
@@ -36,7 +38,9 @@ async fn role(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let role_str = args.rest();
 
     if role_str.is_empty() {
-        msg.channel_id.say(&ctx, "Error: Give a role ID or name").await?;
+        msg.channel_id
+            .say(&ctx, "Error: Give a role ID or name")
+            .await?;
 
         return Ok(());
     }
@@ -77,7 +81,10 @@ fn point_str(s: &str, pos: usize, end: Option<usize>) -> String {
 }
 
 #[command]
-async fn duration(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+#[description("Sets the default duration of mutes, default is 24 hours")]
+#[usage("[duration]")]
+#[example("12 hours 30 minutes")]
+async fn defaultduration(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let mut conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
 
     let duration_str = args.rest();
