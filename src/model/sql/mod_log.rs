@@ -226,7 +226,7 @@ async fn get_user_entries_query(
             SELECT *
               FROM mod_logs
              WHERE guild_id = $1
-               AND user_id >= $2
+               AND user_id = $2
         "#,
         guild_id as i64,
         user_id as i64,

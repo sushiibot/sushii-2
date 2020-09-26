@@ -13,6 +13,81 @@
       "nullable": []
     }
   },
+  "1ff5fca2c6ae1d6d51fb54b0a5572b7bc5b8bf6bc0e43c2e39c6d45b342f186b": {
+    "query": "\n            SELECT *\n              FROM mod_logs\n             WHERE guild_id = $1\n               AND user_id = $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "case_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "action",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "action_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "user_tag",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "executor_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "reason",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "msg_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ]
+    }
+  },
   "20c0e6abdc83add4d32635cea7a0ec4f8d4a33d318c4294bcd05be46a0d7b682": {
     "query": "\n            SELECT *\n              FROM mutes\n             WHERE guild_id = $1\n               AND user_id = $2\n        ",
     "describe": {
