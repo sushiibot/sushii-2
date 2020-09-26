@@ -21,7 +21,6 @@ async fn mute(ctx: &Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
-#[num_args(1)]
 async fn role(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let guild = match msg.guild(&ctx.cache).await {
         Some(g) => g,
@@ -35,6 +34,12 @@ async fn role(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let mut conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
 
     let role_str = args.rest();
+
+    if role_str.is_empty() {
+        msg.channel_id.say(&ctx, "Error: Give a role ID or name").await?;
+
+        return Ok(());
+    }
 
     let role_id = parse_role(role_str)
         .or_else(|| role_str.parse::<u64>().ok())
@@ -154,11 +159,12 @@ mod tests {
     fn point_str_with_end() {
         let s = point_str("0123456789", 0, Some(9));
 
+        // End is exclusive so it won't point at 9
         assert_eq!(
             s,
             "```
 0123456789
-^^^^^^^^^^
+^^^^^^^^^
 ```"
         );
     }
@@ -171,7 +177,7 @@ mod tests {
             s,
             "```
 0123456789
- ^^^^^^
+ ^^^^^
 ```"
         );
     }
