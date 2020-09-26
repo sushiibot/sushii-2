@@ -77,6 +77,17 @@ async fn duration(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     let duration_str = args.rest();
 
+    if duration_str.is_empty() {
+        msg.channel_id
+            .say(
+                &ctx,
+                "Error: Please provide a mute duration. Example: `12 hours 30 minutes`",
+            )
+            .await?;
+
+        return Ok(());
+    }
+
     let duration = match humantime::parse_duration(&duration_str) {
         Ok(d) => d,
         Err(e) => {
@@ -86,17 +97,21 @@ async fn duration(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                     point_str(&duration_str, pos, None),
                 ),
                 DurationError::NumberExpected(pos) => format!(
-                    "Expected a number. This usually means that either the time \
-                        unit is broken into words, e.g. `m in` instead of `min`, \
-                        or just number is omitted, for example `2 hours min` instead \
-                        of `2 hours 1 min`:\n\
+                    "Expected a number.\nThis usually means that either the time \
+                        unit is separated (e.g. `m in` instead of `min`) \
+                        or a number is omitted (e.g. `2 hours min` instead \
+                        of `2 hours 1 min`):\n\
                         {}",
                     point_str(&duration_str, pos, None),
                 ),
                 DurationError::UnknownUnit { start, end, .. } => format!(
-                    "Invalid time unit, valid units are `seconds (second, sec, s), \
-                    minutes (minute, min, m), hours (hour, hr, h), days (day, d), \
-                    weeks (week, w), months (month, M)`:\n{}",
+                    "Invalid time unit, valid units are:\n\
+                    `seconds (second, sec, s),\n\
+                    minutes (minute, min, m),\n\
+                    hours (hour, hr, h),\n\
+                    days (day, d),\n\
+                    weeks (week, w),\n\
+                    months (month, M)`:\n{}",
                     point_str(&duration_str, start, Some(end)),
                 ),
                 DurationError::NumberOverflow => "Duration is too long".into(),
@@ -106,7 +121,7 @@ async fn duration(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             msg.channel_id
                 .say(
                     &ctx.http,
-                    format!("Error: Failed to parse duration: {}", err_str),
+                    format!("Error: Failed to parse duration -- {}", err_str),
                 )
                 .await?;
 
@@ -122,7 +137,7 @@ async fn duration(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         .say(
             &ctx.http,
             format!(
-                "Set the default mute duration to: {}",
+                "Set the default mute duration to `{}`",
                 humantime::format_duration(duration)
             ),
         )
