@@ -317,8 +317,18 @@ pub fn parse_id_reason(args: Args) -> (Vec<u64>, Option<String>) {
 
     let ids_and_reason = args.rest();
 
+    // If there's a reason (alphabetic chars, use that as the end) in case there
+    // are IDs or mentions in the reason which we don't want to include in the
+    // actual action
+    let reason_start = ids_and_reason.find(char::is_alphabetic);
+    let ids_substr = if let Some(index) = reason_start {
+        &ids_and_reason[..index]
+    } else {
+        &ids_and_reason[..]
+    };
+
     let (mut ids, end) =
-        RE.captures_iter(ids_and_reason)
+        RE.captures_iter(ids_substr)
             .enumerate()
             .fold((Vec::new(), 0), |mut acc, (i, caps)| {
                 if let Some(id) = caps.get(1).and_then(|m| m.as_str().parse::<u64>().ok()) {
@@ -369,8 +379,8 @@ mod tests {
             "<@145764790046818304> <@193163974471188480> <@151018674793349121> some reason text",
             // Space separated
             "145764790046818304 193163974471188480 151018674793349121 some reason text",
-            // Random chars in middle
-            "145764790046818304   193163974471188480 aoweifjf 151018674793349121 some reason text",
+            // Random spacing
+            "145764790046818304   193163974471188480    151018674793349121 some reason text",
         ];
 
         for s in input_strs {
@@ -392,8 +402,8 @@ mod tests {
             "<@145764790046818304> <@193163974471188480> <@151018674793349121>",
             // Space separated
             "145764790046818304 193163974471188480 151018674793349121 ",
-            // Random chars in middle
-            "145764790046818304   193163974471188480 aoweifjf 151018674793349121              ",
+            // Random spaces
+            "145764790046818304   193163974471188480     151018674793349121              ",
         ];
 
         for s in input_strs {
@@ -423,6 +433,41 @@ mod tests {
             assert_eq!(ids.len(), 3);
             assert_eq!(ids, IDS_EXP);
             assert!(reason.is_none());
+        }
+    }
+
+    #[test]
+    fn parse_ids_ignores_ids_in_reason() {
+        let inputs_and_expected = vec![
+            // Comma separated
+            (
+                "145764790046818304,193163974471188480,151018674793349121 some reason 193163974471188480 text",
+                "some reason 193163974471188480 text"
+            ),
+            // Mentions
+            (
+                "<@145764790046818304> <@193163974471188480> <@151018674793349121> some reason <@193163974471188480> text",
+                "some reason <@193163974471188480> text"
+            ),
+            // Space separated
+            (
+                "145764790046818304 193163974471188480 151018674793349121 some 193163974471188480 reason text",
+                "some 193163974471188480 reason text"
+            ),
+            // Random spacing
+            (
+                "145764790046818304   193163974471188480    151018674793349121 some reason 193163974471188480    text",
+                "some reason 193163974471188480    text"
+            ),
+        ];
+
+        for (input, expected_reason) in inputs_and_expected {
+            let args = Args::new(input, &[Delimiter::Single(' ')]);
+
+            let (ids, reason) = parse_id_reason(args);
+
+            assert_eq!(ids, IDS_EXP);
+            assert_eq!(reason.unwrap(), expected_reason);
         }
     }
 }
