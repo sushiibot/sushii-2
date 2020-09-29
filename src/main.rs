@@ -4,6 +4,7 @@ use serenity::{
 use sqlx::postgres::PgPoolOptions;
 use std::collections::HashSet;
 use std::sync::Arc;
+use tokio::signal::unix::{signal, SignalKind};
 
 mod commands;
 mod error;
@@ -110,15 +111,39 @@ async fn main() -> Result<()> {
 
         data.insert::<SushiiConfig>(Arc::clone(&sushii_conf));
         data.insert::<SushiiCache>(SushiiCache::default());
-        data.insert::<DbPool>(pool);
+        data.insert::<DbPool>(pool.clone());
         data.insert::<Metrics>(Arc::clone(&metrics));
     }
 
     // Start hyper metrics server
-    tokio::spawn(metrics_server::start(
-        Arc::clone(&sushii_conf),
-        Arc::clone(&metrics),
-    ));
+    let metrics_sender = metrics_server::start(Arc::clone(&sushii_conf), Arc::clone(&metrics));
+
+    let signal_kinds = vec![
+        SignalKind::hangup(),
+        SignalKind::interrupt(),
+        SignalKind::terminate(),
+    ];
+
+    for signal_kind in signal_kinds {
+        let mut stream = signal(signal_kind).unwrap();
+        let shard_manager = client.shard_manager.clone();
+        let pool = pool.clone();
+        let mut metrics_sender = metrics_sender.clone();
+
+        tokio::spawn(async move {
+            stream.recv().await;
+            tracing::info!("Signal received, shutting down...");
+            shard_manager.lock().await.shutdown_all().await;
+
+            tracing::info!("Closing database pool...");
+            pool.close().await;
+
+            tracing::info!("Shutting down metrics server...");
+            metrics_sender.send(()).await.expect("Failed to shut down metrics server");
+
+            tracing::info!("bye");
+        });
+    }
 
     if let Err(why) = client.start().await {
         tracing::error!("Client error: {:?}", why);

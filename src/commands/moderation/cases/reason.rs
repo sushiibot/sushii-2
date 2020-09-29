@@ -189,7 +189,9 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     }
 
-    msg.channel_id.say(&ctx, "Finished updating case reasons").await?;
+    msg.channel_id
+        .say(&ctx, "Finished updating case reasons")
+        .await?;
 
     Ok(())
 }

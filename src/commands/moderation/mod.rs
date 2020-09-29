@@ -4,7 +4,7 @@ pub mod cases;
 pub mod chat;
 
 use self::{
-    cases::{ban::*, history::*, kick::*, mute::*, warn::*, reason::*},
+    cases::{ban::*, history::*, kick::*, mute::*, reason::*, warn::*},
     chat::*,
 };
 
