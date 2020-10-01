@@ -17,6 +17,7 @@ Slimmed down feature set of original sushii-bot with a focus on moderation tools
     -   [ ] warn
     -   [x] mute / unmute
         -   [ ] timed mutes
+            -   [ ] adjust existing mute duration
         -   [ ] mute users who joined in last x minutes
     -   [x] cases
         -   [x] reason
