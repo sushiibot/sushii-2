@@ -263,17 +263,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "darkredis"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aea2720057de6407bb311e02bfbf6584efac4b0baf42abb4be768f178adc934c"
-dependencies = [
- "futures",
- "quick-error",
- "tokio",
-]
-
-[[package]]
 name = "dashmap"
 version = "4.0.0-rc6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1126,12 +1115,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cb14183cc7f213ee2410067e1ceeadba2a7478a59432ff0747a335202798b1e2"
 
 [[package]]
-name = "quick-error"
-version = "1.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1d01941d82fa2ab50be1e79e6714289dd7cde78eba4c074bc5a4374f650dfe0"
-
-[[package]]
 name = "quote"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1619,7 +1602,6 @@ version = "0.1.3"
 dependencies = [
  "async-trait",
  "chrono",
- "darkredis",
  "dashmap",
  "dotenv",
  "futures",
