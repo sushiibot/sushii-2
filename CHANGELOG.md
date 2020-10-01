@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2020-10-01
+
+### Changed
+
+-   Remove target-cpu codegen option
+
 ## [0.1.3] - 2020-10-01
 
 ### Added
@@ -31,5 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Dedupe mod action ids
 -   Handle shutdown signals cleanly
 
-[unreleased]: https://github.com/drklee3/sushii-2/compare/v0.1.3...HEAD
+[unreleased]: https://github.com/drklee3/sushii-2/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/drklee3/sushii-2/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/drklee3/sushii-2/compare/v0.1.2...v0.1.3
