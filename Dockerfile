@@ -7,8 +7,6 @@ RUN USER=root cargo init --bin
 
 # copy over manifests
 COPY ./Cargo.lock ./Cargo.toml ./
-# cargo is a dir and COPY copies dir contents
-COPY ./.cargo ./.cargo
 
 # cache dependencies
 RUN cargo build --release
