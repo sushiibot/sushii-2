@@ -1,24 +1,55 @@
 version: "3.8"
 services:
+    traefik:
+        container_name: traefik
+        image: traefik:v2.3
+        restart: unless-stopped
+        ports:
+            - 80:80
+            - 443:443
+        expose:
+            - "8080"
+            - "8082"
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./traefik:/etc/traefik
+        networks:
+            - web
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.api.rule=Host(`2.sushii.xyz`)"
+            - "traefik.http.routers.api.service=api@internal"
+            - "traefik.http.routers.api.middlewares=auth@file"
+            - "traefik.http.routers.api.entrypoints=secure"
+            - "traefik.http.routers.api.tls.certresolver=acme"
     grafana:
         image: grafana/grafana:7.1.5
         container_name: grafana
-        ports:
-            - "3000:3000"
+        expose:
+            - "3000"
         volumes:
             - ~/docker/grafana:/var/lib/grafana
         networks:
             - web
+        labels:
+            - "traefik.http.routers.grafana.rule=Host(`grafana.2.sushii.xyz`)"
+            - "traefik.http.routers.grafana.entrypoints=secure"
+            - "traefik.http.routers.grafana.tls.certresolver=acme"
     prometheus:
         image: prom/prometheus:v2.20.1
         container_name: prometheus
-        ports:
-            - "9090:9090"
+        expose:
+            - "9090"
         volumes:
             - ~/docker/prometheus:/etc/prometheus
         networks:
             - sushii_net
             - web
+        labels:
+            - "traefik.http.routers.prometheus.rule=Host(`prometheus.2.sushii.xyz`)"
+            - "traefik.http.routers.prometheus.entrypoints=secure"
+            - "traefik.http.routers.prometheus.tls.certresolver=acme"
+            - "traefik.http.routers.prometheus.middlewares=auth@file"
     postgres:
         image: postgres:12
         container_name: postgres

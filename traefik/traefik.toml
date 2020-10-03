@@ -1,0 +1,42 @@
+[entryPoints]
+  [entryPoints.insecure]
+    address = ":80"
+
+    [entryPoints.insecure.http.redirections]
+      [entryPoints.insecure.http.redirections.entryPoint]
+        to = "secure"
+
+  [entryPoints.secure]
+    address = ":443"
+
+    [entryPoints.secure.http.tls]
+      certResolver = "acme"
+
+  [entryPoints.traefik]
+    address = ":8082"
+
+[providers]
+  [providers.docker]
+    endpoint = "unix:///var/run/docker.sock"
+    defaultRule = "Host(`2.sushii.xyz`)"
+    watch = true
+    network = "web"
+
+  [providers.file]
+    filename = "/etc/traefik/dynamic_conf.toml"
+    watch = true
+
+[certificatesResolvers.acme.acme]
+  email = "acme@dlee.dev"
+  storage = "/etc/traefik/acme/acme.json"
+  caServer = "https://acme-v02.api.letsencrypt.org/directory"
+
+  [certificatesResolvers.acme.acme.httpChallenge]
+    entryPoint = "insecure"
+
+[api]
+  dashboard = true
+
+[metrics]
+  [metrics.prometheus]
+    entryPoint = "traefik"
