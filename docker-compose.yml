@@ -17,8 +17,7 @@ services:
             - web
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.api.rule=Host(`2.sushii.xyz`) && PathPrefix(`/traefik`)"
-            - "traefik.http.middlewares.traefik.stripprefix.prefixes=/traefik"
+            - "traefik.http.routers.api.rule=Host(`traefik.2.sushii.xyz`)"
             - "traefik.http.routers.api.service=api@internal"
             - "traefik.http.routers.api.middlewares=auth@file"
             - "traefik.http.routers.api.entrypoints=secure"
@@ -33,8 +32,7 @@ services:
         networks:
             - web
         labels:
-            - "traefik.http.routers.grafana.rule=Host(`2.sushii.xyz`) && PathPrefix(`/grafana`)"
-            - "traefik.http.middlewares.grafana.stripprefix.prefixes=/grafana"
+            - "traefik.http.routers.grafana.rule=Host(`grafana.2.sushii.xyz`)"
             - "traefik.http.routers.grafana.entrypoints=secure"
             - "traefik.http.routers.grafana.tls.certresolver=acme"
     prometheus:
@@ -48,8 +46,7 @@ services:
             - sushii_net
             - web
         labels:
-            - "traefik.http.routers.prometheus.rule=Host(`2.sushii.xyz`) && PathPrefix(`/prometheus`)"
-            - "traefik.http.middlewares.prometheus.stripprefix.prefixes=/prometheus"
+            - "traefik.http.routers.prometheus.rule=Host(`prometheus.2.sushii.xyz`)"
             - "traefik.http.routers.prometheus.entrypoints=secure"
             - "traefik.http.routers.prometheus.tls.certresolver=acme"
             - "traefik.http.routers.prometheus.middlewares=auth@file"
@@ -82,6 +79,8 @@ services:
             - .env
         networks:
             - sushii_net
+        labels:
+            - "traefik.enable=false"
 networks:
     web:
         external: false
