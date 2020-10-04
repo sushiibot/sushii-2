@@ -1,14 +1,20 @@
 use serenity::prelude::*;
+use std::sync::Once;
 use tokio::{
     task,
     time::{self, Duration},
 };
 
+static START: Once = Once::new();
+
 pub mod mute;
 
 pub async fn start(ctx: &Context) {
     let ctx = ctx.clone();
-    task::spawn(ten_seconds(ctx));
+
+    START.call_once(|| {
+        task::spawn(ten_seconds(ctx));
+    });
 }
 
 async fn ten_seconds(ctx: Context) {
