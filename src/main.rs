@@ -139,7 +139,10 @@ async fn main() -> Result<()> {
             pool.close().await;
 
             tracing::info!("Shutting down metrics server...");
-            metrics_sender.send(()).await.expect("Failed to shut down metrics server");
+            metrics_sender
+                .send(())
+                .await
+                .expect("Failed to shut down metrics server");
 
             tracing::info!("bye");
         });

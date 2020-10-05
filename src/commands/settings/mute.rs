@@ -13,7 +13,7 @@ async fn mute(ctx: &Context, msg: &Message) -> CommandResult {
         .channel_id
         .say(
             &ctx.http,
-            "Available sub-commands for `mute` are `role`, `duration`",
+            "Available sub-commands for `mute` are `role`, `defaultduration`",
         )
         .await?;
 

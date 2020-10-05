@@ -9,7 +9,9 @@ use self::{
 };
 
 #[group]
-#[commands(prune, history, ban, unban, kick, mute, reason, unmute, warn)]
+#[commands(
+    prune, history, ban, unban, kick, mute, listmutes, reason, unmute, warn
+)]
 #[only_in("guild")]
 #[required_permissions("BAN_MEMBERS")]
 pub struct Moderation;

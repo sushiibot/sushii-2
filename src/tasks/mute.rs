@@ -44,6 +44,16 @@ pub async fn unmute_member(ctx: &Context, mute: &Mute) -> Result<()> {
     };
 
     let mut member = guild_id.member(&ctx, mute.user_id as u64).await?;
+
+    ModLogEntry::new("unmute", true, guild_id.0, &member.user)
+        .reason(&Some(format!(
+            "Automated Unmute: Mute expired ({}).",
+            mute.get_human_duration()
+                .unwrap_or_else(|| "No duration".into())
+        )))
+        .save(&ctx)
+        .await?;
+
     member.remove_role(&ctx, mute_role).await?;
 
     mute.delete(&ctx).await?;

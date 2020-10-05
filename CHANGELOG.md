@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+-   Listen on sub paths instead of subdomains for Prometheus and Grafana services
+-   Start interval tasks only once
+
+### Added
+
+-   Traefik docker-compose service
+-   `listmutes` command
+
 ## [0.1.4] - 2020-10-01
 
 ### Changed
