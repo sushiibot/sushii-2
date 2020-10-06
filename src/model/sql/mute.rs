@@ -39,13 +39,15 @@ impl Mute {
     /// Gets total mute duration
     pub fn get_duration(&self) -> Option<Duration> {
         self.end_time
-            .map(|m| m.signed_duration_since(Utc::now().naive_local()))
+            .map(|t| t.signed_duration_since(self.start_time))
+            .map(|d| Duration::seconds(d.num_seconds()))
     }
 
     /// Gets remaining mute duration
     pub fn get_duration_remaining(&self) -> Option<Duration> {
         self.end_time
-            .map(|m| m.signed_duration_since(self.start_time))
+            .map(|t| t.signed_duration_since(Utc::now().naive_local()))
+            .map(|d| Duration::seconds(d.num_seconds()))
     }
 
     /// Gets total mute duration with Std Duration
