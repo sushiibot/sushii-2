@@ -146,7 +146,7 @@ async fn listmutes(ctx: &Context, msg: &Message) -> CommandResult {
         );
 
         if let Some(d) = mute.get_human_duration() {
-            let _ = write!(s, "(`{}` total", d);
+            let _ = write!(s, " (`{}` total", d);
         }
 
         if let Some(d) = mute.get_human_duration_remaining() {
@@ -155,7 +155,8 @@ async fn listmutes(ctx: &Context, msg: &Message) -> CommandResult {
 
         let _ = writeln!(
             s,
-            ": {} (ID: {})",
+            ": {} {} (ID: {})",
+            user.mention(),
             user.tag(),
             user.id.0
         );
