@@ -41,7 +41,7 @@ services:
         expose:
             - "9090"
         volumes:
-            - ~/docker/prometheus:/etc/prometheus
+            - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
         networks:
             - sushii_net
             - web
@@ -50,6 +50,21 @@ services:
             - "traefik.http.routers.prometheus.entrypoints=secure"
             - "traefik.http.routers.prometheus.tls.certresolver=acme"
             - "traefik.http.routers.prometheus.middlewares=auth@file"
+    cadvisor:
+        image: gcr.io/google-containers/cadvisor:latest
+        container_name: cadvisor
+        expose:
+            - "8080"
+        volumes:
+            - /:/rootfs:ro
+            - /var/run:/var/run:rw
+            - /sys:/sys:ro
+            - /var/lib/docker/:/var/lib/docker:ro
+        labels:
+            - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.2.sushii.xyz`)"
+            - "traefik.http.routers.cadvisor.entrypoints=secure"
+            - "traefik.http.routers.cadvisor.tls.certresolver=acme"
+            - "traefik.http.routers.cadvisor.middlewares=auth@file"
     postgres:
         image: postgres:12
         container_name: postgres
