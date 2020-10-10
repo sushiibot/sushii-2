@@ -53,6 +53,7 @@ services:
     cadvisor:
         image: gcr.io/google-containers/cadvisor:latest
         container_name: cadvisor
+        privileged: true
         expose:
             - "8080"
         volumes:
