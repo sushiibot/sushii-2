@@ -139,10 +139,15 @@ async fn listmutes(ctx: &Context, msg: &Message) -> CommandResult {
             }
         }
 
-        let _ = write!(s, "`{}` - `{}`",
+        let _ = write!(
+            s,
+            "`{}` - `{}`",
             mute.start_time.format("%Y-%m-%d %H:%M:%S"),
             // Need to do to_string() since indefinite is a string too
-            mute.end_time.map_or_else(|| "indefinite".into(), |m| m.format("%Y-%m-%d %H:%M:%S").to_string())
+            mute.end_time.map_or_else(
+                || "indefinite".into(),
+                |m| m.format("%Y-%m-%d %H:%M:%S").to_string()
+            )
         );
 
         if let Some(d) = mute.get_human_duration() {
@@ -153,13 +158,7 @@ async fn listmutes(ctx: &Context, msg: &Message) -> CommandResult {
             let _ = write!(s, ", `{}` remaining)", d);
         }
 
-        let _ = writeln!(
-            s,
-            ": {} {} (ID: {})",
-            user.mention(),
-            user.tag(),
-            user.id.0
-        );
+        let _ = writeln!(s, ": {} {} (ID: {})", user.mention(), user.tag(), user.id.0);
     }
 
     if s.is_empty() {

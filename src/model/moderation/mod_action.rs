@@ -300,6 +300,12 @@ impl ModActionExecutorDb for ModActionExecutor {
                     ));
                     e.description(&s);
 
+                    e.field(
+                        "Reason",
+                        self.reason.unwrap_or_else(|| "No reason given".into()),
+                        false,
+                    );
+
                     e
                 })
             })
