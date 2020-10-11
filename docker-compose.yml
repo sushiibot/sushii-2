@@ -71,6 +71,19 @@ services:
             - "traefik.http.routers.cadvisor.entrypoints=secure"
             - "traefik.http.routers.cadvisor.tls.certresolver=acme"
             - "traefik.http.routers.cadvisor.middlewares=auth@file"
+    node_exporter:
+        image: quay.io/prometheus/node-exporter
+        container_name: node_exporter
+        pid: "host"
+        command: "--path.rootfs=/host"
+        expose:
+            - "9100"
+        volumes:
+            - /:/host:ro,rslave
+        networks:
+            - web
+        labels:
+            - "traefik.enable=false"
     postgres:
         image: postgres:12
         container_name: postgres
