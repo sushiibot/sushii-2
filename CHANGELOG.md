@@ -14,8 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
--   Traefik docker-compose service
+-   Traefik, PostgreSQL backup, cAdvisor, Node Exporter docker-compose services
 -   `listmutes` command
+-   Mod action reason in response message
+-   Info when roles group is run without sub command
 
 ## [0.1.4] - 2020-10-01
 
@@ -50,3 +52,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [unreleased]: https://github.com/drklee3/sushii-2/compare/v0.1.4...HEAD
 [0.1.4]: https://github.com/drklee3/sushii-2/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/drklee3/sushii-2/compare/v0.1.2...v0.1.3
+[c:27120af]: https://github.com/drklee3/sushii-2/commit/27120af575aed5f7a437152d8b4d16b3fcc7e7c1
