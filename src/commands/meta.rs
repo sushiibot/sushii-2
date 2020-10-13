@@ -17,3 +17,29 @@ async fn invite(ctx: &Context, msg: &Message) -> CommandResult {
 
     Ok(())
 }
+
+#[command]
+async fn stats(ctx: &Context, msg: &Message) -> CommandResult {
+    let version = env!("CARGO_PKG_VERSION");
+    let github_run_id = option_env!("GITHUB_RUN_ID");
+
+    let _ = msg
+        .channel_id
+        .send_message(&ctx.http, |m| {
+            m.embed(|e| {
+                e.title("sushii 2");
+                e.color(0xe67e22);
+
+                e.field("Version", version, true);
+
+                if let Some(id) = github_run_id {
+                    e.field("Build ID", id, true);
+                }
+
+                e
+            })
+        })
+        .await?;
+
+    Ok(())
+}
