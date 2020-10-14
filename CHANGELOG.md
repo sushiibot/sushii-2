@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   `listmutes` command
 -   Mod action reason in response message
 -   Info when roles group is run without sub command
+-   Respond with error if no valid IDs are given to mod action executor
+
+### Fixed
+
+-   Parse mod action executor IDs with length 17-19 instead of just 18-19
 
 ## [0.1.4] - 2020-10-01
 

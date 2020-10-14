@@ -198,6 +198,17 @@ impl ModActionExecutorDb for ModActionExecutor {
         let action_str = self.action.to_string();
         let action_past_str = self.action.to_past_tense();
 
+        if self.target_users.is_empty() {
+            msg.channel_id
+                .say(
+                    &ctx,
+                    "No target users were found, please give valid IDs or mentions",
+                )
+                .await?;
+
+            return Ok(());
+        }
+
         let mut sent_msg = msg
             .channel_id
             .say(
@@ -318,7 +329,7 @@ impl ModActionExecutorDb for ModActionExecutor {
 pub fn parse_id_reason(args: Args) -> (Vec<u64>, Option<String>) {
     lazy_static! {
         // Can overflow, so need to handle later
-        static ref RE: Regex = Regex::new(r"(?:<@)?(\d{18,19})>?").unwrap();
+        static ref RE: Regex = Regex::new(r"(?:<@)?(\d{17,19})>?").unwrap();
     }
 
     let ids_and_reason = args.rest();
