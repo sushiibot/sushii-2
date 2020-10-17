@@ -31,6 +31,8 @@ services:
             - ~/docker/grafana:/var/lib/grafana
         networks:
             - web
+        env_file:
+            - .env.grafana
         labels:
             - "traefik.http.routers.grafana.rule=Host(`grafana.2.sushii.xyz`)"
             - "traefik.http.routers.grafana.entrypoints=secure"
