@@ -19,6 +19,28 @@ pub async fn check_pending_unmutes(ctx: &Context) -> Result<()> {
     Ok(())
 }
 
+fn is_member_unknown_error(err: &serenity::Error) -> bool {
+    match err {
+        serenity::Error::Http(e) => {
+            // Dereference serenity error then deref Box, then borrow it to not take ownership lol
+            match &**e {
+                serenity::http::error::Error::UnsuccessfulRequest(serenity::http::error::ErrorResponse{error,  ..}) => {
+                    // https://discord.com/developers/docs/topics/opcodes-and-status-codes#json
+                    if error.code == 10007 {
+                        // Member not found, Unknown Member
+                        // Meaning they are not in the guild
+                        true
+                    } else {
+                        false
+                    }
+                }
+                _ => false
+            }
+        }
+        _ => false
+    }
+}
+
 pub async fn unmute_member(ctx: &Context, mute: &Mute) -> Result<()> {
     let guild_id = GuildId(mute.guild_id as u64);
     // Possibly inefficient here since there can be the same guild config
@@ -43,18 +65,39 @@ pub async fn unmute_member(ctx: &Context, mute: &Mute) -> Result<()> {
         }
     };
 
-    let mut member = guild_id.member(&ctx, mute.user_id as u64).await?;
+    let user = UserId(mute.user_id as u64).to_user(&ctx).await?;
 
-    ModLogEntry::new("unmute", true, guild_id.0, &member.user)
-        .reason(&Some(format!(
-            "Automated Unmute: Mute expired ({}).",
+    let member = match guild_id.member(&ctx, mute.user_id as u64).await {
+        Ok(m) => Some(m),
+        Err(e) => {
+            // Some other error failed, member could still be in the guild
+            if !is_member_unknown_error(&e) {
+                return Err(e.into());
+            }
+
+            // Member is not found in existing guild
+            None
+        }
+    };
+
+    let mut reason = format!(
+            "Automated Unmute: Mute expired (Duration: {}).",
             mute.get_human_duration()
-                .unwrap_or_else(|| "No duration".into())
-        )))
+                .unwrap_or_else(|| "N/A".into()),
+        );
+    
+    if member.is_none() {
+        reason.push_str(" User is currently not in guild and will not be muted on re-join.");
+    }
+
+    ModLogEntry::new("unmute", true, guild_id.0, &user)
+        .reason(&Some(reason))
         .save(&ctx)
         .await?;
 
-    member.remove_role(&ctx, mute_role).await?;
+    if let Some(mut m) = member {
+        m.remove_role(&ctx, mute_role).await?;
+    }
 
     mute.delete(&ctx).await?;
 

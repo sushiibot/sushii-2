@@ -23,10 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 -   Parse mod action executor IDs with length 17-19 instead of just 18-19
+-   Handle unmutes when members are no longer in the guild
 
 ## [0.1.4] - 2020-10-01
 
-### Changed
+### Fixed
 
 -   Remove target-cpu codegen option
 
@@ -46,13 +47,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 -   Move Docker sushii binary to /usr/local/bin
--   Add libssl-dev in Docker image
--   Fix correct NaiveDateTime format string
--   Prevent role handler from running outside of role channels
--   Fix mod log entry saving
--   Prevent saving placeholder modlog reason
 -   Dedupe mod action ids
 -   Handle shutdown signals cleanly
+
+### Fixed
+
+-   Add libssl-dev in Docker image
+-   Fix correct NaiveDateTime format string
+-   Prevent saving placeholder modlog reason
+-   Prevent role handler from running outside of role channels
+-   Fix mod log entry saving
 
 [unreleased]: https://github.com/drklee3/sushii-2/compare/v0.1.4...HEAD
 [0.1.4]: https://github.com/drklee3/sushii-2/compare/v0.1.3...v0.1.4

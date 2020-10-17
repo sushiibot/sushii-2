@@ -17,7 +17,9 @@ Slimmed down feature set of original sushii-bot with a focus on moderation tools
     -   [x] mute / unmute
         -   [ ] timed mutes
             -   [ ] set duration per mute (s!!mute [ids] [duration and reason])
+            -   [ ] remove time duration (indefinite)
             -   [ ] adjust existing mute duration
+        -   [ ] allow muting users who left
         -   [ ] mute users who joined in last x minutes
     -   [x] cases
         -   [x] reason
@@ -26,7 +28,7 @@ Slimmed down feature set of original sushii-bot with a focus on moderation tools
         -   [x] json support
         -   [x] toml support
     -   [ ] settings
-        -   [ ] dm users on action with reason
+        -   [ ] dm users on action with reason (mutes only)
             -   [ ] toggle
             -   [ ] set message
         -   [ ] default mute duration (0 to disable)
