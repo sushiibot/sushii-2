@@ -106,6 +106,9 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let data = &ctx.data.read().await;
     let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
 
+    // Since take ownership of entries in the iteration, just saving the length
+    let num_entries = entries.len();
+
     for mut entry in entries {
         let msg_id = match entry.msg_id {
             Some(id) => id,
@@ -190,7 +193,7 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     }
 
     msg.channel_id
-        .say(&ctx, "Finished updating case reasons")
+        .say(&ctx, format!("Finished updating {} cases with reason: {}", num_entries, reason))
         .await?;
 
     Ok(())
