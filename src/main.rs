@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
     let sushii_conf = Arc::new(SushiiConfig::new_from_env()?);
 
     let pool = PgPoolOptions::new()
-        .max_connections(5)
+        .max_connections(10)
         .connect(&sushii_conf.database_url)
         .await?;
 
