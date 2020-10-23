@@ -12,7 +12,7 @@ async fn prune(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             msg.channel_id
                 .say(
                     &ctx.http,
-                    "Error: Invalid number of messages, must be between 2 and 99 (inclusive)",
+                    "Error: Invalid number of messages, must be between 1 and 99 (inclusive)",
                 )
                 .await?;
 
@@ -22,7 +22,8 @@ async fn prune(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     // Can delete 100, but we want to + 1 later so that the message invoking this
     // command isn't counted
-    if num_messages < 2 || num_messages > 99 {
+    // also, needs to delete at least 2, but since we + 1, we can allow just 1
+    if num_messages < 1 || num_messages > 99 {
         msg.channel_id
             .say(
                 &ctx.http,
