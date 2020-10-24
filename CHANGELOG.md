@@ -7,12 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.5] - 2020-10-16
+### Added
+
+-   Reference to mute mod log case to determine mute executor on unmute
+-   Pending status to mutes to allow for mute duration to be set per command
 
 ### Changed
 
--   Listen on sub paths instead of subdomains for Prometheus and Grafana services
--   Start interval tasks only once
+-   `reason` responds with number of cases modified and reason
+
+## [0.1.5] - 2020-10-16
 
 ### Added
 
@@ -21,6 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Mod action reason in response message
 -   Info when roles group is run without sub command
 -   Respond with error if no valid IDs are given to mod action executor
+
+### Changed
+
+-   Listen on sub paths instead of subdomains for Prometheus and Grafana services
+-   Start interval tasks only once
 
 ### Fixed
 

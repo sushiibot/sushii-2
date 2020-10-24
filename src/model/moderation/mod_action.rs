@@ -6,6 +6,7 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::CacheAndHttp;
 use serenity::Error;
+use std::time::Duration;
 use std::collections::HashSet;
 use std::fmt;
 use std::fmt::Write;
@@ -16,7 +17,7 @@ use crate::error::{Error as SushiiError, Result};
 use crate::keys::CacheAndHttpContainer;
 use crate::model::sql::{GuildConfig, GuildConfigDb, ModLogEntry, ModLogEntryDb};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ModActionType {
     Ban,
     Unban,
@@ -316,6 +317,16 @@ impl ModActionExecutorDb for ModActionExecutor {
                         self.reason.unwrap_or_else(|| "No reason given".into()),
                         false,
                     );
+
+                    if let Some(duration) = guild_conf.mute_duration {
+                        if self.action == ModActionType::Mute {
+                            e.field(
+                                "Mute Duration",
+                                humantime::format_duration(Duration::from_secs(duration as u64)),
+                                false,
+                            );
+                        }
+                    }
 
                     e
                 })

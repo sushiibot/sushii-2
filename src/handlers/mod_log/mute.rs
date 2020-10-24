@@ -102,19 +102,36 @@ async fn _guild_member_update(
         _ => return Ok(()),
     };
 
+    // Add a mod log entry
+    let entry = modlog_handler(ctx, &new_member.guild_id, &new_member.user, action).await?;
+
     if action == "mute" {
-        // Add a mute entry (to monitor for re-joins)
-        Mute::new(
-            new_member.guild_id.0,
-            new_member.user.id.0,
-            guild_conf.mute_duration.map(|secs| Duration::seconds(secs)),
-        )
-        .save(&ctx)
-        .await?;
+        // Mute entries are to monitor for re-joins and keep track of duration
+
+        // Check for a pending mute (e.g. mutes with a command)
+        if let Some(mute_entry) = Mute::get_pending(&ctx, new_member.guild_id.0, new_member.user.id.0).await? {
+            // If there's a pending one, update the mod log case id and set
+            // pending to false
+            mute_entry
+                .case_id(entry.case_id)
+                .pending(false)
+                .save(&ctx)
+                .await?;
+        } else {
+            // If there isn't a pending, it's just a regular mute from manually
+            // adding roles to a user so just create a new one and save it
+            Mute::new(
+                new_member.guild_id.0,
+                new_member.user.id.0,
+                guild_conf.mute_duration.map(|secs| Duration::seconds(secs)),
+            )
+            .case_id(entry.case_id)
+            .save(&ctx)
+            .await?;
+        }
     } else if action == "unmute" {
         delete_mute(&ctx, new_member.guild_id.0, new_member.user.id.0).await?;
     }
 
-    // Add a mod log entry
-    modlog_handler(ctx, &new_member.guild_id, &new_member.user, action).await
+    Ok(())
 }

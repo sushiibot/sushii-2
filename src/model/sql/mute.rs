@@ -10,17 +10,35 @@ use crate::keys::DbPool;
 pub struct Mute {
     pub guild_id: i64,
     pub user_id: i64,
+
+    /// (guild_id, case_id) foreign key to originating mute mod action
+    pub case_id: Option<i64>,
+
+    /// Allow Mutes to be added from other places other than on_member_update in
+    /// order to change duration on a per mute basis
+    pub pending: bool,
     pub start_time: NaiveDateTime,
     pub end_time: Option<NaiveDateTime>,
 }
 
 #[async_trait]
 pub trait MuteDb {
+    /// Gets a NON-pending mute from guild and user ID
     async fn from_id(ctx: &Context, guild_id: u64, user_id: u64) -> Result<Option<Mute>>;
+
+    /// Gets a pending mute from guild and user ID
+    async fn get_pending(ctx: &Context, guild_id: u64, user_id: u64) -> Result<Option<Mute>>;
+
+    /// Gets all currently expired mutes
     async fn get_expired(ctx: &Context) -> Result<Vec<Mute>>;
+
+    /// Gets all ongoing mutes in a guild
     async fn get_ongoing(ctx: &Context, guild_id: u64) -> Result<Vec<Mute>>;
 
+    /// Saves a mute to the database
     async fn save(&self, ctx: &Context) -> Result<Mute>;
+
+    /// Deletes a mute from the database
     async fn delete(&self, ctx: &Context) -> Result<()>;
 }
 
@@ -31,9 +49,21 @@ impl Mute {
         Mute {
             guild_id: guild_id as i64,
             user_id: user_id as i64,
+            case_id: None,
+            pending: false,
             start_time: now,
             end_time: duration.map(|d| now + d),
         }
+    }
+
+    pub fn case_id(mut self, case_id: i64) -> Self {
+        self.case_id.replace(case_id);
+        self
+    }
+
+    pub fn pending(mut self, pending: bool) -> Self {
+        self.pending = pending;
+        self
     }
 
     /// Gets total mute duration
@@ -82,6 +112,13 @@ impl MuteDb for Mute {
         get_from_id_query(&pool, guild_id, user_id).await
     }
 
+    async fn get_pending(ctx: &Context, guild_id: u64, user_id: u64) -> Result<Option<Mute>> {
+        let data = ctx.data.read().await;
+        let pool = data.get::<DbPool>().unwrap();
+
+        get_pending_query(&pool, guild_id, user_id).await
+    }
+
     async fn get_expired(ctx: &Context) -> Result<Vec<Mute>> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
@@ -111,6 +148,28 @@ impl MuteDb for Mute {
     }
 }
 
+async fn get_pending_query(
+    pool: &sqlx::PgPool,
+    guild_id: u64,
+    user_id: u64,
+) -> Result<Option<Mute>> {
+    sqlx::query_as!(
+        Mute,
+        r#"
+            SELECT *
+              FROM mutes
+             WHERE guild_id = $1
+               AND user_id = $2
+               AND pending = true
+        "#,
+        guild_id as i64,
+        user_id as i64,
+    )
+    .fetch_optional(pool)
+    .await
+    .map_err(Into::into)
+}
+
 async fn get_from_id_query(
     pool: &sqlx::PgPool,
     guild_id: u64,
@@ -123,6 +182,7 @@ async fn get_from_id_query(
               FROM mutes
              WHERE guild_id = $1
                AND user_id = $2
+               AND pending = false
         "#,
         guild_id as i64,
         user_id as i64,

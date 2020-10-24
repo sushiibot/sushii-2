@@ -1,6 +1,6 @@
 use serenity::{model::prelude::*, prelude::*};
 
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::model::{sql::*, sushii_config::*};
 
 pub async fn modlog_handler(
@@ -8,7 +8,7 @@ pub async fn modlog_handler(
     guild_id: &GuildId,
     user: &User,
     action: &str,
-) -> Result<()> {
+) -> Result<ModLogEntry> {
     // check if a ban/unban command was used instead of discord right click ban
     // add the action to the database if not pendings
     let mut entry =
@@ -30,7 +30,8 @@ pub async fn modlog_handler(
                 ?user,
                 "No guild config found while handling mod_log"
             );
-            return Ok(());
+
+            return Err(Error::Sushii("Missing guild".into()));
         }
     };
 
@@ -67,7 +68,7 @@ pub async fn modlog_handler(
     entry.pending = false;
     entry.save(&ctx).await?;
 
-    Ok(())
+    Ok(entry)
 }
 
 async fn get_user_or_bot(ctx: &Context, id: Option<i64>) -> User {
