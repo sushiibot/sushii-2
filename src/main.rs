@@ -87,7 +87,7 @@ async fn main() -> Result<()> {
         .group(&commands::roles::ROLES_GROUP)
         .group(&commands::OWNER_GROUP);
 
-    let mut client = Client::new(&sushii_conf.discord_token)
+    let mut client = Client::builder(&sushii_conf.discord_token)
         .intents(
             GatewayIntents::GUILDS
                 | GatewayIntents::GUILD_MEMBERS

@@ -25,7 +25,7 @@ tracing-subscriber = "0.2"
 
 [dependencies.tokio]
 version = "0.2"
-features = ["macros", "rt-core", "time"]
+features = ["macros", "rt-core", "time", "signal"]
 
 [dependencies.sqlx]
 version = "0.4.0-beta.1"
@@ -33,5 +33,5 @@ default-features = false
 features = [ "runtime-tokio", "macros", "postgres", "json", "chrono", "offline", "migrate" ]
 
 [dependencies.serenity]
-version = "0.9.0-rc.1"
+version = "0.9.0-rc.3"
 features = ["default", "collector"]
