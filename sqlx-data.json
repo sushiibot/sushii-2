@@ -88,45 +88,6 @@
       ]
     }
   },
-  "20c0e6abdc83add4d32635cea7a0ec4f8d4a33d318c4294bcd05be46a0d7b682": {
-    "query": "\n            SELECT *\n              FROM mutes\n             WHERE guild_id = $1\n               AND user_id = $2\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "start_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 3,
-          "name": "end_time",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true
-      ]
-    }
-  },
   "2400c62204bcae835e29e56a42e44964b38dadc88bda3d4388fc059d9376a223": {
     "query": "\n        INSERT INTO mutes\n             VALUES ($1, $2, $3, $4)\n        ON CONFLICT (guild_id, user_id)\n          DO UPDATE\n                SET start_time = $3,\n                    end_time = $4\n            RETURNING *\n        ",
     "describe": {
@@ -150,6 +111,16 @@
           "ordinal": 3,
           "name": "end_time",
           "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "case_id",
+          "type_info": "Int8"
         }
       ],
       "parameters": {
@@ -163,6 +134,8 @@
       "nullable": [
         false,
         false,
+        false,
+        true,
         false,
         true
       ]
@@ -716,6 +689,61 @@
       "nullable": []
     }
   },
+  "8987e9792295e9fd5f88e4636e7b75f6056655be14121dc3922b02d4d31f5886": {
+    "query": "\n        INSERT INTO mutes (guild_id, user_id, start_time, end_time, pending, case_id)\n             VALUES ($1, $2, $3, $4, $5, $6)\n        ON CONFLICT (guild_id, user_id)\n          DO UPDATE\n                SET start_time = $3,\n                    end_time = $4\n            RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "start_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 3,
+          "name": "end_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "case_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Timestamp",
+          "Timestamp",
+          "Bool",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
+      ]
+    }
+  },
   "95d94662c09e3a73ada0b36d6770ad76db85a724edcc3240dff129de127c9e5b": {
     "query": "\n            DELETE FROM mutes\n                  WHERE guild_id = $1\n                    AND user_id = $2\n        ",
     "describe": {
@@ -752,6 +780,16 @@
           "ordinal": 3,
           "name": "end_time",
           "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "case_id",
+          "type_info": "Int8"
         }
       ],
       "parameters": {
@@ -760,6 +798,8 @@
       "nullable": [
         false,
         false,
+        false,
+        true,
         false,
         true
       ]
@@ -788,6 +828,16 @@
           "ordinal": 3,
           "name": "end_time",
           "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "case_id",
+          "type_info": "Int8"
         }
       ],
       "parameters": {
@@ -798,6 +848,8 @@
       "nullable": [
         false,
         false,
+        false,
+        true,
         false,
         true
       ]
