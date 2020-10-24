@@ -225,18 +225,22 @@ async fn upsert_query(pool: &sqlx::PgPool, mute: &Mute) -> Result<Mute> {
     sqlx::query_as!(
         Mute,
         r#"
-        INSERT INTO mutes
-             VALUES ($1, $2, $3, $4)
+        INSERT INTO mutes (guild_id, user_id, start_time, end_time, pending, case_id)
+             VALUES ($1, $2, $3, $4, $5, $6)
         ON CONFLICT (guild_id, user_id)
           DO UPDATE
                 SET start_time = $3,
                     end_time = $4
             RETURNING *
         "#,
+        // Not in the order of the struct fields, but in the order of columns or it make error :(
+        // Pending and case_id were added afterwards so they at the end
         mute.guild_id,
         mute.user_id,
         mute.start_time,
         mute.end_time,
+        mute.pending,
+        mute.case_id,
     )
     .fetch_one(pool)
     .await
