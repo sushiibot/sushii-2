@@ -168,6 +168,57 @@
       ]
     }
   },
+  "24ba7cf2334db7b78b175992f61b6752febaac226fb67ef1fd1b59f08d9b472c": {
+    "query": "\n            SELECT *\n              FROM mutes\n             WHERE guild_id = $1\n               AND user_id = $2\n               AND pending = false\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "start_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 3,
+          "name": "end_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "case_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
+      ]
+    }
+  },
   "295f0e0d0ad26955c10feca52999e878fabbfa0a30fec8d5816ef97501d027f7": {
     "query": "\n            SELECT *\n              FROM mod_logs\n             WHERE guild_id = $1\n               AND case_id >= $2\n               AND case_id <= $3\n        ",
     "describe": {
@@ -400,6 +451,57 @@
       ]
     }
   },
+  "641a2c6e9559975cebe31a000c8e0ae695a04e0a0671f8e0e7e07315cc31703f": {
+    "query": "\n            SELECT *\n              FROM mutes\n             WHERE guild_id = $1\n               AND user_id = $2\n               AND pending = true\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "start_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 3,
+          "name": "end_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "case_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
+      ]
+    }
+  },
   "6f06b01e8606a8e5b958100f3cbaae946bdfe70e35aaf6b5e5e5900ce13a03f4": {
     "query": "\n            SELECT *\n              FROM guild_configs\n             WHERE id = $1\n        ",
     "describe": {
@@ -625,42 +727,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "9785fac5945545df686c0dec6088fe3762381a9db5c5768e2e726a1e52cb5baa": {
-    "query": "\n            SELECT *\n              FROM mutes\n             WHERE end_time > timezone('UTC', now())\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "start_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 3,
-          "name": "end_time",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true
-      ]
     }
   },
   "cf21bd565ae6274c44718984217076091fe7d163feb99065c55535c5b45c87dd": {
