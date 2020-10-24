@@ -166,9 +166,9 @@ dependencies = [
 
 [[package]]
 name = "command_attr"
-version = "0.3.0-rc.2"
+version = "0.3.0-rc.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6745770e89e5e4583424362f15f91c8bb0ef54387d209af30e0446d08909ae7d"
+checksum = "a0f4333a184e4dd8d4f4af51c8cb73a9f8e6290955aa8d851417eebcc6eec3c0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1366,9 +1366,9 @@ dependencies = [
 
 [[package]]
 name = "serenity"
-version = "0.9.0-rc.3"
+version = "0.9.0-rc.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2932867c827d7bf7c2633df1135491fc35d7d3cf9911fd9256ead0ce2bb29f7"
+checksum = "211e5db2a05e5ce6532e6242f0231714b13d8de3d55a2c904ca35d12445bf7cb"
 dependencies = [
  "async-trait",
  "async-tungstenite",
