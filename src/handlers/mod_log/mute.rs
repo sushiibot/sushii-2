@@ -109,7 +109,9 @@ async fn _guild_member_update(
         // Mute entries are to monitor for re-joins and keep track of duration
 
         // Check for a pending mute (e.g. mutes with a command)
-        if let Some(mute_entry) = Mute::get_pending(&ctx, new_member.guild_id.0, new_member.user.id.0).await? {
+        if let Some(mute_entry) =
+            Mute::get_pending(&ctx, new_member.guild_id.0, new_member.user.id.0).await?
+        {
             // If there's a pending one, update the mod log case id and set
             // pending to false
             mute_entry

@@ -24,7 +24,9 @@ fn is_member_unknown_error(err: &serenity::Error) -> bool {
         serenity::Error::Http(e) => {
             // Dereference serenity error then deref Box, then borrow it to not take ownership lol
             match &**e {
-                serenity::http::error::Error::UnsuccessfulRequest(serenity::http::error::ErrorResponse{error,  ..}) => {
+                serenity::http::error::Error::UnsuccessfulRequest(
+                    serenity::http::error::ErrorResponse { error, .. },
+                ) => {
                     // https://discord.com/developers/docs/topics/opcodes-and-status-codes#json
                     if error.code == 10007 {
                         // Member not found, Unknown Member
@@ -34,10 +36,10 @@ fn is_member_unknown_error(err: &serenity::Error) -> bool {
                         false
                     }
                 }
-                _ => false
+                _ => false,
             }
         }
-        _ => false
+        _ => false,
     }
 }
 
@@ -81,11 +83,10 @@ pub async fn unmute_member(ctx: &Context, mute: &Mute) -> Result<()> {
     };
 
     let mut reason = format!(
-            "Automated Unmute: Mute expired (Duration: {}).",
-            mute.get_human_duration()
-                .unwrap_or_else(|| "N/A".into()),
-        );
-    
+        "Automated Unmute: Mute expired (Duration: {}).",
+        mute.get_human_duration().unwrap_or_else(|| "N/A".into()),
+    );
+
     if member.is_none() {
         reason.push_str(" User is currently not in guild and will not be muted on re-join.");
     }

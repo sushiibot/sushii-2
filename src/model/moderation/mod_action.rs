@@ -1,3 +1,4 @@
+use chrono::Duration;
 use lazy_static::lazy_static;
 use regex::Regex;
 use serenity::async_trait;
@@ -6,7 +7,6 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::CacheAndHttp;
 use serenity::Error;
-use std::time::Duration;
 use std::collections::HashSet;
 use std::fmt;
 use std::fmt::Write;
@@ -15,7 +15,8 @@ use std::sync::Arc;
 
 use crate::error::{Error as SushiiError, Result};
 use crate::keys::CacheAndHttpContainer;
-use crate::model::sql::{GuildConfig, GuildConfigDb, ModLogEntry, ModLogEntryDb};
+use crate::model::sql::{GuildConfig, GuildConfigDb, ModLogEntry, ModLogEntryDb, Mute, MuteDb};
+use crate::utils::duration::parse_duration;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ModActionType {
@@ -80,7 +81,8 @@ pub trait ModActionExecutorDb {
         user: &User,
         guild_id: &GuildId,
         guild_conf: &GuildConfig,
-    ) -> StdResult<(), Error>;
+        duration: &Option<Duration>,
+    ) -> Result<()>;
     async fn execute(mut self, ctx: &Context, msg: &Message, guild_id: &GuildId) -> Result<()>;
 }
 
@@ -90,17 +92,27 @@ pub struct ModActionExecutor {
     pub target_users: Vec<u64>,
     pub exclude_users: HashSet<u64>,
     pub reason: Option<String>,
+
+    /// Duration is only for mutes
+    pub duration: Option<StdResult<Duration, String>>,
 }
 
 impl ModActionExecutor {
     pub fn from_args(args: Args, action: ModActionType) -> Self {
-        let (target_users, reason) = parse_id_reason(args);
+        let (target_users, reason, duration) = if action == ModActionType::Mute {
+            parse_id_reason_duration(args)
+        } else {
+            let (target_users, reason) = parse_id_reason(args);
+
+            (target_users, reason, None)
+        };
 
         Self {
             action,
             target_users,
             exclude_users: HashSet::new(),
             reason,
+            duration,
         }
     }
 
@@ -123,7 +135,8 @@ impl ModActionExecutorDb for ModActionExecutor {
         user: &User,
         guild_id: &GuildId,
         guild_conf: &GuildConfig,
-    ) -> StdResult<(), Error> {
+        duration: &Option<Duration>,
+    ) -> Result<()> {
         match self.action {
             ModActionType::Ban => {
                 if let Some(reason) = &self.reason {
@@ -170,6 +183,12 @@ impl ModActionExecutorDb for ModActionExecutor {
                 if let Some(role_id) = guild_conf.mute_role {
                     let mut member = guild_id.member(&cache_http, user).await?;
 
+                    // Add a pending mute entry
+                    Mute::new(guild_id.0, user.id.0, *duration)
+                        .pending(true)
+                        .save(&ctx)
+                        .await?;
+
                     member.add_role(&ctx.http, role_id as u64).await?;
                 }
             }
@@ -209,6 +228,27 @@ impl ModActionExecutorDb for ModActionExecutor {
 
             return Ok(());
         }
+
+        if let Some(duration) = &self.duration {
+            // If there is a duration, check if the duration parsing failed
+            if let Err(e) = duration {
+                msg.channel_id
+                    .say(&ctx, format!("Invalid duration, {}", e))
+                    .await?;
+
+                return Ok(());
+            }
+        }
+
+        // Uh... clone then flatten the Option<Result<Duration>> to just
+        // Option<Duration>, otherwise just use guild config default
+        // This is either the provided duration, the guild config default duration, or just None for indefinite
+        let duration = self
+            .duration
+            .clone()
+            .map(|d| d.ok())
+            .flatten()
+            .or_else(|| guild_conf.mute_duration.map(Duration::seconds));
 
         let mut sent_msg = msg
             .channel_id
@@ -265,17 +305,30 @@ impl ModActionExecutorDb for ModActionExecutor {
             };
 
             let res = self
-                .execute_user(&ctx, &msg, &cache_http, &user, &guild_id, &guild_conf)
+                .execute_user(
+                    &ctx,
+                    &msg,
+                    &cache_http,
+                    &user,
+                    &guild_id,
+                    &guild_conf,
+                    &duration,
+                )
                 .await;
 
             match res {
-                Err(Error::Model(ModelError::InvalidPermissions(permissions))) => {
+                // Bruh it's getting spaghetti'd again
+                Err(SushiiError::Serenity(Error::Model(ModelError::InvalidPermissions(
+                    permissions,
+                )))) => {
                     let _ = writeln!(s, ":question: {} - Error: I don't have permission to {} this user, requires: `{:?}`.", &user_tag_id, &action_str, permissions);
                     if let Err(e) = entry.delete(&ctx).await {
                         tracing::error!("Failed to delete entry: {}", e);
                     }
                 }
-                Err(Error::Model(ModelError::DeleteMessageDaysAmount(num))) => {
+                Err(SushiiError::Serenity(Error::Model(ModelError::DeleteMessageDaysAmount(
+                    num,
+                )))) => {
                     let _ = writeln!(s, ":x: {} - Error: The number of days worth of messages to delete is over the maximum: ({}).", &user_tag_id, &num);
                     if let Err(e) = entry.delete(&ctx).await {
                         tracing::error!("Failed to delete entry: {}", e);
@@ -318,14 +371,15 @@ impl ModActionExecutorDb for ModActionExecutor {
                         false,
                     );
 
-                    if let Some(duration) = guild_conf.mute_duration {
-                        if self.action == ModActionType::Mute {
-                            e.field(
-                                "Mute Duration",
-                                humantime::format_duration(Duration::from_secs(duration as u64)),
-                                false,
-                            );
-                        }
+                    if self.action == ModActionType::Mute {
+                        e.field(
+                            "Mute Duration",
+                            duration.map_or_else(
+                                || "Indefinite".to_string(),
+                                |d| humantime::format_duration(d.to_std().unwrap()).to_string(),
+                            ),
+                            false,
+                        );
                     }
 
                     e
@@ -337,7 +391,44 @@ impl ModActionExecutorDb for ModActionExecutor {
     }
 }
 
-pub fn parse_id_reason(args: Args) -> (Vec<u64>, Option<String>) {
+/// Returns start and end byte range of the duration
+fn find_duration(s: &str) -> Option<regex::Match> {
+    lazy_static! {
+        static ref RE: Regex = Regex::new(
+            r"(?:(?:\d+\s*(?:nanos|nsec|ns|usec|us|millis|msec|ms|seconds|second|secs|sec|s|minutes|minute|min|mins|m|hours|hour|hrs|hr|h|days|day|d|weeks|week|w|months|month|M|years|year|y))\s?)+"
+        ).unwrap();
+    }
+
+    RE.find(s)
+}
+
+fn parse_id_reason_duration(
+    args: Args,
+) -> (
+    Vec<u64>,
+    Option<String>,
+    Option<StdResult<Duration, String>>,
+) {
+    let (ids, reason) = parse_id_reason(args);
+
+    // Look for position of duration string
+    let duration_match = reason.as_ref().and_then(|s| find_duration(&s));
+
+    // Reason without the duration string
+    let reason_no_duration = duration_match.and_then(|d| {
+        reason
+            .as_ref()
+            .map(|r| r.replace(d.as_str(), "").trim().to_string())
+    });
+
+    // Parsed duration
+    let duration = duration_match.map(|d| parse_duration(d.as_str()));
+
+    // Return the ids, reason with the duration string removed, parsed duration
+    (ids, reason_no_duration, duration)
+}
+
+fn parse_id_reason(args: Args) -> (Vec<u64>, Option<String>) {
     lazy_static! {
         // Can overflow, so need to handle later
         static ref RE: Regex = Regex::new(r"(?:<@)?(\d{17,19})>?").unwrap();
@@ -496,6 +587,61 @@ mod tests {
 
             assert_eq!(ids, IDS_EXP);
             assert_eq!(reason.unwrap(), expected_reason);
+        }
+    }
+
+    #[test]
+    fn finds_durations() {
+        let strs = vec![
+            "3000s",
+            "300sec",
+            "300 secs",
+            "50seconds",
+            "1 second",
+            "100m",
+            "12min",
+            "12mins",
+            "1minute",
+            "7minutes",
+            "2h",
+            "7hr",
+            "7hrs",
+            "1hour",
+            "24hours",
+            "1day",
+            "2days",
+            "365d",
+            "1week",
+            "7weeks",
+        ];
+
+        for s in strs {
+            assert!(find_duration(s).is_some());
+        }
+    }
+
+    #[test]
+    fn parses_ids_reason_duration() {
+        let input_strs = vec![
+            "145764790046818304,193163974471188480,151018674793349121 some reason text 6 hours 4 minutes 2 seconds",
+            "145764790046818304,193163974471188480,151018674793349121 some reason text 6hours 4minutes 2seconds",
+            "145764790046818304,193163974471188480,151018674793349121 some reason text 6h 4m 2s",
+            "145764790046818304,193163974471188480,151018674793349121 6hrs 4m 2secs some reason text ",
+            // right in the middle wat the
+            "145764790046818304,193163974471188480,151018674793349121 some 6h 4m 2s reason text",
+        ];
+
+        // 6 hours 4 minutes 2 seconds
+        let duration_exp = Duration::seconds((3600 * 6) + (60 * 4) + 2);
+
+        for s in input_strs {
+            let args = Args::new(s, &[Delimiter::Single(' ')]);
+
+            let (ids, reason, duration) = parse_id_reason_duration(args);
+
+            assert_eq!(ids, IDS_EXP);
+            assert_eq!(reason.unwrap(), REASON_EXP);
+            assert_eq!(duration.unwrap().unwrap(), duration_exp);
         }
     }
 }
