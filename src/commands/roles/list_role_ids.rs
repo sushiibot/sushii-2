@@ -20,9 +20,9 @@ async fn listids(ctx: &Context, msg: &Message) -> CommandResult {
     roles.sort_by(|&a, &b| b.position.cmp(&a.position));
 
     for role in &roles {
-        let _ = write!(
+        let _ = writeln!(
             roles_text,
-            "[{:02}] {} │ {}\n",
+            "[{:02}] {} │ {}",
             role.position, role.id.0, role.name
         );
     }

@@ -131,7 +131,7 @@ impl GuildConfigDb for GuildConfig {
         guild_id: Option<&GuildId>,
     ) -> Result<Option<GuildConfig>> {
         // Return None if no guild found
-        let guild_id = match guild_id.or(msg.and_then(|m| m.guild_id.as_ref())) {
+        let guild_id = match guild_id.or_else(|| msg.and_then(|m| m.guild_id.as_ref())) {
             Some(id) => id,
             None => return Ok(None),
         };

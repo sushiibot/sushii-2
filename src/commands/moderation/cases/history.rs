@@ -82,7 +82,7 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
             let _ = write!(s, " for `{}`", reason);
         }
 
-        let _ = write!(s, "\n");
+        let _ = writeln!(s);
     }
 
     let action_counts = entries.iter().fold(HashMap::new(), |mut acc, case| {

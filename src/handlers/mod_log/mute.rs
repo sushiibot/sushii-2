@@ -125,7 +125,7 @@ async fn _guild_member_update(
             Mute::new(
                 new_member.guild_id.0,
                 new_member.user.id.0,
-                guild_conf.mute_duration.map(|secs| Duration::seconds(secs)),
+                guild_conf.mute_duration.map(Duration::seconds),
             )
             .case_id(entry.case_id)
             .save(&ctx)

@@ -51,7 +51,7 @@ impl fmt::Display for GuildRoles {
             // Add blank line, excluding last one,
             // (groups.len() - 1 won't underflow since loop requires at least 1)
             if i < self.groups.len() - 1 {
-                writeln!(f, "")?;
+                writeln!(f)?;
             }
         }
 

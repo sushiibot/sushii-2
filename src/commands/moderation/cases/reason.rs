@@ -79,7 +79,7 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
         (None, None) => ModLogEntry::get_latest(&ctx, guild_id)
             .await?
-            .map_or_else(|| vec![], |entry| vec![entry]), // Just empty vec if None, or a Vec<Entry>
+            .map_or_else(Vec::new, |entry| vec![entry]), // Just empty vec if None, or a Vec<Entry>
         _ => unreachable!(),
     };
 

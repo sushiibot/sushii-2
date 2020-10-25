@@ -179,9 +179,9 @@ where
     for (group_name, group) in &role_config.groups {
         let group_entry = member_config_roles
             .entry(group_name)
-            .or_insert(HashSet::new());
+            .or_insert_with(HashSet::new);
 
-        for (_role_name, role) in &group.roles {
+        for role in group.roles.values() {
             if member_all_roles.contains(&role.primary_id) {
                 group_entry.insert(role.primary_id);
             }
@@ -227,7 +227,7 @@ fn build_role_name_map<'a>(
     role_name_map
 }
 
-fn dedupe_role_actions<'a>(role_actions: &'a Vec<RoleAction>) -> Vec<&'a RoleAction> {
+fn dedupe_role_actions<'a>(role_actions: &'a [RoleAction]) -> Vec<&'a RoleAction> {
     tracing::debug!(?role_actions, "role_actions");
 
     // Not the actual "dedupe" but more to check if a user is adding/removing a
@@ -290,7 +290,7 @@ fn calculate_roles<'a>(
             // Member's current roles in this group
             let cur_group_roles = member_config_roles
                 .entry(group_name)
-                .or_insert(HashSet::new());
+                .or_insert_with(HashSet::new);
 
             let conf_group = role_config.groups.get(*group_name).unwrap();
 
@@ -305,8 +305,8 @@ fn calculate_roles<'a>(
                 // Check limits if limit is set to greater than 0 (0 is disabled)
                 if conf_group.limit > 0 && cur_group_roles.len() >= conf_group.limit as usize {
                     let entry = over_limit_roles
-                        .entry(group_name.clone())
-                        .or_insert(Vec::new());
+                        .entry(group_name)
+                        .or_insert_with(Vec::new);
 
                     entry.push(orig_role_name);
 
@@ -423,9 +423,9 @@ fn format_response(role_config: &GuildRoles, calc_roles: &CalculatedRoles) -> St
 
     for (group_name, role_names) in over_limit_roles {
         if let Some(group) = &role_config.groups.get(&group_name[..]) {
-            let _ = write!(
+            let _ = writeln!(
                 s,
-                "{} (`{}` group has a limit of `{}` {})\n",
+                "{} (`{}` group has a limit of `{}` {})",
                 vec_to_code_string(role_names),
                 group_name,
                 group.limit,
