@@ -304,9 +304,7 @@ fn calculate_roles<'a>(
 
                 // Check limits if limit is set to greater than 0 (0 is disabled)
                 if conf_group.limit > 0 && cur_group_roles.len() >= conf_group.limit as usize {
-                    let entry = over_limit_roles
-                        .entry(group_name)
-                        .or_insert_with(Vec::new);
+                    let entry = over_limit_roles.entry(group_name).or_insert_with(Vec::new);
 
                     entry.push(orig_role_name);
 

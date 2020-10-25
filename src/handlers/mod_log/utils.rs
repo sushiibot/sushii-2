@@ -1,4 +1,5 @@
 use serenity::{model::prelude::*, prelude::*};
+use std::time::Duration;
 
 use crate::error::{Error, Result};
 use crate::model::{sql::*, sushii_config::*};
@@ -8,6 +9,7 @@ pub async fn modlog_handler(
     guild_id: &GuildId,
     user: &User,
     action: &str,
+    duration: &Option<Duration>,
 ) -> Result<ModLogEntry> {
     // check if a ban/unban command was used instead of discord right click ban
     // add the action to the database if not pendings
@@ -55,6 +57,7 @@ pub async fn modlog_handler(
             placeholder_reason,
             &executor_user,
             &user,
+            &duration,
         )
         .await
         {
@@ -93,6 +96,7 @@ async fn send_mod_log_entry(
     placeholder_reason: String,
     executor_user: &User,
     user: &User,
+    duration: &Option<Duration>,
 ) -> Result<Message> {
     ChannelId(channel_id as u64)
         .send_message(&ctx.http, |m| {
@@ -116,6 +120,17 @@ async fn send_mod_log_entry(
                     mod_log_entry.reason.clone().unwrap_or(placeholder_reason),
                     false,
                 );
+
+                if mod_log_entry.action == "mute" {
+                    e.field(
+                        "Duration",
+                        duration.map_or_else(
+                            || "Indefinite".to_string(),
+                            |d| humantime::format_duration(d).to_string(),
+                        ),
+                        false,
+                    );
+                }
 
                 e.footer(|f| {
                     f.text(format!("Case #{}", &mod_log_entry.case_id));
