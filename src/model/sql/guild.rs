@@ -87,6 +87,14 @@ impl GuildConfig {
     pub fn new(id: i64) -> Self {
         GuildConfig {
             id,
+            // Toggles should default to true since it still requires the main
+            // setting to be set, if setting is set then it should mean they want
+            // it to be turned on then.
+            join_msg_enabled: true,
+            leave_msg_enabled: true,
+            log_msg_enabled: true,
+            log_mod_enabled: true,
+            mute_dm_enabled: true,
             ..Default::default()
         }
     }
