@@ -11,10 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Reference to mute mod log case to determine mute executor on unmute
 -   Pending status to mutes to allow for mute duration to be set per command
+-   Allow duration to be set per mute by the `mute` command
+-   Display mute duration in mod logs
 
 ### Changed
 
 -   `reason` responds with number of cases modified and reason
+-   Enable guild settings by default
+
+### Fixed
+
+-   `warn` command sends message in mod log
 
 ## [0.1.5] - 2020-10-16
 
