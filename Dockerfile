@@ -1,4 +1,4 @@
-## Compile actix-web server
+## Compile sushii
 FROM rust:1.45 as build
 
 # create a new empty shell project
