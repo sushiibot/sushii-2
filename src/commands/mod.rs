@@ -15,5 +15,5 @@ use self::{meta::*, owner::*, prefix::*};
 pub struct Owner;
 
 #[group]
-#[commands(prefix, ping, invite, stats)]
+#[commands(prefix, ping, invite, about)]
 pub struct Meta;

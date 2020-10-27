@@ -13,11 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Pending status to mutes to allow for mute duration to be set per command
 -   Allow duration to be set per mute by the `mute` command
 -   Display mute duration in mod logs
+-   `ModLogReporter` to send messages to mod logs easier
 
 ### Changed
 
 -   `reason` responds with number of cases modified and reason
 -   Enable guild settings by default
+-   Rename `stats` command to `about`
 
 ### Fixed
 

@@ -19,7 +19,7 @@ async fn invite(ctx: &Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
-async fn stats(ctx: &Context, msg: &Message) -> CommandResult {
+async fn about(ctx: &Context, msg: &Message) -> CommandResult {
     let version = env!("CARGO_PKG_VERSION");
     let github_run_id = option_env!("GITHUB_RUN_ID");
 
