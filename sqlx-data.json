@@ -88,59 +88,6 @@
       ]
     }
   },
-  "2400c62204bcae835e29e56a42e44964b38dadc88bda3d4388fc059d9376a223": {
-    "query": "\n        INSERT INTO mutes\n             VALUES ($1, $2, $3, $4)\n        ON CONFLICT (guild_id, user_id)\n          DO UPDATE\n                SET start_time = $3,\n                    end_time = $4\n            RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "start_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 3,
-          "name": "end_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "pending",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "case_id",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Timestamp",
-          "Timestamp"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
-        false,
-        true
-      ]
-    }
-  },
   "24ba7cf2334db7b78b175992f61b6752febaac226fb67ef1fd1b59f08d9b472c": {
     "query": "\n            SELECT *\n              FROM mutes\n             WHERE guild_id = $1\n               AND user_id = $2\n               AND pending = false\n        ",
     "describe": {
@@ -997,6 +944,81 @@
           "Text",
           "Int8",
           "Text",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  "f9f5ab04b595a9260c56105c8977f30c3654420af22ebbc2359c28f4ff805292": {
+    "query": "\n            SELECT *\n              FROM mod_logs\n             WHERE guild_id = $1\n               AND case_id = $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "case_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "action",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "action_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "user_tag",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "executor_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "reason",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "msg_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
           "Int8"
         ]
       },
