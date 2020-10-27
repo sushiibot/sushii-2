@@ -1,7 +1,7 @@
 use chrono::{offset::Utc, Duration};
 use serenity::{model::prelude::*, prelude::*};
 
-use super::utils::modlog_handler;
+use crate::model::moderation::{ModLogReporter, ModLogReporterDb};
 use crate::error::Result;
 use crate::model::sql::*;
 
@@ -126,15 +126,20 @@ async fn _guild_member_update(
         None
     };
 
+    // Initial entry executor might NOT be the same person unmuting as manual
+    // unmutes can be done by anyone. This is only useful when it is an
+    // automated unmute by sushii
+    let initial_entry = if let Some(case_id) = mute_entry.as_ref().and_then(|e| e.case_id) {
+        Some(ModLogEntry::from_case_id(&ctx, new_member.guild_id.0, case_id as u64).await?)
+    } else {
+        None
+    };
+
     // Add a mod log entry
-    let entry = modlog_handler(
-        ctx,
-        &new_member.guild_id,
-        &new_member.user,
-        action,
-        &mute_entry.as_ref().and_then(|m| m.get_std_duration()),
-    )
-    .await?;
+    let entry = ModLogReporter::new(&new_member.guild_id, &new_member.user, action)
+        .mute_duration(mute_entry.as_ref().and_then(|m| m.get_std_duration()))
+        .initial_entry(initial_entry)
+        .execute(&ctx).await?;
 
     if let Some(mute_entry) = mute_entry {
         // Add the mod log case id and save it to db

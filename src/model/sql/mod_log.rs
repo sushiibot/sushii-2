@@ -8,34 +8,6 @@ use serenity::prelude::*;
 use crate::error::Result;
 use crate::keys::DbPool;
 
-#[async_trait]
-pub trait ModLogEntryDb {
-    async fn get_pending_entry(
-        ctx: &Context,
-        mod_action: &str,
-        guild_id: u64,
-        target_id: u64,
-    ) -> Result<Option<ModLogEntry>>;
-
-    async fn get_user_entries(
-        ctx: &Context,
-        guild_id: u64,
-        user_id: u64,
-    ) -> Result<Vec<ModLogEntry>>;
-
-    async fn get_range_entries(
-        ctx: &Context,
-        guild_id: u64,
-        start: u64,
-        end: u64,
-    ) -> Result<Vec<ModLogEntry>>;
-
-    async fn get_latest(ctx: &Context, guild_id: u64) -> Result<Option<ModLogEntry>>;
-
-    async fn save(&self, ctx: &Context) -> Result<ModLogEntry>;
-    async fn delete(&self, ctx: &Context) -> Result<()>;
-}
-
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug)]
 pub struct ModLogEntry {
     pub guild_id: i64,
@@ -103,7 +75,43 @@ impl ModLogEntry {
 }
 
 #[async_trait]
+pub trait ModLogEntryDb {
+    async fn from_case_id(ctx: &Context, guild_id: u64, case_id: u64) -> Result<ModLogEntry>;
+    async fn get_pending_entry(
+        ctx: &Context,
+        mod_action: &str,
+        guild_id: u64,
+        target_id: u64,
+    ) -> Result<Option<ModLogEntry>>;
+
+    async fn get_user_entries(
+        ctx: &Context,
+        guild_id: u64,
+        user_id: u64,
+    ) -> Result<Vec<ModLogEntry>>;
+
+    async fn get_range_entries(
+        ctx: &Context,
+        guild_id: u64,
+        start: u64,
+        end: u64,
+    ) -> Result<Vec<ModLogEntry>>;
+
+    async fn get_latest(ctx: &Context, guild_id: u64) -> Result<Option<ModLogEntry>>;
+
+    async fn save(&self, ctx: &Context) -> Result<ModLogEntry>;
+    async fn delete(&self, ctx: &Context) -> Result<()>;
+}
+
+#[async_trait]
 impl ModLogEntryDb for ModLogEntry {
+    async fn from_case_id(ctx: &Context, guild_id: u64, case_id: u64) -> Result<ModLogEntry> {
+        let data = ctx.data.read().await;
+        let pool = data.get::<DbPool>().unwrap();
+
+        from_case_id_query(pool, guild_id, case_id).await
+    }
+
     /// Fetches a pending ModLogEntry. Returns Err if something failed, None if
     /// not found. This is because we want to stop if something failed, but
     /// continue if not found, so a not found "error" should not be treated as
@@ -188,6 +196,26 @@ impl ModLogEntryDb for ModLogEntry {
 
         delete_mod_action_query(&pool, self).await
     }
+}
+async fn from_case_id_query(
+    pool: &sqlx::PgPool,
+    guild_id: u64,
+    case_id: u64,
+) -> Result<ModLogEntry> {
+    sqlx::query_as!(
+        ModLogEntry,
+        r#"
+            SELECT *
+              FROM mod_logs
+             WHERE guild_id = $1
+               AND case_id = $2
+        "#,
+        guild_id as i64,
+        case_id as i64,
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(Into::into)
 }
 
 async fn get_pending_entry_query(

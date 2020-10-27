@@ -15,9 +15,9 @@ use std::sync::Arc;
 
 use crate::error::{Error as SushiiError, Result};
 use crate::keys::CacheAndHttpContainer;
+use crate::model::moderation::{ModLogReporter, ModLogReporterDb};
 use crate::model::sql::{GuildConfig, GuildConfigDb, ModLogEntry, ModLogEntryDb, Mute, MuteDb};
 use crate::utils::duration::parse_duration;
-use crate::handlers::mod_log::utils::modlog_handler;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ModActionType {
@@ -206,7 +206,7 @@ impl ModActionExecutorDb for ModActionExecutor {
                 // guild_ban_addition, there isn't an event to handle for warns.
                 // So we just send it here right after creating a pending entry,
                 // created right before this execute_user() function is called
-                modlog_handler(&ctx, guild_id, user, "warn", &None).await?;
+                ModLogReporter::new(guild_id, user, "warn").execute(&ctx).await?;
             }
         }
 
