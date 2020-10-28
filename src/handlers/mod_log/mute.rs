@@ -1,8 +1,8 @@
 use chrono::{offset::Utc, Duration};
 use serenity::{model::prelude::*, prelude::*};
 
-use crate::model::moderation::{ModLogReporter, ModLogReporterDb};
 use crate::error::Result;
+use crate::model::moderation::{ModLogReporter, ModLogReporterDb};
 use crate::model::sql::*;
 
 pub async fn guild_member_addition(ctx: &Context, guild_id: &GuildId, mut member: &mut Member) {
@@ -139,7 +139,8 @@ async fn _guild_member_update(
     let entry = ModLogReporter::new(&new_member.guild_id, &new_member.user, action)
         .mute_duration(mute_entry.as_ref().and_then(|m| m.get_std_duration()))
         .initial_entry(initial_entry)
-        .execute(&ctx).await?;
+        .execute(&ctx)
+        .await?;
 
     if let Some(mute_entry) = mute_entry {
         // Add the mod log case id and save it to db

@@ -206,7 +206,9 @@ impl ModActionExecutorDb for ModActionExecutor {
                 // guild_ban_addition, there isn't an event to handle for warns.
                 // So we just send it here right after creating a pending entry,
                 // created right before this execute_user() function is called
-                ModLogReporter::new(guild_id, user, "warn").execute(&ctx).await?;
+                ModLogReporter::new(guild_id, user, "warn")
+                    .execute(&ctx)
+                    .await?;
             }
         }
 

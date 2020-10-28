@@ -6,6 +6,8 @@ use std::collections::HashSet;
 use std::sync::Arc;
 use tokio::signal::unix::{signal, SignalKind};
 
+#[macro_use]
+mod utils;
 mod commands;
 mod error;
 mod handlers;
@@ -15,7 +17,6 @@ mod metrics_server;
 mod model;
 mod prelude;
 mod tasks;
-mod utils;
 
 use crate::error::Result;
 use crate::keys::{CacheAndHttpContainer, DbPool, ShardManagerContainer};

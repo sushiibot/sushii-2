@@ -1,6 +1,7 @@
 use crate::tasks;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 
+pub mod join_msg;
 pub mod mod_log;
 pub mod raw_event_handler;
 pub mod roles;
@@ -46,6 +47,8 @@ impl EventHandler for Handler {
     }
 
     async fn guild_member_addition(&self, ctx: Context, guild_id: GuildId, mut member: Member) {
+        // TODO: Run these concurrently instead of one by one
         mod_log::mute::guild_member_addition(&ctx, &guild_id, &mut member).await;
+        join_msg::guild_member_addition(&ctx, &guild_id, &member).await;
     }
 }
