@@ -9,11 +9,7 @@ pub async fn guild_member_addition(ctx: &Context, guild_id: &GuildId, member: &M
     }
 }
 
-async fn _guild_member_addition(
-    ctx: &Context,
-    guild_id: &GuildId,
-    member: &Member,
-) -> Result<()> {
+async fn _guild_member_addition(ctx: &Context, guild_id: &GuildId, member: &Member) -> Result<()> {
     let guild_conf = match GuildConfig::from_id(&ctx, &member.guild_id).await? {
         Some(c) => c,
         None => {

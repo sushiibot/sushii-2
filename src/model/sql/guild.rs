@@ -2,7 +2,9 @@ use serde::{Deserialize, Serialize};
 use serenity::async_trait;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use serenity::utils::parse_channel;
 
+use super::GuildSetting;
 use crate::prelude::*;
 
 #[async_trait]
@@ -96,6 +98,145 @@ impl GuildConfig {
             log_mod_enabled: true,
             mute_dm_enabled: true,
             ..Default::default()
+        }
+    }
+
+    pub fn set_setting(&mut self, setting: &GuildSetting, val: &str) -> Result<()> {
+        match setting {
+            GuildSetting::JoinMsg => {
+                self.join_msg.replace(val.into());
+            }
+            GuildSetting::JoinReact => {
+                self.join_react.replace(val.into());
+            }
+            GuildSetting::LeaveMsg => {
+                self.leave_msg.replace(val.into());
+            }
+            GuildSetting::MsgChannel => {
+                self.msg_channel.replace(parse_channel(val).ok_or_else(|| Error::Sushii("invalid channel".into()))? as i64);
+            }
+            GuildSetting::MsgLog => {
+                self.log_msg.replace(parse_channel(val).ok_or_else(|| Error::Sushii("invalid channel".into()))? as i64);
+            }
+            GuildSetting::ModLog => {
+                self.log_mod.replace(parse_channel(val).ok_or_else(|| Error::Sushii("invalid channel".into()))? as i64);
+            }
+            GuildSetting::MemberLog => {
+                self.log_member.replace(parse_channel(val).ok_or_else(|| Error::Sushii("invalid channel".into()))? as i64);
+            }
+            GuildSetting::MuteDm => {
+                self.mute_dm_text.replace(val.into());
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Enables/Disables a given setting, returns Ok(true) if successfully changed,
+    /// Ok(false) if it is already enabled and Err() if the setting cannot be
+    /// enabled or disabled
+    fn update_setting(&mut self, setting: &GuildSetting, new_value: bool) -> Result<bool> {
+        match setting {
+            GuildSetting::JoinMsg => {
+                if self.join_msg_enabled == new_value {
+                    return Ok(false);
+                }
+
+                self.join_msg_enabled = new_value;
+            }
+            GuildSetting::LeaveMsg => {
+                if self.leave_msg_enabled == new_value {
+                    return Ok(false);
+                }
+
+                self.leave_msg_enabled = new_value;
+            }
+            GuildSetting::MsgLog => {
+                if self.log_msg_enabled == new_value {
+                    return Ok(false);
+                }
+
+                self.log_msg_enabled = new_value;
+            }
+            GuildSetting::ModLog => {
+                if self.log_mod_enabled == new_value {
+                    return Ok(false);
+                }
+
+                self.log_mod_enabled = new_value;
+            }
+            GuildSetting::MuteDm => {
+                if self.mute_dm_enabled == new_value {
+                    return Ok(false);
+                }
+
+                self.mute_dm_enabled = new_value;
+            }
+            GuildSetting::JoinReact | GuildSetting::MsgChannel | GuildSetting::MemberLog => {
+                return Err(Error::Sushii(
+                    "this setting cannot be enabled/disabled".into(),
+                ));
+            }
+        }
+
+        Ok(true)
+    }
+
+    pub fn enable_setting(&mut self, setting: &GuildSetting) -> Result<bool> {
+        self.update_setting(setting, true)
+    }
+
+    pub fn disable_setting(&mut self, setting: &GuildSetting) -> Result<bool> {
+        self.update_setting(setting, false)
+    }
+
+    /// Toggles a setting and returns it's new value
+    pub fn toggle_setting(&mut self, setting: &GuildSetting) -> Result<bool> {
+        let new_val = match setting {
+            GuildSetting::JoinMsg => {
+                self.join_msg_enabled = !self.join_msg_enabled;
+                self.join_msg_enabled
+            }
+            GuildSetting::LeaveMsg => {
+                self.leave_msg_enabled = !self.leave_msg_enabled;
+                self.leave_msg_enabled
+            }
+            GuildSetting::MsgLog => {
+                self.log_msg_enabled = !self.log_msg_enabled;
+                self.log_msg_enabled
+            }
+            GuildSetting::ModLog => {
+                self.log_mod_enabled = !self.log_mod_enabled;
+                self.log_mod_enabled
+            }
+            GuildSetting::MuteDm => {
+                self.mute_dm_enabled = !self.mute_dm_enabled;
+                self.mute_dm_enabled
+            }
+            GuildSetting::JoinReact | GuildSetting::MsgChannel | GuildSetting::MemberLog => {
+                return Err(Error::Sushii(
+                    "this setting cannot be enabled/disabled".into(),
+                ));
+            }
+        };
+
+        Ok(new_val)
+    }
+
+    pub fn get_setting(&self, setting: &GuildSetting) -> (Option<String>, Option<bool>) {
+        match setting {
+            GuildSetting::JoinMsg => (self.join_msg.clone(), Some(self.join_msg_enabled)),
+            GuildSetting::LeaveMsg => (self.leave_msg.clone(), Some(self.leave_msg_enabled)),
+            GuildSetting::MsgLog => (self.log_msg.map(|id| format!("<#{}>", id as u64)), Some(self.log_msg_enabled)),
+            GuildSetting::ModLog => (self.log_mod.map(|id| format!("<#{}>", id as u64)), Some(self.log_mod_enabled)),
+            GuildSetting::MuteDm => (self.mute_dm_text.clone(), Some(self.mute_dm_enabled)),
+            GuildSetting::JoinReact => (self.join_react.clone(), None),
+            GuildSetting::MsgChannel => {
+                (self.msg_channel.map(|id| format!("<#{}>", id as u64)), None)
+            }
+            GuildSetting::MemberLog => {
+                (self.log_member.map(|id| format!("<#{}>", id as u64)), None)
+            }
         }
     }
 }

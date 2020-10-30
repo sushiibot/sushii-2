@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Allow duration to be set per mute by the `mute` command
 -   Display mute duration in mod logs
 -   `ModLogReporter` to send messages to mod logs easier
+-   Settings subcommands to `set`, `off`, `on`, `toggle`, `show` the given guild setting
 
 ### Changed
 
