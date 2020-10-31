@@ -33,5 +33,5 @@ default-features = false
 features = [ "runtime-tokio", "macros", "postgres", "json", "chrono", "offline", "migrate" ]
 
 [dependencies.serenity]
-version = "0.9.0-rc.4"
+version = "0.9.0"
 features = ["default", "collector"]
