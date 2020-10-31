@@ -45,3 +45,48 @@ pub fn parse_duration(s: &str) -> Result<Duration, String> {
     parse_duration_std(s)
         .and_then(|d| Duration::from_std(d).map_err(|_| "Duration is too long".into()))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn point_str_with_end() {
+        let s = point_str("0123456789", 0, Some(9));
+
+        // End is exclusive so it won't point at 9
+        assert_eq!(
+            s,
+            "```
+0123456789
+^^^^^^^^^
+```"
+        );
+    }
+
+    #[test]
+    fn point_str_substr() {
+        let s = point_str("0123456789", 1, Some(6));
+
+        assert_eq!(
+            s,
+            "```
+0123456789
+ ^^^^^
+```"
+        );
+    }
+
+    #[test]
+    fn point_str_single() {
+        let s = point_str("0123456789", 7, None);
+
+        assert_eq!(
+            s,
+            "```
+0123456789
+       ^
+```"
+        );
+    }
+}
