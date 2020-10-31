@@ -184,6 +184,11 @@ impl ModActionExecutorDb for ModActionExecutor {
                 if let Some(role_id) = guild_conf.mute_role {
                     let mut member = guild_id.member(&cache_http, user).await?;
 
+                    // Handle if already muted, respond with error
+                    if member.roles.contains(&RoleId(role_id as u64)) {
+                        return Err(SushiiError::Sushii("User is already muted".into()));
+                    }
+
                     // Add a pending mute entry
                     Mute::new(guild_id.0, user.id.0, *duration)
                         .pending(true)
