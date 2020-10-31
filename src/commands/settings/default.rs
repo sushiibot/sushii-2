@@ -54,7 +54,7 @@ async fn default(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
                 .say(
                     &ctx.http,
                     "Error: Invalid setting action. \
-                    Available actions are: `set`, `on`, `off`. \
+                    Available actions are: `set`, `on`, `off`, `toggle`. \
                     To show the current setting, omit the action.",
                 )
                 .await?;
@@ -111,7 +111,7 @@ async fn default(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
                 val
             ),
             (Some(val), None) => format!(
-                "<:online:316354435745972244> {} is currently set to: {}",
+                "{} is currently set to: {}",
                 setting.to_string(),
                 val
             ),
