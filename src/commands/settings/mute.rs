@@ -1,4 +1,3 @@
-use humantime::DurationError;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
@@ -71,15 +70,6 @@ async fn role(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     Ok(())
 }
 
-fn point_str(s: &str, pos: usize, end: Option<usize>) -> String {
-    format!(
-        "```\n{}\n{}{}\n```",
-        s,
-        " ".repeat(pos),
-        "^".repeat(end.map_or(1, |e| e - pos)) // End is exclusive
-    )
-}
-
 #[command]
 #[description("Sets the default duration of mutes, default is 24 hours")]
 #[usage("[duration]")]
@@ -100,40 +90,13 @@ async fn defaultduration(ctx: &Context, msg: &Message, args: Args) -> CommandRes
         return Ok(());
     }
 
-    let duration = match humantime::parse_duration(&duration_str) {
+    let duration = match crate::utils::duration::parse_duration_std(&duration_str) {
         Ok(d) => d,
         Err(e) => {
-            let err_str = match e {
-                DurationError::InvalidCharacter(pos) => format!(
-                    "Invalid character (only alphanumeric characters are allowed):\n{}",
-                    point_str(&duration_str, pos, None),
-                ),
-                DurationError::NumberExpected(pos) => format!(
-                    "Expected a number.\nThis usually means that either the time \
-                        unit is separated (e.g. `m in` instead of `min`) \
-                        or a number is omitted (e.g. `2 hours min` instead \
-                        of `2 hours 1 min`):\n\
-                        {}",
-                    point_str(&duration_str, pos, None),
-                ),
-                DurationError::UnknownUnit { start, end, .. } => format!(
-                    "Invalid time unit, valid units are:\n\
-                    `seconds (second, sec, s),\n\
-                    minutes (minute, min, m),\n\
-                    hours (hour, hr, h),\n\
-                    days (day, d),\n\
-                    weeks (week, w),\n\
-                    months (month, M)`:\n{}",
-                    point_str(&duration_str, start, Some(end)),
-                ),
-                DurationError::NumberOverflow => "Duration is too long".into(),
-                DurationError::Empty => "Duration cannot be empty".into(),
-            };
-
             msg.channel_id
                 .say(
                     &ctx.http,
-                    format!("Error: Failed to parse duration -- {}", err_str),
+                    format!("Error: Failed to parse duration -- {}", e),
                 )
                 .await?;
 

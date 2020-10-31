@@ -1,4 +1,5 @@
 use chrono::Duration;
+use core::time::Duration as StdDuration;
 use humantime::DurationError;
 
 fn point_str(s: &str, pos: usize, end: Option<usize>) -> String {
@@ -10,7 +11,7 @@ fn point_str(s: &str, pos: usize, end: Option<usize>) -> String {
     )
 }
 
-pub fn parse_duration(s: &str) -> Result<Duration, String> {
+pub fn parse_duration_std(s: &str) -> Result<StdDuration, String> {
     humantime::parse_duration(&s)
         .map_err(|e| match e {
             DurationError::InvalidCharacter(pos) => format!(
@@ -38,5 +39,9 @@ pub fn parse_duration(s: &str) -> Result<Duration, String> {
             DurationError::NumberOverflow => "Duration is too long".into(),
             DurationError::Empty => "Duration cannot be empty".into(),
         })
+}
+
+pub fn parse_duration(s: &str) -> Result<Duration, String> {
+    parse_duration_std(s)
         .and_then(|d| Duration::from_std(d).map_err(|_| "Duration is too long".into()))
 }
