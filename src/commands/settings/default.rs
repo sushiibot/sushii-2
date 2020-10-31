@@ -110,11 +110,7 @@ async fn default(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
                 setting.to_string(),
                 val
             ),
-            (Some(val), None) => format!(
-                "{} is currently set to: {}",
-                setting.to_string(),
-                val
-            ),
+            (Some(val), None) => format!("{} is currently set to: {}", setting.to_string(), val),
             (None, _) => format!("{} is not set", setting.to_string()),
         },
     };

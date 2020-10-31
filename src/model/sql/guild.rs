@@ -113,16 +113,28 @@ impl GuildConfig {
                 self.leave_msg.replace(val.into());
             }
             GuildSetting::MsgChannel => {
-                self.msg_channel.replace(parse_channel(val).ok_or_else(|| Error::Sushii("invalid channel".into()))? as i64);
+                self.msg_channel.replace(
+                    parse_channel(val).ok_or_else(|| Error::Sushii("invalid channel".into()))?
+                        as i64,
+                );
             }
             GuildSetting::MsgLog => {
-                self.log_msg.replace(parse_channel(val).ok_or_else(|| Error::Sushii("invalid channel".into()))? as i64);
+                self.log_msg.replace(
+                    parse_channel(val).ok_or_else(|| Error::Sushii("invalid channel".into()))?
+                        as i64,
+                );
             }
             GuildSetting::ModLog => {
-                self.log_mod.replace(parse_channel(val).ok_or_else(|| Error::Sushii("invalid channel".into()))? as i64);
+                self.log_mod.replace(
+                    parse_channel(val).ok_or_else(|| Error::Sushii("invalid channel".into()))?
+                        as i64,
+                );
             }
             GuildSetting::MemberLog => {
-                self.log_member.replace(parse_channel(val).ok_or_else(|| Error::Sushii("invalid channel".into()))? as i64);
+                self.log_member.replace(
+                    parse_channel(val).ok_or_else(|| Error::Sushii("invalid channel".into()))?
+                        as i64,
+                );
             }
             GuildSetting::MuteDm => {
                 self.mute_dm_text.replace(val.into());
@@ -227,8 +239,14 @@ impl GuildConfig {
         match setting {
             GuildSetting::JoinMsg => (self.join_msg.clone(), Some(self.join_msg_enabled)),
             GuildSetting::LeaveMsg => (self.leave_msg.clone(), Some(self.leave_msg_enabled)),
-            GuildSetting::MsgLog => (self.log_msg.map(|id| format!("<#{}>", id as u64)), Some(self.log_msg_enabled)),
-            GuildSetting::ModLog => (self.log_mod.map(|id| format!("<#{}>", id as u64)), Some(self.log_mod_enabled)),
+            GuildSetting::MsgLog => (
+                self.log_msg.map(|id| format!("<#{}>", id as u64)),
+                Some(self.log_msg_enabled),
+            ),
+            GuildSetting::ModLog => (
+                self.log_mod.map(|id| format!("<#{}>", id as u64)),
+                Some(self.log_mod_enabled),
+            ),
             GuildSetting::MuteDm => (self.mute_dm_text.clone(), Some(self.mute_dm_enabled)),
             GuildSetting::JoinReact => (self.join_react.clone(), None),
             GuildSetting::MsgChannel => {

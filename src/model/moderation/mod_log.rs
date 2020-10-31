@@ -164,24 +164,29 @@ impl<'a> ModLogReporterDb for ModLogReporter<'a> {
                         ),
                         false,
                     );
-                    e.field("Action", &entry.action, false);
+
+                    if entry.action == "mute" {
+                        e.field(
+                            "Action",
+                            format!(
+                                "{} (Duration: {})",
+                                entry.action,
+                                self.duration.map_or_else(
+                                    || "Indefinite".to_string(),
+                                    |d| humantime::format_duration(d).to_string(),
+                                ),
+                            ),
+                            false,
+                        );
+                    } else {
+                        e.field("Action", &entry.action, false);
+                    }
 
                     e.field(
                         "Reason",
                         entry.reason.clone().unwrap_or(placeholder_reason),
                         false,
                     );
-
-                    if entry.action == "mute" {
-                        e.field(
-                            "Duration",
-                            self.duration.map_or_else(
-                                || "Indefinite".to_string(),
-                                |d| humantime::format_duration(d).to_string(),
-                            ),
-                            false,
-                        );
-                    }
 
                     e.footer(|f| {
                         f.text(format!("Case #{}", &entry.case_id));
