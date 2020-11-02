@@ -50,7 +50,7 @@ async fn role(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             guild
                 .roles
                 .values()
-                .find(|&x| x.name == role_str)
+                .find(|&x| x.name.to_lowercase() == role_str.to_lowercase())
                 .map(|x| x.id.0)
         });
 
