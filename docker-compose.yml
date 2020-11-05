@@ -96,6 +96,8 @@ services:
             - ~/docker/postgres:/var/lib/postgresql/data
         networks:
             - sushii_net
+        labels:
+            - traefik.enable=false
     postgres_backups:
         image: prodrigestivill/postgres-backup-local
         restart: unless-stopped
@@ -116,6 +118,8 @@ services:
             - HEALTHCHECK_PORT=8080
         networks:
             - sushii_net
+        labels:
+            - traefik.enable=false
     sushii:
         image: docker.pkg.github.com/drklee3/sushii-2/sushii-2:latest
         container_name: sushii
@@ -139,6 +143,6 @@ services:
             - "traefik.enable=false"
 networks:
     web:
-        external: false
+        internal: false
     sushii_net:
         external: false
