@@ -2,13 +2,12 @@ use serenity::framework::standard::macros::group;
 
 mod default;
 mod list;
-mod mod_log;
 mod mute;
 
-use self::{default::*, list::*, mod_log::*, mute::*};
+use self::{default::*, list::*, mute::*};
 
 #[group]
-#[commands(list, modlog, mute)]
+#[commands(list, mute)]
 #[description("Guild settings, requires MANAGE_GUILD permissions")]
 #[prefix("settings")]
 #[only_in("guild")]
