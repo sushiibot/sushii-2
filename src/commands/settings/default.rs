@@ -7,7 +7,7 @@ use crate::model::sql::*;
 
 #[command]
 async fn default(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    // Default is modifying settings, set, on, off, toggle
+    // Default is either help message or modifying settings, set, on, off, toggle
 
     // First need to check for which setting to modify
     let setting_name = match args.single::<String>() {
@@ -15,11 +15,7 @@ async fn default(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
         Err(_) => {
             msg
                 .channel_id
-                .say(&ctx.http, "Error: Please give a setting to modify. \
-                    Available settings are: \n\
-                    `joinmsg`, `joinreact`, `leavemsg`, `msgchannel`, `msglog`, `modlog`, `memberlog`, `mutedm`.\n\
-                    Then provide `set`, `on`, `off`, or `toggle`.\n\
-                    Example: `settings joinmsg set <your join message>`")
+                .say(&ctx.http, "Available settings commands can be found here: <https://2.sushii.xyz/commands#settings>")
                 .await?;
 
             return Ok(());

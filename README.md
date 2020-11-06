@@ -16,7 +16,7 @@ Slimmed down feature set of original sushii-bot with a focus on moderation tools
     -   [x] warn
     -   [x] mute / unmute
         -   [ ] timed mutes
-            -   [ ] set duration per mute (s!!mute [ids] [duration and reason])
+            -   [x] set duration per mute (s!!mute [ids] [duration and reason])
             -   [ ] remove time duration (indefinite)
             -   [ ] adjust existing mute duration
         -   [ ] allow muting users who left
@@ -24,6 +24,7 @@ Slimmed down feature set of original sushii-bot with a focus on moderation tools
     -   [x] cases
         -   [x] reason
         -   [x] history
+    -   [ ] user ID lookup (list of ids to check if in guild, banned, muted, etc)
     -   [x] roles
         -   [x] json support
         -   [x] toml support

@@ -81,7 +81,6 @@ async fn main() -> Result<()> {
         .before(hooks::before)
         .after(hooks::after)
         .on_dispatch_error(hooks::dispatch_error)
-        .help(&commands::help::HELP_CMD)
         .group(&commands::META_GROUP)
         .group(&commands::moderation::MODERATION_GROUP)
         .group(&commands::settings::SETTINGS_GROUP)
