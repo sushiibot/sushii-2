@@ -1,6 +1,6 @@
 use chrono::naive::NaiveDateTime;
 use chrono::offset::Utc;
-use prometheus::{IntCounterVec, Opts, Registry};
+use prometheus::{IntCounterVec, IntGauge, Opts, Registry};
 use prometheus_static_metric::make_static_metric;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 
@@ -59,17 +59,12 @@ make_static_metric! {
     }
 }
 
-#[async_trait]
-pub trait MetricsAsync {
-    // Need our own trait since serenity's RawEventHandler doesn't use references
-    async fn raw_event(&self, ctx: &Context, event: &Event);
-}
-
 pub struct Metrics {
     pub registry: Registry,
     pub start_time: NaiveDateTime,
     pub messages: MessageCounterVec,
     pub events: EventCounterVec,
+    pub guilds: IntGauge,
 }
 
 impl Metrics {
@@ -82,17 +77,27 @@ impl Metrics {
             IntCounterVec::new(Opts::new("events", "Gateway events"), &["event_type"]).unwrap();
         let events_static_vec = EventCounterVec::from(&events_vec);
 
+        let guilds_gauge = IntGauge::new("guilds", "Current guilds").unwrap();
+
         let registry = Registry::new_custom(Some("sushii".into()), None).unwrap();
         registry.register(Box::new(messages_vec)).unwrap();
         registry.register(Box::new(events_vec)).unwrap();
+        registry.register(Box::new(guilds_gauge.clone())).unwrap();
 
         Self {
             registry,
             start_time: Utc::now().naive_local(),
             messages: messages_static_vec,
             events: events_static_vec,
+            guilds: guilds_gauge,
         }
     }
+}
+
+#[async_trait]
+pub trait MetricsAsync {
+    // Need our own trait since serenity's RawEventHandler doesn't use references
+    async fn raw_event(&self, ctx: &Context, event: &Event);
 }
 
 #[async_trait]
@@ -119,8 +124,14 @@ impl MetricsAsync for Metrics {
             Event::ChannelUpdate(_) => self.events.channel_update.inc(),
             Event::GuildBanAdd(_) => self.events.guild_ban_add.inc(),
             Event::GuildBanRemove(_) => self.events.guild_ban_remove.inc(),
-            Event::GuildCreate(_) => self.events.guild_create.inc(),
-            Event::GuildDelete(_) => self.events.guild_delete.inc(),
+            Event::GuildCreate(_) => {
+                self.events.guild_create.inc();
+                self.guilds.inc();
+            },
+            Event::GuildDelete(_) => {
+                self.events.guild_delete.inc();
+                self.guilds.dec();
+            },
             Event::GuildEmojisUpdate(_) => self.events.guild_emojis_update.inc(),
             Event::GuildIntegrationsUpdate(_) => self.events.guild_integrations_update.inc(),
             Event::GuildMemberAdd(_) => self.events.guild_member_add.inc(),
