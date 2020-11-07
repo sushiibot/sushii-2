@@ -5,6 +5,7 @@ use sqlx::postgres::PgPoolOptions;
 use std::collections::HashSet;
 use std::sync::Arc;
 use tokio::signal::unix::{signal, SignalKind};
+use tracing_subscriber::EnvFilter;
 
 #[macro_use]
 mod utils;
@@ -27,10 +28,12 @@ use crate::model::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // install global subscriber configured based on RUST_LOG envvar.
-    tracing_subscriber::fmt().init();
-
     let sushii_conf = Arc::new(SushiiConfig::new_from_env()?);
+
+    // install global subscriber configured based on RUST_LOG envvar.
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .init();
 
     let pool = PgPoolOptions::new()
         .max_connections(10)

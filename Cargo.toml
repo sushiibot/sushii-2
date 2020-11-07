@@ -28,7 +28,9 @@ version = "0.2"
 features = ["macros", "rt-core", "time", "signal"]
 
 [dependencies.sqlx]
-version = "0.4.0-beta.1"
+# version = "0.4.0-beta.1"
+git = "https://github.com/launchbadge/sqlx/"
+branch = "master"
 default-features = false
 features = [ "runtime-tokio", "macros", "postgres", "json", "chrono", "offline", "migrate" ]
 
