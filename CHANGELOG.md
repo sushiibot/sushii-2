@@ -7,9 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+-   `mute setduration` and `mute addduration` commands to update existing mute durations
+-   Short prune alias `p` for faster prunes
+-   Guild and guild member count metric gauges
+
 ### Changed
 
--   Help commands now link to website commands list.
+-   Use case insensitive role name search for `settings mute role` command
+-   Help commands now link to website commands list
+-   Move mute duration next to action name in mod logs
+
+### Fixed
+
+-   Respond with an error if attempting to mute already muted members
+-   Prevent mutes with only duration provided to consider reason as empty string, causing Discord embeds to fail
+-   Mute entries properly save their false pending state so that re-joining will re-assign mute roles
 
 ## [0.1.6]
 
