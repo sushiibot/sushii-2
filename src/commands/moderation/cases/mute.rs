@@ -179,12 +179,14 @@ async fn modify_duration(
 
 #[command]
 #[only_in("guild")]
+#[aliases("setd", "setdur", "settime")]
 async fn setduration(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     modify_duration(DurationModifyAction::Set, ctx, msg, args).await
 }
 
 #[command]
 #[only_in("guild")]
+#[aliases("addd", "adddur", "addtime", "extend")]
 async fn addduration(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     modify_duration(DurationModifyAction::Add, ctx, msg, args).await
 }
