@@ -144,7 +144,7 @@ async fn _guild_member_update(
         .initial_entry(initial_entry)
         .execute(&ctx)
         .await?;
-    
+
     tracing::debug!(?mute_entry, ?entry, "Added mod log entry");
 
     if let Some(mute_entry) = mute_entry {

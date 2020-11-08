@@ -432,13 +432,7 @@ fn parse_id_reason_duration(
         reason
             .as_ref()
             .map(|r| r.replace(d.as_str(), "").trim().to_string())
-            .and_then(|r| {
-                if r.is_empty() {
-                    None
-                } else {
-                    Some(r)
-                }
-            })
+            .and_then(|r| if r.is_empty() { None } else { Some(r) })
     });
 
     // Parsed duration

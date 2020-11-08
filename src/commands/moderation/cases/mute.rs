@@ -1,3 +1,4 @@
+use chrono::Duration;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
@@ -7,6 +8,7 @@ use std::fmt::Write;
 use crate::model::moderation::{ModActionExecutor, ModActionExecutorDb, ModActionType};
 use crate::model::sql::*;
 use crate::utils::duration::parse_duration;
+use crate::utils::user::get_user;
 
 #[command]
 #[only_in("guild")]
@@ -70,6 +72,11 @@ enum DurationModifyAction {
     Add,
 }
 
+enum DurationOption {
+    Duration(Duration),
+    Indefinite,
+}
+
 async fn modify_duration(
     action: DurationModifyAction,
     ctx: &Context,
@@ -111,18 +118,32 @@ async fn modify_duration(
         }
     };
 
-    let duration = match parse_duration(args.rest()) {
-        Ok(d) => d,
-        Err(e) => {
-            msg.channel_id
-                .say(
-                    &ctx.http,
-                    format!("Error: Failed to parse duration -- {}", e),
-                )
-                .await?;
+    // or is indefinite
+    let duration_str = args.rest();
 
-            return Ok(());
-        }
+    if duration_str.is_empty() {
+        msg.channel_id
+            .say(&ctx.http, "Error: Give a duration or `indefinite`")
+            .await?;
+
+        return Ok(());
+    }
+
+    let duration_opt = match duration_str.to_lowercase().as_ref() {
+        "indefinite" | "indef" | "inf" | "none" => DurationOption::Indefinite,
+        _ => match parse_duration(duration_str) {
+            Ok(d) => DurationOption::Duration(d),
+            Err(e) => {
+                msg.channel_id
+                        .say(
+                            &ctx.http,
+                            format!("Error: Failed to parse duration, give a duration or `indefinite` -- {}", e),
+                        )
+                        .await?;
+
+                return Ok(());
+            }
+        },
     };
 
     let mut mute = match Mute::from_id(&ctx, guild_id.0, user_id).await? {
@@ -139,34 +160,79 @@ async fn modify_duration(
         }
     };
 
+    let user = match get_user(&ctx, mute.user_id as u64).await {
+        Some(u) => u,
+        None => {
+            msg.channel_id
+                .say(&ctx, "Error: Failed to fetch user")
+                .await?;
+
+            return Ok(());
+        }
+    };
+
+    let old_duration = mute
+        .get_human_duration()
+        .unwrap_or_else(|| "Indefinite".into());
+
     let s = match action {
         DurationModifyAction::Add => {
-            // End time = end + new duration
-            // or if indefinite / no end time
-            // End time = start + new duration
-            mute.end_time = mute
-                .end_time
-                .and_then(|t| t.checked_add_signed(duration))
-                .or_else(|| mute.start_time.checked_add_signed(duration));
+            match duration_opt {
+                DurationOption::Duration(duration) => {
+                    // End time = end + new duration
+                    // or if indefinite / no end time
+                    // End time = start + new duration
+                    mute.end_time = mute
+                        .end_time
+                        .and_then(|t| t.checked_add_signed(duration))
+                        .or_else(|| mute.start_time.checked_add_signed(duration));
 
-            format!(
-                "Mute duration extended by {}, new duration is now {}",
-                humantime::format_duration(duration.to_std().unwrap()),
-                mute.get_std_duration()
-                    .map(|d| humantime::format_duration(d).to_string())
-                    .unwrap_or_else(|| "N/A".to_string())
-            )
+                    format!(
+                        "Mute duration for {} extended by `{}`, new duration is now `{}` (old duration: `{}`)",
+                        user.tag(),
+                        humantime::format_duration(duration.to_std().unwrap()),
+                        mute.get_std_duration()
+                            .map(|d| humantime::format_duration(d).to_string())
+                            .unwrap_or_else(|| "N/A".to_string()),
+                        old_duration
+                    )
+                }
+                DurationOption::Indefinite => {
+                    mute.end_time = None;
+
+                    format!(
+                        "Mute for {} is now indefinite (old duration: `{}`)",
+                        user.tag(),
+                        old_duration
+                    )
+                }
+            }
         }
         DurationModifyAction::Set => {
-            // End time = start + new duration
-            mute.end_time = mute.start_time.checked_add_signed(duration);
+            match duration_opt {
+                DurationOption::Duration(duration) => {
+                    // End time = start + new duration
+                    mute.end_time = mute.start_time.checked_add_signed(duration);
 
-            format!(
-                "Mute duration set to {}",
-                mute.get_std_duration()
-                    .map(|d| humantime::format_duration(d).to_string())
-                    .unwrap_or_else(|| "N/A".to_string())
-            )
+                    format!(
+                        "Mute duration for {} set to `{}` (old duration: `{}`)",
+                        user.tag(),
+                        mute.get_std_duration()
+                            .map(|d| humantime::format_duration(d).to_string())
+                            .unwrap_or_else(|| "N/A".to_string()),
+                        old_duration
+                    )
+                }
+                DurationOption::Indefinite => {
+                    mute.end_time = None;
+
+                    format!(
+                        "Mute for {} is now indefinite (old duration: `{}`)",
+                        user.tag(),
+                        old_duration
+                    )
+                }
+            }
         }
     };
 
@@ -179,14 +245,14 @@ async fn modify_duration(
 
 #[command]
 #[only_in("guild")]
-#[aliases("setd", "setdur", "settime")]
+#[aliases("s", "set", "setd", "setdur", "settime")]
 async fn setduration(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     modify_duration(DurationModifyAction::Set, ctx, msg, args).await
 }
 
 #[command]
 #[only_in("guild")]
-#[aliases("addd", "adddur", "addtime", "extend")]
+#[aliases("a", "add", "addd", "adddur", "addtime", "extend")]
 async fn addduration(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     modify_duration(DurationModifyAction::Add, ctx, msg, args).await
 }
