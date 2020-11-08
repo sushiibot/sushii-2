@@ -1,13 +1,16 @@
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use serenity::utils::parse_mention;
 use std::fmt::Write;
 
 use crate::model::moderation::{ModActionExecutor, ModActionExecutorDb, ModActionType};
 use crate::model::sql::*;
+use crate::utils::duration::parse_duration;
 
 #[command]
 #[only_in("guild")]
+#[sub_commands(setduration, addduration)]
 async fn mute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let guild_id = match msg.guild_id {
         Some(id) => id,
@@ -60,6 +63,130 @@ async fn unmute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         .await?;
 
     Ok(())
+}
+
+enum DurationModifyAction {
+    Set,
+    Add,
+}
+
+async fn modify_duration(
+    action: DurationModifyAction,
+    ctx: &Context,
+    msg: &Message,
+    mut args: Args,
+) -> CommandResult {
+    let guild_id = match msg.guild_id {
+        Some(id) => id,
+        None => {
+            msg.channel_id.say(&ctx.http, "No guild ID found").await?;
+
+            return Ok(());
+        }
+    };
+
+    let user_id_str = match args.single::<String>() {
+        Ok(s) => s,
+        Err(_) => {
+            msg.channel_id
+                .say(&ctx.http, "Please give a user ID")
+                .await?;
+
+            return Ok(());
+        }
+    };
+
+    let user_id = match user_id_str
+        .parse::<u64>()
+        .ok()
+        .or_else(|| parse_mention(user_id_str))
+    {
+        Some(id) => id,
+        None => {
+            msg.channel_id
+                .say(&ctx.http, "Invalid user ID given")
+                .await?;
+
+            return Ok(());
+        }
+    };
+
+    let duration = match parse_duration(args.rest()) {
+        Ok(d) => d,
+        Err(e) => {
+            msg.channel_id
+                .say(
+                    &ctx.http,
+                    format!("Error: Failed to parse duration -- {}", e),
+                )
+                .await?;
+
+            return Ok(());
+        }
+    };
+
+    let mut mute = match Mute::from_id(&ctx, guild_id.0, user_id).await? {
+        Some(m) => m,
+        None => {
+            msg.channel_id
+                .say(
+                    &ctx,
+                    "Error: This member is not muted, or a mute entry was not found",
+                )
+                .await?;
+
+            return Ok(());
+        }
+    };
+
+    let s = match action {
+        DurationModifyAction::Add => {
+            // End time = end + new duration
+            // or if indefinite / no end time
+            // End time = start + new duration
+            mute.end_time = mute
+                .end_time
+                .and_then(|t| t.checked_add_signed(duration))
+                .or_else(|| mute.start_time.checked_add_signed(duration));
+
+            format!(
+                "Mute duration extended by {}, new duration is now {}",
+                humantime::format_duration(duration.to_std().unwrap()),
+                mute.get_std_duration()
+                    .map(|d| humantime::format_duration(d).to_string())
+                    .unwrap_or_else(|| "N/A".to_string())
+            )
+        }
+        DurationModifyAction::Set => {
+            // End time = start + new duration
+            mute.end_time = mute.start_time.checked_add_signed(duration);
+
+            format!(
+                "Mute duration set to {}",
+                mute.get_std_duration()
+                    .map(|d| humantime::format_duration(d).to_string())
+                    .unwrap_or_else(|| "N/A".to_string())
+            )
+        }
+    };
+
+    mute.save(&ctx).await?;
+
+    msg.channel_id.say(&ctx, s).await?;
+
+    Ok(())
+}
+
+#[command]
+#[only_in("guild")]
+async fn setduration(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+    modify_duration(DurationModifyAction::Set, ctx, msg, args).await
+}
+
+#[command]
+#[only_in("guild")]
+async fn addduration(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+    modify_duration(DurationModifyAction::Add, ctx, msg, args).await
 }
 
 #[command]
