@@ -128,29 +128,29 @@ impl MetricsAsync for Metrics {
             Event::ChannelUpdate(_) => self.events.channel_update.inc(),
             Event::GuildBanAdd(_) => self.events.guild_ban_add.inc(),
             Event::GuildBanRemove(_) => self.events.guild_ban_remove.inc(),
-            Event::GuildCreate(GuildCreateEvent {guild, ..}) => {
+            Event::GuildCreate(GuildCreateEvent { guild, .. }) => {
                 self.events.guild_create.inc();
                 self.guilds.inc();
 
                 self.members.add(guild.member_count as i64);
-            },
+            }
             Event::GuildDelete(_) => {
                 self.events.guild_delete.inc();
                 self.guilds.dec();
 
                 // self.members stale value,
                 // don't have the guild anymore so don't know how many to sub()
-            },
+            }
             Event::GuildEmojisUpdate(_) => self.events.guild_emojis_update.inc(),
             Event::GuildIntegrationsUpdate(_) => self.events.guild_integrations_update.inc(),
             Event::GuildMemberAdd(_) => {
                 self.events.guild_member_add.inc();
                 self.members.inc();
-            },
+            }
             Event::GuildMemberRemove(_) => {
                 self.events.guild_member_remove.inc();
                 self.members.dec();
-            },
+            }
             Event::GuildMemberUpdate(_) => self.events.guild_member_update.inc(),
             Event::GuildMembersChunk(_) => self.events.guild_members_chunk.inc(),
             Event::GuildRoleCreate(_) => self.events.guild_role_create.inc(),

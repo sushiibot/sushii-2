@@ -8,7 +8,7 @@ pub mod prefix;
 pub mod roles;
 pub mod settings;
 
-use self::{meta::*, owner::*, prefix::*, help::*};
+use self::{help::*, meta::*, owner::*, prefix::*};
 
 #[group]
 #[commands(quit)]
