@@ -39,3 +39,39 @@ Slimmed down feature set of original sushii-bot with a focus on moderation tools
     -   avatar
     -   userinfo
     -   notifications
+
+## Running
+
+Docker images are published on the [GitHub Container Registry](https://github.com/users/drklee3/packages/container/package/sushii-2).
+
+Images on the GitHub Packages Docker registry are no longer updated.
+
+```bash
+docker run --expose 9888 --env-file ./.env ghcr.io/drklee3/sushii-2:latest
+```
+
+## Building
+
+Alternatively, you can build from source with Rust
+
+```bash
+cargo build --release
+```
+
+## Configuration
+
+Configuration options are set via environment variables, options are as follows
+
+```bash
+RUST_LOG=info,sqlx=warn
+DISCORD_TOKEN=
+DEFAULT_PREFIX=
+OWNER_IDS=
+
+# These options are for convenience to set the PostgreSQL options at the same time
+POSTGRES_PASSWORD=
+POSTGRES_USER=
+POSTGRES_DB=
+
+DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}
+```
