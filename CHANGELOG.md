@@ -18,12 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Use case insensitive role name search for `settings mute role` command
 -   Help commands now link to website commands list
 -   Move mute duration next to action name in mod logs
+-   Update serenity to `0.9.1`
 
 ### Fixed
 
 -   Respond with an error if attempting to mute already muted members
 -   Prevent mutes with only duration provided to consider reason as empty string, causing Discord embeds to fail
 -   Mute entries properly save their false pending state so that re-joining will re-assign mute roles
+-   Remove serenity's default prefix `~`
 
 ## [0.1.6]
 
