@@ -79,6 +79,7 @@ async fn main() -> Result<()> {
                         }
                     })
                 })
+                .prefix("")
                 .on_mention(Some(bot_id))
         })
         .before(hooks::before)
