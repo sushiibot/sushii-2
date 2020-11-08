@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.7]
+
 ### Added
 
 -   `mute setduration` and `mute addduration` commands to update existing mute durations
@@ -101,7 +103,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Prevent role handler from running outside of role channels
 -   Fix mod log entry saving
 
-[unreleased]: https://github.com/drklee3/sushii-2/compare/v0.1.6...HEAD
+[unreleased]: https://github.com/drklee3/sushii-2/compare/v0.1.7...HEAD
+[0.1.7]: https://github.com/drklee3/sushii-2/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/drklee3/sushii-2/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/drklee3/sushii-2/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/drklee3/sushii-2/compare/v0.1.3...v0.1.4
