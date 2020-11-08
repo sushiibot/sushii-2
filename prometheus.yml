@@ -9,6 +9,11 @@ scrape_configs:
       static_configs:
           - targets: ["sushii:9888"]
 
+    - job_name: "sushii site"
+      scrape_interval: 5s
+      static_configs:
+          - targets: ["sushii-site:8000"]
+
     - job_name: "cadvisor"
       scrape_interval: 5s
       static_configs:
