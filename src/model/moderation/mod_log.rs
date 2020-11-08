@@ -109,7 +109,7 @@ impl<'a> ModLogReporterDb for ModLogReporter<'a> {
             format!("Responsible moderator: Please use `{}reason {} [reason]` to set a reason for this case.",
                 prefix, entry.case_id)
         } else {
-            "".into()
+            "N/A".into()
         };
 
         if let Some(channel_id) = guild_conf.log_mod {
