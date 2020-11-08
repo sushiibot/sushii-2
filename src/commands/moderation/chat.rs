@@ -3,8 +3,8 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 #[command]
-#[num_args(1)]
 #[usage("[num messages]")]
+#[aliases("p")]
 async fn prune(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let num_messages = match args.single::<u64>() {
         Ok(n) => n,
