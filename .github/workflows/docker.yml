@@ -6,33 +6,21 @@ on:
             - v*
 
 env:
-    IMAGE_NAME: sushii-2
+    IMAGE_NAME: ghcr.io/drklee3/sushii-2
 
 jobs:
     push:
-        # Ensure test job passes before pushing image.
-        # needs: test
         runs-on: ubuntu-latest
         if: github.event_name == 'push'
         steps:
             - uses: actions/checkout@v2
 
-            - name: Set Docker Tags
-              id: set_tags
-              run: |
-                  # Strip git ref prefix from version
-                  TAGS=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-                  # Strip "v" prefix from tag name
-                  [[ "${{ github.ref }}" == "refs/tags/"* ]] && TAGS=$(echo $TAGS | sed -e 's/^v//')
-
-                  # Add stable and latest tag to tagged versions
-                  [ "$TAGS" != "master" ] && TAGS=${TAGS},stable,latest
-
-                  echo ::set-output name=tags::${TAGS}
-                  echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-                  echo "Docker image tags: $TAGS"
-                  echo ${{ steps.set_tags.outputs.tags }}
+            - name: Docker meta
+              id: docker_meta
+              uses: crazy-max/ghaction-docker-meta@v1
+              with:
+                  images: ${{ env.IMAGE_NAME }}
+                  tag-match: "\d{1,3}.\d{1,3}.\d{1,3}"
 
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v1
@@ -51,7 +39,7 @@ jobs:
                   file: ./Dockerfile
                   pull: true
                   push: true
-                  tags: ${{ steps.set_tags.outputs.tags }}
+                  tags: ${{ steps.docker_meta.outputs.tags }}
                   cache-from: type=registry,ref=drklee3/sushii-2:latest
                   cache-to: type=inline
                   labels: |
