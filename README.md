@@ -60,7 +60,8 @@ cargo build --release
 
 ## Configuration
 
-Configuration options are set via environment variables, options are as follows
+Configuration options are set via environment variables read from an `.env`
+file, options are as follows
 
 ```bash
 RUST_LOG=info,sqlx=warn
