@@ -15,10 +15,10 @@ Slimmed down feature set of original sushii-bot with a focus on moderation tools
     -   [x] prune
     -   [x] warn
     -   [x] mute / unmute
-        -   [ ] timed mutes
+        -   [x] timed mutes
             -   [x] set duration per mute (s!!mute [ids] [duration and reason])
-            -   [ ] remove time duration (indefinite)
-            -   [ ] adjust existing mute duration
+            -   [x] remove time duration (indefinite)
+            -   [x] adjust existing mute duration
         -   [ ] allow muting users who left
         -   [ ] mute users who joined in last x minutes
     -   [x] cases
