@@ -432,6 +432,13 @@ fn parse_id_reason_duration(
         reason
             .as_ref()
             .map(|r| r.replace(d.as_str(), "").trim().to_string())
+            .and_then(|r| {
+                if r.is_empty() {
+                    None
+                } else {
+                    Some(r)
+                }
+            })
     });
 
     // Parsed duration
@@ -654,6 +661,33 @@ mod tests {
 
             assert_eq!(ids, IDS_EXP);
             assert_eq!(reason.unwrap(), REASON_EXP);
+            assert_eq!(duration.unwrap().unwrap(), duration_exp);
+        }
+    }
+
+    #[test]
+    fn parses_ids_duration_no_reason() {
+        // Whitespace should NOT count as the reason, empty reason would cause
+        // Discord embeds to fail
+        let input_strs = vec![
+            "145764790046818304,193163974471188480,151018674793349121 6 hours 4 minutes 2 seconds",
+            "145764790046818304,193163974471188480,151018674793349121 6hours 4minutes 2seconds",
+            "145764790046818304,193163974471188480,151018674793349121 6h 4m 2s",
+            "145764790046818304,193163974471188480,151018674793349121 6hrs 4m 2secs ",
+            "145764790046818304,193163974471188480,151018674793349121  6h 4m 2s",
+        ];
+
+        // 6 hours 4 minutes 2 seconds
+        let duration_exp = Duration::seconds((3600 * 6) + (60 * 4) + 2);
+
+        for s in input_strs {
+            let args = Args::new(s, &[Delimiter::Single(' ')]);
+
+            let (ids, reason, duration) = parse_id_reason_duration(args);
+
+            assert_eq!(ids, IDS_EXP);
+            println!("reason: {:#?}", reason);
+            assert!(reason.is_none());
             assert_eq!(duration.unwrap().unwrap(), duration_exp);
         }
     }
