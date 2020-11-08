@@ -108,8 +108,11 @@ async fn _guild_member_update(
         if let Some(mute_entry) =
             Mute::get_pending(&ctx, new_member.guild_id.0, new_member.user.id.0).await?
         {
+            tracing::debug!(?mute_entry, "Found pending mute entry");
             // If there's a pending one, update pending to false
-            Some(mute_entry.pending(false))
+            // Save it first in case other stuff fails, since if other stuff
+            // fails we don't want this pending still, just throw it out I guess
+            Some(mute_entry.pending(false).save(&ctx).await?)
         } else {
             // If there isn't a pending, it's just a regular mute from manually
             // adding roles to a user so just create a new one
@@ -141,6 +144,8 @@ async fn _guild_member_update(
         .initial_entry(initial_entry)
         .execute(&ctx)
         .await?;
+    
+    tracing::debug!(?mute_entry, ?entry, "Added mod log entry");
 
     if let Some(mute_entry) = mute_entry {
         // Add the mod log case id and save it to db

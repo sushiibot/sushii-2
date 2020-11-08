@@ -230,7 +230,8 @@ async fn upsert_query(pool: &sqlx::PgPool, mute: &Mute) -> Result<Mute> {
         ON CONFLICT (guild_id, user_id)
           DO UPDATE
                 SET start_time = $3,
-                    end_time = $4
+                    end_time = $4,
+                    pending = $5
             RETURNING *
         "#,
         // Not in the order of the struct fields, but in the order of columns or it make error :(
