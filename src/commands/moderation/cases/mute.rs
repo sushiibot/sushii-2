@@ -27,7 +27,7 @@ async fn mute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     if conf.mute_role.is_none() {
         let _ = msg
             .channel_id
-            .say(&ctx.http, "There is no mute command set");
+            .say(&ctx.http, "There is no mute role set");
 
         return Ok(());
     }
