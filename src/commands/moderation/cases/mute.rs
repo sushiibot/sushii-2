@@ -25,9 +25,20 @@ async fn mute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     let conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
     if conf.mute_role.is_none() {
-        let _ = msg
-            .channel_id
-            .say(&ctx.http, "There is no mute role set");
+        let _ = msg.channel_id.say(&ctx.http, "There is no mute role set");
+
+        return Ok(());
+    }
+
+    if args.is_empty() {
+        msg.channel_id
+            .say(
+                &ctx.http,
+                "Error: Please provide IDs or mentions, \
+                reason, and an optional duration to mute users, or use `mute \
+                setduration` or `mute addduration` to modify an existing mute",
+            )
+            .await?;
 
         return Ok(());
     }
