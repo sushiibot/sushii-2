@@ -83,40 +83,48 @@ async fn defaultduration(ctx: &Context, msg: &Message, args: Args) -> CommandRes
         msg.channel_id
             .say(
                 &ctx,
-                "Error: Please provide a mute duration. Example: `12 hours 30 minutes`",
+                "Error: Please provide a mute duration or `indefinite` (or 0) to disable. Example: `12 hours 30 minutes`",
             )
             .await?;
 
         return Ok(());
     }
 
-    let duration = match crate::utils::duration::parse_duration_std(&duration_str) {
-        Ok(d) => d,
-        Err(e) => {
-            msg.channel_id
-                .say(
-                    &ctx.http,
-                    format!("Error: Failed to parse duration -- {}", e),
-                )
-                .await?;
+    let duration = match duration_str {
+        "inf" | "indef" | "indefinite" | "0" => None,
+        _ => {
+            let duration = match crate::utils::duration::parse_duration_std(&duration_str) {
+                Ok(d) => d,
+                Err(e) => {
+                    msg.channel_id
+                        .say(
+                            &ctx.http,
+                            format!("Error: Failed to parse duration -- {}", e),
+                        )
+                        .await?;
 
-            return Ok(());
+                    return Ok(());
+                }
+            };
+
+            Some(duration)
         }
     };
 
-    conf.mute_duration.replace(duration.as_secs() as i64);
+    conf.mute_duration = duration.map(|d| d.as_secs() as i64);
 
     conf.save(&ctx).await?;
 
-    msg.channel_id
-        .say(
-            &ctx.http,
-            format!(
-                "Set the default mute duration to `{}`",
-                humantime::format_duration(duration)
-            ),
+    let s = if let Some(dur) = duration {
+        format!(
+            "Set the default mute duration to `{}`",
+            humantime::format_duration(dur)
         )
-        .await?;
+    } else {
+        "Default mute duration set to indefinite (will not expire)".into()
+    };
+
+    msg.channel_id.say(&ctx.http, s).await?;
 
     Ok(())
 }
