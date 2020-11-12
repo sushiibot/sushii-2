@@ -113,25 +113,32 @@ fn parse_config(input_str: &str) -> Result<GuildRoles, String> {
 #[test]
 fn parses_roles_config_from_json() {
     let json_config_base = r#"{
-        "bias": {
-            "limit": 3,
-            "roles": {
-                "First Role": {
-                    "primary_id": 123
-                },
-                "Second Role": {
-                    "primary_id": 456,
-                    "secondary_id": 789
-                }
+        "groups": [
+            {
+                "name": "bias",
+                "limit": 3,
+                "roles": [
+                    {
+                        "name": "First Role",
+                        "primary_id": 123
+                    },
+                    {
+                        "name": "Second Role",
+                        "primary_id": 456,
+                        "secondary_id": 789
+                    }
+                ]
+            },
+            {
+                "name": "extra",
+                "roles": [
+                    {
+                        "name": "Third Role",
+                        "primary_id": 1011
+                    }
+                ]
             }
-        },
-        "extra": {
-            "roles": {
-                "Third Role": {
-                    "primary_id": 1011
-                }
-            }
-        }
+        ]
     }"#;
 
     let configs = vec![
@@ -146,6 +153,8 @@ fn parses_roles_config_from_json() {
     for config in configs {
         let c = parse_config(&config);
 
+        println!("{:#?}", c);
+
         assert!(c.is_ok());
     }
 }
@@ -153,21 +162,25 @@ fn parses_roles_config_from_json() {
 #[test]
 fn parses_roles_config_from_toml() {
     let toml_config_base = r#"
-    [bias]
+    [[groups]]
+    name = "bias"
     limit = 3
 
-    [bias.roles]
-    [bias.roles."First Role"]
+    [[groups.roles]]
+    name = "First Role"
     primary_id = 123
 
-    [bias.roles."Second Role"]
+    [[groups.roles]]
+    name = "Second Role"
     primary_id = 456
     secondary_id = 789
 
-    [extra]
-    [extra.roles]
-    [extra.roles."Third Role"]
-    primary_id = 1011
+    [[groups]]
+    name = "extra"
+
+    [[groups.roles]]
+    name = "Third Role"
+    primary_id = 1_011
     "#;
 
     let configs = vec![

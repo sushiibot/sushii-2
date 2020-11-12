@@ -176,12 +176,12 @@ where
     let mut member_config_roles: HashMap<&str, HashSet<u64>> = HashMap::new();
 
     // add the member's current roles
-    for (group_name, group) in &role_config.groups {
+    for group in &role_config.groups {
         let group_entry = member_config_roles
-            .entry(group_name)
+            .entry(&group.name)
             .or_insert_with(HashSet::new);
 
-        for role in group.roles.values() {
+        for role in group.roles.iter() {
             if member_all_roles.contains(&role.primary_id) {
                 group_entry.insert(role.primary_id);
             }
@@ -210,16 +210,17 @@ where
     (member_all_roles, member_config_roles)
 }
 
+/// Returns HashMap<String role name, (role_name, role, group_name, group index)
 fn build_role_name_map<'a>(
     role_config: &'a GuildRoles,
-) -> HashMap<String, (&str, &'a GuildRole, &'a str)> {
+) -> HashMap<String, (&str, &'a GuildRole, &'a str, usize)> {
     // Config roles: map from role name -> (role, group_name)
-    let mut role_name_map: HashMap<String, (&str, &GuildRole, &str)> = HashMap::new();
-    for (group_name, group) in &role_config.groups {
-        for (role_name, role) in &group.roles {
+    let mut role_name_map: HashMap<String, (&str, &GuildRole, &str, usize)> = HashMap::new();
+    for (i, group) in role_config.groups.iter().enumerate() {
+        for role in &group.roles {
             role_name_map.insert(
-                role_name.trim().to_lowercase(),
-                (&role_name, &role, &group_name),
+                role.name.trim().to_lowercase(),
+                (&role.name, &role, &group.name, i),
             );
         }
     }
@@ -273,7 +274,7 @@ fn dedupe_role_actions<'a>(role_actions: &'a [RoleAction]) -> Vec<&'a RoleAction
 fn calculate_roles<'a>(
     role_config: &GuildRoles,
     role_actions_deduped: Vec<&'a RoleAction>,
-    role_name_map: HashMap<String, (&'a str, &'a GuildRole, &'a str)>,
+    role_name_map: HashMap<String, (&'a str, &'a GuildRole, &'a str, usize)>,
     mut member_all_roles: HashSet<u64>,
     mut member_config_roles: HashMap<&'a str, HashSet<u64>>,
 ) -> CalculatedRoles<'a> {
@@ -285,14 +286,15 @@ fn calculate_roles<'a>(
     let mut over_limit_roles: HashMap<&str, Vec<&str>> = HashMap::new();
 
     for action in role_actions_deduped {
-        if let Some((orig_role_name, role, group_name)) = role_name_map.get(action.role_name.trim())
+        if let Some((orig_role_name, role, group_name, group_index)) =
+            role_name_map.get(action.role_name.trim())
         {
             // Member's current roles in this group
             let cur_group_roles = member_config_roles
                 .entry(group_name)
                 .or_insert_with(HashSet::new);
 
-            let conf_group = role_config.groups.get(*group_name).unwrap();
+            let conf_group = role_config.groups.get(*group_index).unwrap();
 
             if action.kind == RoleActionKind::Add {
                 // If member already has it
@@ -420,7 +422,7 @@ fn format_response(role_config: &GuildRoles, calc_roles: &CalculatedRoles) -> St
     }
 
     for (group_name, role_names) in over_limit_roles {
-        if let Some(group) = &role_config.groups.get(&group_name[..]) {
+        if let Some(group) = &role_config.groups.iter().find(|&x| x.name == *group_name) {
             let _ = writeln!(
                 s,
                 "{} (`{}` group has a limit of `{}` {})",
@@ -542,59 +544,38 @@ mod tests {
 
     fn role_conf() -> GuildRoles {
         GuildRoles {
-            groups: [
-                (
-                    "FirstGroup".to_string(),
-                    GuildGroup {
-                        limit: 2,
-                        roles: [
-                            (
-                                "FirstRole".to_string(),
-                                GuildRole {
-                                    primary_id: 1,
-                                    secondary_id: None,
-                                },
-                            ),
-                            (
-                                "SecondRole".to_string(),
-                                GuildRole {
-                                    primary_id: 2,
-                                    secondary_id: Some(20),
-                                },
-                            ),
-                            (
-                                "ThirdRole".to_string(),
-                                GuildRole {
-                                    primary_id: 3,
-                                    secondary_id: Some(30),
-                                },
-                            ),
-                        ]
-                        .iter()
-                        .cloned()
-                        .collect(),
-                    },
-                ),
-                (
-                    "SecondGroup".to_string(),
-                    GuildGroup {
-                        limit: 0,
-                        roles: [(
-                            "Dog".to_string(),
-                            GuildRole {
-                                primary_id: 100,
-                                secondary_id: Some(1000),
-                            },
-                        )]
-                        .iter()
-                        .cloned()
-                        .collect(),
-                    },
-                ),
-            ]
-            .iter()
-            .cloned()
-            .collect(),
+            groups: vec![
+                GuildGroup {
+                    name: "FirstGroup".into(),
+                    limit: 2,
+                    roles: vec![
+                        GuildRole {
+                            name: "FirstRole".into(),
+                            primary_id: 1,
+                            secondary_id: None,
+                        },
+                        GuildRole {
+                            name: "SecondRole".into(),
+                            primary_id: 2,
+                            secondary_id: Some(20),
+                        },
+                        GuildRole {
+                            name: "ThirdRole".into(),
+                            primary_id: 3,
+                            secondary_id: Some(30),
+                        },
+                    ],
+                },
+                GuildGroup {
+                    name: "SecondGroup".into(),
+                    limit: 0,
+                    roles: vec![GuildRole {
+                        name: "Dog".into(),
+                        primary_id: 100,
+                        secondary_id: Some(1000),
+                    }],
+                },
+            ],
         }
     }
 

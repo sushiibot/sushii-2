@@ -1,9 +1,11 @@
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::fmt;
 
 #[derive(Deserialize, Default, Serialize, Clone, Debug)]
 pub struct GuildRole {
+    /// Name of the role and what to search
+    pub name: String,
+
     /// Main role id that has the highest priority for the colour
     pub primary_id: u64,
 
@@ -14,24 +16,28 @@ pub struct GuildRole {
 
 #[derive(Deserialize, Default, Serialize, Clone, Debug)]
 pub struct GuildGroup {
+    /// Name of the group
+    pub name: String,
+
     /// Limit default is 0 which means disabled
     #[serde(default)]
     pub limit: u64,
-    pub roles: HashMap<String, GuildRole>,
+
+    /// List of roles in this group
+    pub roles: Vec<GuildRole>,
 }
 
 #[derive(Deserialize, Default, Serialize, Clone, Debug)]
 pub struct GuildRoles {
-    #[serde(flatten)]
-    pub groups: HashMap<String, GuildGroup>,
+    pub groups: Vec<GuildGroup>,
 }
 
 impl fmt::Display for GuildRoles {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "**Role Groups**")?;
 
-        for (i, (group_name, group)) in self.groups.iter().enumerate() {
-            writeln!(f, "> **{}**", group_name)?;
+        for (i, group) in self.groups.iter().enumerate() {
+            writeln!(f, "> **{}**", group.name)?;
 
             if group.limit > 0 {
                 writeln!(f, "> Limit: `{}`", group.limit)?;
@@ -42,8 +48,8 @@ impl fmt::Display for GuildRoles {
                 "> Roles: {}",
                 group
                     .roles
-                    .keys()
-                    .map(|s| format!("`{}`", s))
+                    .iter()
+                    .map(|s| format!("`{}`", s.name))
                     .collect::<Vec<String>>()
                     .join(", ")
             )?;
@@ -63,10 +69,10 @@ impl GuildRoles {
     pub fn get_examples_string(&self) -> String {
         let roles: Vec<&str> = self
             .groups
-            .values()
-            .map(|g| g.roles.keys())
+            .iter()
+            .map(|g| g.roles.iter())
             .flatten()
-            .map(|r| r.as_str())
+            .map(|r| r.name.as_str())
             .take(2)
             .collect();
 
