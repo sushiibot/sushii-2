@@ -3,6 +3,7 @@ use serenity::async_trait;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::utils::parse_channel;
+use std::convert::TryFrom;
 
 use super::GuildSetting;
 use crate::prelude::*;
@@ -107,7 +108,12 @@ impl GuildConfig {
                 self.join_msg.replace(val.into());
             }
             GuildSetting::JoinReact => {
-                self.join_react.replace(val.into());
+                self.join_react.replace(
+                    // Convert to ReactionType to validate, then convert back to string to save it
+                    ReactionType::try_from(val)
+                        .or_else(|_| Err(Error::Sushii("invalid emoji".into())))?
+                        .to_string(),
+                );
             }
             GuildSetting::LeaveMsg => {
                 self.leave_msg.replace(val.into());
