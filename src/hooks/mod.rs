@@ -56,6 +56,10 @@ pub async fn after(ctx: &Context, msg: &Message, _: &str, error: Result<(), Comm
     // Errors here are only from sushii errors, not user input errors
     if let Err(e) = error {
         tracing::error!(?msg, %e, "Error running command");
+
+        // Downcast error
+        sentry::capture_error(&*e);
+
         let _ = msg
             .channel_id
             .say(&ctx, "Something went wrong while running this command :(")

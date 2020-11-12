@@ -35,6 +35,16 @@ async fn main() -> Result<()> {
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
+    let _guard = sushii_conf
+        .sentry_url
+        .clone()
+        .map(|url| sentry::init(url))
+        .or_else(|| {
+            tracing::warn!("SENTRY_URL is not set");
+
+            None
+        });
+
     let pool = PgPoolOptions::new()
         .max_connections(10)
         .connect(&sushii_conf.database_url)
