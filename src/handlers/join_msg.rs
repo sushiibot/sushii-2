@@ -1,4 +1,5 @@
 use serenity::{model::prelude::*, prelude::*};
+use std::convert::TryFrom;
 
 use crate::error::Result;
 use crate::model::sql::*;
@@ -40,7 +41,15 @@ async fn _guild_member_addition(ctx: &Context, guild_id: &GuildId, member: &Memb
             &guild_id.name(&ctx).await.unwrap_or_else(|| "".into()),
         );
 
-    msg_channel.say(&ctx, join_msg_replaced).await?;
+    let msg = msg_channel.say(&ctx, join_msg_replaced).await?;
+
+    // Convert string emoji to ReactionType to allow custom emojis
+    if let Some(reaction) = guild_conf
+        .join_react
+        .and_then(|r| ReactionType::try_from(r).ok())
+    {
+        msg.react(&ctx, reaction).await?;
+    }
 
     Ok(())
 }
