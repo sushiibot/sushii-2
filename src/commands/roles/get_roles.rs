@@ -22,12 +22,12 @@ async fn get(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     let conf_str = match format.as_ref() {
         "json" => serde_json::to_string_pretty(&conf.role_config)?,
-        "toml" => toml::ser::to_string_pretty(&conf.role_config)?,
+        "yml" | "yaml" => serde_yaml::to_string(&conf.role_config)?,
         _ => {
             msg.channel_id
                 .say(
                     &ctx.http,
-                    "Invalid format, valid options are `json` or `toml`",
+                    "Invalid format, valid options are `json` or `yaml`",
                 )
                 .await?;
 

@@ -6,7 +6,7 @@ use crate::model::sql::*;
 
 enum ConfigType {
     Json,
-    Toml,
+    Yaml,
 }
 
 fn error_pointed_str(s: &str, line: usize, col: usize) -> String {
@@ -63,7 +63,8 @@ fn parse_config(input_str: &str) -> Result<GuildRoles, String> {
 
         // Remove codeblock backticks
         input_str = input_str.trim_start_matches("```json");
-        input_str = input_str.trim_start_matches("```toml");
+        input_str = input_str.trim_start_matches("```yaml");
+        input_str = input_str.trim_start_matches("```yml");
         input_str = input_str.trim_start_matches('`');
         input_str = input_str.trim_end_matches('`');
 
@@ -76,10 +77,8 @@ fn parse_config(input_str: &str) -> Result<GuildRoles, String> {
 
     let config_type_hint = if roles_conf_str.starts_with('{') {
         Some(ConfigType::Json)
-    } else if roles_conf_str.starts_with('[') {
-        Some(ConfigType::Toml)
     } else {
-        None
+        Some(ConfigType::Yaml)
     };
 
     if let Some(hint) = config_type_hint {
@@ -92,16 +91,16 @@ fn parse_config(input_str: &str) -> Result<GuildRoles, String> {
                     error_pointed_str(roles_conf_str, e.line(), e.column())
                 )
             }),
-            ConfigType::Toml => toml::from_str::<GuildRoles>(&roles_conf_str).map_err(|e| {
-                if let Some((line, column)) = e.line_col() {
+            ConfigType::Yaml => serde_yaml::from_str::<GuildRoles>(&roles_conf_str).map_err(|e| {
+                if let Some(location) = e.location() {
                     format!(
                         "Error in roles config: {}\n\
-                            ```toml\n{}\n```",
+                            ```yaml\n{}\n```",
                         e,
-                        error_pointed_str(roles_conf_str, line, column)
+                        error_pointed_str(roles_conf_str, location.line(), location.column())
                     )
                 } else {
-                    "Invalid toml configuration".to_string()
+                    "Invalid yaml configuration".to_string()
                 }
             }),
         }
@@ -160,36 +159,30 @@ fn parses_roles_config_from_json() {
 }
 
 #[test]
-fn parses_roles_config_from_toml() {
-    let toml_config_base = r#"
-    [[groups]]
-    name = "bias"
-    limit = 3
-
-    [[groups.roles]]
-    name = "First Role"
-    primary_id = 123
-
-    [[groups.roles]]
-    name = "Second Role"
-    primary_id = 456
-    secondary_id = 789
-
-    [[groups]]
-    name = "extra"
-
-    [[groups.roles]]
-    name = "Third Role"
-    primary_id = 1_011
+fn parses_roles_config_from_yaml() {
+    let yaml_config_base = r#"
+    groups:
+    - name: bias
+      limit: 3
+      roles:
+      - name: First Role
+        primary_id: 123
+      - name: Second Role
+        primary_id: 456
+        secondary_id: 789
+    - name: extra
+      roles:
+      - name: Third Role
+        primary_id: 1011
     "#;
 
     let configs = vec![
-        format!("```{}```", &toml_config_base),
-        format!("`{}`", &toml_config_base),
-        format!("```toml{}```", &toml_config_base),
-        format!("```toml\n{}```", &toml_config_base),
-        format!("```toml{}`", &toml_config_base),
-        toml_config_base.to_string(),
+        format!("```{}```", &yaml_config_base),
+        format!("`{}`", &yaml_config_base),
+        format!("```yaml{}```", &yaml_config_base),
+        format!("```yaml\n{}```", &yaml_config_base),
+        format!("```yml{}`", &yaml_config_base),
+        yaml_config_base.to_string(),
     ];
 
     for config in configs {

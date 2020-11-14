@@ -27,7 +27,7 @@ Slimmed down feature set of original sushii-bot with a focus on moderation tools
     -   [ ] user ID lookup (list of ids to check if in guild, banned, muted, etc)
     -   [x] roles
         -   [x] json support
-        -   [x] toml support
+        -   [x] yml support
     -   [ ] settings
         -   [ ] dm users on action with reason (mutes only)
             -   [ ] toggle
