@@ -6,7 +6,7 @@ on:
             - v*
 
 env:
-    IMAGE_NAME: ghcr.io/drklee3/sushii-2
+    IMAGE_NAME: ghcr.io/sushiibot/sushii-2
 
 jobs:
     push:
@@ -40,7 +40,7 @@ jobs:
                   pull: true
                   push: true
                   tags: ${{ steps.docker_meta.outputs.tags }}
-                  cache-from: type=registry,ref=drklee3/sushii-2:latest
+                  cache-from: type=registry,ref=${ env.IMAGE_NAME }:latest
                   cache-to: type=inline
                   labels: |
                       org.opencontainers.image.source=${{ github.event.repository.html_url }}
