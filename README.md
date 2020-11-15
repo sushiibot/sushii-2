@@ -34,7 +34,6 @@ Slimmed down feature set of original sushii-bot with a focus on moderation tools
             -   [ ] set message
         -   [ ] default mute duration (0 to disable)
         -   [ ] default num messages delete messages on ban
-    -   [ ] auto boost role?
 -   user
     -   avatar
     -   userinfo
