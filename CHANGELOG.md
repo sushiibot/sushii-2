@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+-  Join reactions
+-  Allow setting mute defaultduration to indefinite
+-  Sentry error logging
+
+### Changed
+
+-  Preserve group and role order to match role configuration
+-  Respond with mute subcommands if no args are given
+-  Replace TOML role configuration with YAML
+
+### Fixed
+
+-  Validate join react setting
+
 ## [0.1.7]
 
 ### Added
