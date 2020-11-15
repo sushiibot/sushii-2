@@ -438,8 +438,15 @@ fn format_response(role_config: &GuildRoles, calc_roles: &CalculatedRoles) -> St
 }
 
 pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
-    // ignore self and bots
+    // ignore self
+    if msg.is_own(&ctx).await {
+        return Ok(None);
+    }
+
+    // Delete other bots and return
     if msg.author.bot {
+        msg.delete(&ctx).await?;
+
         return Ok(None);
     }
 
