@@ -24,7 +24,17 @@ fn error_pointed_str(s: &str, line: usize, col: usize) -> String {
 async fn set(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let mut conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
 
-    let roles_conf = match parse_config(&args.rest()) {
+    let conf_str = if msg.attachments.is_empty() {
+        args.rest().to_string()
+    } else {
+        if let Some(attachment) = msg.attachments.first() {
+            String::from_utf8(attachment.download().await?)?
+        } else {
+            "".into()
+        }
+    };
+
+    let roles_conf = match parse_config(&conf_str) {
         Err(e) => {
             let _ = msg.channel_id.say(&ctx.http, &e).await?;
 
