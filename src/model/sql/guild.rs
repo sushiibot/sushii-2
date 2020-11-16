@@ -4,6 +4,8 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::utils::parse_channel;
 use std::convert::TryFrom;
+use std::fmt;
+use std::time::Duration;
 
 use super::GuildSetting;
 use crate::prelude::*;
@@ -262,6 +264,105 @@ impl GuildConfig {
                 (self.log_member.map(|id| format!("<#{}>", id as u64)), None)
             }
         }
+    }
+}
+
+fn fmt_channel(id: Option<i64>) -> Option<String> {
+    id.map(|id| format!("<#{}>", id))
+}
+
+fn fmt_role(id: Option<i64>) -> Option<String> {
+    id.map(|id| format!("<@&{}>", id))
+}
+
+fn fmt_num(num: Option<i32>) -> Option<String> {
+    num.map(|num| num.to_string())
+}
+
+fn fmt_duration(d: Option<i64>) -> Option<String> {
+    d.map(|d| d as u64)
+        .map(Duration::from_secs)
+        .map(|d| humantime::format_duration(d).to_string())
+}
+
+impl fmt::Display for GuildConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // (Name, Value, Option<Enabled>)
+        let fields = [
+            ("Prefix", Some(self.prefix.clone()), None),
+            (
+                "Join Message",
+                Some(self.join_msg.clone()),
+                Some(self.join_msg_enabled),
+            ),
+            ("Join React", Some(self.join_react.clone()), None),
+            (
+                "Leave Message",
+                Some(self.leave_msg.clone()),
+                Some(self.leave_msg_enabled),
+            ),
+            (
+                "Message Channel",
+                Some(fmt_channel(self.msg_channel)),
+                None,
+            ),
+            (
+                "Message Log",
+                Some(fmt_channel(self.log_msg)),
+                Some(self.log_msg_enabled),
+            ),
+            (
+                "Mod Log",
+                Some(fmt_channel(self.log_mod)),
+                Some(self.log_mod_enabled),
+            ),
+            ("Member Log", Some(fmt_channel(self.log_member)), None),
+            ("Mute Role", Some(fmt_role(self.mute_role)), None),
+            (
+                "Mute Default Duration",
+                Some(fmt_duration(self.mute_duration)),
+                None,
+            ),
+            (
+                "Mute DM",
+                Some(self.mute_dm_text.clone()),
+                Some(self.mute_dm_enabled),
+            ),
+            (
+                "Roles Channel",
+                Some(fmt_channel(self.role_channel)),
+                Some(self.role_enabled),
+            ),
+            ("Invite Guard", None, Some(self.invite_guard)),
+            ("Max Mentions", Some(fmt_num(self.max_mention)), None),
+            // role_config: Option<serde_json::Value>,
+        ];
+
+        for field in fields.iter() {
+            if let Some(enabled) = field.2 {
+                if enabled {
+                    write!(f, "<:online:316354435745972244>")?;
+                } else {
+                    write!(f, "<:offline:316354467031416832>")?;
+                }
+            }
+
+            if let Some(value) = field.1.as_ref() {
+                write!(f, " **{}:** ", field.0)?;
+
+                match value {
+                    Some(v) => write!(f, " {}", v)?,
+                    None => write!(f, r#" \_\_\_\_\_\_"#)?,
+                };
+            } else {
+                // Fields that don't have a value shouldn't have the ":"
+                write!(f, " **{}** ", field.0)?;
+            }
+
+            writeln!(f)?;
+        }
+
+        Ok(())
     }
 }
 
