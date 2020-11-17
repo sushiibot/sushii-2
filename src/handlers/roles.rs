@@ -8,7 +8,7 @@ use std::time::Duration;
 use std::vec::Vec;
 use tokio::time::delay_for;
 
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::keys::CacheAndHttpContainer;
 use crate::model::sql::{
     guild_roles::{GuildRole, GuildRoles},
@@ -467,7 +467,11 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
 
     // get configs
     let role_config: GuildRoles = match guild_conf.role_config {
-        Some(c) => serde_json::from_value(c)?,
+        Some(c) => serde_json::from_value(c).map_err(|e| {
+            tracing::warn!(guild_id=guild.id.0, "Failed to convert guild role config to GuildRoles struct: {}", e);
+
+            Error::Sushii("Role configuration is invalid".into())
+        })?,
         None => return Ok(None),
     };
 
