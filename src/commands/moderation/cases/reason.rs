@@ -8,6 +8,17 @@ use serenity::prelude::*;
 use crate::keys::CacheAndHttpContainer;
 use crate::model::sql::{GuildConfig, GuildConfigDb, ModLogEntry, ModLogEntryDb};
 
+enum CaseRange {
+    /// A single case ID
+    Single(u64),
+    /// A range of inclusive case IDs
+    Range { start: u64, end: u64 },
+    /// A single latest case
+    Latest,
+    /// The latest number of cases
+    LatestCount(u64),
+}
+
 #[command]
 #[only_in("guild")]
 async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
@@ -24,7 +35,10 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         Ok(s) => s,
         Err(_) => {
             msg.channel_id
-                .say(&ctx.http, "Please give a case ID, ID range, or `latest`")
+                .say(
+                    &ctx.http,
+                    "Please give a case ID, ID range, `latest`, or `latest~n`",
+                )
                 .await?;
 
             return Ok(());
@@ -48,39 +62,55 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     }
 
     // Case ID range
-    let (start, end) = if let Some(captures) = RE.captures(&range_str) {
+    let case_range = if let Some(captures) = RE.captures(&range_str) {
         let start = captures.get(1).unwrap().as_str().parse::<u64>()?;
         let end = captures.get(2).unwrap().as_str().parse::<u64>()?;
 
-        (Some(start), Some(end))
+        CaseRange::Range { start, end }
 
     // Single case ID
     } else if let Ok(num) = range_str.parse::<u64>() {
-        // Just use the same start / end
-        (Some(num), Some(num))
+        CaseRange::Single(num)
 
     // Latest
     } else if range_str == "latest" {
-        (None, None)
+        CaseRange::Latest
+
+    // Latest n cases
+    } else if range_str.starts_with("latest~") {
+        let count = match range_str.trim_start_matches("latest~").parse::<u64>() {
+            Ok(c) => c,
+            Err(_) => {
+                msg.channel_id
+                        .say(
+                            &ctx.http,
+                            "Invalid number of latest cases, give a valid number after `latest~` (Example: `latest~3 for the latest 3 cases)",
+                        )
+                        .await?;
+
+                return Ok(());
+            }
+        };
+
+        CaseRange::LatestCount(count)
     } else {
         msg.channel_id
             .say(
                 &ctx.http,
-                "Invalid case, please give a case ID (2), ID range (1-4), or `latest`",
+                "Invalid case, please give a case ID (2), ID range (1-4), `latest`, or `latest~n` (latest~3)",
             )
             .await?;
 
         return Ok(());
     };
 
-    let entries = match (start, end) {
-        (Some(start), Some(end)) => {
+    let entries = match case_range {
+        CaseRange::Single(id) => ModLogEntry::get_range_entries(&ctx, guild_id, id, id).await?,
+        CaseRange::Range { start, end } => {
             ModLogEntry::get_range_entries(&ctx, guild_id, start, end).await?
         }
-        (None, None) => ModLogEntry::get_latest(&ctx, guild_id)
-            .await?
-            .map_or_else(Vec::new, |entry| vec![entry]), // Just empty vec if None, or a Vec<Entry>
-        _ => unreachable!(),
+        CaseRange::Latest => ModLogEntry::get_latest(&ctx, guild_id, 1).await?,
+        CaseRange::LatestCount(count) => ModLogEntry::get_latest(&ctx, guild_id, count).await?,
     };
 
     if entries.is_empty() {
@@ -108,6 +138,18 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     // Since take ownership of entries in the iteration, just saving the length
     let num_entries = entries.len();
+
+    let num_cases_str = match case_range {
+        CaseRange::Single(_) => "1 case".into(),
+        CaseRange::Range { start, end } => format!("{} cases ({}-{})", num_entries, start, end),
+        CaseRange::Latest => "latest 1 case".into(),
+        CaseRange::LatestCount(_) => format!("latest {} cases", num_entries),
+    };
+
+    let mut sent_msg = msg
+        .channel_id
+        .say(&ctx, format!("Updating {}...", num_cases_str))
+        .await?;
 
     for mut entry in entries {
         let msg_id = match entry.msg_id {
@@ -192,14 +234,13 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     }
 
-    msg.channel_id
-        .say(
-            &ctx,
-            format!(
-                "Finished updating {} cases with reason: {}",
-                num_entries, reason
-            ),
-        )
+    sent_msg
+        .edit(&ctx, |m| {
+            m.content(format!(
+                "Finished updating {} with reason: {}",
+                num_cases_str, reason
+            ))
+        })
         .await?;
 
     Ok(())

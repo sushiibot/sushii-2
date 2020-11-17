@@ -301,11 +301,7 @@ impl fmt::Display for GuildConfig {
                 Some(self.leave_msg.clone()),
                 Some(self.leave_msg_enabled),
             ),
-            (
-                "Message Channel",
-                Some(fmt_channel(self.msg_channel)),
-                None,
-            ),
+            ("Message Channel", Some(fmt_channel(self.msg_channel)), None),
             (
                 "Message Log",
                 Some(fmt_channel(self.log_msg)),

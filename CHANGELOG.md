@@ -12,12 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  Join reactions
 -  Allow setting mute defaultduration to indefinite
 -  Sentry error logging
+-  Update latest n mod log cases with `reason latest~n [reason]`
 
 ### Changed
 
 -  Preserve group and role order to match role configuration
 -  Respond with mute subcommands if no args are given
 -  Replace TOML role configuration with YAML
+-  Display `settings list` nicer in an embed
 
 ### Fixed
 
