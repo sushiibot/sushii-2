@@ -121,7 +121,7 @@ services:
         labels:
             - traefik.enable=false
     sushii:
-        image: ghcr.io/drklee3/sushii-2:latest
+        image: ghcr.io/sushiibot/sushii-2:latest
         container_name: sushii
         restart: unless-stopped
         depends_on:

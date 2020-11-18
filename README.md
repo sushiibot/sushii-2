@@ -41,12 +41,12 @@ Slimmed down feature set of original sushii-bot with a focus on moderation tools
 
 ## Running
 
-Docker images are published on the [GitHub Container Registry](https://github.com/users/drklee3/packages/container/package/sushii-2).
+Docker images are published on the [GitHub Container Registry](https://github.com/users/sushiibot/packages/container/package/sushii-2).
 
 Images on the GitHub Packages Docker registry are no longer updated.
 
 ```bash
-docker run --expose 9888 --env-file ./.env ghcr.io/drklee3/sushii-2:latest
+docker run --expose 9888 --env-file ./.env ghcr.io/sushiibot/sushii-2:latest
 ```
 
 ## Building
