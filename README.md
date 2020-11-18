@@ -5,40 +5,6 @@ Rewrite of [sushii-bot](https://github.com/drklee3/sushii-bot) with async
 
 wip... again.
 
-## Features
-
-Slimmed down feature set of original sushii-bot with a focus on moderation tools
-
--   [ ] moderation tools
-    -   [x] ban / unban
-    -   [x] kick
-    -   [x] prune
-    -   [x] warn
-    -   [x] mute / unmute
-        -   [x] timed mutes
-            -   [x] set duration per mute (s!!mute [ids] [duration and reason])
-            -   [x] remove time duration (indefinite)
-            -   [x] adjust existing mute duration
-        -   [ ] allow muting users who left
-        -   [ ] mute users who joined in last x minutes
-    -   [x] cases
-        -   [x] reason
-        -   [x] history
-    -   [ ] user ID lookup (list of ids to check if in guild, banned, muted, etc)
-    -   [x] roles
-        -   [x] json support
-        -   [x] yml support
-    -   [ ] settings
-        -   [ ] dm users on action with reason (mutes only)
-            -   [ ] toggle
-            -   [ ] set message
-        -   [ ] default mute duration (0 to disable)
-        -   [ ] default num messages delete messages on ban
--   user
-    -   avatar
-    -   userinfo
-    -   notifications
-
 ## Running
 
 Docker images are published on the [GitHub Container Registry](https://github.com/users/sushiibot/packages/container/package/sushii-2).
@@ -74,4 +40,5 @@ POSTGRES_USER=
 POSTGRES_DB=
 
 DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}
+SENTRY_DSN=
 ```
