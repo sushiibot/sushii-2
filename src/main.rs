@@ -36,11 +36,11 @@ async fn main() -> Result<()> {
         .init();
 
     let _guard = sushii_conf
-        .sentry_url
+        .sentry_dsn
         .clone()
         .map(|url| sentry::init(url))
         .or_else(|| {
-            tracing::warn!("SENTRY_URL is not set");
+            tracing::warn!("SENTRY_DSN is not set");
 
             None
         });

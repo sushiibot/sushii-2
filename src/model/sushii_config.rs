@@ -21,7 +21,7 @@ pub struct SushiiConfig {
     pub lastfm_key: String,
     pub metrics_interface: IpAddr,
     pub metrics_port: u16,
-    pub sentry_url: Option<String>,
+    pub sentry_dsn: Option<String>,
 }
 
 fn parse_id_array(s: &str) -> Vec<u64> {
@@ -57,7 +57,7 @@ impl SushiiConfig {
                 .ok()
                 .and_then(|x| x.parse().ok())
                 .unwrap_or(9888),
-            sentry_url: env::var("SENTRY_URL").ok(),
+            sentry_dsn: env::var("SENTRY_DSN").ok(),
         })
     }
 }
