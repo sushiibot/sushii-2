@@ -189,12 +189,22 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             }
         };
 
+        // Define here so we can use &str in the map below to not clone every line
+        let new_reason_line = format!("**Reason:** {}", reason);
+
         // edit reason
-        for mut field in &mut embed.fields {
-            if field.name == "Reason" {
-                field.value = reason.to_string();
-            }
-        }
+        embed.description = embed.description.map(|d| {
+            d.split('\n')
+                .map(|line| {
+                    if line.starts_with("**Reason:**") {
+                        &new_reason_line
+                    } else {
+                        line
+                    }
+                })
+                .collect::<Vec<_>>()
+                .join("\n")
+        });
 
         if let Err(e) = message
             .edit(&cache_http, |m| {
