@@ -67,8 +67,8 @@ impl FromStr for GuildSettingAction {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let action = match s {
             "set" => Self::Set,
-            "on" => Self::On,
-            "off" => Self::Off,
+            "on" | "enable" => Self::On,
+            "off" | "disable" => Self::Off,
             "toggle" => Self::Toggle,
             "show" => Self::Show,
             _ => return Err(Error::Sushii("Invalid guild setting action".into())),
