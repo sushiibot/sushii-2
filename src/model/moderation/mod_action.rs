@@ -430,7 +430,7 @@ fn parse_id_reason_duration(
     // Reason without the duration string
     let reason_no_duration = duration_match.and_then(|d| {
         reason
-            .as_ref()
+            .clone()
             .map(|r| r.replace(d.as_str(), "").trim().to_string())
             .and_then(|r| if r.is_empty() { None } else { Some(r) })
     });
@@ -438,8 +438,16 @@ fn parse_id_reason_duration(
     // Parsed duration
     let duration = duration_match.map(|d| parse_duration(d.as_str()));
 
+    // Original reason if there isn't a duration found
+    let processed_reason = if duration_match.is_none() {
+        // If there isn't a duration, should use the original reason
+        reason
+    } else {
+        reason_no_duration
+    };
+
     // Return the ids, reason with the duration string removed, parsed duration
-    (ids, reason_no_duration, duration)
+    (ids, processed_reason, duration)
 }
 
 fn parse_id_reason(args: Args) -> (Vec<u64>, Option<String>) {
@@ -683,6 +691,24 @@ mod tests {
             println!("reason: {:#?}", reason);
             assert!(reason.is_none());
             assert_eq!(duration.unwrap().unwrap(), duration_exp);
+        }
+    }
+
+    #[test]
+    fn parses_ids_reason_no_duration() {
+        let input_strs = vec![
+            "145764790046818304,193163974471188480,151018674793349121 some reason text",
+            "145764790046818304,193163974471188480,151018674793349121   some reason text    ",
+        ];
+
+        for s in input_strs {
+            let args = Args::new(s, &[Delimiter::Single(' ')]);
+
+            let (ids, reason, duration) = parse_id_reason_duration(args);
+
+            assert_eq!(ids, IDS_EXP);
+            assert!(duration.is_none());
+            assert_eq!(reason.unwrap(), REASON_EXP);
         }
     }
 }

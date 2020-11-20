@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -  Add on/off guild setting aliases "enable" and "disable"
 
+### Fixed
+
+-  Parse missing reason when using `mute` command without a duration
+
 ## [0.1.8]
 
 ### Added
