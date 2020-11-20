@@ -83,6 +83,7 @@ pub async fn unmute_member(ctx: &Context, mute: &Mute) -> Result<()> {
         mute.get_human_duration().unwrap_or_else(|| "N/A".into()),
     );
 
+    // TODO: Send modlog entry if member not in guild since it only sends when modifying user roles
     if member.is_none() {
         reason.push_str(" User is currently not in guild and will not be muted on re-join.");
     }

@@ -24,6 +24,7 @@ async fn _guild_member_addition(
     let now = Utc::now().naive_local();
 
     // If mute already expired, just log it and return -- don't need to do anything else
+    // TODO: Check if this is needed, don't think this ever happens, since if it's already expired it would be deleted
     if let Some(end) = mute.end_time {
         if now > end {
             ModLogEntry::new("unmute", true, guild_id.0, &member.user)
@@ -113,9 +114,15 @@ async fn _guild_member_update(
             // Save it first in case other stuff fails, since if other stuff
             // fails we don't want this pending still, just throw it out I guess
             Some(mute_entry.pending(false).save(&ctx).await?)
+        } else if let Some(mute_entry) = Mute::from_id(&ctx, new_member.guild_id.0, new_member.user.id.0).await? {
+            // If a muted user re-joins, guild_member_addition would add mute
+            // role, and there would be an existing non-pending mute entry
+
+            Some(mute_entry)
         } else {
-            // If there isn't a pending, it's just a regular mute from manually
-            // adding roles to a user so just create a new one
+            // If there isn't a pending OR there isn't an existing mute, it's
+            // a NEW regular mute from manually adding roles to a user so just
+            // create a new one
             Some(Mute::new(
                 new_member.guild_id.0,
                 new_member.user.id.0,
