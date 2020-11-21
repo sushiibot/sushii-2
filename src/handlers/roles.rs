@@ -552,7 +552,6 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::sql::guild_roles::{GuildGroup, GuildRole, GuildRoles};
 
     fn role_conf() -> GuildRoles {
         GuildRoles {
