@@ -3,7 +3,7 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 use crate::keys::*;
-use crate::model::sql::guild::*;
+use crate::model::sql::*;
 
 #[command]
 #[only_in("guild")]

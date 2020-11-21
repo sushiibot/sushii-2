@@ -114,7 +114,9 @@ async fn _guild_member_update(
             // Save it first in case other stuff fails, since if other stuff
             // fails we don't want this pending still, just throw it out I guess
             Some(mute_entry.pending(false).save(&ctx).await?)
-        } else if let Some(mute_entry) = Mute::from_id(&ctx, new_member.guild_id.0, new_member.user.id.0).await? {
+        } else if let Some(mute_entry) =
+            Mute::from_id(&ctx, new_member.guild_id.0, new_member.user.id.0).await?
+        {
             // If a muted user re-joins, guild_member_addition would add mute
             // role, and there would be an existing non-pending mute entry
 

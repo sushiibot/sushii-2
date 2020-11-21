@@ -5,6 +5,7 @@ pub mod join_msg;
 pub mod mod_log;
 pub mod raw_event_handler;
 pub mod roles;
+pub mod user_levels;
 
 pub use raw_event_handler::RawHandler;
 
@@ -27,6 +28,7 @@ impl EventHandler for Handler {
 
     async fn message(&self, ctx: Context, msg: Message) {
         roles::message(&ctx, &msg).await;
+        user_levels::message(&ctx, &msg).await;
     }
 
     async fn guild_ban_addition(&self, ctx: Context, guild_id: GuildId, banned_user: User) {

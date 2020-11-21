@@ -2,7 +2,7 @@ use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
-use crate::model::sql::guild::*;
+use crate::model::sql::*;
 
 #[command]
 async fn list(ctx: &Context, msg: &Message) -> CommandResult {

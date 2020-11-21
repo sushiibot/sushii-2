@@ -10,10 +10,7 @@ use tokio::time::delay_for;
 
 use crate::error::{Error, Result};
 use crate::keys::CacheAndHttpContainer;
-use crate::model::sql::{
-    guild_roles::{GuildRole, GuildRoles},
-    GuildConfig, GuildConfigDb,
-};
+use crate::model::sql::*;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum RoleActionKind {

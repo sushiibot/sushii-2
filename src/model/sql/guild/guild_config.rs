@@ -7,7 +7,7 @@ use std::convert::TryFrom;
 use std::fmt;
 use std::time::Duration;
 
-use super::GuildSetting;
+use crate::model::sql::GuildSetting;
 use crate::prelude::*;
 
 #[async_trait]
