@@ -33,9 +33,15 @@ async fn _guild_member_addition(ctx: &Context, guild_id: &GuildId, member: &Memb
         None => return Ok(()),
     };
 
+    let member_number = match guild_id.to_guild_cached(&ctx).await {
+        Some(g) => g.member_count,
+        None => 0,
+    };
+
     let join_msg_replaced = join_msg
         .replace("<mention>", &member.user.mention())
         .replace("<username>", &member.user.name)
+        .replace("<member_number>", &member_number.to_string())
         .replace(
             "<server>",
             &guild_id.name(&ctx).await.unwrap_or_else(|| "".into()),
