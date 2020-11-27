@@ -41,7 +41,10 @@ impl UserLevel {
     }
 
     /// Increments values with the time intervals reset accordingly
-    pub fn inc(self) -> Self {
+    pub fn inc(mut self) -> Self {
+        // Set last_message to now, so that next XP inc is minimum 1 minute later
+        self.last_msg = Utc::now().naive_local();
+
         self.reset_intervals().inc_fields()
     }
 
