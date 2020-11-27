@@ -21,6 +21,7 @@ enum CaseRange {
 
 #[command]
 #[only_in("guild")]
+#[required_permissions("BAN_MEMBERS")]
 async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let guild_id = match msg.guild_id {
         Some(id) => id.0,

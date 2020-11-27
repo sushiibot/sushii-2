@@ -6,6 +6,7 @@ use crate::model::moderation::{ModActionExecutor, ModActionExecutorDb, ModAction
 
 #[command]
 #[only_in("guild")]
+#[required_permissions("BAN_MEMBERS")]
 async fn kick(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let guild_id = match msg.guild_id {
         Some(id) => id,

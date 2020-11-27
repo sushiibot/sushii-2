@@ -1,3 +1,4 @@
+use reqwest::Client as ReqwestClient;
 use serenity::{
     client::bridge::gateway::ShardManager,
     prelude::{Mutex, TypeMapKey},
@@ -36,4 +37,10 @@ pub struct CacheAndHttpContainer;
 
 impl TypeMapKey for CacheAndHttpContainer {
     type Value = Arc<CacheAndHttp>;
+}
+
+pub struct ReqwestContainer;
+
+impl TypeMapKey for ReqwestContainer {
+    type Value = ReqwestClient;
 }

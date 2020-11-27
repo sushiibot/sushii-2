@@ -1955,6 +1955,7 @@ dependencies = [
  "prometheus",
  "prometheus-static-metric",
  "regex",
+ "reqwest",
  "sentry",
  "serde",
  "serde_json",

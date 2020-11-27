@@ -4,6 +4,7 @@ pub mod moderation;
 pub mod sql;
 pub mod sushii_cache;
 pub mod sushii_config;
+pub mod user;
 
 pub use self::{
     context::SushiiContext,

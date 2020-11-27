@@ -9,6 +9,7 @@ use crate::model::sql::{ModLogEntry, ModLogEntryDb};
 
 #[command]
 #[only_in("guild")]
+#[required_permissions("BAN_MEMBERS")]
 async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let guild_id = match msg.guild_id {
         Some(id) => id.0,

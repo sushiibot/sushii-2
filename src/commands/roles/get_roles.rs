@@ -5,6 +5,7 @@ use serenity::prelude::*;
 use crate::model::sql::*;
 
 #[command]
+#[required_permissions("MANAGE_GUILD")]
 async fn get(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
 

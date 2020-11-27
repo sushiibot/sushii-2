@@ -1,10 +1,15 @@
 use num_traits::cast::ToPrimitive;
+use serde_json::json;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
+use serenity::http::AttachmentType;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::utils::parse_mention;
+use std::borrow::Cow;
 
+use crate::keys::*;
 use crate::model::sql::*;
+use crate::model::user::*;
 
 #[command]
 #[only_in("guild")]
@@ -40,7 +45,7 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 }
             }
         }
-        Err(_) => msg.author.clone(), // need ownership 
+        Err(_) => msg.author.clone(), // need ownership
     };
 
     let user_level = match UserLevelRanked::from_id(&ctx, target_user.id, guild_id).await? {
@@ -60,21 +65,85 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .and_then(|xp| xp.to_i64())
         .unwrap_or(0);
 
-    msg.channel_id
-        .send_message(&ctx, |m| {
-            m.embed(|e| {
-                e.title(format!("Rank for {}", target_user.tag()));
-                e.color(0xe67e22);
+    let level_prog = UserLevelProgress::from_xp(user_level.msg_all_time);
+    let level_prog_global = UserLevelProgress::from_xp(user_level_global);
 
-                e.field("Daily", user_level.fmt_rank_day(), true);
-                e.field("Weekly", user_level.fmt_rank_week(), true);
-                e.field("Monthly", user_level.fmt_rank_month(), true);
-                e.field("All Time", user_level.fmt_rank_all_time(), true);
+    let reqwest_client = ctx
+        .data
+        .read()
+        .await
+        .get::<ReqwestContainer>()
+        .cloned()
+        .unwrap();
 
-                e
-            })
-        })
-        .await?;
+    let sushii_conf = SushiiConfig::get(&ctx).await;
+
+    let res = reqwest_client
+        .post(&format!("{}/template", sushii_conf.image_server_url))
+        .json(&json!({
+            "name": "rank",
+            "width": 500,
+            "height": 400,
+            "ctx": {
+                "CONTENT_COLOR": "0, 184, 148",
+                "CONTENT_OPACITY": "1",
+                "AVATAR_URL": target_user.face(),
+                "REP": "123",
+                "FISHIES": "456",
+                "USERNAME": target_user.tag(),
+                "PATRON_EMOJI": "",
+                "XP_PROGRESS": level_prog.next_level_xp_percentage,
+                "LEVEL": level_prog.level,
+                "GLOBAL_LEVEL": level_prog_global.level,
+                "CURR_LEVEL_XP": level_prog.next_level_xp_progress,
+                "LEVEL_XP_REQ": level_prog.next_level_xp_required,
+                "DAILY": user_level.fmt_rank_day(),
+                "WEEKLY": user_level.fmt_rank_week(),
+                "MONTHLY": user_level.fmt_rank_month(),
+                "ALL": user_level.fmt_rank_all_time()
+            }
+        }))
+        .send()
+        .await
+        .and_then(|r| r.error_for_status());
+
+    let bytes = match res {
+        Ok(r) => r.bytes().await?,
+        Err(e) => {
+            tracing::warn!("Image server responded with error: {}", e);
+
+            msg.channel_id
+                .send_message(&ctx, |m| {
+                    m.embed(|e| {
+                        e.title(format!("Rank for {}", target_user.tag()));
+                        e.color(0xe67e22);
+
+                        e.field(
+                            "Level",
+                            format!("{} (Global: {})", level_prog.level, level_prog_global.level),
+                            false,
+                        );
+
+                        e.field("Daily", user_level.fmt_rank_day(), true);
+                        e.field("Weekly", user_level.fmt_rank_week(), true);
+                        e.field("Monthly", user_level.fmt_rank_month(), true);
+                        e.field("All Time", user_level.fmt_rank_all_time(), true);
+
+                        e
+                    })
+                })
+                .await?;
+
+            return Ok(());
+        }
+    };
+
+    let files = AttachmentType::Bytes {
+        data: Cow::from(bytes.as_ref()),
+        filename: "level.png".into(),
+    };
+
+    msg.channel_id.send_files(&ctx, vec![files], |m| m).await?;
 
     Ok(())
 }

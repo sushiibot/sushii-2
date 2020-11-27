@@ -6,6 +6,7 @@ use crate::model::sql::*;
 
 #[command]
 #[aliases("sendhelp", "send info", "send help")]
+#[required_permissions("MANAGE_GUILD")]
 async fn sendinfo(ctx: &Context, msg: &Message) -> CommandResult {
     let conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
 

@@ -2,11 +2,9 @@ use serenity::framework::standard::macros::group;
 
 pub mod rank;
 
-use self::{rank::*};
+use self::rank::*;
 
 #[group]
-#[commands(
-    rank
-)]
+#[commands(rank)]
 #[only_in("guild")]
 pub struct Users;

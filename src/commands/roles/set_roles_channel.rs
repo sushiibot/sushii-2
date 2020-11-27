@@ -6,6 +6,7 @@ use serenity::utils::parse_channel;
 use crate::model::sql::*;
 
 #[command]
+#[required_permissions("MANAGE_GUILD")]
 #[num_args(1)]
 async fn setchannel(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let mut conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;

@@ -21,6 +21,7 @@ fn error_pointed_str(s: &str, line: usize, col: usize) -> String {
 }
 
 #[command]
+#[required_permissions("MANAGE_GUILD")]
 async fn set(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let mut conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
 

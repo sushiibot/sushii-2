@@ -6,6 +6,7 @@ use crate::model::moderation::{ModActionExecutor, ModActionExecutorDb, ModAction
 
 #[command]
 #[only_in("guild")]
+#[required_permissions("BAN_MEMBERS")]
 async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let guild_id = match msg.guild_id {
         Some(id) => id,
@@ -35,6 +36,7 @@ async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
 #[command]
 #[only_in("guild")]
+#[required_permissions("BAN_MEMBERS")]
 async fn unban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let guild_id = match msg.guild_id {
         Some(id) => id,

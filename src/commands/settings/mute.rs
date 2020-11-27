@@ -7,6 +7,7 @@ use crate::model::sql::*;
 
 #[command]
 #[sub_commands(role, defaultduration)]
+#[required_permissions("MANAGE_GUILD")]
 async fn mute(ctx: &Context, msg: &Message) -> CommandResult {
     let _ = msg
         .channel_id
@@ -20,6 +21,7 @@ async fn mute(ctx: &Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
+#[required_permissions("MANAGE_GUILD")]
 #[description("Sets the mute role")]
 #[usage("[role mention, ID, or name]")]
 async fn role(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
@@ -71,6 +73,7 @@ async fn role(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 }
 
 #[command]
+#[required_permissions("MANAGE_GUILD")]
 #[description("Sets the default duration of mutes, default is 24 hours")]
 #[usage("[duration]")]
 #[example("12 hours 30 minutes")]

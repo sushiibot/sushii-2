@@ -6,6 +6,7 @@ use std::str::FromStr;
 use crate::model::sql::*;
 
 #[command]
+#[required_permissions("MANAGE_GUILD")]
 async fn default(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     // Default is either help message or modifying settings, set, on, off, toggle
 

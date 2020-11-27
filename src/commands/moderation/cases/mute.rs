@@ -12,6 +12,7 @@ use crate::utils::user::get_user;
 
 #[command]
 #[only_in("guild")]
+#[required_permissions("BAN_MEMBERS")]
 #[sub_commands(setduration, addduration)]
 async fn mute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let guild_id = match msg.guild_id {
@@ -52,6 +53,7 @@ async fn mute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
 #[command]
 #[only_in("guild")]
+#[required_permissions("BAN_MEMBERS")]
 async fn unmute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let guild_id = match msg.guild_id {
         Some(id) => id,
@@ -256,6 +258,7 @@ async fn modify_duration(
 
 #[command]
 #[only_in("guild")]
+#[required_permissions("BAN_MEMBERS")]
 #[aliases("s", "set", "setd", "setdur", "settime")]
 async fn setduration(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     modify_duration(DurationModifyAction::Set, ctx, msg, args).await
@@ -263,12 +266,14 @@ async fn setduration(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
 
 #[command]
 #[only_in("guild")]
+#[required_permissions("BAN_MEMBERS")]
 #[aliases("a", "add", "addd", "adddur", "addtime", "extend")]
 async fn addduration(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     modify_duration(DurationModifyAction::Add, ctx, msg, args).await
 }
 
 #[command]
+#[required_permissions("BAN_MEMBERS")]
 #[only_in("guild")]
 async fn listmutes(ctx: &Context, msg: &Message) -> CommandResult {
     let guild = match msg.guild(&ctx.cache).await {

@@ -20,7 +20,7 @@ mod prelude;
 mod tasks;
 
 use crate::error::Result;
-use crate::keys::{CacheAndHttpContainer, DbPool, ShardManagerContainer};
+use crate::keys::{CacheAndHttpContainer, DbPool, ReqwestContainer, ShardManagerContainer};
 use crate::model::{
     sql::{GuildConfig, GuildConfigDb},
     Metrics, SushiiCache, {SushiiConfig, SushiiConfigDb},
@@ -109,8 +109,7 @@ async fn main() -> Result<()> {
                 | GatewayIntents::GUILD_BANS
                 | GatewayIntents::GUILD_MESSAGES
                 | GatewayIntents::GUILD_MESSAGE_REACTIONS
-                | GatewayIntents::DIRECT_MESSAGES
-                | GatewayIntents::GUILD_PRESENCES,
+                | GatewayIntents::DIRECT_MESSAGES, // | GatewayIntents::GUILD_PRESENCES,
         )
         .framework(framework)
         .event_handler(handlers::Handler)
@@ -128,6 +127,7 @@ async fn main() -> Result<()> {
         data.insert::<SushiiCache>(SushiiCache::default());
         data.insert::<DbPool>(pool.clone());
         data.insert::<Metrics>(Arc::clone(&metrics));
+        data.insert::<ReqwestContainer>(reqwest::Client::new());
     }
 
     // Start hyper metrics server

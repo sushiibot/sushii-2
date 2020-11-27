@@ -4,6 +4,7 @@ use serenity::prelude::*;
 use std::fmt::Write;
 
 #[command]
+#[required_permissions("MANAGE_GUILD")]
 async fn listids(ctx: &Context, msg: &Message) -> CommandResult {
     let guild = match msg.guild(&ctx.cache).await {
         Some(g) => g,
