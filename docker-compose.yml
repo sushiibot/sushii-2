@@ -145,6 +145,9 @@ services:
         image: ghcr.io/sushiibot/sushii-image-server:latest
         container_name: sushii-image-server
         restart: unless-stopped
+        init: true
+        cap_add:
+            - SYS_ADMIN
         expose:
             - "3000"
         networks:
