@@ -81,7 +81,7 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let res = reqwest_client
         .post(&format!("{}/template", sushii_conf.image_server_url))
         .json(&json!({
-            "name": "rank",
+            "templateName": "rank",
             "width": 500,
             "height": 400,
             "ctx": {
