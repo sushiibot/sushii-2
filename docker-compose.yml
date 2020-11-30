@@ -141,6 +141,16 @@ services:
             - sushii_net
         labels:
             - "traefik.enable=false"
+    sushii-image-server:
+        image: ghcr.io/sushiibot/sushii-image-server:latest
+        container_name: sushii-image-server
+        restart: unless-stopped
+        expose:
+            - "3000"
+        networks:
+            - sushii_net
+        labels:
+            - "traefik.enable=false"
 networks:
     web:
         internal: false
