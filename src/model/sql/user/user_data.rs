@@ -88,7 +88,7 @@ impl UserData {
         self
     }
 
-    pub fn inc_fishies(mut self, is_self: bool) -> Self {
+    pub fn inc_fishies(&mut self, is_self: bool) -> (i64, bool) {
         // 1% chance of golden fishy
         let d = Bernoulli::new(0.01).unwrap();
         let is_golden = d.sample(&mut thread_rng());
@@ -111,7 +111,7 @@ impl UserData {
 
         self.fishies = fishies.round() as i64;
 
-        self
+        (fishies.round() as i64, is_golden)
     }
 }
 

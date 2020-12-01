@@ -91,7 +91,7 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             "templateName": "rank",
             "width": 500,
             "height": 400,
-            "ctx": {
+            "context": {
                 "CONTENT_COLOR": "0, 184, 148",
                 "CONTENT_OPACITY": "1",
                 "AVATAR_URL": target_user.face(),

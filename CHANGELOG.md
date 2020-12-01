@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 -  Add on/off guild setting aliases "enable" and "disable"
+-  Fishy and rep commands
 
 ### Fixed
 

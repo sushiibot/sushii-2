@@ -38,5 +38,11 @@ async fn rep(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     author_user_data.reset_last_rep().save(&ctx).await?;
 
+    let target_user = target_id.to_user(&ctx).await?;
+
+    msg.channel_id
+        .say(&ctx, format!("You gave {} a rep!", target_user.tag()))
+        .await?;
+
     Ok(())
 }
