@@ -12,6 +12,7 @@ pub use self::{
     mod_log::{ModLogEntry, ModLogEntryDb},
     mute::{delete_mute, Mute, MuteDb},
     user::{
+        user_data::{UserData, UserDataDb},
         user_level::{UserLevel, UserLevelDb},
         user_level_global::{UserLevelGlobal, UserLevelGlobalDb},
         user_level_ranked::{UserLevelRanked, UserLevelRankedDb},

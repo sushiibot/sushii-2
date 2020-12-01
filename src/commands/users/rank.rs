@@ -68,6 +68,13 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let level_prog = UserLevelProgress::from_xp(user_level.msg_all_time);
     let level_prog_global = UserLevelProgress::from_xp(user_level_global);
 
+    // Get user level or create a new one
+    let user_data = if let Some(data) = UserData::from_id(&ctx, msg.author.id).await? {
+        data
+    } else {
+        UserData::new(msg.author.id).save(&ctx).await?
+    };
+
     let reqwest_client = ctx
         .data
         .read()
@@ -88,10 +95,10 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 "CONTENT_COLOR": "0, 184, 148",
                 "CONTENT_OPACITY": "1",
                 "AVATAR_URL": target_user.face(),
-                "REP": "123",
-                "FISHIES": "456",
+                "REP": user_data.rep,
+                "FISHIES": user_data.fishies,
                 "USERNAME": target_user.tag(),
-                "PATRON_EMOJI": "",
+                "PATRON_EMOJI": user_data.patron_emoji,
                 "XP_PROGRESS": level_prog.next_level_xp_percentage,
                 "LEVEL": level_prog.level,
                 "GLOBAL_LEVEL": level_prog_global.level,

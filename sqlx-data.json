@@ -656,6 +656,68 @@
       ]
     }
   },
+  "7704eb4d3dbcc181acc793e60a2e454a0117c4cdf431d197eaab0ca5b9e30999": {
+    "query": "\n            SELECT *\n              FROM users\n             WHERE id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "is_patron",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 2,
+          "name": "patron_emoji",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "rep",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "fishies",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "last_rep",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 6,
+          "name": "last_fishies",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 7,
+          "name": "profile_data",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true
+      ]
+    }
+  },
   "7f3f73abf9611a449d744022b08fbd0fec2f3ade0b82792b99acd5e28009356a": {
     "query": "\n              SELECT *\n                FROM mod_logs\n               WHERE guild_id = $1\n            ORDER BY case_id DESC\n               LIMIT $2\n        ",
     "describe": {
@@ -946,6 +1008,75 @@
         null,
         null,
         null
+      ]
+    }
+  },
+  "c2ca79ad759253247f528c644884a907f16a4dc5ccb8934fb0dcdd14b30d06a8": {
+    "query": "\n        INSERT INTO users (id, is_patron, patron_emoji, rep, fishies, last_rep, last_fishies, profile_data)\n             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET is_patron = $2,\n                    patron_emoji = $3,\n                    rep = $4,\n                    fishies = $5,\n                    last_rep = $6,\n                    last_fishies = $7,\n                    profile_data = $8\n          RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "is_patron",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 2,
+          "name": "patron_emoji",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "rep",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "fishies",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "last_rep",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 6,
+          "name": "last_fishies",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 7,
+          "name": "profile_data",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Bool",
+          "Text",
+          "Int8",
+          "Int8",
+          "Timestamp",
+          "Timestamp",
+          "Jsonb"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true
       ]
     }
   },
