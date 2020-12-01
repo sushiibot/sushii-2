@@ -8,6 +8,17 @@ use crate::model::sql::*;
 #[command]
 #[only_in("guild")]
 async fn fishy(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+    // Check cooldown before checking args
+    let mut author_user_data = UserData::from_id_or_new(&ctx, msg.author.id).await?;
+
+    if let Some(duration_str) = author_user_data.fishies_humantime_cooldown() {
+        msg.channel_id
+            .say(&ctx, format!("You can fishy again in {}", duration_str))
+            .await?;
+
+        return Ok(());
+    }
+
     let target_str = args.rest();
 
     let target_id = match target_str
@@ -29,17 +40,17 @@ async fn fishy(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         }
     };
 
-    let is_self = target_id == msg.author.id;
+    let target_user = target_id.to_user(&ctx).await?;
 
-    let mut author_user_data = UserData::from_id_or_new(&ctx, msg.author.id).await?;
-
-    if let Some(duration_str) = author_user_data.fishies_humantime_cooldown() {
+    if target_user.bot {
         msg.channel_id
-            .say(&ctx, format!("You can fishy again in {}", duration_str))
+            .say(&ctx, "Error: Bots don't need fishies :(")
             .await?;
 
         return Ok(());
     }
+
+    let is_self = target_id == msg.author.id;
 
     let target_user_data = if !is_self {
         Some(UserData::from_id_or_new(&ctx, target_id).await?)
@@ -68,16 +79,10 @@ async fn fishy(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         }
     };
 
-    let target_user_tag = if is_self {
-        msg.author.tag()
-    } else {
-        target_id.to_user(&ctx).await?.face()
-    };
-
     let name_str = if is_self {
         "".to_string()
     } else {
-        format!(" for {}", target_user_tag)
+        format!(" for {}", target_user.tag())
     };
 
     let s = if is_golden {
