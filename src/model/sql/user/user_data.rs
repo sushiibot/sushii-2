@@ -1,6 +1,7 @@
 use chrono::{naive::NaiveDateTime, offset::Utc, Duration};
 use rand::distributions::{Bernoulli, Distribution};
-use rand_distr::LogNormal;
+use rand::prelude::*;
+use rand_distr::StandardNormal;
 use serde::{Deserialize, Serialize};
 use serenity::async_trait;
 use serenity::model::prelude::*;
@@ -90,18 +91,22 @@ impl UserData {
     pub fn inc_fishies(mut self, is_self: bool) -> Self {
         // 1% chance of golden fishy
         let d = Bernoulli::new(0.01).unwrap();
-        let is_golden = d.sample(&mut rand::thread_rng());
+        let is_golden = d.sample(&mut thread_rng());
 
-        // mean 2, standard deviation 3
-        let log_normal = LogNormal::new(15.0, 5.0).unwrap();
-        let mut fishies = log_normal.sample(&mut rand::thread_rng());
+        // N(0, 1)
+        let mut fishies: f64 = thread_rng().sample(StandardNormal);
 
+        fishies = fishies.abs() * 8.0;
+        fishies += 5.0;
+
+        // For someone else, multiply by 1.5
         if !is_self {
-            fishies = fishies * 0.7f64;
-        };
+            fishies = fishies * 1.7f64;
+        }
 
+        // If golden fishy, multiply x6
         if is_golden {
-            fishies = fishies * 6.0;
+            fishies = fishies * 8.0;
         }
 
         self.fishies = fishies.round() as i64;
