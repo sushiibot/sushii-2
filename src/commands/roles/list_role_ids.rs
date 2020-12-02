@@ -32,9 +32,11 @@ async fn listids(ctx: &Context, msg: &Message) -> CommandResult {
     if roles_text.len() >= 2000 {
         let files = vec![(roles_text.as_bytes(), "roles.txt")];
 
-        let _ = msg.channel_id.send_files(&ctx.http, files, |m| {
-            m.content("Guild role ids are attached in the following text file")
-        });
+        msg.channel_id
+            .send_files(&ctx.http, files, |m| {
+                m.content("Guild role ids are attached in the following text file")
+            })
+            .await?;
     } else {
         let s = format!("```json\n{}```", roles_text);
 
