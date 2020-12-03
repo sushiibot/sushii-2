@@ -8,7 +8,7 @@ use std::time::Duration;
 use std::vec::Vec;
 use tokio::time::delay_for;
 
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::keys::CacheAndHttpContainer;
 use crate::model::sql::*;
 
@@ -115,10 +115,20 @@ pub async fn message(ctx: &Context, msg: &Message) {
             delay_for(Duration::from_secs(5)).await;
             tracing::error!(?msg, "Failed to handle roles message: {}", e);
 
+            let sent_msg = msg
+                .channel_id
+                .say(&ctx.http, "Failed to update your roles :(")
+                .await;
+
             let data = &ctx.data.read().await;
             let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
 
-            let _ = msg.delete(&cache_http).await;
+            if let Ok(sent_msg) = sent_msg {
+                // Ignore errors whatever
+                let _ = join!(msg.delete(&ctx), sent_msg.delete(&ctx));
+            } else {
+                let _ = msg.delete(&cache_http).await;
+            }
         }
     }
 }
@@ -464,15 +474,19 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
 
     // get configs
     let role_config: GuildRoles = match guild_conf.role_config {
-        Some(c) => serde_json::from_value(c).map_err(|e| {
-            tracing::warn!(
-                guild_id = guild.id.0,
-                "Failed to convert guild role config to GuildRoles struct: {}",
-                e
-            );
+        Some(c) => match serde_json::from_value(c) {
+            Ok(c) => c,
+            Err(e) => {
+                tracing::warn!(
+                    guild_id = guild.id.0,
+                    "Failed to convert guild role config to GuildRoles struct: {}",
+                    e
+                );
 
-            Error::Sushii("Role configuration is invalid".into())
-        })?,
+                // If role deserialize fails, respond with error
+                return Ok(Some("Role configuration is invalid".into()));
+            }
+        },
         None => return Ok(None),
     };
 
@@ -524,7 +538,8 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
         return Ok(Some("Couldn't modify your roles. You can add a role with `+role name` or remove a role with `-role name`.  Use `clear` or `reset` to remove all roles".into()));
     }
 
-    if let Err(e) = guild
+    // If edit member fails, just return error
+    guild
         .edit_member(&ctx.http, msg.author.id, |m| {
             m.roles(
                 &calc_roles
@@ -534,13 +549,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
                     .collect::<Vec<RoleId>>(),
             )
         })
-        .await
-    {
-        msg.channel_id
-            .say(&ctx.http, "Failed to modify your roles :(")
-            .await?;
-        tracing::warn!(?msg, "Failed to edit member: {}", e);
-    }
+        .await?;
 
     if is_reset {
         return Ok(Some("Your roles have been reset.".into()));
