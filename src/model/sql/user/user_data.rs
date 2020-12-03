@@ -113,6 +113,19 @@ impl UserData {
 
         (fishies.round() as i64, is_golden)
     }
+
+    pub fn rep_level(&self) -> String {
+        let num = match self.rep {
+            n if n >= 2000 => 11,
+            n if n >= 1000 => 10,
+            n if n >= 100 => 9,
+            n if n >= 50 => 8,
+            n if n >= 0 => 7,
+            _ => 1,
+        };
+
+        format!("{:02}", num)
+    }
 }
 
 #[async_trait]

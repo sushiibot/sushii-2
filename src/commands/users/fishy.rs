@@ -71,10 +71,8 @@ async fn fishy(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         None => {
             let fishies_tup = author_user_data.inc_fishies(is_self);
 
-            author_user_data.reset_last_fishy()
-                .save(&ctx)
-                .await?;
-            
+            author_user_data.reset_last_fishy().save(&ctx).await?;
+
             fishies_tup
         }
     };
@@ -86,14 +84,15 @@ async fn fishy(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     };
 
     let s = if is_golden {
-        format!("You caught a golden fishy{}!!! ({} fishies)", name_str, fishies)
+        format!(
+            "You caught a golden fishy{}!!! ({} fishies)",
+            name_str, fishies
+        )
     } else {
         format!("You caught {} fishies{}!", fishies, name_str)
     };
 
-    msg.channel_id
-        .say(&ctx, s)
-        .await?;
+    msg.channel_id.say(&ctx, s).await?;
 
     Ok(())
 }

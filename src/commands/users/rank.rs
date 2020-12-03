@@ -85,6 +85,11 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     let sushii_conf = SushiiConfig::get(&ctx).await;
 
+    let (rank_day, rank_day_total) = user_level.get_rank_day();
+    let (rank_week, rank_week_total) = user_level.get_rank_week();
+    let (rank_month, rank_month_total) = user_level.get_rank_month();
+    let (rank_all, rank_all_total) = user_level.get_rank_all_time();
+
     let res = reqwest_client
         .post(&format!("{}/template", sushii_conf.image_server_url))
         .json(&json!({
@@ -92,22 +97,36 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             "width": 500,
             "height": 400,
             "context": {
+                "BASE_URL": "http://localhost:3000",
                 "CONTENT_COLOR": "0, 184, 148",
                 "CONTENT_OPACITY": "1",
                 "AVATAR_URL": target_user.face(),
                 "REP": user_data.rep,
+                "REP_LEVEL": user_data.rep_level(),
                 "FISHIES": user_data.fishies,
-                "USERNAME": target_user.tag(),
+                "USERNAME": target_user.name,
+                "DISCRIMINATOR": target_user.discriminator,
+                "IS_PATRON": user_data.is_patron,
                 "PATRON_EMOJI": user_data.patron_emoji,
-                "XP_PROGRESS": level_prog.next_level_xp_percentage,
+                // levels
                 "LEVEL": level_prog.level,
+                "CURR_XP": level_prog.next_level_xp_progress,
+                "REQ_XP": level_prog.next_level_xp_required,
+                "XP_PROGRESS": level_prog.next_level_xp_percentage,
+                // global
                 "GLOBAL_LEVEL": level_prog_global.level,
-                "CURR_LEVEL_XP": level_prog.next_level_xp_progress,
-                "LEVEL_XP_REQ": level_prog.next_level_xp_required,
-                "DAILY": user_level.fmt_rank_day(),
-                "WEEKLY": user_level.fmt_rank_week(),
-                "MONTHLY": user_level.fmt_rank_month(),
-                "ALL": user_level.fmt_rank_all_time()
+                "GLOBAL_CURR_XP": level_prog_global.next_level_xp_progress,
+                "GLOBAL_REQ_XP": level_prog_global.next_level_xp_required,
+                "GLOBAL_XP_PROGRESS": level_prog_global.next_level_xp_percentage,
+                // ranks
+                "RANK_ALL": rank_all,
+                "RANK_ALL_TOTAL": rank_all_total,
+                "RANK_WEEK": rank_week,
+                "RANK_WEEK_TOTAL": rank_week_total,
+                "RANK_MONTH": rank_month,
+                "RANK_MONTH_TOTAL": rank_month_total,
+                "RANK_DAY": rank_day,
+                "RANK_DAY_TOTAL": rank_day_total
             }
         }))
         .send()

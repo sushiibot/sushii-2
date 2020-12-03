@@ -12,9 +12,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  Add on/off guild setting aliases "enable" and "disable"
 -  Fishy and rep commands
 
+### Changed
+
+-  Use updated rank template context variables
+
+### Fixed
+
+-  Actually send roles.txt file with `roles listids` when length is over 2000 chars
+
+## [0.1.9]
+
 ### Fixed
 
 -  Parse missing reason when using `mute` command without a duration
+-  Check permissions per command instead of only per group
 
 ## [0.1.8]
 

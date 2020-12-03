@@ -1,4 +1,4 @@
-use chrono::naive::NaiveDateTime;
+use chrono::{naive::NaiveDateTime, offset::Utc, Datelike};
 use serde::{Deserialize, Serialize};
 use serenity::async_trait;
 use serenity::model::prelude::*;
@@ -31,9 +31,16 @@ pub struct UserLevelRanked {
     pub msg_day_total: Option<i64>,
 }
 
+fn get_rank(rank: Option<i64>, total: Option<i64>) -> (i64, i64) {
+    match (rank, total) {
+        // I don't think rank can be 0 since it's row_number
+        (Some(rank), Some(total)) => (rank, total),
+        _ => (0, 0),
+    }
+}
+
 fn fmt_rank(rank: Option<i64>, total: Option<i64>) -> String {
     match (rank, total) {
-        (Some(rank), _) if rank == 0 => "N/A".to_string(),
         (Some(rank), Some(total)) => {
             format!("{}/{}", rank, total)
         }
@@ -42,6 +49,44 @@ fn fmt_rank(rank: Option<i64>, total: Option<i64>) -> String {
 }
 
 impl UserLevelRanked {
+    // Ranks would be for user's last message timeframes, so if user sent a
+    // message on 12/02/2020, daily rank would ONLY be for those users who have
+    // last_msg in that day So if it is the next day, 12/03 it would be stale
+    fn reset_stale_ranks(mut self) -> Self {
+        let now = Utc::now().naive_local();
+
+        if now.ordinal() != self.last_msg.ordinal() {
+            self.msg_day_rank = None;
+        }
+
+        if now.iso_week() != self.last_msg.iso_week() {
+            self.msg_week_rank = None;
+        }
+
+        if now.month() != self.last_msg.month() {
+            self.msg_month_rank = None;
+        }
+
+        self
+    }
+
+    pub fn get_rank_all_time(&self) -> (i64, i64) {
+        get_rank(self.msg_all_time_rank, self.msg_all_time_total)
+    }
+
+    pub fn get_rank_month(&self) -> (i64, i64) {
+        get_rank(self.msg_month_rank, self.msg_month_total)
+    }
+
+    pub fn get_rank_week(&self) -> (i64, i64) {
+        get_rank(self.msg_week_rank, self.msg_week_total)
+    }
+
+    pub fn get_rank_day(&self) -> (i64, i64) {
+        get_rank(self.msg_day_rank, self.msg_day_total)
+    }
+
+    // Format ranks to string
     pub fn fmt_rank_all_time(&self) -> String {
         fmt_rank(self.msg_all_time_rank, self.msg_all_time_total)
     }
@@ -78,7 +123,9 @@ impl UserLevelRankedDb for UserLevelRanked {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
-        ranked_from_id_query(&pool, user_id, guild_id).await
+        ranked_from_id_query(&pool, user_id, guild_id)
+            .await
+            .map(|o| o.map(UserLevelRanked::reset_stale_ranks))
     }
 }
 
@@ -89,6 +136,7 @@ async fn ranked_from_id_query(
 ) -> Result<Option<UserLevelRanked>> {
     sqlx::query_as!(
         UserLevelRanked,
+        // If target user has not sent a message today, it would have incorrect ranks
         r#"
             SELECT * 
                 FROM (
