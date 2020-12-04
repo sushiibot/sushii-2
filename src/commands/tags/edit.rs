@@ -208,10 +208,7 @@ async fn delete(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     tag.delete(&ctx).await?;
 
     msg.channel_id
-        .say(
-            &ctx,
-            format!("Deleted tag `{}`", tag_name),
-        )
+        .say(&ctx, format!("Deleted tag `{}`", tag_name))
         .await?;
 
     Ok(())

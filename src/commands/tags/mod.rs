@@ -4,11 +4,12 @@ mod add;
 mod edit;
 mod get;
 mod info;
+mod list;
 
-use self::{add::*, edit::*, get::*, info::*};
+use self::{add::*, edit::*, get::*, info::*, list::*};
 
 #[group]
-#[commands(add, edit, info, get, rename, random)]
+#[commands(add, edit, info, get, rename, random, list)]
 #[only_in("guild")]
 #[prefix("tag")]
 #[default_command(get)]

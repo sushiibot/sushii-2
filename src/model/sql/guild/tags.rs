@@ -40,6 +40,23 @@ impl Tag {
 pub trait TagDb {
     async fn from_name(ctx: &Context, tag_name: &str, guild_id: GuildId) -> Result<Option<Tag>>;
     async fn random(ctx: &Context, guild_id: GuildId) -> Result<Option<Tag>>;
+    /// Searches for a given substring
+    async fn search(
+        ctx: &Context,
+        guild_id: GuildId,
+        query: &str,
+        count: i64,
+        offset: Option<&str>,
+    ) -> Result<Vec<Tag>>;
+
+    /// Get paginated list of all tags
+    async fn get_page(
+        ctx: &Context,
+        guild_id: GuildId,
+        count: i64,
+        offset: Option<&str>,
+    ) -> Result<Vec<Tag>>;
+    async fn get_count(ctx: &Context, guild_id: GuildId) -> Result<i64>;
 
     async fn can_edit(&self, ctx: &Context, member: &Member) -> Result<bool>;
     async fn rename(&mut self, ctx: &Context, tag_name: &str) -> Result<bool>;
@@ -59,6 +76,37 @@ impl TagDb for Tag {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         random_query(&pool, guild_id).await
+    }
+
+    async fn search(
+        ctx: &Context,
+        guild_id: GuildId,
+        query: &str,
+        count: i64,
+        offset: Option<&str>,
+    ) -> Result<Vec<Tag>> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
+        search_query(&pool, guild_id, query, count, offset).await
+    }
+
+    /// Get paginated list of all tags
+    async fn get_page(
+        ctx: &Context,
+        guild_id: GuildId,
+        count: i64,
+        offset: Option<&str>,
+    ) -> Result<Vec<Tag>> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
+        get_page_query(&pool, guild_id, count, offset).await
+    }
+
+    /// Get total number of tags in a given guild
+    async fn get_count(ctx: &Context, guild_id: GuildId) -> Result<i64> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
+        get_count_query(&pool, guild_id).await
     }
 
     async fn can_edit(&self, ctx: &Context, member: &Member) -> Result<bool> {
@@ -132,6 +180,76 @@ async fn random_query(pool: &sqlx::PgPool, guild_id: GuildId) -> Result<Option<T
     )
     .fetch_optional(pool)
     .await
+    .map_err(Into::into)
+}
+
+async fn search_query(
+    pool: &sqlx::PgPool,
+    guild_id: GuildId,
+    query: &str,
+    count: i64,
+    offset: Option<&str>,
+) -> Result<Vec<Tag>> {
+    sqlx::query_as!(
+        Tag,
+        // Should have a trigram index for this search, B-tree indexes can't
+        // search patterns that aren't left-anchored
+        r#"
+              SELECT *
+                FROM tags
+               WHERE guild_id = $1
+                 AND tag_name = '%' || $2 || '%'
+                 AND (tag_name > $3 OR $3 IS NULL)
+            ORDER BY tag_name ASC
+               LIMIT $4
+        "#,
+        i64::from(guild_id),
+        query,
+        offset,
+        count,
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(Into::into)
+}
+
+async fn get_page_query(
+    pool: &sqlx::PgPool,
+    guild_id: GuildId,
+    count: i64,
+    offset: Option<&str>,
+) -> Result<Vec<Tag>> {
+    sqlx::query_as!(
+        Tag,
+        r#"
+              SELECT *
+                FROM tags
+               WHERE guild_id = $1
+                 AND (tag_name > $2 OR $2 IS NULL)
+            ORDER BY tag_name ASC
+               LIMIT $3
+        "#,
+        i64::from(guild_id),
+        offset,
+        count,
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(Into::into)
+}
+
+async fn get_count_query(pool: &sqlx::PgPool, guild_id: GuildId) -> Result<i64> {
+    sqlx::query!(
+        r#"
+              SELECT COUNT(*) as "count!"
+                FROM tags
+               WHERE guild_id = $1
+        "#,
+        i64::from(guild_id),
+    )
+    .fetch_one(pool)
+    .await
+    .map(|r| r.count)
     .map_err(Into::into)
 }
 
