@@ -97,15 +97,18 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             "width": 500,
             "height": 400,
             "context": {
-                "BASE_URL": "http://localhost:3000",
+                "BASE_URL": sushii_conf.image_server_url,
                 "CONTENT_COLOR": "0, 184, 148",
                 "CONTENT_OPACITY": "1",
+                // Username stuff
+                "USERNAME": target_user.name,
+                "DISCRIMINATOR": target_user.discriminator,
                 "AVATAR_URL": target_user.face(),
+                // Rep and fishies
                 "REP": user_data.rep,
                 "REP_LEVEL": user_data.rep_level(),
                 "FISHIES": user_data.fishies,
-                "USERNAME": target_user.name,
-                "DISCRIMINATOR": target_user.discriminator,
+                // Emojis
                 "IS_PATRON": user_data.is_patron,
                 "PATRON_EMOJI": user_data.patron_emoji,
                 // levels
