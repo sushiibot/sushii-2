@@ -7,6 +7,7 @@ pub mod owner;
 pub mod prefix;
 pub mod roles;
 pub mod settings;
+pub mod tags;
 pub mod users;
 
 use self::{help::*, meta::*, owner::*, prefix::*};

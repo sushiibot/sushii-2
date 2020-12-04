@@ -96,6 +96,7 @@ async fn main() -> Result<()> {
         .after(hooks::after)
         .on_dispatch_error(hooks::dispatch_error)
         .group(&commands::META_GROUP)
+        .group(&commands::tags::TAGS_GROUP)
         .group(&commands::users::USERS_GROUP)
         .group(&commands::moderation::MODERATION_GROUP)
         .group(&commands::settings::SETTINGS_GROUP)

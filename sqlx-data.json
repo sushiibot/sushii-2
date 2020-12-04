@@ -327,6 +327,57 @@
       ]
     }
   },
+  "2d2a043e86f3e5c49bd1f739f08b70f4dbef18306c917fc9fbe16dbda427c96c": {
+    "query": "\n            SELECT *\n              FROM tags\n             WHERE tag_name = $1\n               AND guild_id = $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "owner_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "tag_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "use_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "created",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "3c84a34473a5e720b2ae6c2512b3d898c5a12ed45ff7047cb61380735b7e5dd8": {
     "query": "\n            SELECT SUM(msg_all_time) AS xp\n              FROM user_levels\n             WHERE user_id = $1\n        ",
     "describe": {
@@ -345,6 +396,19 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "48283bd7092684e3b7b5649a4aa3984ce063a4c5b1b215aa3c3cdb0f02f2ca4e": {
+    "query": "\n            DELETE FROM tags\n                  WHERE guild_id = $1\n                    AND tag_name = $2\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": []
     }
   },
   "4a51a275caf4f152fe7426976b6b003d43d341674d81d4206b4b042377f37b8f": {
@@ -1008,6 +1072,111 @@
         null,
         null,
         null
+      ]
+    }
+  },
+  "add265dd79458efe15555d7bf9ba83142789f8e2f74543ea9d06821cc6549fb1": {
+    "query": "\n            SELECT *\n              FROM tags\n             WHERE guild_id = $1\n            OFFSET floor(random() * (\n                       SELECT COUNT(*)\n                         FROM tags))\n             LIMIT 1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "owner_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "tag_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "use_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "created",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "b10c97dde60793808f690f9fb36840b85fdbb37a7a79925d17eded73ca050dfe": {
+    "query": "\n        INSERT INTO tags (owner_id, guild_id, tag_name, content, use_count, created)\n             VALUES ($1, $2, $3, $4, $5, $6)\n        ON CONFLICT (guild_id, tag_name)\n          DO UPDATE\n                SET tag_name = $3,\n                    content = $4,\n                    use_count = $5\n          RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "owner_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "tag_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "use_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "created",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Text",
+          "Text",
+          "Int8",
+          "Timestamp"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
       ]
     }
   },
