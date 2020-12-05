@@ -1,5 +1,5 @@
 use serenity::collector::reaction_collector::ReactionAction;
-use serenity::framework::standard::{macros::command, CommandResult};
+use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use std::fmt::Write;
@@ -11,18 +11,21 @@ use crate::model::Paginator;
 
 const PAGE_SIZE: i64 = 10;
 
-fn fmt_tags(tags: &Vec<Tag>) -> String {
+fn fmt_tags(tags: &Vec<Tag>, highlight: &str) -> String {
     let mut s = String::new();
 
     for tag in tags {
-        let _ = writeln!(s, "{}", tag.tag_name);
+        let tag_name_highlighted = tag
+            .tag_name
+            .replace(highlight, &format!("__{}__", highlight));
+        let _ = writeln!(s, "{}", tag_name_highlighted);
     }
 
     s
 }
 
 #[command]
-async fn list(ctx: &Context, msg: &Message) -> CommandResult {
+async fn search(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let guild_id = match msg.guild_id {
         Some(id) => id,
         None => {
@@ -31,24 +34,40 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
         }
     };
 
-    let tag_count = Tag::get_count(&ctx, guild_id).await?;
+    let query = match args.single::<String>() {
+        Ok(q) => q,
+        Err(_) => {
+            msg.channel_id
+                .say(&ctx, "Error: Please give a search")
+                .await?;
+
+            return Ok(());
+        }
+    };
+
+    let tag_count = Tag::get_search_count(&ctx, guild_id, &query).await?;
 
     if tag_count == 0 {
-        msg.channel_id.say(&ctx, "Error: There are no tags").await?;
+        msg.channel_id
+            .say(
+                &ctx,
+                format!("Error: There are no tags found containing {}", query),
+            )
+            .await?;
 
         return Ok(());
     }
 
     // Page size 10
     let mut paginator = Paginator::new(PAGE_SIZE, tag_count);
-    let mut tags = Tag::get_page(&ctx, guild_id, PAGE_SIZE, None).await?;
+    let mut tags = Tag::search(&ctx, guild_id, &query, PAGE_SIZE, None).await?;
 
     let mut sent_msg = msg
         .channel_id
         .send_message(&ctx.http, |m| {
             m.embed(|e| {
-                e.title(format!("Server Tags ({} total)", tag_count));
-                e.description(fmt_tags(&tags));
+                e.title(format!("Server tags containing {} ({} total)", query, tag_count));
+                e.description(fmt_tags(&tags, &query));
                 e.footer(|f| {
                     f.text(format!(
                         "Page {}/{}",
@@ -60,6 +79,7 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
                 e
             });
 
+            // Only add reactions if theres multiple pages
             if paginator.page_count > 1 {
                 m.reactions(vec![
                     ReactionType::Unicode("⬅️".into()),
@@ -98,7 +118,8 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
                     }
 
                     // Get next page
-                    tags = Tag::get_page(&ctx, guild_id, PAGE_SIZE, offset.as_deref()).await?;
+                    tags =
+                        Tag::search(&ctx, guild_id, &query, PAGE_SIZE, offset.as_deref()).await?;
                 } else if r.emoji.unicode_eq("⬅️") {
                     // Ignore on first page
                     if paginator.current_page == 1 {
@@ -107,9 +128,10 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
                     }
 
                     // Use previous page's last tag as offset
-                    tags = Tag::get_page(
+                    tags = Tag::search(
                         &ctx,
                         guild_id,
+                        &query,
                         PAGE_SIZE,
                         paginator.prev_offset().map(|o| o.as_str()),
                     )
@@ -119,8 +141,8 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
                 sent_msg
                     .edit(&ctx, |m| {
                         m.embed(|e| {
-                            e.title(format!("Server Tags ({} total)", tag_count));
-                            e.description(fmt_tags(&tags));
+                            e.title(format!("Server containing {} ({} total)", query, tag_count));
+                            e.description(fmt_tags(&tags, &query));
                             e.footer(|f| {
                                 f.text(format!(
                                     "Page {}/{}",

@@ -53,6 +53,7 @@ pub trait TagDb {
         count: i64,
         offset: Option<&str>,
     ) -> Result<Vec<Tag>>;
+    async fn get_search_count(ctx: &Context, guild_id: GuildId, query: &str) -> Result<i64>;
 
     /// Get paginated list of all tags
     async fn get_page(
@@ -93,6 +94,13 @@ impl TagDb for Tag {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         search_query(&pool, guild_id, query, count, offset).await
+    }
+
+    /// Get total number of tags containing query as a substring
+    async fn get_search_count(ctx: &Context, guild_id: GuildId, query: &str) -> Result<i64> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
+        get_search_count_query(&pool, guild_id, query).await
     }
 
     /// Get paginated list of all tags
@@ -188,6 +196,27 @@ async fn random_query(pool: &sqlx::PgPool, guild_id: GuildId) -> Result<Option<T
     .map_err(Into::into)
 }
 
+async fn get_search_count_query(
+    pool: &sqlx::PgPool,
+    guild_id: GuildId,
+    query: &str,
+) -> Result<i64> {
+    sqlx::query!(
+        r#"
+              SELECT COUNT(*) as "count!"
+                FROM tags
+               WHERE guild_id = $1
+                 AND tag_name ILIKE '%' || $2 || '%'
+        "#,
+        i64::from(guild_id),
+        query,
+    )
+    .fetch_one(pool)
+    .await
+    .map(|r| r.count)
+    .map_err(Into::into)
+}
+
 async fn search_query(
     pool: &sqlx::PgPool,
     guild_id: GuildId,
@@ -203,7 +232,7 @@ async fn search_query(
               SELECT *
                 FROM tags
                WHERE guild_id = $1
-                 AND tag_name = '%' || $2 || '%'
+                 AND tag_name ILIKE '%' || $2 || '%'
                  AND (tag_name > $3 OR $3 IS NULL)
             ORDER BY tag_name ASC
                LIMIT $4
