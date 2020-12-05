@@ -1,13 +1,6 @@
-use serenity::model::prelude::*;
-use serenity::prelude::*;
-
-use crate::error::Result;
-
 pub struct Paginator<O: Clone> {
-    page_size: usize,
     pub page_count: usize,
     pub current_page: usize,
-    item_count: usize,
     offsets: Vec<Option<O>>,
 }
 
@@ -16,17 +9,10 @@ impl<O: Clone> Paginator<O> {
         let page_count = (item_count + page_size - 1) / page_size;
 
         Self {
-            page_size: page_size as usize,
             page_count: page_count as usize,
-            item_count: item_count as usize,
             current_page: 1,
             offsets: vec![None; page_count as usize],
         }
-    }
-
-    pub fn page_size(mut self, page_size: usize) -> Self {
-        self.page_size = page_size;
-        self
     }
 
     pub fn next(&mut self, offset: Option<O>) -> bool {
