@@ -5,7 +5,6 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 use crate::prelude::*;
-use crate::model::PaginateQuery;
 
 #[derive(Deserialize, Serialize, sqlx::FromRow, Debug)]
 pub struct Tag {
@@ -18,7 +17,12 @@ pub struct Tag {
 }
 
 impl Tag {
-    pub fn new(owner_id: UserId, guild_id: GuildId, tag_name: &str, content: &str) -> Self {
+    pub fn new<S1: Into<String>, S2: Into<String>>(
+        owner_id: UserId,
+        guild_id: GuildId,
+        tag_name: S1,
+        content: S2,
+    ) -> Self {
         let created = Utc::now().naive_local();
 
         Self {
@@ -63,22 +67,6 @@ pub trait TagDb {
     async fn rename(&mut self, ctx: &Context, tag_name: &str) -> Result<bool>;
     async fn save(&self, ctx: &Context) -> Result<Tag>;
     async fn delete(&self, ctx: &Context) -> Result<()>;
-}
-
-#[async_trait]
-impl PaginateQuery for Tag {
-    type Output = Tag;
-
-    async fn get_page(
-        ctx: &Context,
-        guild_id: GuildId,
-        count: i64,
-        offset: Option<&str>,
-    ) -> Result<Vec<Tag>> {
-        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
-
-        get_page_query(&pool, guild_id, count, offset).await
-    }
 }
 
 #[async_trait]

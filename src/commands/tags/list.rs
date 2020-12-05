@@ -7,6 +7,7 @@ use std::time::Duration;
 use tokio::stream::StreamExt;
 
 use crate::model::sql::*;
+use crate::model::Paginator;
 
 const PAGE_SIZE: i64 = 10;
 
@@ -38,12 +39,9 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
         return Ok(());
     }
 
-    let page_count = (tag_count + PAGE_SIZE - 1) / PAGE_SIZE;
-    let mut page_num = 1;
-
+    // Page size 10
+    let mut paginator = Paginator::new(PAGE_SIZE, tag_count);
     let mut tags = Tag::get_page(&ctx, guild_id, PAGE_SIZE, None).await?;
-    // Offset entries, first page is None so we start from first N entries
-    let mut offsets = vec![None; page_count as usize];
 
     let mut sent_msg = msg
         .channel_id
@@ -52,7 +50,10 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
                 e.title(format!("Server Tags ({} total)", tag_count));
                 e.description(fmt_tags(&tags));
                 e.footer(|f| {
-                    f.text(format!("Page {}/{}", page_num, page_count));
+                    f.text(format!(
+                        "Page {}/{}",
+                        paginator.current_page, paginator.page_count
+                    ));
                     f
                 });
 
@@ -78,26 +79,21 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
     {
         match *reaction_action {
             ReactionAction::Added(ref r) => {
-                tracing::info!("offsets: {:?}", offsets);
+                // tracing::info!("offsets: {:?}", offsets);
 
                 // Next page
                 if r.emoji.unicode_eq("➡️") {
-                    // Ignore on last page
-                    if page_count == page_num {
+                    let offset = tags.last().map(|t| t.tag_name.clone());
+                    if !paginator.next(offset.clone()) {
                         r.delete(&ctx).await?;
                         continue;
                     }
 
-                    // Use the last tag in current page as offset
-                    let offset = tags.last().map(|t| t.tag_name.clone());
-                    offsets[page_num as usize] = offset.clone();
-
                     // Get next page
                     tags = Tag::get_page(&ctx, guild_id, PAGE_SIZE, offset.as_deref()).await?;
-                    page_num += 1;
                 } else if r.emoji.unicode_eq("⬅️") {
                     // Ignore on first page
-                    if page_num == 1 {
+                    if paginator.current_page == 1 {
                         r.delete(&ctx).await?;
                         continue;
                     }
@@ -107,10 +103,9 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
                         &ctx,
                         guild_id,
                         PAGE_SIZE,
-                        offsets[page_num as usize - 2].as_deref(),
+                        paginator.prev_offset().map(|o| o.as_str()),
                     )
                     .await?;
-                    page_num -= 1;
                 }
 
                 sent_msg
@@ -120,7 +115,10 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
                             e.title(format!("Server Tags ({} total)", tag_count));
                             e.description(fmt_tags(&tags));
                             e.footer(|f| {
-                                f.text(format!("Page {}/{}", page_num, page_count));
+                                f.text(format!(
+                                    "Page {}/{}",
+                                    paginator.current_page, paginator.page_count
+                                ));
                                 f
                             });
 

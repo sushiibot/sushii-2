@@ -47,7 +47,7 @@ async fn add(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         return Ok(());
     }
 
-    let tag = Tag::new(msg.author.id, guild_id, &tag_name, &tag_content)
+    let tag = Tag::new(msg.author.id, guild_id, &tag_name, tag_content)
         .save(&ctx)
         .await?;
 

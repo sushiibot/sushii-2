@@ -10,7 +10,7 @@ pub mod user;
 pub use self::{
     context::SushiiContext,
     metrics::{Metrics, MetricsAsync},
-    pagination::{Paginator, PaginateQuery, Paginate},
+    pagination::Paginator,
     sushii_cache::SushiiCache,
     sushii_config::{SushiiConfig, SushiiConfigDb},
 };
