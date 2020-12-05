@@ -40,7 +40,7 @@ async fn get(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     msg.channel_id
         .send_message(&ctx.http, |m| {
-            m.content(tag.content);
+            m.content(&tag.content);
             m.allowed_mentions(|am| {
                 am.empty_parse();
                 am
@@ -49,6 +49,8 @@ async fn get(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             m
         })
         .await?;
+
+    tag.inc().save(&ctx).await?;
 
     Ok(())
 }

@@ -39,6 +39,11 @@ impl Tag {
         self.content = content.to_string();
         self
     }
+
+    pub fn inc(mut self) -> Self {
+        self.use_count += 1;
+        self
+    }
 }
 
 #[async_trait]
@@ -64,6 +69,7 @@ pub trait TagDb {
     ) -> Result<Vec<Tag>>;
     async fn get_count(ctx: &Context, guild_id: GuildId) -> Result<i64>;
 
+    async fn get_top_used(ctx: &Context, guild_id: GuildId, count: i64) -> Result<Vec<Tag>>;
     async fn can_edit(&self, ctx: &Context, member: &Member) -> Result<bool>;
     async fn rename(&mut self, ctx: &Context, tag_name: &str) -> Result<bool>;
     async fn save(&self, ctx: &Context) -> Result<Tag>;
@@ -120,6 +126,12 @@ impl TagDb for Tag {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         get_count_query(&pool, guild_id).await
+    }
+
+    async fn get_top_used(ctx: &Context, guild_id: GuildId, count: i64) -> Result<Vec<Tag>> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
+        get_top_used_query(&pool, guild_id, count).await
     }
 
     async fn can_edit(&self, ctx: &Context, member: &Member) -> Result<bool> {
@@ -284,6 +296,28 @@ async fn get_count_query(pool: &sqlx::PgPool, guild_id: GuildId) -> Result<i64> 
     .fetch_one(pool)
     .await
     .map(|r| r.count)
+    .map_err(Into::into)
+}
+
+async fn get_top_used_query(
+    pool: &sqlx::PgPool,
+    guild_id: GuildId,
+    count: i64,
+) -> Result<Vec<Tag>> {
+    sqlx::query_as!(
+        Tag,
+        r#"
+              SELECT *
+                FROM tags
+               WHERE guild_id = $1
+            ORDER BY use_count DESC
+               LIMIT $2
+        "#,
+        i64::from(guild_id),
+        count,
+    )
+    .fetch_all(pool)
+    .await
     .map_err(Into::into)
 }
 

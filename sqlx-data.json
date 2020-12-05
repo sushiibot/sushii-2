@@ -566,59 +566,6 @@
       ]
     }
   },
-  "4b5bb182eb57c2a84f59feae2a4f0e7ef1afbc934e26da115e9952453af720c0": {
-    "query": "\n              SELECT *\n                FROM tags\n               WHERE guild_id = $1\n                 AND tag_name = '%' || $2 || '%'\n                 AND (tag_name > $3 OR $3 IS NULL)\n            ORDER BY tag_name ASC\n               LIMIT $4\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "owner_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "tag_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "use_count",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "created",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Text",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "4ded0d9f469101a8a3c0b49ef6dc14fd31dc8217e6a7f1ed11bbc04ec1e82c1a": {
     "query": "\n              SELECT COUNT(*) as \"count!\"\n                FROM tags\n               WHERE guild_id = $1\n        ",
     "describe": {
@@ -1448,27 +1395,6 @@
       ]
     }
   },
-  "c812fc45fd040dbd5b29000b49956615cba047b2cafcc2f87e33e036b96abcb3": {
-    "query": "\n              SELECT COUNT(*) as \"count!\"\n                FROM tags\n               WHERE guild_id = $1\n                 AND tag_name = '%' || $2 || '%'\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "cf21bd565ae6274c44718984217076091fe7d163feb99065c55535c5b45c87dd": {
     "query": "\n            SELECT *\n              FROM mutes\n             WHERE end_time < timezone('UTC', now())\n        ",
     "describe": {
@@ -1723,6 +1649,57 @@
         true,
         true,
         true
+      ]
+    }
+  },
+  "efe682472850d573455b77483e2d8d549fb55d104e8ca84747cc9c0bee56436a": {
+    "query": "\n              SELECT *\n                FROM tags\n               WHERE guild_id = $1\n            ORDER BY use_count DESC\n               LIMIT $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "owner_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "tag_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "use_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "created",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
       ]
     }
   },
