@@ -64,7 +64,7 @@ async fn fishy(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             let fishies_tup = target.inc_fishies(is_self);
             target.save(&ctx).await?;
             // So we need to save author separately
-            author_user_data.reset_last_rep().save(&ctx).await?;
+            author_user_data.reset_last_fishy().save(&ctx).await?;
 
             fishies_tup
         }
