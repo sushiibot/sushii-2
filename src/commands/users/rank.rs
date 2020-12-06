@@ -69,10 +69,10 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let level_prog_global = UserLevelProgress::from_xp(user_level_global);
 
     // Get user level or create a new one
-    let user_data = if let Some(data) = UserData::from_id(&ctx, msg.author.id).await? {
+    let user_data = if let Some(data) = UserData::from_id(&ctx, target_user.id).await? {
         data
     } else {
-        UserData::new(msg.author.id).save(&ctx).await?
+        UserData::new(target_user.id).save(&ctx).await?
     };
 
     let reqwest_client = ctx
