@@ -52,13 +52,19 @@ async fn add(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .await?;
 
     msg.channel_id
-        .say(
-            &ctx,
-            format!(
+        .send_message(&ctx, |m| {
+            m.content(format!(
                 "Created a new tag `{}` with content: {}",
                 tag.tag_name, tag.content
-            ),
-        )
+            ));
+
+            m.allowed_mentions(|am| {
+                am.empty_parse();
+                am
+            });
+
+            m
+        })
         .await?;
 
     Ok(())
