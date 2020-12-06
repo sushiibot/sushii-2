@@ -28,7 +28,10 @@ RUN cargo build --release
 FROM debian:buster-slim
 
 WORKDIR /config
-RUN apt-get update && apt-get install -y libssl-dev && rm -rf /var/lib/apt/lists/*
+
+# Fix sentry HTTPS calls with ca-certificates:
+# https://github.com/getsentry/sentry-rust/issues/239
+RUN apt-get update && apt-get install -y libssl-dev ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=build /usr/src/sushii/target/release/sushii-2 /usr/local/bin/sushii-2
 
 EXPOSE 9888
