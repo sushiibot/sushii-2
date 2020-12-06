@@ -150,6 +150,9 @@ services:
             - SYS_ADMIN
         expose:
             - "3000"
+        volumes:
+            - ~/sushii-image-server/static:/app/static:ro
+            - ~/sushii-image-server/templates:/app/templates:ro
         networks:
             - sushii_net
         labels:
