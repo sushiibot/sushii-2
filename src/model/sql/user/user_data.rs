@@ -109,7 +109,7 @@ impl UserData {
             fishies = fishies * 8.0;
         }
 
-        self.fishies = fishies.round() as i64;
+        self.fishies += fishies.round() as i64;
 
         (fishies.round() as i64, is_golden)
     }
