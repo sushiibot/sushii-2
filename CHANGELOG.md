@@ -7,11 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.1.11]
+
+### Added
+
+-  Last.fm commands `set` and `np` (now playing)
+
 ### Fixed
 
 -  Show rank data for target user data instead of author's
 -  Reset last fishy instead of rep when fishing for another user
 -  Add to existing user fishies instead of replacing
+-  Zero pad user discriminator in rank image
+-  Prevent mentions when adding a tag
 
 ## [0.1.10]
 
@@ -155,7 +163,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Prevent role handler from running outside of role channels
 -   Fix mod log entry saving
 
-[unreleased]: https://github.com/sushiibot/sushii-2/compare/v0.1.10...HEAD
+[unreleased]: https://github.com/sushiibot/sushii-2/compare/v0.1.11...HEAD
+[0.1.11]: https://github.com/sushiibot/sushii-2/compare/v0.1.10...v0.1.11
 [0.1.10]: https://github.com/sushiibot/sushii-2/compare/v0.1.9...v0.1.10
 [0.1.9]: https://github.com/sushiibot/sushii-2/compare/v0.1.8...v0.1.9
 [0.1.8]: https://github.com/sushiibot/sushii-2/compare/v0.1.7...v0.1.8
