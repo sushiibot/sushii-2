@@ -518,7 +518,10 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
     // Should remove all roles
     let is_reset = msg.content == "clear" || msg.content == "reset";
 
-    let member = guild.member(&cache_http, msg.author.id).await?;
+    let member = guild.member(&cache_http, msg.author.id).await.map_err(|e| {
+        tracing::error!("Failed to fetch guild member: {}", e);
+        e
+    })?;
 
     let (member_all_roles, member_config_roles) =
         categorize_member_roles(&role_config, member.roles, is_reset);
@@ -550,7 +553,12 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
                     .collect::<Vec<RoleId>>(),
             )
         })
-        .await?;
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to edit member: {}", e);
+
+            e
+        })?;
 
     if is_reset {
         return Ok(Some("Your roles have been reset.".into()));
