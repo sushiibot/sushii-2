@@ -12,5 +12,5 @@ pub use self::{
     metrics::{Metrics, MetricsAsync},
     pagination::Paginator,
     sushii_cache::SushiiCache,
-    sushii_config::{SushiiConfig, SushiiConfigDb},
+    sushii_config::SushiiConfig,
 };

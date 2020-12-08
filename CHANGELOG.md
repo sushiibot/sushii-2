@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -  Show rank data for target user data instead of author's
 -  Reset last fishy instead of rep when fishing for another user
+-  Add to existing user fishies instead of replacing
 
 ## [0.1.10]
 

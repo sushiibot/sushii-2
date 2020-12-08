@@ -1,6 +1,7 @@
 use serenity::framework::standard::macros::group;
 
 pub mod help;
+pub mod lastfm;
 pub mod meta;
 pub mod moderation;
 pub mod owner;

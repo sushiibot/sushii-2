@@ -3,7 +3,6 @@ use rand::distributions::{Bernoulli, Distribution};
 use rand::prelude::*;
 use rand_distr::StandardNormal;
 use serde::{Deserialize, Serialize};
-use serenity::async_trait;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
@@ -20,6 +19,7 @@ pub struct UserData {
     pub last_rep: Option<NaiveDateTime>,
     pub last_fishies: Option<NaiveDateTime>,
     pub profile_data: Option<serde_json::Value>,
+    pub lastfm_username: Option<String>,
 }
 
 fn eligible(last_time: Option<NaiveDateTime>, cooldown: Duration) -> bool {
@@ -126,31 +126,21 @@ impl UserData {
 
         format!("{:02}", num)
     }
-}
 
-#[async_trait]
-pub trait UserDataDb {
-    async fn from_id(ctx: &Context, user_id: UserId) -> Result<Option<UserData>>;
-    async fn from_id_or_new(ctx: &Context, user_id: UserId) -> Result<UserData>;
-
-    async fn save(&self, ctx: &Context) -> Result<UserData>;
-}
-
-#[async_trait]
-impl UserDataDb for UserData {
-    async fn from_id(ctx: &Context, user_id: UserId) -> Result<Option<UserData>> {
+    pub async fn from_id(ctx: &Context, user_id: UserId) -> Result<Option<UserData>> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
         from_id_query(&pool, user_id).await
     }
-    async fn from_id_or_new(ctx: &Context, user_id: UserId) -> Result<UserData> {
+
+    pub async fn from_id_or_new(ctx: &Context, user_id: UserId) -> Result<UserData> {
         let user_data = Self::from_id(ctx, user_id).await?;
 
         Ok(user_data.unwrap_or_else(|| UserData::new(user_id)))
     }
 
-    async fn save(&self, ctx: &Context) -> Result<UserData> {
+    pub async fn save(&self, ctx: &Context) -> Result<UserData> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
@@ -177,8 +167,8 @@ async fn upsert_query(pool: &sqlx::PgPool, user_data: &UserData) -> Result<UserD
     sqlx::query_as!(
         UserData,
         r#"
-        INSERT INTO users (id, is_patron, patron_emoji, rep, fishies, last_rep, last_fishies, profile_data)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        INSERT INTO users (id, is_patron, patron_emoji, rep, fishies, last_rep, last_fishies, profile_data, lastfm_username)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         ON CONFLICT (id)
           DO UPDATE
                 SET is_patron = $2,
@@ -187,7 +177,8 @@ async fn upsert_query(pool: &sqlx::PgPool, user_data: &UserData) -> Result<UserD
                     fishies = $5,
                     last_rep = $6,
                     last_fishies = $7,
-                    profile_data = $8
+                    profile_data = $8,
+                    lastfm_username = $9
           RETURNING *
         "#,
         user_data.id,
@@ -198,6 +189,7 @@ async fn upsert_query(pool: &sqlx::PgPool, user_data: &UserData) -> Result<UserD
         user_data.last_rep,
         user_data.last_fishies,
         user_data.profile_data,
+        user_data.lastfm_username,
     )
     .fetch_one(pool)
     .await

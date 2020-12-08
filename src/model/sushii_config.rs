@@ -1,15 +1,9 @@
-use serenity::async_trait;
 use serenity::prelude::*;
 use std::env;
 use std::net::IpAddr;
 use std::sync::Arc;
 
 use crate::error::Result;
-
-#[async_trait]
-pub trait SushiiConfigDb {
-    async fn get(ctx: &Context) -> Arc<SushiiConfig>;
-}
 
 #[derive(Debug, Clone)]
 pub struct SushiiConfig {
@@ -62,16 +56,14 @@ impl SushiiConfig {
             image_server_url: env::var("IMAGE_SERVER_URL")?,
         })
     }
-}
 
-#[async_trait]
-impl SushiiConfigDb for SushiiConfig {
-    async fn get(ctx: &Context) -> Arc<Self> {
-        let data = ctx.data.read().await;
-
-        data.get::<SushiiConfig>()
+    pub async fn get(ctx: &Context) -> Arc<Self> {
+        ctx.data
+            .read()
+            .await
+            .get::<SushiiConfig>()
+            .cloned()
             .expect("Context data is missing SushiiConfig")
-            .clone()
     }
 }
 

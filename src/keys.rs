@@ -7,7 +7,7 @@ use serenity::{
 use sqlx::PgPool;
 use std::sync::Arc;
 
-pub use crate::model::{Metrics, MetricsAsync, SushiiCache, SushiiConfig, SushiiConfigDb};
+pub use crate::model::{Metrics, MetricsAsync, SushiiCache, SushiiConfig};
 
 impl TypeMapKey for SushiiCache {
     type Value = SushiiCache;

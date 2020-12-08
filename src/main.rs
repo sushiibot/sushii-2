@@ -23,7 +23,7 @@ use crate::error::Result;
 use crate::keys::{CacheAndHttpContainer, DbPool, ReqwestContainer, ShardManagerContainer};
 use crate::model::{
     sql::{GuildConfig, GuildConfigDb},
-    Metrics, SushiiCache, {SushiiConfig, SushiiConfigDb},
+    Metrics, SushiiCache, SushiiConfig,
 };
 
 #[tokio::main]

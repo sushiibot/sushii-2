@@ -36,13 +36,13 @@ async fn prune(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     let messages: Vec<MessageId> = msg
         .channel_id
-        .messages(&ctx.http, |r| r.limit(num_messages + 1))
+        .messages(ctx, |r| r.limit(num_messages + 1))
         .await?
         .iter()
         .map(|m| m.id)
         .collect();
 
-    msg.channel_id.delete_messages(&ctx.http, messages).await?;
+    msg.channel_id.delete_messages(ctx, messages).await?;
 
     Ok(())
 }
