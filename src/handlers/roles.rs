@@ -555,7 +555,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
         })
         .await
         .map_err(|e| {
-            tracing::error!("Failed to edit member: {}", e);
+            tracing::error!(?calc_roles, "Failed to edit member: {}", e);
 
             e
         })?;
