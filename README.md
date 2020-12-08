@@ -33,6 +33,7 @@ RUST_LOG=info,sqlx=warn
 DISCORD_TOKEN=
 DEFAULT_PREFIX=
 OWNER_IDS=
+LASTFM_KEY=
 
 # These options are for convenience to set the PostgreSQL options at the same time
 POSTGRES_PASSWORD=
