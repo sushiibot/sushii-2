@@ -7,5 +7,6 @@ use self::{np::*, set::*};
 
 #[group]
 #[prefix("fm")]
+#[default_command(np)]
 #[commands(np, set)]
 pub struct LastFm;
