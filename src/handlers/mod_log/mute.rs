@@ -90,7 +90,11 @@ async fn _guild_member_update(
     // If there isn't an prev member then we can't really compare if the role was just added
     let old_member = match old_member {
         Some(m) => m,
-        None => return Ok(()),
+        None => {
+            tracing::warn!(?new_member, "Old member is not cached");
+
+            return Ok(())
+        },
     };
 
     let old_has_mute = old_member.roles.contains(&mute_role);
