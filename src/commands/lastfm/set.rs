@@ -56,6 +56,8 @@ async fn set(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                     true,
                 );
 
+                /*
+                // Should be in ISO-8601
                 e.timestamp(lastfm_user.registered.unix_timestamp);
 
                 e.footer(|f| {
@@ -63,6 +65,7 @@ async fn set(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
                     f
                 });
+                */
 
                 e
             });
