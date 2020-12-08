@@ -13,6 +13,6 @@ use self::{add::*, edit::*, get::*, info::*, list::*, search::*, top::*};
 #[group]
 #[commands(add, edit, info, get, rename, random, list, search, top)]
 #[only_in("guild")]
-#[prefix("tag")]
+#[prefixes("tag", "t")]
 #[default_command(get)]
 pub struct Tags;
