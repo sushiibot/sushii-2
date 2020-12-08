@@ -586,6 +586,82 @@
       ]
     }
   },
+  "5e1184c3b9dd8e29c5340b2afae592afdb64386cab7633fe7d34847422f789f9": {
+    "query": "\n        INSERT INTO users (id, is_patron, patron_emoji, rep, fishies, last_rep, last_fishies, profile_data, lastfm_username)\n             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET is_patron = $2,\n                    patron_emoji = $3,\n                    rep = $4,\n                    fishies = $5,\n                    last_rep = $6,\n                    last_fishies = $7,\n                    profile_data = $8,\n                    lastfm_username = $9\n          RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "is_patron",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 2,
+          "name": "patron_emoji",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "rep",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "fishies",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "last_rep",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 6,
+          "name": "last_fishies",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 7,
+          "name": "profile_data",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 8,
+          "name": "lastfm_username",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Bool",
+          "Text",
+          "Int8",
+          "Int8",
+          "Timestamp",
+          "Timestamp",
+          "Jsonb",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
   "641a2c6e9559975cebe31a000c8e0ae695a04e0a0671f8e0e7e07315cc31703f": {
     "query": "\n            SELECT *\n              FROM mutes\n             WHERE guild_id = $1\n               AND user_id = $2\n               AND pending = true\n        ",
     "describe": {
