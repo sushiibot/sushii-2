@@ -1,24 +1,42 @@
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use serenity::utils::parse_mention;
 
 use crate::keys::*;
 use crate::model::sql::*;
 
 #[command]
 #[only_in("guild")]
-async fn np(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    let lastfm_username = match UserData::from_id(ctx, msg.author.id)
+async fn np(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    let target_id = if args.is_empty() {
+        msg.author.id
+    } else {
+        match args
+            .single::<String>()
+            .ok()
+            .and_then(|id_str| id_str.parse::<u64>().ok().or_else(|| parse_mention(id_str)))
+        {
+            Some(id) => UserId(id),
+            None => {
+                msg.reply(&ctx, "Error: Invalid user given").await?;
+
+                return Ok(());
+            }
+        }
+    };
+
+    let lastfm_username = match UserData::from_id(ctx, target_id)
         .await?
         .and_then(|d| d.lastfm_username)
     {
         Some(d) => d,
         None => {
             msg.reply(
-                    ctx,
-                    "Error: No Last.fm username saved, use `fm set [username]`",
-                )
-                .await?;
+                ctx,
+                "Error: No Last.fm username saved, use `fm set [username]`",
+            )
+            .await?;
 
             return Ok(());
         }
@@ -47,8 +65,7 @@ async fn np(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let track = match recent_tracks.tracks.first() {
         Some(t) => t,
         None => {
-            msg.reply(ctx, "Error: No recent tracks were found")
-                .await?;
+            msg.reply(ctx, "Error: No recent tracks were found").await?;
 
             return Ok(());
         }
