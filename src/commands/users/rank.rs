@@ -102,7 +102,7 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 "CONTENT_OPACITY": "1",
                 // Username stuff
                 "USERNAME": target_user.name,
-                "DISCRIMINATOR": target_user.discriminator,
+                "DISCRIMINATOR": format!("{:0>4}", target_user.discriminator),
                 "AVATAR_URL": target_user.face(),
                 // Rep and fishies
                 "REP": user_data.rep,
