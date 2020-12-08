@@ -112,13 +112,14 @@ pub async fn message(ctx: &Context, msg: &Message) {
         Err(e) => {
             // This should only run if message sent in the role channel,
             // otherwise sushii will delete any messages that have an error
-            delay_for(Duration::from_secs(5)).await;
             tracing::error!(?msg, "Failed to handle roles message: {}", e);
 
             let sent_msg = msg
                 .channel_id
                 .say(&ctx.http, "Failed to update your roles :(")
                 .await;
+
+            delay_for(Duration::from_secs(5)).await;
 
             let data = &ctx.data.read().await;
             let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
