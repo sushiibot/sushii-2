@@ -518,13 +518,16 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
     // Should remove all roles
     let is_reset = msg.content == "clear" || msg.content == "reset";
 
-    let member = guild.member(&cache_http, msg.author.id).await.map_err(|e| {
-        tracing::error!("Failed to fetch guild member: {}", e);
-        e
-    })?;
+    let member = guild
+        .member(&cache_http, msg.author.id)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to fetch guild member: {}", e);
+            e
+        })?;
 
     let (member_all_roles, member_config_roles) =
-        categorize_member_roles(&role_config, member.roles, is_reset);
+        categorize_member_roles(&role_config, member.roles.clone(), is_reset);
     let role_name_map = build_role_name_map(&role_config);
 
     let calc_roles = calculate_roles(
@@ -542,23 +545,33 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
         return Ok(Some("Couldn't modify your roles. You can add a role with `+role name` or remove a role with `-role name`.  Use `clear` or `reset` to remove all roles".into()));
     }
 
-    // If edit member fails, just return error
-    guild
-        .edit_member(&ctx.http, msg.author.id, |m| {
-            m.roles(
-                &calc_roles
-                    .member_new_all_roles
-                    .iter()
-                    .map(|i| RoleId(*i))
-                    .collect::<Vec<RoleId>>(),
-            )
-        })
-        .await
-        .map_err(|e| {
-            tracing::error!(?calc_roles, "Failed to edit member: {}", e);
+    let before_roles: HashSet<_> = member.roles.iter().map(|r| r.0).collect();
+    let after_roles: HashSet<_> = calc_roles
+        .member_new_all_roles
+        .iter()
+        .map(|id| *id)
+        .collect();
 
-            e
-        })?;
+    // Only edit member if there are roles added or removed
+    if before_roles != after_roles {
+        // If edit member fails, just return error
+        let _ = guild
+            .edit_member(&ctx.http, msg.author.id, |m| {
+                m.roles(
+                    &calc_roles
+                        .member_new_all_roles
+                        .iter()
+                        .map(|i| RoleId(*i))
+                        .collect::<Vec<RoleId>>(),
+                )
+            })
+            .await
+            .map_err(|e| {
+                tracing::error!(?calc_roles, "Failed to edit member: {}", e);
+
+                e
+            });
+    }
 
     if is_reset {
         return Ok(Some("Your roles have been reset.".into()));
