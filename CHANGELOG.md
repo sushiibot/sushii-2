@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+-  Add short `t` alias to `tag` commands
+
+### Fixed
+
+-  Add tag delete command to command group
+
+### Changed
+
+-  Update serenity to `current#fb1f0bfd`
+
 ## [0.1.11]
 
 ### Added
