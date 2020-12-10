@@ -1,6 +1,5 @@
 use chrono::{naive::NaiveDateTime, offset::Utc, Duration};
 use serde::{Deserialize, Serialize};
-use serenity::async_trait;
 use serenity::prelude::*;
 
 use crate::error::Result;
@@ -19,27 +18,6 @@ pub struct Mute {
     pub pending: bool,
     pub start_time: NaiveDateTime,
     pub end_time: Option<NaiveDateTime>,
-}
-
-#[async_trait]
-pub trait MuteDb {
-    /// Gets a NON-pending mute from guild and user ID
-    async fn from_id(ctx: &Context, guild_id: u64, user_id: u64) -> Result<Option<Mute>>;
-
-    /// Gets a pending mute from guild and user ID
-    async fn get_pending(ctx: &Context, guild_id: u64, user_id: u64) -> Result<Option<Mute>>;
-
-    /// Gets all currently expired mutes
-    async fn get_expired(ctx: &Context) -> Result<Vec<Mute>>;
-
-    /// Gets all ongoing mutes in a guild
-    async fn get_ongoing(ctx: &Context, guild_id: u64) -> Result<Vec<Mute>>;
-
-    /// Saves a mute to the database
-    async fn save(&self, ctx: &Context) -> Result<Mute>;
-
-    /// Deletes a mute from the database
-    async fn delete(&self, ctx: &Context) -> Result<()>;
 }
 
 impl Mute {
@@ -101,46 +79,57 @@ impl Mute {
         self.get_std_duration_remaining()
             .map(|d| humantime::format_duration(d).to_string())
     }
-}
 
-#[async_trait]
-impl MuteDb for Mute {
-    async fn from_id(ctx: &Context, guild_id: u64, user_id: u64) -> Result<Option<Mute>> {
+    /// Gets a NON-pending mute from guild and user ID
+    pub async fn from_id(ctx: &Context, guild_id: u64, user_id: u64) -> Result<Option<Mute>> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
         get_from_id_query(&pool, guild_id, user_id).await
     }
 
-    async fn get_pending(ctx: &Context, guild_id: u64, user_id: u64) -> Result<Option<Mute>> {
+    /// Gets a mute from guild and user ID that can be EITHER pending or non-pending
+    pub async fn from_id_any_pending(ctx: &Context, guild_id: u64, user_id: u64) -> Result<Option<Mute>> {
+        let data = ctx.data.read().await;
+        let pool = data.get::<DbPool>().unwrap();
+
+        get_from_id_any_pending_query(&pool, guild_id, user_id).await
+    }
+
+    /// Gets a pending mute from guild and user ID
+    pub async fn get_pending(ctx: &Context, guild_id: u64, user_id: u64) -> Result<Option<Mute>> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
         get_pending_query(&pool, guild_id, user_id).await
     }
 
-    async fn get_expired(ctx: &Context) -> Result<Vec<Mute>> {
+    /// Gets all currently expired mutes
+    pub async fn get_expired(ctx: &Context) -> Result<Vec<Mute>> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
         get_expired_query(&pool).await
     }
 
-    async fn get_ongoing(ctx: &Context, guild_id: u64) -> Result<Vec<Mute>> {
+    /// Gets all ongoing mutes in a guild
+    pub async fn get_ongoing(ctx: &Context, guild_id: u64) -> Result<Vec<Mute>> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
         get_ongoing_query(&pool, guild_id).await
     }
 
-    async fn save(&self, ctx: &Context) -> Result<Self> {
+    /// Saves a mute to the database
+    pub async fn save(&self, ctx: &Context) -> Result<Self> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
         upsert_query(&pool, &self).await
     }
 
-    async fn delete(&self, ctx: &Context) -> Result<()> {
+    /// Deletes a mute from the database
+    pub async fn delete(&self, ctx: &Context) -> Result<()> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
@@ -183,6 +172,27 @@ async fn get_from_id_query(
              WHERE guild_id = $1
                AND user_id = $2
                AND pending = false
+        "#,
+        guild_id as i64,
+        user_id as i64,
+    )
+    .fetch_optional(pool)
+    .await
+    .map_err(Into::into)
+}
+
+async fn get_from_id_any_pending_query(
+    pool: &sqlx::PgPool,
+    guild_id: u64,
+    user_id: u64,
+) -> Result<Option<Mute>> {
+    sqlx::query_as!(
+        Mute,
+        r#"
+            SELECT *
+              FROM mutes
+             WHERE guild_id = $1
+               AND user_id = $2
         "#,
         guild_id as i64,
         user_id as i64,

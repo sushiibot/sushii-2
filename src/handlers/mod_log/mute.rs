@@ -71,7 +71,7 @@ pub async fn guild_member_update(ctx: &Context, old_member: &Option<Member>, new
 
 async fn _guild_member_update(
     ctx: &Context,
-    old_member: &Option<Member>,
+    _old_member: &Option<Member>,
     new_member: &Member,
 ) -> Result<()> {
     let guild_conf = match GuildConfig::from_id(&ctx, &new_member.guild_id).await? {
@@ -87,41 +87,13 @@ async fn _guild_member_update(
         None => return Ok(()),
     };
 
-    // If there isn't an prev member then we can't really compare if the role was just added
-    let old_member = match old_member {
-        Some(m) => m,
-        None => return Ok(()),
-    };
+    let mute_entry = Mute::from_id_any_pending(ctx, new_member.guild_id.0, new_member.user.id.0).await?;
 
-    let old_has_mute = old_member.roles.contains(&mute_role);
     let new_has_mute = new_member.roles.contains(&mute_role);
 
-    let action = match (old_has_mute, new_has_mute) {
-        (false, true) => "mute",
-        (true, false) => "unmute",
-        // No changes, return
-        _ => return Ok(()),
-    };
-
-    // Mute entries are to monitor for re-joins and keep track of duration
-    let mute_entry = if action == "mute" {
-        // Check for a pending mute (e.g. mutes with a command)
-        if let Some(mute_entry) =
-            Mute::get_pending(&ctx, new_member.guild_id.0, new_member.user.id.0).await?
-        {
-            tracing::debug!(?mute_entry, "Found pending mute entry");
-            // If there's a pending one, update pending to false
-            // Save it first in case other stuff fails, since if other stuff
-            // fails we don't want this pending still, just throw it out I guess
-            Some(mute_entry.pending(false).save(&ctx).await?)
-        } else if let Some(mute_entry) =
-            Mute::from_id(&ctx, new_member.guild_id.0, new_member.user.id.0).await?
-        {
-            // If a muted user re-joins, guild_member_addition would add mute
-            // role, and there would be an existing non-pending mute entry
-
-            Some(mute_entry)
-        } else {
+    let mute_entry = match (mute_entry, new_has_mute) {
+        // Role added manually: No mute entry and has mute role
+        (None, true) => {
             // If there isn't a pending OR there isn't an existing mute, it's
             // a NEW regular mute from manually adding roles to a user so just
             // create a new one
@@ -130,12 +102,28 @@ async fn _guild_member_update(
                 new_member.user.id.0,
                 guild_conf.mute_duration.map(Duration::seconds),
             ))
-        }
-    } else {
-        // action == "unmute"
-        delete_mute(&ctx, new_member.guild_id.0, new_member.user.id.0).await?;
+        },
+        // Role added for s!!mute command: Has pending mute entry, so use existing
+        (Some(entry), true) if entry.pending == true => {
+            // If there's a pending one, update pending to false
+            // Save it first in case other stuff fails, since if other stuff
+            // fails we don't want this pending still, just throw it out I guess
+            Some(entry.pending(false).save(ctx).await?)
+        },
+        // Role removed: Has mute entry and does not have mute role
+        (Some(_), false) => {
+            delete_mute(&ctx, new_member.guild_id.0, new_member.user.id.0).await?;
 
-        None
+            None
+        },
+        // No changes, return
+        _ => return Ok(()),
+    };
+
+    let action = if mute_entry.is_none() {
+        "unmute"
+    } else {
+        "mute"
     };
 
     // Initial entry executor might NOT be the same person unmuting as manual

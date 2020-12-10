@@ -16,7 +16,7 @@ use std::sync::Arc;
 use crate::error::{Error as SushiiError, Result};
 use crate::keys::CacheAndHttpContainer;
 use crate::model::moderation::{ModLogReporter, ModLogReporterDb};
-use crate::model::sql::{GuildConfig, GuildConfigDb, ModLogEntry, ModLogEntryDb, Mute, MuteDb};
+use crate::model::sql::{GuildConfig, GuildConfigDb, ModLogEntry, ModLogEntryDb, Mute};
 use crate::utils::duration::parse_duration;
 
 #[derive(Debug, PartialEq, Eq)]

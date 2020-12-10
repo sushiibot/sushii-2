@@ -11,7 +11,7 @@ pub use self::{
         tags::{Tag, TagDb},
     },
     mod_log::{ModLogEntry, ModLogEntryDb},
-    mute::{delete_mute, Mute, MuteDb},
+    mute::{delete_mute, Mute},
     user::{
         user_data::UserData,
         user_level::{UserLevel, UserLevelDb},
