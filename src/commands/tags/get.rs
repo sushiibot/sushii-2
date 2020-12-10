@@ -88,5 +88,7 @@ async fn random(ctx: &Context, msg: &Message) -> CommandResult {
         })
         .await?;
 
+    tag.inc().save(&ctx).await?;
+
     Ok(())
 }
