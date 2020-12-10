@@ -145,7 +145,7 @@ impl ModActionExecutorDb for ModActionExecutor {
                         .ban_with_reason(
                             &ctx.http,
                             user,
-                            7u8,
+                            0u8,
                             format!(
                                 "[Ban by user: {} (ID: {})] {}",
                                 &msg.author.tag(),
@@ -155,7 +155,18 @@ impl ModActionExecutorDb for ModActionExecutor {
                         )
                         .await?;
                 } else {
-                    guild_id.ban(&ctx.http, user, 7u8).await?;
+                    guild_id
+                        .ban_with_reason(
+                            &ctx.http,
+                            user,
+                            0u8,
+                            format!(
+                                "[Ban by user: {} (ID: {})] No reason provided",
+                                &msg.author.tag(),
+                                &msg.author.id.0,
+                            ),
+                        )
+                        .await?;
                 }
             }
             ModActionType::Unban => {
@@ -176,7 +187,17 @@ impl ModActionExecutorDb for ModActionExecutor {
                         )
                         .await?;
                 } else {
-                    guild_id.kick(&ctx.http, user).await?;
+                    guild_id
+                        .kick_with_reason(
+                            &ctx.http,
+                            user,
+                            &format!(
+                                "[Kick by user: {} (ID: {})] No reason provided",
+                                &msg.author.tag(),
+                                &msg.author.id.0,
+                            ),
+                        )
+                        .await?;
                 }
             }
             ModActionType::Mute => {
