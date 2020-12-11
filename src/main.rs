@@ -38,7 +38,17 @@ async fn main() -> Result<()> {
     let _guard = sushii_conf
         .sentry_dsn
         .clone()
-        .map(|url| sentry::init(url))
+        .map(|url| {
+            sentry::init((
+                url,
+                sentry::ClientOptions {
+                    release: Some(
+                        concat!(env!("CARGO_PKG_NAME"), "@", env!("CARGO_PKG_VERSION")).into(),
+                    ),
+                    ..Default::default()
+                },
+            ))
+        })
         .or_else(|| {
             tracing::warn!("SENTRY_DSN is not set");
 
