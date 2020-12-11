@@ -42,9 +42,7 @@ async fn main() -> Result<()> {
             sentry::init((
                 url,
                 sentry::ClientOptions {
-                    release: Some(
-                        concat!(env!("CARGO_PKG_NAME"), "@", env!("CARGO_PKG_VERSION")).into(),
-                    ),
+                    release: sentry::release_name!(),
                     ..Default::default()
                 },
             ))
