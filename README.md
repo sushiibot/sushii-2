@@ -1,3 +1,6 @@
+![CI](https://github.com/sushiibot/sushii-2/workflows/CI/badge.svg)
+[![dependency status](https://deps.rs/repo/github/sushiibot/sushii-2/status.svg)](https://deps.rs/repo/github/sushiibot/sushii-2)
+
 # sushii-2
 
 Rewrite of [sushii-bot](https://github.com/drklee3/sushii-bot) with async
