@@ -35,7 +35,9 @@ async fn set(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     let lastfm_user = fm_client.user_info(&username).await.send().await?.user;
 
-    user_data.lastfm_username.replace(lastfm_user.username.clone());
+    user_data
+        .lastfm_username
+        .replace(lastfm_user.username.clone());
     user_data.save(ctx).await?;
 
     msg.channel_id
@@ -50,11 +52,7 @@ async fn set(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                     a
                 });
 
-                e.field(
-                    "Total Tracks",
-                    &lastfm_user.total_tracks,
-                    true,
-                );
+                e.field("Total Tracks", &lastfm_user.scrobbles, true);
 
                 /*
                 // Should be in ISO-8601
