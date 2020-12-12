@@ -89,7 +89,11 @@ impl Mute {
     }
 
     /// Gets a mute from guild and user ID that can be EITHER pending or non-pending
-    pub async fn from_id_any_pending(ctx: &Context, guild_id: u64, user_id: u64) -> Result<Option<Mute>> {
+    pub async fn from_id_any_pending(
+        ctx: &Context,
+        guild_id: u64,
+        user_id: u64,
+    ) -> Result<Option<Mute>> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 

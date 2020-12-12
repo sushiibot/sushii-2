@@ -87,7 +87,8 @@ async fn _guild_member_update(
         None => return Ok(()),
     };
 
-    let mute_entry = Mute::from_id_any_pending(ctx, new_member.guild_id.0, new_member.user.id.0).await?;
+    let mute_entry =
+        Mute::from_id_any_pending(ctx, new_member.guild_id.0, new_member.user.id.0).await?;
 
     let new_has_mute = new_member.roles.contains(&mute_role);
 
@@ -102,20 +103,20 @@ async fn _guild_member_update(
                 new_member.user.id.0,
                 guild_conf.mute_duration.map(Duration::seconds),
             ))
-        },
+        }
         // Role added for s!!mute command: Has pending mute entry, so use existing
         (Some(entry), true) if entry.pending == true => {
             // If there's a pending one, update pending to false
             // Save it first in case other stuff fails, since if other stuff
             // fails we don't want this pending still, just throw it out I guess
             Some(entry.pending(false).save(ctx).await?)
-        },
+        }
         // Role removed: Has mute entry and does not have mute role
         (Some(_), false) => {
             delete_mute(&ctx, new_member.guild_id.0, new_member.user.id.0).await?;
 
             None
-        },
+        }
         // No changes, return
         _ => return Ok(()),
     };
