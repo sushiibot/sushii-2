@@ -24,7 +24,7 @@ reqwest = { version = "0.10", features = [ "json" ] }
 sentry = {version = "0.21", default-features= false, features = ["backtrace", "contexts", "panic", "reqwest", "rustls"]}
 serde = "1.0.114"
 serde_json = "1.0.57"
-serde_yaml = "0.8"
+serde_yaml = "0.8.14"
 tracing = "0.1"
 tracing-subscriber = "0.2"
 
