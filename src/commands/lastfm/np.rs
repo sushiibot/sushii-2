@@ -71,7 +71,10 @@ async fn np(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     };
 
-    let now_playing = track.attrs.as_ref().map_or(false, |a| a.now_playing == "true");
+    let now_playing = track
+        .attrs
+        .as_ref()
+        .map_or(false, |a| a.now_playing == "true");
     let field_title = if now_playing {
         "Now listening to"
     } else {

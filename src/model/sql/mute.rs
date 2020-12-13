@@ -100,14 +100,6 @@ impl Mute {
         get_from_id_any_pending_query(&pool, guild_id, user_id).await
     }
 
-    /// Gets a pending mute from guild and user ID
-    pub async fn get_pending(ctx: &Context, guild_id: u64, user_id: u64) -> Result<Option<Mute>> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
-
-        get_pending_query(&pool, guild_id, user_id).await
-    }
-
     /// Gets all currently expired mutes
     pub async fn get_expired(ctx: &Context) -> Result<Vec<Mute>> {
         let data = ctx.data.read().await;
@@ -139,28 +131,6 @@ impl Mute {
 
         delete_mute_query(&pool, self.guild_id, self.user_id).await
     }
-}
-
-async fn get_pending_query(
-    pool: &sqlx::PgPool,
-    guild_id: u64,
-    user_id: u64,
-) -> Result<Option<Mute>> {
-    sqlx::query_as!(
-        Mute,
-        r#"
-            SELECT *
-              FROM mutes
-             WHERE guild_id = $1
-               AND user_id = $2
-               AND pending = true
-        "#,
-        guild_id as i64,
-        user_id as i64,
-    )
-    .fetch_optional(pool)
-    .await
-    .map_err(Into::into)
 }
 
 async fn get_from_id_query(

@@ -11,7 +11,7 @@ use crate::model::Paginator;
 
 const PAGE_SIZE: i64 = 10;
 
-fn fmt_tags(tags: &Vec<Tag>) -> String {
+fn fmt_tags(tags: &[Tag]) -> String {
     let mut s = String::new();
 
     for tag in tags {
@@ -85,61 +85,58 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
         .next()
         .await
     {
-        match *reaction_action {
-            ReactionAction::Added(ref r) => {
-                // tracing::info!("offsets: {:?}", offsets);
+        if let ReactionAction::Added(ref r) = *reaction_action {
+            // tracing::info!("offsets: {:?}", offsets);
 
-                // Next page
-                if r.emoji.unicode_eq("➡️") {
-                    let offset = tags.last().map(|t| t.tag_name.clone());
-                    if !paginator.next(offset.clone()) {
-                        r.delete(&ctx).await?;
-                        continue;
-                    }
-
-                    // Get next page
-                    tags = Tag::get_page(&ctx, guild_id, PAGE_SIZE, offset.as_deref()).await?;
-                } else if r.emoji.unicode_eq("⬅️") {
-                    // Ignore on first page
-                    if paginator.current_page == 1 {
-                        r.delete(&ctx).await?;
-                        continue;
-                    }
-
-                    // Use previous page's last tag as offset
-                    tags = Tag::get_page(
-                        &ctx,
-                        guild_id,
-                        PAGE_SIZE,
-                        paginator.prev_offset().map(|o| o.as_str()),
-                    )
-                    .await?;
+            // Next page
+            if r.emoji.unicode_eq("➡️") {
+                let offset = tags.last().map(|t| t.tag_name.clone());
+                if !paginator.next(offset.clone()) {
+                    r.delete(&ctx).await?;
+                    continue;
                 }
 
-                sent_msg
-                    .edit(&ctx, |m| {
-                        m.embed(|e| {
-                            e.title(format!("Server Tags ({} total)", tag_count));
-                            e.description(fmt_tags(&tags));
-                            e.footer(|f| {
-                                f.text(format!(
-                                    "Page {}/{}",
-                                    paginator.current_page, paginator.page_count
-                                ));
-                                f
-                            });
+                // Get next page
+                tags = Tag::get_page(&ctx, guild_id, PAGE_SIZE, offset.as_deref()).await?;
+            } else if r.emoji.unicode_eq("⬅️") {
+                // Ignore on first page
+                if paginator.current_page == 1 {
+                    r.delete(&ctx).await?;
+                    continue;
+                }
 
-                            e
+                // Use previous page's last tag as offset
+                tags = Tag::get_page(
+                    &ctx,
+                    guild_id,
+                    PAGE_SIZE,
+                    paginator.prev_offset().map(|o| o.as_str()),
+                )
+                .await?;
+            }
+
+            sent_msg
+                .edit(&ctx, |m| {
+                    m.embed(|e| {
+                        e.title(format!("Server Tags ({} total)", tag_count));
+                        e.description(fmt_tags(&tags));
+                        e.footer(|f| {
+                            f.text(format!(
+                                "Page {}/{}",
+                                paginator.current_page, paginator.page_count
+                            ));
+                            f
                         });
 
-                        m
-                    })
-                    .await?;
+                        e
+                    });
 
-                // Delete reaction after handling, so that user can react again
-                r.delete(&ctx).await?;
-            }
-            _ => {}
+                    m
+                })
+                .await?;
+
+            // Delete reaction after handling, so that user can react again
+            r.delete(&ctx).await?;
         }
     }
 

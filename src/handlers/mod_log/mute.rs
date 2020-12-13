@@ -105,7 +105,7 @@ async fn _guild_member_update(
             ))
         }
         // Role added for s!!mute command: Has pending mute entry, so use existing
-        (Some(entry), true) if entry.pending == true => {
+        (Some(entry), true) if entry.pending => {
             // If there's a pending one, update pending to false
             // Save it first in case other stuff fails, since if other stuff
             // fails we don't want this pending still, just throw it out I guess

@@ -549,7 +549,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
     let after_roles: HashSet<_> = calc_roles
         .member_new_all_roles
         .iter()
-        .map(|id| *id)
+        .copied()
         .collect();
 
     // Only edit member if there are roles added or removed

@@ -101,12 +101,12 @@ impl UserData {
 
         // For someone else, multiply by 1.5
         if !is_self {
-            fishies = fishies * 1.7f64;
+            fishies *= 1.7f64;
         }
 
         // If golden fishy, multiply x6
         if is_golden {
-            fishies = fishies * 8.0;
+            fishies *= 8.0;
         }
 
         self.fishies += fishies.round() as i64;

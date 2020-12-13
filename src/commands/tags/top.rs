@@ -5,7 +5,7 @@ use std::fmt::Write;
 
 use crate::model::sql::*;
 
-fn fmt_tags(tags: &Vec<Tag>) -> String {
+fn fmt_tags(tags: &[Tag]) -> String {
     let mut s = String::new();
 
     for tag in tags {
@@ -30,7 +30,7 @@ async fn top(ctx: &Context, msg: &Message) -> CommandResult {
     msg.channel_id
         .send_message(&ctx.http, |m| {
             m.embed(|e| {
-                e.title(format!("Server Tags (Most Used)"));
+                e.title("Server Tags (Most Used)");
                 e.description(fmt_tags(&tags));
 
                 e

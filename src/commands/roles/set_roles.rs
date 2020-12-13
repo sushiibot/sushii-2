@@ -27,12 +27,10 @@ async fn set(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     let conf_str = if msg.attachments.is_empty() {
         args.rest().to_string()
+    } else if let Some(attachment) = msg.attachments.first() {
+        String::from_utf8(attachment.download().await?)?
     } else {
-        if let Some(attachment) = msg.attachments.first() {
-            String::from_utf8(attachment.download().await?)?
-        } else {
-            "".into()
-        }
+        "".into()
     };
 
     let roles_conf = match parse_config(&conf_str) {

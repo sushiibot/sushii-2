@@ -113,7 +113,7 @@ impl GuildConfig {
                 self.join_react.replace(
                     // Convert to ReactionType to validate, then convert back to string to save it
                     ReactionType::try_from(val)
-                        .or_else(|_| Err(Error::Sushii("invalid emoji".into())))?
+                        .map_err(|_| Error::Sushii("invalid emoji".into()))?
                         .to_string(),
                 );
             }
