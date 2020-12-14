@@ -15,6 +15,10 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
         None => return Ok(()),
     };
 
+    if msg.author.bot {
+        return Ok(());
+    }
+
     let guild_conf = match GuildConfig::from_id(ctx, &guild_id).await? {
         Some(conf) => conf,
         None => return Ok(()),

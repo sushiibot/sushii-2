@@ -12,12 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 -  Add short `t` alias to `tag` commands
--  Deleted / edited message logging only if message logs are enabled
+-  Add deleted / edited message logging (only caches messages if message logs are enabled)
 
 ### Fixed
 
 -  Add tag delete command to command group
--  Update serenity to `current#692e98`, fixes
+-  Update serenity to `current#692e98`, fixes ban reason truncation
 
 ### Changed
 
