@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.1.12]
+
 ### Added
 
 -  Add short `t` alias to `tag` commands
@@ -15,10 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 -  Add tag delete command to command group
+-  Update serenity to `current#692e98`, fixes
 
 ### Changed
 
--  Update serenity to `current#fb1f0bfd`
+-  Delete 0 messages by default for `ban` command
 
 ## [0.1.11]
 
@@ -176,7 +179,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Prevent role handler from running outside of role channels
 -   Fix mod log entry saving
 
-[unreleased]: https://github.com/sushiibot/sushii-2/compare/v0.1.11...HEAD
+[unreleased]: https://github.com/sushiibot/sushii-2/compare/v0.1.12...HEAD
+[0.1.12]: https://github.com/sushiibot/sushii-2/compare/v0.1.11...v0.1.12
 [0.1.11]: https://github.com/sushiibot/sushii-2/compare/v0.1.10...v0.1.11
 [0.1.10]: https://github.com/sushiibot/sushii-2/compare/v0.1.9...v0.1.10
 [0.1.9]: https://github.com/sushiibot/sushii-2/compare/v0.1.8...v0.1.9
