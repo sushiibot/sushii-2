@@ -52,4 +52,6 @@ jobs:
                   cache-from: type=local,src=/tmp/.buildx-cache
                   cache-to: type=local,dest=/tmp/.buildx-cache
                   tags: ${{ steps.docker_meta.outputs.tags }}
-                  labels: ${{ steps.docker_meta.outputs.labels }}
+                  labels: |
+                      ${{ steps.docker_meta.outputs.labels }}
+                      org.opencontainers.image.description=Moderation bot for Discord
