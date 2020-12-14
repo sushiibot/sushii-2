@@ -24,7 +24,7 @@ impl SavedMessage {
             message_id: i64::from(msg.id),
             author_id: i64::from(msg.author.id),
             channel_id: i64::from(msg.channel_id),
-            guild_id: msg.guild_id.map(|id| i64::from(id))?,
+            guild_id: msg.guild_id.map(i64::from)?,
             created: msg.timestamp.naive_utc(),
             content: msg.content.clone(),
             msg: Json(msg.clone()),

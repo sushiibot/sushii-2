@@ -1,7 +1,6 @@
 use chrono::Duration;
 use lazy_static::lazy_static;
 use regex::Regex;
-use serenity::async_trait;
 use serenity::framework::standard::Args;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
@@ -72,21 +71,6 @@ impl ModActionType {
     }
 }
 
-#[async_trait]
-pub trait ModActionExecutorDb {
-    async fn execute_user(
-        &self,
-        ctx: &Context,
-        msg: &Message,
-        cache_http: &Arc<CacheAndHttp>,
-        user: &User,
-        guild_id: &GuildId,
-        guild_conf: &GuildConfig,
-        duration: &Option<Duration>,
-    ) -> Result<()>;
-    async fn execute(mut self, ctx: &Context, msg: &Message, guild_id: &GuildId) -> Result<()>;
-}
-
 #[derive(Debug)]
 pub struct ModActionExecutor {
     pub action: ModActionType,
@@ -123,11 +107,8 @@ impl ModActionExecutor {
         });
         self
     }
-}
 
-#[async_trait]
-impl ModActionExecutorDb for ModActionExecutor {
-    // Well... kind of yeah
+    #[allow(clippy::too_many_arguments)]
     async fn execute_user(
         &self,
         ctx: &Context,
@@ -241,7 +222,7 @@ impl ModActionExecutorDb for ModActionExecutor {
         Ok(())
     }
 
-    async fn execute(mut self, ctx: &Context, msg: &Message, guild_id: &GuildId) -> Result<()> {
+    pub async fn execute(mut self, ctx: &Context, msg: &Message, guild_id: &GuildId) -> Result<()> {
         let data = &ctx.data.read().await;
         let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
 

@@ -5,7 +5,7 @@ use serenity::prelude::*;
 use serenity::utils::parse_mention;
 use std::fmt::Write;
 
-use crate::model::moderation::{ModActionExecutor, ModActionExecutorDb, ModActionType};
+use crate::model::moderation::{ModActionExecutor, ModActionType};
 use crate::model::sql::*;
 use crate::utils::duration::parse_duration;
 use crate::utils::user::get_user;

@@ -2,7 +2,7 @@ use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
-use crate::model::moderation::{ModActionExecutor, ModActionExecutorDb, ModActionType};
+use crate::model::moderation::{ModActionExecutor, ModActionType};
 
 #[command]
 #[only_in("guild")]
