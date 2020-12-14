@@ -1,11 +1,12 @@
 use crate::tasks;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 
-pub mod join_msg;
-pub mod mod_log;
-pub mod raw_event_handler;
-pub mod roles;
-pub mod user_levels;
+mod join_msg;
+mod mod_log;
+mod msg_log;
+mod raw_event_handler;
+mod roles;
+mod user_levels;
 
 pub use raw_event_handler::RawHandler;
 
@@ -27,8 +28,31 @@ impl EventHandler for Handler {
     }
 
     async fn message(&self, ctx: Context, msg: Message) {
-        roles::message(&ctx, &msg).await;
-        user_levels::message(&ctx, &msg).await;
+        tokio::join!(
+            roles::message(&ctx, &msg),
+            user_levels::message(&ctx, &msg),
+            msg_log::message(&ctx, &msg)
+        );
+    }
+
+    async fn message_delete(
+        &self,
+        ctx: Context,
+        channel_id: ChannelId,
+        msg_id: MessageId,
+        guild_id: Option<GuildId>,
+    ) {
+        msg_log::message_delete(&ctx, channel_id, msg_id, guild_id).await;
+    }
+
+    async fn message_update(
+        &self,
+        ctx: Context,
+        old_msg: Option<Message>,
+        new_msg: Option<Message>,
+        event: MessageUpdateEvent,
+    ) {
+        msg_log::message_update(&ctx, &old_msg, &new_msg, &event).await;
     }
 
     async fn guild_ban_addition(&self, ctx: Context, guild_id: GuildId, banned_user: User) {

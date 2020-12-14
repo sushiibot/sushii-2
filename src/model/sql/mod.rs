@@ -8,6 +8,7 @@ pub use self::{
         guild_config::{GuildConfig, GuildConfigDb},
         guild_roles::{GuildGroup, GuildRole, GuildRoles},
         guild_setting::{GuildSetting, GuildSettingAction},
+        messages::SavedMessage,
         tags::{Tag, TagDb},
     },
     mod_log::{ModLogEntry, ModLogEntryDb},
