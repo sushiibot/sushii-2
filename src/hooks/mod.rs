@@ -57,8 +57,12 @@ pub async fn after(ctx: &Context, msg: &Message, _: &str, error: Result<(), Comm
     if let Err(e) = error {
         tracing::error!(?msg, %e, "Error running command");
 
-        // Downcast error
-        sentry::capture_error(&*e);
+        if let Err(e) = tokio::task::spawn_blocking(move || {
+            // Downcast error
+            sentry::capture_error(&*e);
+        }).await {
+            tracing::error!("Failed to spawn sentry::capture_error task: {}", e);
+        }
 
         let _ = msg
             .channel_id
