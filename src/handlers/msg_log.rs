@@ -119,13 +119,9 @@ async fn _message_delete(
     }
 
     let s = format!(
-        "Message deleted by <@{}> in {}\n\
-        > {}\n\
+        "> {}\n\
         {}",
-        saved_msg.author_id as u64,
-        channel_id.mention(),
-        saved_msg.content,
-        attachments_s,
+        saved_msg.content, attachments_s,
     );
 
     let now = Utc::now().naive_utc();
@@ -133,7 +129,12 @@ async fn _message_delete(
     ChannelId(log_msg_channel as u64)
         .send_message(ctx, |m| {
             m.embed(|e| {
-                e.description(s);
+                e.description(format!(
+                    "<@{}> in {}",
+                    saved_msg.author_id as u64,
+                    channel_id.mention()
+                ));
+                e.field("Message Deleted", s, false);
 
                 e.footer(|f| {
                     f.text("Deleted at");
@@ -204,13 +205,9 @@ async fn _message_update(
     }
 
     let s = format!(
-        "Message edited by <@{}> in <#{}>\n\
-        **Before:** {}\n\
+        "**Before:** {}\n\
         **+After:** {}",
-        saved_msg.author_id as u64,
-        saved_msg.channel_id as u64,
-        saved_msg.content,
-        new_content,
+        saved_msg.content, new_content,
     );
 
     let now = Utc::now().naive_utc();
@@ -218,7 +215,12 @@ async fn _message_update(
     ChannelId(log_msg_channel as u64)
         .send_message(ctx, |m| {
             m.embed(|e| {
-                e.description(s);
+                e.description(format!(
+                    "<@{}> in <#{}>",
+                    saved_msg.author_id as u64, saved_msg.channel_id as u64
+                ));
+                e.field("Message Edited", s, false);
+
                 e.footer(|f| {
                     f.text("Edited at");
 
