@@ -53,7 +53,7 @@ impl UserLevelRanked {
     // message on 12/02/2020, daily rank would ONLY be for those users who have
     // last_msg in that day So if it is the next day, 12/03 it would be stale
     fn reset_stale_ranks(mut self) -> Self {
-        let now = Utc::now().naive_local();
+        let now = Utc::now().naive_utc();
 
         if now.ordinal() != self.last_msg.ordinal() {
             self.msg_day_rank = None;

@@ -23,7 +23,7 @@ impl Tag {
         tag_name: S1,
         content: S2,
     ) -> Self {
-        let created = Utc::now().naive_local();
+        let created = Utc::now().naive_utc();
 
         Self {
             owner_id: i64::from(owner_id),

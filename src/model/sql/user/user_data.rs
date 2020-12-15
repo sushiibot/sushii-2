@@ -29,7 +29,7 @@ fn eligible(last_time: Option<NaiveDateTime>, cooldown: Duration) -> bool {
         None => return true,
     };
 
-    let now = Utc::now().naive_local();
+    let now = Utc::now().naive_utc();
 
     // Now is past last time + cooldown duration
     now > (last_time + cooldown)
@@ -46,7 +46,7 @@ fn humantime_remaining(last_time: Option<NaiveDateTime>, cooldown: Duration) -> 
         None => return None,
     };
 
-    let now = Utc::now().naive_local();
+    let now = Utc::now().naive_utc();
     let next_time = last_time + cooldown;
 
     // Get duration, and then round to nearest second
@@ -74,12 +74,12 @@ impl UserData {
     }
 
     pub fn reset_last_rep(mut self) -> Self {
-        self.last_rep.replace(Utc::now().naive_local());
+        self.last_rep.replace(Utc::now().naive_utc());
         self
     }
 
     pub fn reset_last_fishy(mut self) -> Self {
-        self.last_fishies.replace(Utc::now().naive_local());
+        self.last_fishies.replace(Utc::now().naive_utc());
         self
     }
 

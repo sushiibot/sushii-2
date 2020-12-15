@@ -21,7 +21,7 @@ async fn _guild_member_addition(
         None => return Ok(()),
     };
 
-    let now = Utc::now().naive_local();
+    let now = Utc::now().naive_utc();
 
     // If mute already expired, just log it and return -- don't need to do anything else
     // TODO: Check if this is needed, don't think this ever happens, since if it's already expired it would be deleted

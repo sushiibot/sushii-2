@@ -28,13 +28,13 @@ impl UserLevel {
             msg_month: 5,
             msg_week: 5,
             msg_day: 5,
-            last_msg: Utc::now().naive_local(),
+            last_msg: Utc::now().naive_utc(),
         }
     }
 
     /// Checks if user is eligible for increment, limited to once per minute
     pub fn eligible(&self) -> bool {
-        let now = Utc::now().naive_local();
+        let now = Utc::now().naive_utc();
 
         // Now is past (last message + 1 minute)
         now > (self.last_msg + Duration::minutes(1))
@@ -43,14 +43,14 @@ impl UserLevel {
     /// Increments values with the time intervals reset accordingly
     pub fn inc(mut self) -> Self {
         // Set last_message to now, so that next XP inc is minimum 1 minute later
-        self.last_msg = Utc::now().naive_local();
+        self.last_msg = Utc::now().naive_utc();
 
         self.reset_intervals().inc_fields()
     }
 
     /// Resets intervals that have expired
     fn reset_intervals(mut self) -> Self {
-        let now = Utc::now().naive_local();
+        let now = Utc::now().naive_utc();
 
         if now.ordinal() != self.last_msg.ordinal() {
             self.msg_day = 0;

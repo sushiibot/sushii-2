@@ -22,7 +22,7 @@ pub struct Mute {
 
 impl Mute {
     pub fn new(guild_id: u64, user_id: u64, duration: Option<Duration>) -> Self {
-        let now = Utc::now().naive_local();
+        let now = Utc::now().naive_utc();
 
         Mute {
             guild_id: guild_id as i64,
@@ -54,7 +54,7 @@ impl Mute {
     /// Gets remaining mute duration
     pub fn get_duration_remaining(&self) -> Option<Duration> {
         self.end_time
-            .map(|t| t.signed_duration_since(Utc::now().naive_local()))
+            .map(|t| t.signed_duration_since(Utc::now().naive_utc()))
             .map(|d| Duration::seconds(d.num_seconds()))
     }
 

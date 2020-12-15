@@ -89,7 +89,7 @@ impl Metrics {
 
         Self {
             registry,
-            start_time: Utc::now().naive_local(),
+            start_time: Utc::now().naive_utc(),
             messages: messages_static_vec,
             events: events_static_vec,
             guilds: guilds_gauge,

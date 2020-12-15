@@ -36,7 +36,7 @@ impl ModLogEntry {
             // This is temporary as we get the actual case_id when inserting into db
             case_id: -1,
             action: action.to_string(),
-            action_time: Utc::now().naive_local(),
+            action_time: Utc::now().naive_utc(),
             pending,
             user_id: user.id.0 as i64,
             user_tag: user.tag(),
