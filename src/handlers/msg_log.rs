@@ -1,4 +1,6 @@
+use chrono::Utc;
 use serenity::{model::prelude::*, prelude::*};
+use std::fmt::Write;
 
 use crate::error::Result;
 use crate::model::sql::*;
@@ -99,28 +101,50 @@ async fn _message_delete(
         None => return Ok(()), // Not found
     };
 
-    let attachments: Vec<_> = saved_msg
+    let mut attachments_s = String::new();
+
+    for (i, attachment_url) in saved_msg
         .msg
         .attachments
         .iter()
         .map(|a| a.proxy_url.as_str())
-        .collect();
+        .enumerate()
+    {
+        let _ = write!(attachments_s, "[Attachment #{}]({})", i + 1, attachment_url);
+
+        // Add comma if not last one
+        if i < saved_msg.msg.attachments.len() - 1 {
+            let _ = write!(attachments_s, ", ");
+        }
+    }
+
+    let s = format!(
+        "Message deleted by <@{}> in {}\n\
+        > {}\n\
+        {}",
+        saved_msg.author_id as u64,
+        channel_id.mention(),
+        saved_msg.content,
+        attachments_s,
+    );
+
+    let now = Utc::now().naive_utc();
 
     ChannelId(log_msg_channel as u64)
         .send_message(ctx, |m| {
-            m.content(format!(
-                "🗑️ Deleted message by <@{}> in {}\n\
-                > {}\n\
-                {}",
-                saved_msg.author_id as u64,
-                channel_id.mention(),
-                saved_msg.content,
-                attachments.join("\n"),
-            ));
+            m.embed(|e| {
+                e.description(s);
 
-            m.allowed_mentions(|am| {
-                am.empty_parse();
-                am
+                e.footer(|f| {
+                    f.text("Deleted at");
+
+                    f
+                });
+
+                e.timestamp(now.format("%Y-%m-%dT%H:%M:%S").to_string());
+                e.colour(0xe74c3c);
+
+                e
             });
 
             m
@@ -179,21 +203,32 @@ async fn _message_update(
         }
     }
 
+    let s = format!(
+        "Message edited by <@{}> in <#{}>\n\
+        **Before:** {}\n\
+        **+After:** {}",
+        saved_msg.author_id as u64,
+        saved_msg.channel_id as u64,
+        saved_msg.content,
+        new_content,
+    );
+
+    let now = Utc::now().naive_utc();
+
     ChannelId(log_msg_channel as u64)
         .send_message(ctx, |m| {
-            m.content(format!(
-                ":pencil: Edited message by <@{}> in <#{}>\n\
-                **Before:** {}\n\
-                **+After:** {}",
-                saved_msg.author_id as u64,
-                saved_msg.channel_id as u64,
-                saved_msg.content,
-                new_content,
-            ));
+            m.embed(|e| {
+                e.description(s);
+                e.footer(|f| {
+                    f.text("Edited at");
 
-            m.allowed_mentions(|am| {
-                am.empty_parse();
-                am
+                    f
+                });
+
+                e.timestamp(now.format("%Y-%m-%dT%H:%M:%S").to_string());
+                e.colour(0x9b59b6);
+
+                e
             });
 
             m
