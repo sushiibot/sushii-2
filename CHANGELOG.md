@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+-  `fm recent` command
+-  Send typing status when rendering rank image
+-  `fishy` command alias `fwishy`
+
+### Changed
+
+-  Use embeds for message logs
+
+### Fixed
+
+-  Ignore bots for message logs
+-  Replace usage of `naive_local()` with `naive_utc()`
+
 ## [0.1.12]
 
 ### Added

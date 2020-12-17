@@ -6,6 +6,7 @@ use serenity::utils::parse_mention;
 use crate::model::sql::*;
 
 #[command]
+#[aliases("fwishy")]
 #[only_in("guild")]
 async fn fishy(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     // Check cooldown before checking args
