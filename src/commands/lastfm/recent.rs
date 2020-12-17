@@ -1,11 +1,11 @@
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use serenity::utils::parse_mention;
 use std::fmt::Write;
 
 use crate::keys::*;
 use crate::model::sql::*;
+use crate::utils::user::parse_id;
 
 #[command]
 #[only_in("guild")]
@@ -13,11 +13,7 @@ async fn recent(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let target_id = if args.is_empty() {
         msg.author.id
     } else {
-        match args
-            .single::<String>()
-            .ok()
-            .and_then(|id_str| id_str.parse::<u64>().ok().or_else(|| parse_mention(id_str)))
-        {
+        match args.single::<String>().ok().and_then(parse_id) {
             Some(id) => UserId(id),
             None => {
                 msg.reply(&ctx, "Error: Invalid user given").await?;
