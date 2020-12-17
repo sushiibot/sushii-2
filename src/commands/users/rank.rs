@@ -75,6 +75,9 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         UserData::new(target_user.id).save(&ctx).await?
     };
 
+    // Send typing
+    let typing = msg.channel_id.start_typing(&ctx.http)?;
+
     let reqwest_client = ctx
         .data
         .read()
@@ -173,6 +176,8 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     };
 
     msg.channel_id.send_files(&ctx, vec![files], |m| m).await?;
+
+    typing.stop();
 
     Ok(())
 }
