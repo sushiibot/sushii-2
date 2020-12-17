@@ -1,12 +1,13 @@
 use serenity::framework::standard::macros::group;
 
-pub mod np;
-pub mod set;
+mod np;
+mod recent;
+mod set;
 
-use self::{np::*, set::*};
+use self::{np::*, recent::*, set::*};
 
 #[group]
 #[prefix("fm")]
 #[default_command(np)]
-#[commands(np, set)]
+#[commands(np, set, recent)]
 pub struct LastFm;
