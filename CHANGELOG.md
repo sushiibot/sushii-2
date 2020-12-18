@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  `fm recent` command
 -  Send typing status when rendering rank image
 -  `fishy` command alias `fwishy`
+-  `serverinfo` command
 
 ### Changed
 
