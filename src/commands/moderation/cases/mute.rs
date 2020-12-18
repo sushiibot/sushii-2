@@ -274,6 +274,7 @@ async fn addduration(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
 
 #[command]
 #[required_permissions("BAN_MEMBERS")]
+#[aliases("listmute", "mutelist", "muteslist")]
 #[only_in("guild")]
 async fn listmutes(ctx: &Context, msg: &Message) -> CommandResult {
     let guild = match msg.guild(&ctx.cache).await {
@@ -317,33 +318,31 @@ async fn listmutes(ctx: &Context, msg: &Message) -> CommandResult {
         .filter(|x| x.end_time.is_none())
         .collect();
 
-    // Merge definite and indefinites
-    let ongoing_mutes_sorted: Vec<&Mute> = definite_mutes
-        .into_iter()
-        .chain(indefinite_mutes.into_iter())
-        .collect();
-
     let mut s = String::new();
 
-    for mute in ongoing_mutes_sorted {
-        let user = match UserId(mute.user_id as u64).to_user(&ctx).await {
-            Ok(u) => u,
-            Err(e) => {
-                tracing::error!(?mute, "Failed to get user: {}", e);
-
-                continue;
-            }
-        };
-
+    for mute in definite_mutes {
         if let Some(d) = mute.get_human_duration() {
-            let _ = write!(s, "`{}` total", d);
+            let _ = write!(s, "`{}`", d);
         }
 
         if let Some(d) = mute.get_human_duration_remaining() {
-            let _ = write!(s, ", `{}` remaining", d);
+            let _ = write!(s, " | `{}` remaining", d);
         }
 
-        let _ = writeln!(s, ": {}", user.mention());
+        let _ = writeln!(s, ": <@{}>", mute.user_id as u64);
+    }
+
+    if !indefinite_mutes.is_empty() {
+        writeln!(s, "")?;
+        writeln!(s, "**Indefinite Mutes**")?;
+    }
+
+    for mute in indefinite_mutes {
+        if let Some(d) = mute.get_human_duration_elapsed() {
+            let _ = write!(s, "`{}` elapsed", d);
+        }
+
+        let _ = writeln!(s, ": <@{}>", mute.user_id as u64);
     }
 
     if s.is_empty() {

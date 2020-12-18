@@ -13,10 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  Send typing status when rendering rank image
 -  `fishy` command alias `fwishy`
 -  `serverinfo` command
+-  Respond with prefix info when bot is mentioned
 
 ### Changed
 
 -  Use embeds for message logs
+-  Migrate to `metrics` crate from `prometheus` crate
+-  Clean up `listmutes` and reduce clutter
+-  Delete mute entries when a member is banned
 
 ### Fixed
 
