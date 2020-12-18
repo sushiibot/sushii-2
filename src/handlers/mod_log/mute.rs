@@ -51,12 +51,6 @@ async fn _guild_member_addition(
         None => return Ok(()),
     };
 
-    // Add a pending modlog entry for the auto mute reason
-    ModLogEntry::new("mute", true, guild_id.0, &member.user)
-        .reason(&Some("Automated Mute: User left with a mute role.".into()))
-        .save(&ctx)
-        .await?;
-
     // Re-add mute role if there's a mute entry
     member.add_role(&ctx.http, mute_role).await?;
 
@@ -117,7 +111,7 @@ async fn _guild_member_update(
 
             None
         }
-        // No changes, return
+        // Role added but not pending, just whatever maybe rejoin
         _ => return Ok(()),
     };
 
