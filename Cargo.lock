@@ -1178,50 +1178,25 @@ dependencies = [
 [[package]]
 name = "metrics"
 version = "0.13.0-alpha.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d3b214b3ae0a21937be886af1fea4aff35dc02c9906a3ae0d8eea00f949bd32"
-dependencies = [
- "metrics-macros 0.1.0-alpha.7 (registry+https://github.com/rust-lang/crates.io-index)",
- "proc-macro-hack",
-]
-
-[[package]]
-name = "metrics"
-version = "0.13.0-alpha.11"
 source = "git+https://github.com/metrics-rs/metrics.git?branch=main#3a119901ce710465eade0f735764bdb440b96b8d"
 dependencies = [
- "metrics-macros 0.1.0-alpha.7 (git+https://github.com/metrics-rs/metrics.git?branch=main)",
+ "metrics-macros",
  "proc-macro-hack",
 ]
 
 [[package]]
 name = "metrics-exporter-prometheus"
 version = "0.1.0-alpha.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a9aefa38f48944b5a91adcf35eec305f9527b889ec078b863ff250e4cc0af7a"
+source = "git+https://github.com/metrics-rs/metrics.git?branch=main#3a119901ce710465eade0f735764bdb440b96b8d"
 dependencies = [
  "hdrhistogram",
  "hyper",
- "metrics 0.13.0-alpha.11 (registry+https://github.com/rust-lang/crates.io-index)",
+ "metrics",
  "metrics-util",
  "parking_lot",
  "quanta",
  "thiserror",
  "tokio",
-]
-
-[[package]]
-name = "metrics-macros"
-version = "0.1.0-alpha.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3472609fadf7c97f8ea4c0dd5ab671b1c33824ef9fd2da117311fa093e46c2c6"
-dependencies = [
- "lazy_static",
- "proc-macro-hack",
- "proc-macro2",
- "quote",
- "regex",
- "syn",
 ]
 
 [[package]]
@@ -1240,15 +1215,14 @@ dependencies = [
 [[package]]
 name = "metrics-util"
 version = "0.4.0-alpha.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e176b573aa63b9dd030df3a01eb49a382de35e37c459fc131cf342f978f4a8fa"
+source = "git+https://github.com/metrics-rs/metrics.git?branch=main#3a119901ce710465eade0f735764bdb440b96b8d"
 dependencies = [
  "atomic-shim",
  "crossbeam-epoch 0.9.1",
  "crossbeam-utils 0.8.1",
  "dashmap 3.11.10",
  "indexmap",
- "metrics 0.13.0-alpha.11 (registry+https://github.com/rust-lang/crates.io-index)",
+ "metrics",
  "parking_lot",
  "quanta",
 ]
@@ -1591,39 +1565,6 @@ checksum = "1e0704ee1a7e00d7bb417d0770ea303c1bccbabf0ef1667dae92b5967f5f8a71"
 dependencies = [
  "unicode-xid",
 ]
-
-[[package]]
-name = "prometheus"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30d70cf4412832bcac9cffe27906f4a66e450d323525e977168c70d1b36120ae"
-dependencies = [
- "cfg-if 0.1.10",
- "fnv",
- "lazy_static",
- "parking_lot",
- "protobuf",
- "regex",
- "thiserror",
-]
-
-[[package]]
-name = "prometheus-static-metric"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "63cf9eb6aec7d2dade7fe7b6ba7e58a7a6563bad57ab056299a474da504b966d"
-dependencies = [
- "lazy_static",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "protobuf"
-version = "2.18.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da78e04bc0e40f36df43ecc6575e4f4b180e8156c4efd73f13d5619479b05696"
 
 [[package]]
 name = "quanta"
@@ -2329,13 +2270,11 @@ dependencies = [
  "hyper",
  "lastfm-rs",
  "lazy_static",
- "metrics 0.13.0-alpha.11 (git+https://github.com/metrics-rs/metrics.git?branch=main)",
+ "metrics",
  "metrics-exporter-prometheus",
  "num-format",
  "num-traits",
  "num_cpus",
- "prometheus",
- "prometheus-static-metric",
  "rand",
  "rand_distr",
  "regex",
