@@ -2,6 +2,7 @@ use crate::tasks;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 
 mod join_msg;
+mod mention;
 mod mod_log;
 mod msg_log;
 mod raw_event_handler;
@@ -31,7 +32,8 @@ impl EventHandler for Handler {
         tokio::join!(
             roles::message(&ctx, &msg),
             user_levels::message(&ctx, &msg),
-            msg_log::message(&ctx, &msg)
+            msg_log::message(&ctx, &msg),
+            mention::message(&ctx, &msg),
         );
     }
 
