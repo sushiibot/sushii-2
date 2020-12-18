@@ -1,7 +1,4 @@
-use metrics::{
-    counter, decrement_gauge, increment_gauge,
-    register_counter, register_gauge,
-};
+use metrics::{counter, decrement_gauge, increment_gauge, register_counter, register_gauge};
 use metrics_exporter_prometheus::PrometheusBuilder;
 use serenity::{model::prelude::*, prelude::*};
 use std::net::SocketAddr;

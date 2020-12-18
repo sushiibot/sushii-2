@@ -21,6 +21,10 @@ async fn serverinfo(ctx: &Context, msg: &Message) -> CommandResult {
 
     let mut guild_str = String::new();
 
+    if let Some(ref desc) = guild.description {
+        writeln!(guild_str, "**Description:** {}", desc)?;
+    }
+
     writeln!(guild_str, "**Owner:** {} (ID {})", owner.tag(), owner.id.0)?;
     writeln!(
         guild_str,
@@ -81,6 +85,23 @@ async fn serverinfo(ctx: &Context, msg: &Message) -> CommandResult {
         emojis, animated_emojis
     )?;
 
+    if guild.premium_subscription_count > 0 {
+        writeln!(
+            guild_str,
+            "**Boosts:** {}",
+            guild.premium_subscription_count
+        )?;
+        writeln!(guild_str, "**Boost Level:** {}", guild.premium_tier.num())?;
+    }
+
+    if let Some(ref vanity_url_code) = guild.vanity_url_code {
+        writeln!(
+            guild_str,
+            "**Vanity Invite:** [discord.gg/{code}](https://discord.gg/{code})",
+            code = vanity_url_code
+        )?;
+    }
+
     msg.channel_id
         .send_message(ctx, |m| {
             m.embed(|e| {
@@ -99,6 +120,13 @@ async fn serverinfo(ctx: &Context, msg: &Message) -> CommandResult {
                 }
 
                 e.description(guild_str);
+
+                if let Some(ref banner_url) = guild.banner {
+                    e.image(format!(
+                        "https://cdn.discordapp.com/banners/{}/{}.png?size=4096",
+                        guild.id.0, banner_url
+                    ));
+                }
 
                 e.footer(|f| {
                     f.text(&format!("Guild ID: {}", &guild.id.0));
