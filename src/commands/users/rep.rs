@@ -1,9 +1,9 @@
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use serenity::utils::parse_mention;
 
 use crate::model::sql::*;
+use crate::utils::user::parse_id;
 
 #[command]
 #[only_in("guild")]
@@ -18,11 +18,7 @@ async fn rep(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         return Ok(());
     }
 
-    let target_id = match args
-        .single::<String>()
-        .ok()
-        .and_then(|id_str| id_str.parse::<u64>().ok().or_else(|| parse_mention(id_str)))
-    {
+    let target_id = match args.single::<String>().ok().and_then(parse_id) {
         Some(id) => UserId(id),
         None => {
             msg.channel_id

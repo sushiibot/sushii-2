@@ -1,9 +1,9 @@
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use serenity::utils::parse_mention;
 
 use crate::model::sql::*;
+use crate::utils::user::parse_id;
 
 #[command]
 #[aliases("fwishy")]
@@ -22,11 +22,7 @@ async fn fishy(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     let target_str = args.rest();
 
-    let target_id = match target_str
-        .parse::<u64>()
-        .ok()
-        .or_else(|| parse_mention(target_str))
-    {
+    let target_id = match parse_id(target_str) {
         Some(id) => UserId(id),
         None => {
             if target_str != "self" {

@@ -4,12 +4,12 @@ use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::http::AttachmentType;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use serenity::utils::parse_mention;
 use std::borrow::Cow;
 
 use crate::keys::*;
 use crate::model::sql::*;
 use crate::model::user::*;
+use crate::utils::user::parse_id;
 
 #[command]
 #[only_in("guild")]
@@ -22,7 +22,7 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     // Get target, or self
     let target_user = match args.single::<String>() {
         Ok(id_str) => {
-            let user_id = match id_str.parse::<u64>().ok().or_else(|| parse_mention(id_str)) {
+            let user_id = match parse_id(id_str) {
                 Some(id) => id,
                 None => {
                     msg.channel_id

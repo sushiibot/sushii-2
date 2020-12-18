@@ -22,12 +22,28 @@ async fn serverinfo(ctx: &Context, msg: &Message) -> CommandResult {
     let mut guild_str = String::new();
 
     writeln!(guild_str, "**Owner:** {} (ID {})", owner.tag(), owner.id.0)?;
-    writeln!(guild_str, "**Created:** {}", guild.id.created_at().format("%Y-%m-%d %H:%M:%S"))?;
-    writeln!(guild_str, "**Members:** {}", guild.member_count.to_formatted_string(&Locale::en))?;
+    writeln!(
+        guild_str,
+        "**Created:** {}",
+        guild.id.created_at().format("%Y-%m-%d %H:%M:%S")
+    )?;
+    writeln!(
+        guild_str,
+        "**Members:** {}",
+        guild.member_count.to_formatted_string(&Locale::en)
+    )?;
     writeln!(guild_str, "**Region:** {}", guild.region)?;
     writeln!(guild_str, "**Roles:** {}", guild.roles.len())?;
-    writeln!(guild_str, "**Verification Level:** {:?}", guild.verification_level)?;
-    writeln!(guild_str, "**Explicit Content Filter:** {:?}", guild.explicit_content_filter)?;
+    writeln!(
+        guild_str,
+        "**Verification Level:** {:?}",
+        guild.verification_level
+    )?;
+    writeln!(
+        guild_str,
+        "**Explicit Content Filter:** {:?}",
+        guild.explicit_content_filter
+    )?;
 
     if !guild.features.is_empty() {
         writeln!(guild_str, "**Features:** {}", guild.features.join(", "))?;
@@ -43,7 +59,11 @@ async fn serverinfo(ctx: &Context, msg: &Message) -> CommandResult {
         acc
     });
 
-    writeln!(guild_str, "**Channels:** {} text, {} voice", text_channels, voice_channels)?;
+    writeln!(
+        guild_str,
+        "**Channels:** {} text, {} voice",
+        text_channels, voice_channels
+    )?;
 
     let (emojis, animated_emojis) = guild.emojis.values().fold((0, 0), |mut acc, emoji| {
         if emoji.animated {
@@ -55,7 +75,11 @@ async fn serverinfo(ctx: &Context, msg: &Message) -> CommandResult {
         acc
     });
 
-    writeln!(guild_str, "**Emojis:** {} static, {} animated", emojis, animated_emojis)?;
+    writeln!(
+        guild_str,
+        "**Emojis:** {} static, {} animated",
+        emojis, animated_emojis
+    )?;
 
     msg.channel_id
         .send_message(ctx, |m| {
