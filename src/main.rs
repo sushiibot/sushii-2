@@ -14,7 +14,6 @@ mod error;
 mod handlers;
 mod hooks;
 mod keys;
-mod metrics_server;
 mod model;
 mod prelude;
 mod tasks;
@@ -60,7 +59,7 @@ async fn main() -> Result<()> {
 
     sqlx::migrate!("./migrations").run(&pool).await?;
 
-    let metrics = Arc::new(Metrics::new());
+    let metrics = Arc::new(Metrics::new(&sushii_conf));
 
     let http = Http::new_with_token(&sushii_conf.discord_token);
 
@@ -141,9 +140,6 @@ async fn main() -> Result<()> {
         data.insert::<ReqwestContainer>(reqwest::Client::new());
     }
 
-    // Start hyper metrics server
-    let metrics_sender = metrics_server::start(Arc::clone(&sushii_conf), Arc::clone(&metrics));
-
     let signal_kinds = vec![
         SignalKind::hangup(),
         SignalKind::interrupt(),
@@ -154,7 +150,6 @@ async fn main() -> Result<()> {
         let mut stream = signal(signal_kind).unwrap();
         let shard_manager = client.shard_manager.clone();
         let pool = pool.clone();
-        let mut metrics_sender = metrics_sender.clone();
 
         tokio::spawn(async move {
             stream.recv().await;
@@ -165,10 +160,6 @@ async fn main() -> Result<()> {
             pool.close().await;
 
             tracing::info!("Shutting down metrics server...");
-            metrics_sender
-                .send(())
-                .await
-                .expect("Failed to shut down metrics server");
 
             tracing::info!("bye");
         });

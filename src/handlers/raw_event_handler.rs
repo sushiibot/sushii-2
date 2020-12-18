@@ -1,4 +1,4 @@
-use crate::keys::{Metrics, MetricsAsync};
+use crate::keys::Metrics;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 
 pub struct RawHandler;

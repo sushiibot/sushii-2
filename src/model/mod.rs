@@ -8,9 +8,6 @@ pub mod sushii_config;
 pub mod user;
 
 pub use self::{
-    context::SushiiContext,
-    metrics::{Metrics, MetricsAsync},
-    pagination::Paginator,
-    sushii_cache::SushiiCache,
+    context::SushiiContext, metrics::Metrics, pagination::Paginator, sushii_cache::SushiiCache,
     sushii_config::SushiiConfig,
 };
