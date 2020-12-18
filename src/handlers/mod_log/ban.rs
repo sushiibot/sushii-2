@@ -1,6 +1,6 @@
 use serenity::{model::prelude::*, prelude::*};
 
-use crate::model::moderation::{ModLogReporter, ModLogReporterDb};
+use crate::model::moderation::ModLogReporter;
 
 pub async fn guild_ban_addition(ctx: &Context, guild_id: &GuildId, banned_user: &User) {
     if let Err(e) = ModLogReporter::new(guild_id, banned_user, "ban")

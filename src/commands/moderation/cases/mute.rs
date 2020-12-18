@@ -293,16 +293,13 @@ async fn listmutes(ctx: &Context, msg: &Message) -> CommandResult {
         }
     };
 
-    let mute_role = match guild_conf.mute_role {
-        Some(role) => RoleId(role as u64),
-        None => {
-            msg.channel_id
-                .say(&ctx, "Error: There isn't a mute role set")
-                .await?;
+    if guild_conf.mute_role.is_none() {
+        msg.channel_id
+            .say(&ctx, "Error: There isn't a mute role set")
+            .await?;
 
-            return Ok(());
-        }
-    };
+        return Ok(());
+    }
 
     let ongoing_mutes: Vec<Mute> = Mute::get_ongoing(&ctx, guild.id.0).await?;
 
@@ -338,38 +335,15 @@ async fn listmutes(ctx: &Context, msg: &Message) -> CommandResult {
             }
         };
 
-        if let Ok(member) = guild.member(&ctx, mute.user_id as u64).await {
-            // Double check if member has a mute role or not
-            if !member.roles.contains(&mute_role) {
-                // Delete this mute entry if the member is missing a mute role
-                if let Err(e) = mute.delete(&ctx).await {
-                    tracing::error!(?mute, "Failed to delete mute: {}", e);
-                }
-
-                continue;
-            }
-        }
-
-        let _ = write!(
-            s,
-            "`{}` - `{}`",
-            mute.start_time.format("%Y-%m-%d %H:%M:%S"),
-            // Need to do to_string() since indefinite is a string too
-            mute.end_time.map_or_else(
-                || "indefinite".into(),
-                |m| m.format("%Y-%m-%d %H:%M:%S").to_string()
-            )
-        );
-
         if let Some(d) = mute.get_human_duration() {
-            let _ = write!(s, " (`{}` total", d);
+            let _ = write!(s, "`{}` total", d);
         }
 
         if let Some(d) = mute.get_human_duration_remaining() {
-            let _ = write!(s, ", `{}` remaining)", d);
+            let _ = write!(s, ", `{}` remaining", d);
         }
 
-        let _ = writeln!(s, ": {} {} (ID: {})", user.mention(), user.tag(), user.id.0);
+        let _ = writeln!(s, ": {}", user.mention());
     }
 
     if s.is_empty() {

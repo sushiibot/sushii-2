@@ -1,4 +1,3 @@
-use serenity::async_trait;
 use serenity::{model::prelude::*, prelude::*};
 use std::fmt::Write;
 use std::time::Duration;
@@ -41,24 +40,8 @@ impl<'a> ModLogReporter<'a> {
         self.initial_entry = initial_entry;
         self
     }
-}
 
-#[async_trait]
-pub trait ModLogReporterDb {
-    async fn execute(&self, ctx: &Context) -> Result<ModLogEntry>;
-    async fn send_message(
-        &self,
-        ctx: &Context,
-        entry: &ModLogEntry,
-        channel_id: u64,
-        executor_user: User,
-        placeholder_reason: String,
-    ) -> Result<Message>;
-}
-
-#[async_trait]
-impl<'a> ModLogReporterDb for ModLogReporter<'a> {
-    async fn execute(&self, ctx: &Context) -> Result<ModLogEntry> {
+    pub async fn execute(&self, ctx: &Context) -> Result<ModLogEntry> {
         // check if a ban/unban command was used instead of discord right click ban
         // add the action to the database if not pendings
         let mut entry = match ModLogEntry::get_pending_entry(

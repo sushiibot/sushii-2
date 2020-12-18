@@ -2,7 +2,7 @@ use chrono::{offset::Utc, Duration};
 use serenity::{model::prelude::*, prelude::*};
 
 use crate::error::Result;
-use crate::model::moderation::{ModLogReporter, ModLogReporterDb};
+use crate::model::moderation::ModLogReporter;
 use crate::model::sql::*;
 
 pub async fn guild_member_addition(ctx: &Context, guild_id: &GuildId, mut member: &mut Member) {
