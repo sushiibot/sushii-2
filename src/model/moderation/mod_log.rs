@@ -96,6 +96,16 @@ impl<'a> ModLogReporter<'a> {
             "N/A".into()
         };
 
+        // Save before sending message in case some API stuff fails
+        // Entry still should be saved even if message fails to send
+        entry.pending = false;
+        entry.save(&ctx).await?;
+
+        // Only send if mod log is enabled
+        if !guild_conf.log_mod_enabled {
+            return Ok(entry);
+        }
+
         if let Some(channel_id) = guild_conf.log_mod {
             match self
                 .send_message(
@@ -113,9 +123,6 @@ impl<'a> ModLogReporter<'a> {
                 Err(e) => tracing::error!("Failed to send mod log entry message: {}", e),
             }
         }
-
-        entry.pending = false;
-        entry.save(&ctx).await?;
 
         Ok(entry)
     }
