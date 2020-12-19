@@ -66,11 +66,11 @@ impl UserData {
 
     /// Returns None if user can rep again, otherwise an Option<String> with time left
     pub fn rep_humantime_cooldown(&self) -> Option<String> {
-        humantime_remaining(self.last_rep, Duration::days(1))
+        humantime_remaining(self.last_rep, Duration::hours(12))
     }
 
     pub fn fishies_humantime_cooldown(&self) -> Option<String> {
-        humantime_remaining(self.last_fishies, Duration::days(1))
+        humantime_remaining(self.last_fishies, Duration::hours(12))
     }
 
     pub fn reset_last_rep(mut self) -> Self {

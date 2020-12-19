@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  Migrate to `metrics` crate from `prometheus` crate
 -  Clean up `listmutes` and reduce clutter
 -  Delete mute entries when a member is banned
+-  Lower fishy/rep cooldown from 1 day to 12 hours
 
 ### Fixed
 
