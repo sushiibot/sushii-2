@@ -73,7 +73,7 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
     let mut s = String::new();
 
     for entry in &entries {
-        let _ = write!(s, "`[Case #{}]` **{}**", entry.case_id, entry.action);
+        let _ = write!(s, "`[{} | #{}]` **{}**", entry.action_time.format("%y-%m-%d %H:%M"), entry.case_id, entry.action);
 
         if let Some(id) = entry.executor_id {
             let _ = write!(s, " by <@{}>", id);
@@ -126,6 +126,8 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
                 e.description(&s);
                 e.field("Summary", action_counts_string, false);
                 e.color(0xe67e22);
+
+                e.footer(|f| f.text("Date format: YY-MM-DD • Times in UTC"));
 
                 e
             })
