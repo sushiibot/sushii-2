@@ -115,10 +115,11 @@ impl ModActionExecutor {
         msg: &Message,
         cache_http: &Arc<CacheAndHttp>,
         user: &User,
+        guild: &Option<Guild>,
         guild_id: &GuildId,
         guild_conf: &GuildConfig,
         duration: &Option<Duration>,
-    ) -> Result<()> {
+    ) -> Result<Option<String>> {
         match self.action {
             ModActionType::Ban => {
                 if let Some(reason) = &self.reason {
@@ -216,10 +217,33 @@ impl ModActionExecutor {
                 ModLogReporter::new(guild_id, user, "warn")
                     .execute(&ctx)
                     .await?;
+
+                let guild_name = guild
+                    .as_ref()
+                    .map(|g| g.name.clone())
+                    .unwrap_or_else(|| format!("Unknown Guild (ID: {})", guild_id.0));
+
+                if let Err(_) = user
+                    .dm(ctx, |m| {
+                        m.content(format!(
+                            "You have been warned in {}\nReason: {}",
+                            guild_name,
+                            self.reason
+                                .clone()
+                                .unwrap_or_else(|| "No reason given".into())
+                        ))
+                    })
+                    .await
+                {
+                    // Space in front since its added on at end
+                    return Ok(Some(
+                        " Failed to send DM, they possibly have them disabled".into(),
+                    ));
+                }
             }
         }
 
-        Ok(())
+        Ok(None)
     }
 
     pub async fn execute(mut self, ctx: &Context, msg: &Message, guild_id: &GuildId) -> Result<()> {
@@ -229,6 +253,8 @@ impl ModActionExecutor {
         let guild_conf = GuildConfig::from_id(&ctx, guild_id)
             .await?
             .ok_or_else(|| SushiiError::Sushii("No guild found".into()))?;
+
+        let guild = guild_id.to_guild_cached(ctx).await;
 
         let action_str = self.action.to_string();
         let action_past_str = self.action.to_past_tense();
@@ -325,6 +351,7 @@ impl ModActionExecutor {
                     &msg,
                     &cache_http,
                     &user,
+                    &guild,
                     &guild_id,
                     &guild_conf,
                     &duration,
@@ -355,13 +382,14 @@ impl ModActionExecutor {
                         tracing::error!("Failed to delete entry: {}", e);
                     }
                 }
-                Ok(_) => {
+                Ok(extra_str) => {
                     let _ = writeln!(
                         s,
-                        "{} {} {}.",
+                        "{} {} {}.{}",
                         self.action.to_emoji(),
                         &user_tag_id,
-                        &action_past_str
+                        &action_past_str,
+                        &extra_str.unwrap_or_else(|| "".into()),
                     );
                     // add the action to hashset to prevent dupe actions
                     self.exclude_users.insert(id);

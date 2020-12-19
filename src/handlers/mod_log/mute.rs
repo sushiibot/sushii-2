@@ -1,5 +1,6 @@
 use chrono::{offset::Utc, Duration};
 use serenity::{model::prelude::*, prelude::*};
+use std::fmt::Write;
 
 use crate::error::Result;
 use crate::model::moderation::ModLogReporter;
@@ -143,6 +144,29 @@ async fn _guild_member_update(
         // Add the mod log case id and save it to db
         mute_entry.case_id(entry.case_id).save(&ctx).await?;
     }
+
+    // If dm isn't enabled skip the rest
+    if !guild_conf.mute_dm_enabled {
+        return Ok(());
+    }
+
+    let guild_name = new_member.guild_id.to_guild_cached(&ctx).await
+        .as_ref()
+        .map(|g| g.name.clone())
+        .unwrap_or_else(|| format!("Unknown Guild (ID: {})", new_member.guild_id.0));
+
+    // Dm user
+    let mut s = format!("You have been {}d in {}", action, guild_name);
+
+    if action == "mute" {
+        if let Some(ref reason) = entry.reason {
+            write!(s, "Reason: {}", reason)?;
+        } else {
+            write!(s, "Reason: No reason given")?;
+        }
+    }
+
+    new_member.user.dm(ctx, |m| m.content(s)).await?;
 
     Ok(())
 }

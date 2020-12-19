@@ -6,7 +6,7 @@ use sqlx::migrate::MigrateError;
 use sqlx::Error as SqlxError;
 use std::env::VarError;
 use std::error::Error as StdError;
-use std::fmt::{Display, Formatter, Result as FmtResult};
+use std::fmt::{Display, Formatter, Error as FmtError, Result as FmtResult};
 use std::io::Error as IoError;
 use std::result::Result as StdResult;
 
@@ -18,6 +18,7 @@ pub enum Error {
     Sushii(String),
     // Crate errors
     Dotenv(DotenvError),
+    Fmt(FmtError),
     Io(IoError),
     Json(SerdeJsonError),
     Serenity(SerenityError),
@@ -42,6 +43,12 @@ impl From<SerenityError> for Error {
 impl From<DotenvError> for Error {
     fn from(err: DotenvError) -> Error {
         Error::Dotenv(err)
+    }
+}
+
+impl From<FmtError> for Error {
+    fn from(err: FmtError) -> Error {
+        Error::Fmt(err)
     }
 }
 
@@ -88,6 +95,7 @@ impl Display for Error {
             Error::Sushii(ref inner) => inner.fmt(f),
             // Crates
             Error::Dotenv(ref inner) => inner.fmt(f),
+            Error::Fmt(ref inner) => inner.fmt(f),
             Error::Io(ref inner) => inner.fmt(f),
             Error::Json(ref inner) => inner.fmt(f),
             Error::Serenity(ref inner) => inner.fmt(f),

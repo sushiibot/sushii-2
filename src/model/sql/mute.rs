@@ -82,12 +82,16 @@ impl Mute {
 
     /// Gets human readable formatted duration string of elapsed
     pub fn get_human_duration_elapsed(&self) -> Option<String> {
-        let d = Utc::now().naive_utc()
+        let d = Utc::now()
+            .naive_utc()
             .signed_duration_since(self.start_time);
 
         let d_secs = Duration::seconds(d.num_seconds());
 
-        d_secs.to_std().ok().map(|d| humantime::format_duration(d).to_string())
+        d_secs
+            .to_std()
+            .ok()
+            .map(|d| humantime::format_duration(d).to_string())
     }
 
     /// Gets a NON-pending mute from guild and user ID
