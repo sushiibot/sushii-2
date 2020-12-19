@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  `fishy` command alias `fwishy`
 -  `serverinfo` command
 -  Respond with prefix info when bot is mentioned
+-  Add member logs
 
 ### Changed
 

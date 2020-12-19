@@ -2,6 +2,7 @@ use crate::tasks;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 
 mod join_msg;
+mod member_log;
 mod mention;
 mod mod_log;
 mod msg_log;
@@ -77,6 +78,20 @@ impl EventHandler for Handler {
     async fn guild_member_addition(&self, ctx: Context, guild_id: GuildId, mut member: Member) {
         // TODO: Run these concurrently instead of one by one
         mod_log::mute::guild_member_addition(&ctx, &guild_id, &mut member).await;
-        join_msg::guild_member_addition(&ctx, &guild_id, &member).await;
+
+        tokio::join!(
+            join_msg::guild_member_addition(&ctx, &guild_id, &member),
+            member_log::guild_member_addition(&ctx, &guild_id, &member),
+        );
+    }
+
+    async fn guild_member_removal(
+        &self,
+        ctx: Context,
+        guild_id: GuildId,
+        user: User,
+        member: Option<Member>,
+    ) {
+        member_log::guild_member_removal(&ctx, &guild_id, &user, &member).await;
     }
 }
