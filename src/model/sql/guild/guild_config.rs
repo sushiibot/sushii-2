@@ -66,19 +66,16 @@ pub struct GuildConfig {
 
     /// Member join / leave log channel
     pub log_member: Option<i64>,
+    pub log_member_enabled: bool,
 
     /// Mute role ID
     pub mute_role: Option<i64>,
     /// Duration in seconds
     pub mute_duration: Option<i64>,
 
-    /// Should DM user on ban
-    pub ban_dm_text: Option<String>,
-    pub ban_dm_enabled: bool,
-
-    /// Should DM user on kick
-    pub kick_dm_text: Option<String>,
-    pub kick_dm_enabled: bool,
+    /// Should DM user on warn
+    pub warn_dm_text: Option<String>,
+    pub warn_dm_enabled: bool,
 
     /// Should DM user on mute
     pub mute_dm_text: Option<String>,
@@ -99,7 +96,9 @@ impl GuildConfig {
             leave_msg_enabled: true,
             log_msg_enabled: true,
             log_mod_enabled: true,
+            log_member_enabled: true,
             mute_dm_enabled: true,
+            warn_dm_enabled: true,
             ..Default::default()
         }
     }
@@ -147,6 +146,9 @@ impl GuildConfig {
             GuildSetting::MuteDm => {
                 self.mute_dm_text.replace(val.into());
             }
+            GuildSetting::WarnDm => {
+                self.mute_dm_text.replace(val.into());
+            }
         }
 
         Ok(())
@@ -185,6 +187,13 @@ impl GuildConfig {
 
                 self.log_mod_enabled = new_value;
             }
+            GuildSetting::MemberLog => {
+                if self.log_member_enabled == new_value {
+                    return Ok(false);
+                }
+
+                self.log_member_enabled = new_value;
+            }
             GuildSetting::MuteDm => {
                 if self.mute_dm_enabled == new_value {
                     return Ok(false);
@@ -192,7 +201,14 @@ impl GuildConfig {
 
                 self.mute_dm_enabled = new_value;
             }
-            GuildSetting::JoinReact | GuildSetting::MsgChannel | GuildSetting::MemberLog => {
+            GuildSetting::WarnDm => {
+                if self.warn_dm_enabled == new_value {
+                    return Ok(false);
+                }
+
+                self.warn_dm_enabled = new_value;
+            }
+            GuildSetting::JoinReact | GuildSetting::MsgChannel => {
                 return Err(Error::Sushii(
                     "this setting cannot be enabled/disabled".into(),
                 ));
@@ -229,11 +245,19 @@ impl GuildConfig {
                 self.log_mod_enabled = !self.log_mod_enabled;
                 self.log_mod_enabled
             }
+            GuildSetting::MemberLog => {
+                self.log_member_enabled = !self.log_member_enabled;
+                self.log_member_enabled
+            }
             GuildSetting::MuteDm => {
                 self.mute_dm_enabled = !self.mute_dm_enabled;
                 self.mute_dm_enabled
             }
-            GuildSetting::JoinReact | GuildSetting::MsgChannel | GuildSetting::MemberLog => {
+            GuildSetting::WarnDm => {
+                self.warn_dm_enabled = !self.warn_dm_enabled;
+                self.warn_dm_enabled
+            }
+            GuildSetting::JoinReact | GuildSetting::MsgChannel => {
                 return Err(Error::Sushii(
                     "this setting cannot be enabled/disabled".into(),
                 ));
@@ -256,6 +280,7 @@ impl GuildConfig {
                 Some(self.log_mod_enabled),
             ),
             GuildSetting::MuteDm => (self.mute_dm_text.clone(), Some(self.mute_dm_enabled)),
+            GuildSetting::WarnDm => (self.warn_dm_text.clone(), Some(self.warn_dm_enabled)),
             GuildSetting::JoinReact => (self.join_react.clone(), None),
             GuildSetting::MsgChannel => {
                 (self.msg_channel.map(|id| format!("<#{}>", id as u64)), None)
@@ -312,7 +337,11 @@ impl fmt::Display for GuildConfig {
                 Some(fmt_channel(self.log_mod)),
                 Some(self.log_mod_enabled),
             ),
-            ("Member Log", Some(fmt_channel(self.log_member)), None),
+            (
+                "Member Log",
+                Some(fmt_channel(self.log_member)),
+                Some(self.log_member_enabled),
+            ),
             ("Mute Role", Some(fmt_role(self.mute_role)), None),
             (
                 "Mute Default Duration",
@@ -528,12 +557,11 @@ async fn upsert_config_query(conf: &GuildConfig, pool: &sqlx::PgPool) -> Result<
         conf.log_mod,
         conf.log_mod_enabled,
         conf.log_member,
+        conf.log_member_enabled,
         conf.mute_role,
         conf.mute_duration,
-        conf.ban_dm_text,
-        conf.ban_dm_enabled,
-        conf.kick_dm_text,
-        conf.kick_dm_enabled,
+        conf.warn_dm_text,
+        conf.warn_dm_enabled,
         conf.mute_dm_text,
         conf.mute_dm_enabled,
         conf.max_mention,

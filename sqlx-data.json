@@ -1,17 +1,5 @@
 {
   "db": "PostgreSQL",
-  "031094f06d4f294d9d90b0ca35ea79408ba5f7c7dea2317e612eb9878b06d154": {
-    "query": "\n                DELETE FROM messages\n                      WHERE channel_id = $1\n                            AND ctid IN (\n                                  SELECT ctid\n                                    FROM messages\n                                ORDER BY created DESC\n                                   LIMIT 100\n                            )\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "06ceaf2895890f4228d2f782e33498fc047e60421ee875e4a780b24a59de0623": {
     "query": "\n            DELETE FROM mod_logs\n                  WHERE guild_id = $1\n                    AND case_id = $2\n        ",
     "describe": {
@@ -685,68 +673,6 @@
       ]
     }
   },
-  "4a60213d0aead57b816df4c5f944c9e50b2bb09ecfb7a09e494710749b80f5e0": {
-    "query": "\n                SELECT *, msg as \"msg: Json<SerenityMessage>\"\n                  FROM messages\n                 WHERE message_id = $1\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "message_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "author_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "channel_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "created",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 5,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "msg",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 7,
-          "name": "msg: Json<SerenityMessage>",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "4ded0d9f469101a8a3c0b49ef6dc14fd31dc8217e6a7f1ed11bbc04ec1e82c1a": {
     "query": "\n              SELECT COUNT(*) as \"count!\"\n                FROM tags\n               WHERE guild_id = $1\n        ",
     "describe": {
@@ -840,68 +766,6 @@
         true,
         true,
         true
-      ]
-    }
-  },
-  "626c3c3fe0dd13a01823b0aba9070081b6532f375db4525c5ab2731842a41a85": {
-    "query": "\n            INSERT INTO messages (\n                            message_id,\n                            author_id,\n                            channel_id,\n                            guild_id,\n                            created,\n                            content,\n                            msg)\n                 VALUES ($1, $2, $3, $4, $5, $6, $7)\n            ON CONFLICT (message_id)\n              DO UPDATE\n                    SET author_id = $2,\n                        channel_id = $3,\n                        guild_id = $4,\n                        created = $5,\n                        content = $6,\n                        msg = $7\n              RETURNING *\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "message_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "author_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "channel_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "created",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 5,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "msg",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Timestamp",
-          "Text",
-          "Jsonb"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
       ]
     }
   },
@@ -1337,62 +1201,6 @@
       "nullable": []
     }
   },
-  "9eba88d27956f0d7cdb53a59373f01bffd599bed27484f8ea73d2af12a24fba3": {
-    "query": "\n                SELECT *\n                  FROM messages\n                 WHERE message_id = $1\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "message_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "author_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "channel_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "created",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 5,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "msg",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "a29a90c4878865eb9ba3b426e58237c9489c034ff48f81b02813f91e1b0c1b26": {
     "query": "\n            SELECT * \n                FROM (\n                    SELECT *,\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(DOY FROM last_msg) ORDER BY msg_day DESC) AS msg_day_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(DOY FROM last_msg)) AS msg_day_total,\n\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(WEEK FROM last_msg) ORDER BY msg_week DESC) AS msg_week_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(WEEK FROM last_msg)) AS msg_week_total,\n\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(MONTH FROM last_msg) ORDER BY msg_month DESC) AS msg_month_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(MONTH FROM last_msg)) AS msg_month_total,\n\n                        ROW_NUMBER() OVER(ORDER BY msg_all_time DESC) AS msg_all_time_rank,\n                        COUNT(*) OVER() AS msg_all_time_total\n                    FROM user_levels WHERE guild_id = $1\n                ) t\n            WHERE t.user_id = $2\n        ",
     "describe": {
@@ -1551,62 +1359,6 @@
       ]
     }
   },
-  "a88ac2f419ae9be45faa9a6bcc77a53117b17d2ede8c5e715ca9c74596b8720e": {
-    "query": "\n                SELECT message_id,\n                       author_id,\n                       channel_id,\n                       guild_id,\n                       created,\n                       content,\n                       msg as \"msg: Json<SerenityMessage>\"\n                  FROM messages\n                 WHERE message_id = $1\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "message_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "author_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "channel_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "created",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 5,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "msg: Json<SerenityMessage>",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "add265dd79458efe15555d7bf9ba83142789f8e2f74543ea9d06821cc6549fb1": {
     "query": "\n            SELECT *\n              FROM tags\n             WHERE guild_id = $1\n            OFFSET floor(random() * (\n                       SELECT COUNT(*)\n                         FROM tags))\n             LIMIT 1\n        ",
     "describe": {
@@ -1710,6 +1462,43 @@
         false,
         false
       ]
+    }
+  },
+  "c0526535107d188f318ecc723f2d8629eef92266e9802414606a3f4fba3afbeb": {
+    "query": "INSERT INTO guild_configs (\n                id                ,\n                name              ,\n                prefix            ,\n                join_msg          ,\n                join_msg_enabled  ,\n                join_react        ,\n                leave_msg         ,\n                leave_msg_enabled ,\n                msg_channel       ,\n                role_channel      ,\n                role_config       ,\n                role_enabled      ,\n                invite_guard      ,\n                log_msg           ,\n                log_msg_enabled   ,\n                log_mod           ,\n                log_mod_enabled   ,\n                log_member        ,\n                log_member_enabled,\n                mute_role         ,\n                mute_duration     ,\n                warn_dm_text      ,\n                warn_dm_enabled   ,\n                mute_dm_text      ,\n                mute_dm_enabled   ,\n                max_mention\n            )\n     VALUES ($1,  $2,  $3,  $4,  $5,  $6,  $7,  $8,  $9,  $10,\n             $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,\n             $21, $22, $23, $24, $25, $26)\nON CONFLICT (id)\n  DO UPDATE\n        SET -- id = $1, Don't need to update ID \n            name               = $2,\n            prefix             = $3,\n            join_msg           = $4,\n            join_msg_enabled   = $5,\n            join_react         = $6,\n            leave_msg          = $7,\n            leave_msg_enabled  = $8,\n            msg_channel        = $9,\n            role_channel       = $10,\n            role_config        = $11,\n            role_enabled       = $12,\n            invite_guard       = $13,\n            log_msg            = $14,\n            log_msg_enabled    = $15,\n            log_mod            = $16,\n            log_mod_enabled    = $17,\n            log_member         = $18,\n            log_member_enabled = $19,\n            mute_role          = $20,\n            mute_duration      = $21,\n            warn_dm_text       = $22,\n            warn_dm_enabled    = $23,\n            mute_dm_text       = $24,\n            mute_dm_enabled    = $25,\n            max_mention        = $26\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
+          "Bool",
+          "Int8",
+          "Int8",
+          "Jsonb",
+          "Bool",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Int8",
+          "Text",
+          "Bool",
+          "Text",
+          "Bool",
+          "Int4"
+        ]
+      },
+      "nullable": []
     }
   },
   "cf21bd565ae6274c44718984217076091fe7d163feb99065c55535c5b45c87dd": {

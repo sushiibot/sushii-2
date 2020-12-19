@@ -20,6 +20,10 @@ async fn _guild_member_addition(ctx: &Context, guild_id: &GuildId, member: &Memb
         }
     };
 
+    if !guild_conf.log_member_enabled {
+        return Ok(());
+    }
+
     let member_log_channel = match guild_conf.log_member {
         Some(id) => ChannelId(id as u64),
         None => return Ok(()),
@@ -101,6 +105,10 @@ async fn _guild_member_removal(
             return Ok(());
         }
     };
+
+    if !guild_conf.log_member_enabled {
+        return Ok(());
+    }
 
     let member_log_channel = match guild_conf.log_member {
         Some(id) => ChannelId(id as u64),

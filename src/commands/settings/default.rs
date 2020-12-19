@@ -32,7 +32,7 @@ async fn default(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
                 .channel_id
                 .say(&ctx.http, "Error: Invalid setting. \
                     Available settings are: \n\
-                    `joinmsg`, `joinreact`, `leavemsg`, `msgchannel`, `msglog`, `modlog`, `memberlog`, `mutedm`")
+                    `joinmsg`, `joinreact`, `leavemsg`, `msgchannel`, `msglog`, `modlog`, `memberlog`, `mutedm`, `warndm`")
                 .await?;
 
             return Ok(());

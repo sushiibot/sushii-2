@@ -12,6 +12,7 @@ pub enum GuildSetting {
     ModLog,
     MemberLog,
     MuteDm,
+    WarnDm,
 }
 
 impl fmt::Display for GuildSetting {
@@ -28,6 +29,7 @@ impl fmt::Display for GuildSetting {
                 GuildSetting::ModLog => "mod log",
                 GuildSetting::MemberLog => "member log",
                 GuildSetting::MuteDm => "mute DMs",
+                GuildSetting::WarnDm => "warn DMs",
             }
         )
     }
@@ -46,6 +48,7 @@ impl FromStr for GuildSetting {
             "modlog" => Self::ModLog,
             "memberlog" => Self::MemberLog,
             "mutedm" => Self::MuteDm,
+            "warndm" => Self::WarnDm,
             _ => return Err(Error::Sushii("Invalid guild setting".into())),
         };
 

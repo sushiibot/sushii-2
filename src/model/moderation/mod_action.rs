@@ -218,6 +218,10 @@ impl ModActionExecutor {
                     .execute(&ctx)
                     .await?;
 
+                if !guild_conf.warn_dm_enabled {
+                    return Ok(Some(" Warn DMs are not enabled, user not DMed.".into()));
+                }
+
                 let guild_name = guild
                     .as_ref()
                     .map(|g| g.name.clone())
