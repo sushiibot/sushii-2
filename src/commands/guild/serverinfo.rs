@@ -50,7 +50,17 @@ async fn serverinfo(ctx: &Context, msg: &Message) -> CommandResult {
     )?;
 
     if !guild.features.is_empty() {
-        writeln!(guild_str, "**Features:** {}", guild.features.join(", "))?;
+        write!(guild_str, "**Features:** ")?;
+
+        for (i, feature) in guild.features.iter().enumerate() {
+            write!(guild_str, "`{}`", feature)?;
+
+            if i != guild.features.len() - 1 {
+                write!(guild_str, ", ")?;
+            }
+        }
+
+        writeln!(guild_str)?;
     }
 
     let (text_channels, voice_channels) = guild.channels.values().fold((0, 0), |mut acc, chan| {
@@ -121,11 +131,8 @@ async fn serverinfo(ctx: &Context, msg: &Message) -> CommandResult {
 
                 e.description(guild_str);
 
-                if let Some(ref banner_url) = guild.banner {
-                    e.image(format!(
-                        "https://cdn.discordapp.com/banners/{}/{}.png?size=4096",
-                        guild.id.0, banner_url
-                    ));
+                if let Some(banner_url) = guild.banner_url() {
+                    e.image(banner_url);
                 }
 
                 e.footer(|f| {
