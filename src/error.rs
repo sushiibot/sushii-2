@@ -6,7 +6,7 @@ use sqlx::migrate::MigrateError;
 use sqlx::Error as SqlxError;
 use std::env::VarError;
 use std::error::Error as StdError;
-use std::fmt::{Display, Formatter, Error as FmtError, Result as FmtResult};
+use std::fmt::{Display, Error as FmtError, Formatter, Result as FmtResult};
 use std::io::Error as IoError;
 use std::result::Result as StdResult;
 

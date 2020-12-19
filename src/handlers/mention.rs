@@ -39,7 +39,7 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
 
     let prefix = guild_conf
         .and_then(|c| c.prefix)
-        .unwrap_or(sushii_conf.default_prefix.clone());
+        .unwrap_or_else(|| sushii_conf.default_prefix.clone());
 
     let s = format!(
         "Hewwo my prefix in this guild is `{}`. \

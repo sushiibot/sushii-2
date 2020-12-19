@@ -223,7 +223,7 @@ impl ModActionExecutor {
                     .map(|g| g.name.clone())
                     .unwrap_or_else(|| format!("Unknown Guild (ID: {})", guild_id.0));
 
-                if let Err(_) = user
+                let dm_res = user
                     .dm(ctx, |m| {
                         m.content(format!(
                             "You have been warned in {}\nReason: {}",
@@ -233,8 +233,9 @@ impl ModActionExecutor {
                                 .unwrap_or_else(|| "No reason given".into())
                         ))
                     })
-                    .await
-                {
+                    .await;
+
+                if dm_res.is_err() {
                     // Space in front since its added on at end
                     return Ok(Some(
                         " Failed to send DM, they possibly have them disabled".into(),

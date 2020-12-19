@@ -333,7 +333,7 @@ async fn listmutes(ctx: &Context, msg: &Message) -> CommandResult {
     }
 
     if !indefinite_mutes.is_empty() {
-        writeln!(s, "")?;
+        writeln!(s)?;
         writeln!(s, "**Indefinite Mutes**")?;
     }
 
