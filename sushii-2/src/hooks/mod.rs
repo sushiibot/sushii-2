@@ -4,7 +4,7 @@ use serenity::framework::standard::DispatchError;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
-use crate::model::sql::{GuildConfig, GuildConfigDb};
+use crate::model::sql::GuildConfig;
 
 #[hook]
 pub async fn before(ctx: &Context, msg: &Message, cmd_name: &str) -> bool {

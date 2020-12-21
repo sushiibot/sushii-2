@@ -5,7 +5,7 @@ use serenity::utils::parse_mention;
 use std::collections::HashMap;
 use std::fmt::Write;
 
-use crate::model::sql::{ModLogEntry, ModLogEntryDb};
+use crate::model::sql::ModLogEntry;
 
 #[command]
 #[only_in("guild")]

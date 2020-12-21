@@ -1,6 +1,5 @@
 use chrono::{naive::NaiveDateTime, offset::Utc, Datelike};
 use serde::{Deserialize, Serialize};
-use serenity::async_trait;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
@@ -102,20 +101,8 @@ impl UserLevelRanked {
     pub fn fmt_rank_day(&self) -> String {
         fmt_rank(self.msg_day_rank, self.msg_day_total)
     }
-}
 
-#[async_trait]
-pub trait UserLevelRankedDb {
-    async fn from_id(
-        ctx: &Context,
-        user_id: UserId,
-        guild_id: GuildId,
-    ) -> Result<Option<UserLevelRanked>>;
-}
-
-#[async_trait]
-impl UserLevelRankedDb for UserLevelRanked {
-    async fn from_id(
+    pub async fn from_id(
         ctx: &Context,
         user_id: UserId,
         guild_id: GuildId,

@@ -1,4 +1,3 @@
-use dotenv::Error as DotenvError;
 use humantime::DurationError;
 use serde_json::Error as SerdeJsonError;
 use serenity::Error as SerenityError;
@@ -9,7 +8,6 @@ use std::error::Error as StdError;
 use std::fmt::{Display, Error as FmtError, Formatter, Result as FmtResult};
 use std::io::Error as IoError;
 use std::result::Result as StdResult;
-use sushii_model::Error as SushiiModelError;
 
 pub type Result<T> = StdResult<T, Error>;
 
@@ -17,9 +15,7 @@ pub type Result<T> = StdResult<T, Error>;
 pub enum Error {
     // Sushii errors
     Sushii(String),
-    Model(SushiiModelError),
     // Crate errors
-    Dotenv(DotenvError),
     Fmt(FmtError),
     Io(IoError),
     Json(SerdeJsonError),
@@ -28,12 +24,6 @@ pub enum Error {
     Migrate(MigrateError),
     Var(VarError),
     Duration(DurationError),
-}
-
-impl From<SushiiModelError> for Error {
-    fn from(err: SushiiModelError) -> Error {
-        Error::Model(err)
-    }
 }
 
 impl From<SerdeJsonError> for Error {
@@ -45,12 +35,6 @@ impl From<SerdeJsonError> for Error {
 impl From<SerenityError> for Error {
     fn from(err: SerenityError) -> Error {
         Error::Serenity(err)
-    }
-}
-
-impl From<DotenvError> for Error {
-    fn from(err: DotenvError) -> Error {
-        Error::Dotenv(err)
     }
 }
 
@@ -101,9 +85,7 @@ impl Display for Error {
         match *self {
             // Sushii
             Error::Sushii(ref inner) => inner.fmt(f),
-            Error::Model(ref inner) => inner.fmt(f),
             // Crates
-            Error::Dotenv(ref inner) => inner.fmt(f),
             Error::Fmt(ref inner) => inner.fmt(f),
             Error::Io(ref inner) => inner.fmt(f),
             Error::Json(ref inner) => inner.fmt(f),

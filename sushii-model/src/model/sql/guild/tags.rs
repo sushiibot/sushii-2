@@ -1,6 +1,5 @@
 use chrono::{naive::NaiveDateTime, offset::Utc};
 use serde::{Deserialize, Serialize};
-use serenity::async_trait;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
@@ -44,53 +43,24 @@ impl Tag {
         self.use_count += 1;
         self
     }
-}
 
-#[async_trait]
-pub trait TagDb {
-    async fn from_name(ctx: &Context, tag_name: &str, guild_id: GuildId) -> Result<Option<Tag>>;
-    async fn random(ctx: &Context, guild_id: GuildId) -> Result<Option<Tag>>;
-    /// Searches for a given substring
-    async fn search(
+    pub async fn from_name(
         ctx: &Context,
+        tag_name: &str,
         guild_id: GuildId,
-        query: &str,
-        count: i64,
-        offset: Option<&str>,
-    ) -> Result<Vec<Tag>>;
-    async fn get_search_count(ctx: &Context, guild_id: GuildId, query: &str) -> Result<i64>;
-
-    /// Get paginated list of all tags
-    async fn get_page(
-        ctx: &Context,
-        guild_id: GuildId,
-        count: i64,
-        offset: Option<&str>,
-    ) -> Result<Vec<Tag>>;
-    async fn get_count(ctx: &Context, guild_id: GuildId) -> Result<i64>;
-
-    async fn get_top_used(ctx: &Context, guild_id: GuildId, count: i64) -> Result<Vec<Tag>>;
-    async fn can_edit(&self, ctx: &Context, member: &Member) -> Result<bool>;
-    async fn rename(&mut self, ctx: &Context, tag_name: &str) -> Result<bool>;
-    async fn save(&self, ctx: &Context) -> Result<Tag>;
-    async fn delete(&self, ctx: &Context) -> Result<()>;
-}
-
-#[async_trait]
-impl TagDb for Tag {
-    async fn from_name(ctx: &Context, tag_name: &str, guild_id: GuildId) -> Result<Option<Tag>> {
+    ) -> Result<Option<Tag>> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         from_name_query(&pool, tag_name, guild_id).await
     }
 
-    async fn random(ctx: &Context, guild_id: GuildId) -> Result<Option<Tag>> {
+    pub async fn random(ctx: &Context, guild_id: GuildId) -> Result<Option<Tag>> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         random_query(&pool, guild_id).await
     }
 
-    async fn search(
+    pub async fn search(
         ctx: &Context,
         guild_id: GuildId,
         query: &str,
@@ -103,14 +73,14 @@ impl TagDb for Tag {
     }
 
     /// Get total number of tags containing query as a substring
-    async fn get_search_count(ctx: &Context, guild_id: GuildId, query: &str) -> Result<i64> {
+    pub async fn get_search_count(ctx: &Context, guild_id: GuildId, query: &str) -> Result<i64> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         get_search_count_query(&pool, guild_id, query).await
     }
 
     /// Get paginated list of all tags
-    async fn get_page(
+    pub async fn get_page(
         ctx: &Context,
         guild_id: GuildId,
         count: i64,
@@ -122,25 +92,25 @@ impl TagDb for Tag {
     }
 
     /// Get total number of tags in a given guild
-    async fn get_count(ctx: &Context, guild_id: GuildId) -> Result<i64> {
+    pub async fn get_count(ctx: &Context, guild_id: GuildId) -> Result<i64> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         get_count_query(&pool, guild_id).await
     }
 
-    async fn get_top_used(ctx: &Context, guild_id: GuildId, count: i64) -> Result<Vec<Tag>> {
+    pub async fn get_top_used(ctx: &Context, guild_id: GuildId, count: i64) -> Result<Vec<Tag>> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         get_top_used_query(&pool, guild_id, count).await
     }
 
-    async fn can_edit(&self, ctx: &Context, member: &Member) -> Result<bool> {
+    pub async fn can_edit(&self, ctx: &Context, member: &Member) -> Result<bool> {
         Ok(i64::from(member.user.id) == self.owner_id
             || member.permissions(&ctx).await?.manage_guild())
     }
 
     /// Renames this tag, returns false if there is already a tag with the desired name
-    async fn rename(&mut self, ctx: &Context, tag_name: &str) -> Result<bool> {
+    pub async fn rename(&mut self, ctx: &Context, tag_name: &str) -> Result<bool> {
         // Check for existing tag
         if Self::from_name(&ctx, tag_name, GuildId(self.guild_id as u64))
             .await?
@@ -155,13 +125,13 @@ impl TagDb for Tag {
         Ok(true)
     }
 
-    async fn save(&self, ctx: &Context) -> Result<Tag> {
+    pub async fn save(&self, ctx: &Context) -> Result<Tag> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         upsert_query(&pool, &self).await
     }
 
-    async fn delete(&self, ctx: &Context) -> Result<()> {
+    pub async fn delete(&self, ctx: &Context) -> Result<()> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         delete_query(&pool, &self).await

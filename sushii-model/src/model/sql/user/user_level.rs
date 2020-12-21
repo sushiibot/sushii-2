@@ -1,6 +1,5 @@
 use chrono::{naive::NaiveDateTime, offset::Utc, Datelike, Duration};
 use serde::{Deserialize, Serialize};
-use serenity::async_trait;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
@@ -79,22 +78,8 @@ impl UserLevel {
 
         self
     }
-}
 
-#[async_trait]
-pub trait UserLevelDb {
-    async fn from_id(
-        ctx: &Context,
-        user_id: UserId,
-        guild_id: GuildId,
-    ) -> Result<Option<UserLevel>>;
-
-    async fn save(&self, ctx: &Context) -> Result<UserLevel>;
-}
-
-#[async_trait]
-impl UserLevelDb for UserLevel {
-    async fn from_id(
+    pub async fn from_id(
         ctx: &Context,
         user_id: UserId,
         guild_id: GuildId,
@@ -105,7 +90,7 @@ impl UserLevelDb for UserLevel {
         from_id_query(&pool, user_id, guild_id).await
     }
 
-    async fn save(&self, ctx: &Context) -> Result<UserLevel> {
+    pub async fn save(&self, ctx: &Context) -> Result<UserLevel> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 

@@ -1,7 +1,6 @@
 use chrono::naive::NaiveDateTime;
 use chrono::offset::Utc;
 use serde::{Deserialize, Serialize};
-use serenity::async_trait;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
@@ -72,40 +71,8 @@ impl ModLogEntry {
             _ => 0xe67e22,
         }
     }
-}
 
-#[async_trait]
-pub trait ModLogEntryDb {
-    async fn from_case_id(ctx: &Context, guild_id: u64, case_id: u64) -> Result<ModLogEntry>;
-    async fn get_pending_entry(
-        ctx: &Context,
-        mod_action: &str,
-        guild_id: u64,
-        target_id: u64,
-    ) -> Result<Option<ModLogEntry>>;
-
-    async fn get_user_entries(
-        ctx: &Context,
-        guild_id: u64,
-        user_id: u64,
-    ) -> Result<Vec<ModLogEntry>>;
-
-    async fn get_range_entries(
-        ctx: &Context,
-        guild_id: u64,
-        start: u64,
-        end: u64,
-    ) -> Result<Vec<ModLogEntry>>;
-
-    async fn get_latest(ctx: &Context, guild_id: u64, count: u64) -> Result<Vec<ModLogEntry>>;
-
-    async fn save(&self, ctx: &Context) -> Result<ModLogEntry>;
-    async fn delete(&self, ctx: &Context) -> Result<()>;
-}
-
-#[async_trait]
-impl ModLogEntryDb for ModLogEntry {
-    async fn from_case_id(ctx: &Context, guild_id: u64, case_id: u64) -> Result<ModLogEntry> {
+    pub async fn from_case_id(ctx: &Context, guild_id: u64, case_id: u64) -> Result<ModLogEntry> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
@@ -116,7 +83,7 @@ impl ModLogEntryDb for ModLogEntry {
     /// not found. This is because we want to stop if something failed, but
     /// continue if not found, so a not found "error" should not be treated as
     /// an error.
-    async fn get_pending_entry(
+    pub async fn get_pending_entry(
         ctx: &Context,
         mod_action: &str,
         guild_id: u64,
@@ -141,7 +108,7 @@ impl ModLogEntryDb for ModLogEntry {
             })
     }
 
-    async fn get_user_entries(
+    pub async fn get_user_entries(
         ctx: &Context,
         guild_id: u64,
         user_id: u64,
@@ -152,7 +119,7 @@ impl ModLogEntryDb for ModLogEntry {
         get_user_entries_query(pool, guild_id, user_id).await
     }
 
-    async fn get_range_entries(
+    pub async fn get_range_entries(
         ctx: &Context,
         guild_id: u64,
         start: u64,
@@ -168,7 +135,7 @@ impl ModLogEntryDb for ModLogEntry {
         get_range_entries_query(pool, guild_id, start, end).await
     }
 
-    async fn get_latest(ctx: &Context, guild_id: u64, count: u64) -> Result<Vec<ModLogEntry>> {
+    pub async fn get_latest(ctx: &Context, guild_id: u64, count: u64) -> Result<Vec<ModLogEntry>> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
@@ -177,7 +144,7 @@ impl ModLogEntryDb for ModLogEntry {
 
     /// Saves a ModLogEntry to the database. Returns a new one from the database
     /// with a valid case_id if is new entry. Otherwise just returns the same self
-    async fn save(&self, ctx: &Context) -> Result<Self> {
+    pub async fn save(&self, ctx: &Context) -> Result<Self> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
@@ -190,13 +157,14 @@ impl ModLogEntryDb for ModLogEntry {
         }
     }
 
-    async fn delete(&self, ctx: &Context) -> Result<()> {
+    pub async fn delete(&self, ctx: &Context) -> Result<()> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
         delete_mod_action_query(&pool, self).await
     }
 }
+
 async fn from_case_id_query(
     pool: &sqlx::PgPool,
     guild_id: u64,

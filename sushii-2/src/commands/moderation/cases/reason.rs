@@ -6,7 +6,7 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 use crate::keys::CacheAndHttpContainer;
-use crate::model::sql::{GuildConfig, GuildConfigDb, ModLogEntry, ModLogEntryDb};
+use crate::model::sql::{GuildConfig, ModLogEntry};
 
 enum CaseRange {
     /// A single case ID

@@ -20,10 +20,7 @@ mod tasks;
 
 use crate::error::Result;
 use crate::keys::{CacheAndHttpContainer, DbPool, ReqwestContainer, ShardManagerContainer};
-use crate::model::{
-    sql::{GuildConfig, GuildConfigDb},
-    Metrics, SushiiCache, SushiiConfig,
-};
+use crate::model::{sql::GuildConfig, Metrics, SushiiCache, SushiiConfig};
 
 #[tokio::main]
 async fn main() -> Result<()> {

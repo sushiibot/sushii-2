@@ -27,6 +27,9 @@ serde_yaml = "0.8.14"
 tracing = "0.1"
 tracing-subscriber = "0.2"
 
+[dependencies.sushii-model]
+path = "../sushii-model"
+
 [dependencies.metrics]
 # version = "0.13.0-alpha.11"
 git = "https://github.com/metrics-rs/metrics.git"

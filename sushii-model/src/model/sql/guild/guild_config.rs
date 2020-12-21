@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use serenity::async_trait;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::utils::parse_channel;
@@ -9,24 +8,6 @@ use std::time::Duration;
 
 use crate::model::sql::GuildSetting;
 use crate::prelude::*;
-
-#[async_trait]
-pub trait GuildConfigDb {
-    async fn from_msg(ctx: &Context, msg: &Message) -> Result<Option<GuildConfig>>;
-    async fn from_msg_or_respond(ctx: &Context, msg: &Message) -> Result<GuildConfig>;
-    async fn from_id(ctx: &Context, guild_id: &GuildId) -> Result<Option<GuildConfig>>;
-
-    async fn get(
-        ctx: &Context,
-        msg: Option<&Message>,
-        guild_id: Option<&GuildId>,
-    ) -> Result<Option<GuildConfig>>;
-
-    async fn cache(&self, ctx: &Context);
-    async fn save(&self, ctx: &Context) -> Result<()>;
-    async fn save_db(&self, ctx: &Context) -> Result<()>;
-    fn save_bg(&self, ctx: &Context);
-}
 
 #[derive(Deserialize, Default, Serialize, sqlx::FromRow, Clone, Debug)]
 pub struct GuildConfig {
@@ -290,6 +271,132 @@ impl GuildConfig {
             }
         }
     }
+
+    /// Gets a GuildConfig from a given message
+    pub async fn from_msg(ctx: &Context, msg: &Message) -> Result<Option<GuildConfig>> {
+        GuildConfig::get(ctx, Some(msg), None).await
+    }
+
+    /// Gets a GuildConfig from a message, and responds in channel if no guild is found
+    pub async fn from_msg_or_respond(ctx: &Context, msg: &Message) -> Result<GuildConfig> {
+        match GuildConfig::from_msg(ctx, msg).await? {
+            Some(conf) => Ok(conf),
+            None => {
+                if let Err(e) = msg
+                    .channel_id
+                    .say(&ctx.http, "Failed to get the guild config :(")
+                    .await
+                {
+                    tracing::error!(?msg, "Failed to send message: {}", e);
+                }
+
+                tracing::warn!(?msg, "Failed to get guild config");
+
+                Err(Error::Sushii("Failed to get guild config".into()))
+            }
+        }
+    }
+
+    /// Gets a Guildconfig from a guild id
+    pub async fn from_id(ctx: &Context, guild_id: &GuildId) -> Result<Option<GuildConfig>> {
+        GuildConfig::get(ctx, None, Some(guild_id)).await
+    }
+
+    /// Gets a GuildConfig from the cache or database
+    pub async fn get(
+        ctx: &Context,
+        msg: Option<&Message>,
+        guild_id: Option<&GuildId>,
+    ) -> Result<Option<GuildConfig>> {
+        // Return None if no guild found
+        let guild_id = match guild_id.or_else(|| msg.and_then(|m| m.guild_id.as_ref())) {
+            Some(id) => id,
+            None => return Ok(None),
+        };
+
+        let data = ctx.data.read().await;
+        let sushii_cache = data.get::<SushiiCache>().unwrap();
+
+        // Check if exists in cache
+        if sushii_cache.guilds.contains_key(&guild_id) {
+            return Ok(sushii_cache
+                .guilds
+                .get(&guild_id)
+                .map(|e| e.value().clone()));
+        }
+
+        // Not in cache, fetch from database
+        let pool = data.get::<DbPool>().unwrap();
+        let conf = match get_guild_config_query(&pool, guild_id.0)
+            .await
+            .map_err(|e| {
+                tracing::error!(
+                    ?msg,
+                    ?guild_id,
+                    "Failed to get guild config from database: {}",
+                    e
+                );
+
+                e
+            })? {
+            Some(c) => c,
+            None => {
+                let new_conf = GuildConfig::new(guild_id.0 as i64);
+
+                if let Err(e) = new_conf.save_db(&ctx).await {
+                    tracing::error!("Failed to save new guild config: {}", e);
+                }
+
+                new_conf
+            }
+        };
+
+        conf.cache(&ctx).await;
+
+        Ok(Some(conf))
+    }
+
+    /// Updates config in the cache
+    pub async fn cache(&self, ctx: &Context) {
+        let data = ctx.data.read().await;
+        let sushii_cache = data.get::<SushiiCache>().unwrap();
+
+        sushii_cache
+            .guilds
+            .insert(GuildId(self.id as u64), self.clone());
+
+        tracing::info!(config = ?self, "Cached guild config");
+    }
+
+    /// Saves config to database
+    pub async fn save_db(&self, ctx: &Context) -> Result<()> {
+        let data = ctx.data.read().await;
+        let pool = data.get::<DbPool>().unwrap();
+
+        // Update db and cache
+        upsert_config_query(self, pool).await?;
+        Ok(())
+    }
+
+    /// Saves config to both database and cache
+    pub async fn save(&self, ctx: &Context) -> Result<()> {
+        self.save_db(&ctx).await?;
+        self.cache(&ctx).await;
+
+        Ok(())
+    }
+
+    /// Saves config in the background, does NOT respond with an error but does log errors
+    /// Mainly used because this isn't an async fn, can be used in or_else
+    pub fn save_bg(&self, ctx: &Context) {
+        let conf = self.clone();
+        let ctx = ctx.clone();
+        tokio::spawn(async move {
+            if let Err(e) = conf.save(&ctx).await {
+                tracing::error!("Failed to save config in background: {}", e);
+            }
+        });
+    }
 }
 
 fn fmt_channel(id: Option<i64>) -> Option<String> {
@@ -388,135 +495,6 @@ impl fmt::Display for GuildConfig {
         }
 
         Ok(())
-    }
-}
-
-#[async_trait]
-impl GuildConfigDb for GuildConfig {
-    /// Gets a GuildConfig from a given message
-    async fn from_msg(ctx: &Context, msg: &Message) -> Result<Option<GuildConfig>> {
-        GuildConfig::get(ctx, Some(msg), None).await
-    }
-
-    /// Gets a GuildConfig from a message, and responds in channel if no guild is found
-    async fn from_msg_or_respond(ctx: &Context, msg: &Message) -> Result<GuildConfig> {
-        match GuildConfig::from_msg(ctx, msg).await? {
-            Some(conf) => Ok(conf),
-            None => {
-                if let Err(e) = msg
-                    .channel_id
-                    .say(&ctx.http, "Failed to get the guild config :(")
-                    .await
-                {
-                    tracing::error!(?msg, "Failed to send message: {}", e);
-                }
-
-                tracing::warn!(?msg, "Failed to get guild config");
-
-                Err(Error::Sushii("Failed to get guild config".into()))
-            }
-        }
-    }
-
-    /// Gets a Guildconfig from a guild id
-    async fn from_id(ctx: &Context, guild_id: &GuildId) -> Result<Option<GuildConfig>> {
-        GuildConfig::get(ctx, None, Some(guild_id)).await
-    }
-
-    /// Gets a GuildConfig from the cache or database
-    async fn get(
-        ctx: &Context,
-        msg: Option<&Message>,
-        guild_id: Option<&GuildId>,
-    ) -> Result<Option<GuildConfig>> {
-        // Return None if no guild found
-        let guild_id = match guild_id.or_else(|| msg.and_then(|m| m.guild_id.as_ref())) {
-            Some(id) => id,
-            None => return Ok(None),
-        };
-
-        let data = ctx.data.read().await;
-        let sushii_cache = data.get::<SushiiCache>().unwrap();
-
-        // Check if exists in cache
-        if sushii_cache.guilds.contains_key(&guild_id) {
-            return Ok(sushii_cache
-                .guilds
-                .get(&guild_id)
-                .map(|e| e.value().clone()));
-        }
-
-        // Not in cache, fetch from database
-        let pool = data.get::<DbPool>().unwrap();
-        let conf = match get_guild_config_query(&pool, guild_id.0)
-            .await
-            .map_err(|e| {
-                tracing::error!(
-                    ?msg,
-                    ?guild_id,
-                    "Failed to get guild config from database: {}",
-                    e
-                );
-
-                e
-            })? {
-            Some(c) => c,
-            None => {
-                let new_conf = GuildConfig::new(guild_id.0 as i64);
-
-                if let Err(e) = new_conf.save_db(&ctx).await {
-                    tracing::error!("Failed to save new guild config: {}", e);
-                }
-
-                new_conf
-            }
-        };
-
-        conf.cache(&ctx).await;
-
-        Ok(Some(conf))
-    }
-
-    /// Updates config in the cache
-    async fn cache(&self, ctx: &Context) {
-        let data = ctx.data.read().await;
-        let sushii_cache = data.get::<SushiiCache>().unwrap();
-
-        sushii_cache
-            .guilds
-            .insert(GuildId(self.id as u64), self.clone());
-
-        tracing::info!(config = ?self, "Cached guild config");
-    }
-
-    /// Saves config to database
-    async fn save_db(&self, ctx: &Context) -> Result<()> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
-
-        // Update db and cache
-        upsert_config_query(self, pool).await?;
-        Ok(())
-    }
-
-    /// Saves config to both database and cache
-    async fn save(&self, ctx: &Context) -> Result<()> {
-        self.save_db(&ctx).await?;
-        self.cache(&ctx).await;
-
-        Ok(())
-    }
-
-    /// Saves config in the background, does NOT respond with an error but does log errors
-    /// Mainly used because this isn't an async fn, can be used in or_else
-    fn save_bg(&self, ctx: &Context) {
-        let conf = self.clone();
-        let ctx = ctx.clone();
-        tokio::spawn(async move {
-            if let Err(e) = conf.save(&ctx).await {
-                tracing::error!("Failed to save config in background: {}", e);
-            }
-        });
     }
 }
 

@@ -2285,6 +2285,7 @@ dependencies = [
  "serde_yaml",
  "serenity",
  "sqlx",
+ "sushii-model",
  "tokio",
  "tracing",
  "tracing-subscriber",
@@ -2293,6 +2294,25 @@ dependencies = [
 [[package]]
 name = "sushii-model"
 version = "0.1.0"
+dependencies = [
+ "chrono",
+ "dashmap 4.0.0-rc6",
+ "futures",
+ "humantime",
+ "lazy_static",
+ "metrics",
+ "num-format",
+ "num-traits",
+ "rand",
+ "rand_distr",
+ "regex",
+ "serde",
+ "serde_json",
+ "serenity",
+ "sqlx",
+ "tokio",
+ "tracing",
+]
 
 [[package]]
 name = "syn"

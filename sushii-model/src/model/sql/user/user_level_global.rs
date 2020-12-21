@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use serenity::async_trait;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use sqlx::types::Decimal;
@@ -12,14 +11,8 @@ pub struct UserLevelGlobal {
     pub xp: Option<Decimal>,
 }
 
-#[async_trait]
-pub trait UserLevelGlobalDb {
-    async fn from_id(ctx: &Context, user_id: UserId) -> Result<Option<UserLevelGlobal>>;
-}
-
-#[async_trait]
-impl UserLevelGlobalDb for UserLevelGlobal {
-    async fn from_id(ctx: &Context, user_id: UserId) -> Result<Option<UserLevelGlobal>> {
+impl UserLevelGlobal {
+    pub async fn from_id(ctx: &Context, user_id: UserId) -> Result<Option<UserLevelGlobal>> {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
