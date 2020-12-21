@@ -1,48 +1,66 @@
+use actix_cors::Cors;
+use actix_web::{http::header, middleware, web, App, Error, HttpResponse, HttpServer};
 use juniper::{
     tests::fixtures::starwars::schema::{Database, Query},
     EmptyMutation, EmptySubscription, RootNode,
 };
-use rocket::{response::content, State};
+use juniper_actix::{
+    graphiql_handler as gqli_handler, graphql_handler, playground_handler as play_handler,
+};
+use tracing_subscriber::filter::{EnvFilter, LevelFilter};
 
 type Schema = RootNode<'static, Query, EmptyMutation<Database>, EmptySubscription<Database>>;
 
-#[rocket::get("/")]
-fn graphiql() -> content::Html<String> {
-    juniper_rocket_async::graphiql_source("/graphql")
+fn schema() -> Schema {
+    Schema::new(
+        Query,
+        EmptyMutation::<Database>::new(),
+        EmptySubscription::<Database>::new(),
+    )
 }
 
-#[rocket::get("/graphql?<request>")]
-async fn get_graphql_handler(
-    context: State<'_, Database>,
-    request: juniper_rocket_async::GraphQLRequest,
-    schema: State<'_, Schema>,
-) -> juniper_rocket_async::GraphQLResponse {
-    request.execute(&schema, &context).await
+async fn graphiql_handler() -> Result<HttpResponse, Error> {
+    gqli_handler("/", None).await
+}
+async fn playground_handler() -> Result<HttpResponse, Error> {
+    play_handler("/", None).await
+}
+async fn graphql(
+    req: actix_web::HttpRequest,
+    payload: actix_web::web::Payload,
+    schema: web::Data<Schema>,
+) -> Result<HttpResponse, Error> {
+    let context = Database::new();
+    graphql_handler(&schema, &context, req, payload).await
 }
 
-#[rocket::post("/graphql", data = "<request>")]
-async fn post_graphql_handler(
-    context: State<'_, Database>,
-    request: juniper_rocket_async::GraphQLRequest,
-    schema: State<'_, Schema>,
-) -> juniper_rocket_async::GraphQLResponse {
-    request.execute(&schema, &context).await
-}
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env().add_directive(LevelFilter::INFO.into()))
+        .init();
 
-#[rocket::main]
-async fn main() {
-    rocket::ignite()
-        .manage(Database::new())
-        .manage(Schema::new(
-            Query,
-            EmptyMutation::<Database>::new(),
-            EmptySubscription::<Database>::new(),
-        ))
-        .mount(
-            "/",
-            rocket::routes![graphiql, get_graphql_handler, post_graphql_handler],
-        )
-        .launch()
-        .await
-        .expect("server to launch");
+    let server = HttpServer::new(move || {
+        App::new()
+            .data(schema())
+            .wrap(middleware::Compress::default())
+            .wrap(middleware::Logger::default())
+            .wrap(
+                Cors::default()
+                    .allowed_origin("http://127.0.0.1:8080")
+                    .allowed_methods(vec!["POST", "GET"])
+                    .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
+                    .allowed_header(header::CONTENT_TYPE)
+                    .supports_credentials()
+                    .max_age(3600),
+            )
+            .service(
+                web::resource("/")
+                    .route(web::post().to(graphql))
+                    .route(web::get().to(graphql)),
+            )
+            .service(web::resource("/playground").route(web::get().to(playground_handler)))
+            .service(web::resource("/graphiql").route(web::get().to(graphiql_handler)))
+    });
+    server.bind("127.0.0.1:8080").unwrap().run().await
 }
