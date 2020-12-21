@@ -4,4 +4,4 @@ services:
         ports:
             - "5432:5432"
     sushii:
-        build: .
+        build: ./sushii-2/
