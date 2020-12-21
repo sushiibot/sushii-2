@@ -3,12 +3,25 @@ use serde::{Deserialize, Serialize};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
+#[cfg(feature = "graphql")]
+use juniper::{
+    graphql_object, EmptySubscription, FieldResult, GraphQLEnum, 
+    GraphQLInputObject, GraphQLObject, ScalarValue,
+};
+
 use crate::error::Result;
 use crate::keys::DbPool;
+use crate::BigInt;
 
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug)]
+#[cfg_attr(
+    feature = "graphql",
+    graphql(description = "A humanoid creature in the Star Wars universe"),
+    derive(GraphQLObject),
+)]
 pub struct UserLevel {
-    pub user_id: i64,
+    #[sqlx(rename = "BIGINT")]
+    pub user_id: BigInt,
     pub guild_id: i64,
     pub msg_all_time: i64,
     pub msg_month: i64,
@@ -20,7 +33,7 @@ pub struct UserLevel {
 impl UserLevel {
     pub fn new(user_id: UserId, guild_id: GuildId) -> Self {
         Self {
-            user_id: user_id.into(),
+            user_id: user_id.0.into(),
             guild_id: guild_id.into(),
             // msg_counts all default 5 since it would be created on first message
             msg_all_time: 5,
@@ -106,7 +119,13 @@ async fn from_id_query(
     sqlx::query_as!(
         UserLevel,
         r#"
-            SELECT *
+            SELECT user_id as "user_id: BigInt",
+                   guild_id,
+                   msg_all_time,
+                   msg_month,
+                   msg_week,
+                   msg_day,
+                   last_msg
               FROM user_levels
              WHERE user_id = $1
                AND guild_id = $2
@@ -134,7 +153,7 @@ async fn upsert_query(pool: &sqlx::PgPool, user_level: &UserLevel) -> Result<Use
                     last_msg = $7
           RETURNING *
         "#,
-        user_level.user_id,
+        user_level.user_id.0,
         user_level.guild_id,
         user_level.msg_all_time,
         user_level.msg_month,

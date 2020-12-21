@@ -3000,6 +3000,7 @@ dependencies = [
  "chrono",
  "dashmap 4.0.0-rc6",
  "humantime",
+ "juniper",
  "metrics",
  "rand",
  "rand_distr",
