@@ -1,6 +1,6 @@
 use juniper::{graphql_object, FieldResult};
 use std::sync::Arc;
-use sushii_model::model::{sql::UserLevel, BigInt};
+use sushii_model::model::{sql::{UserLevel, UserLevelRanked}, BigInt};
 
 #[derive(Clone)]
 pub struct Context {
@@ -25,7 +25,7 @@ impl Query {
         "1.0"
     }
 
-    async fn rank(
+    async fn level(
         ctx: &Context,
         user_id: BigInt,
         guild_id: BigInt,
@@ -33,5 +33,15 @@ impl Query {
         let user_level = UserLevel::from_id(&ctx.pool, user_id, guild_id).await?;
 
         Ok(user_level)
+    }
+
+    async fn rank(
+        ctx: &Context,
+        user_id: BigInt,
+        guild_id: BigInt,
+    ) -> FieldResult<Option<UserLevelRanked>> {
+        let user_level_ranked = UserLevelRanked::from_id(&ctx.pool, user_id, guild_id).await?;
+
+        Ok(user_level_ranked)
     }
 }

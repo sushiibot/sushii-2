@@ -1,47 +1,58 @@
 use chrono::{naive::NaiveDateTime, offset::Utc, Datelike};
 use serde::{Deserialize, Serialize};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
 
-use crate::error::Result;
+#[cfg(not(feature = "graphql"))]
+use serenity::{model::prelude::*, prelude::*};
+#[cfg(not(feature = "graphql"))]
 use crate::keys::DbPool;
 
+#[cfg(feature = "graphql")]
+use juniper::GraphQLObject;
+
+use crate::error::Result;
+use crate::model::BigInt;
+
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug)]
+#[cfg_attr(
+    feature = "graphql",
+    graphql(description = "A user's level and ranks in a single guild"),
+    derive(GraphQLObject),
+)]
 pub struct UserLevelRanked {
-    pub user_id: i64,
-    pub guild_id: i64,
-    pub msg_all_time: i64,
-    pub msg_month: i64,
-    pub msg_week: i64,
-    pub msg_day: i64,
+    pub user_id: BigInt,
+    pub guild_id: BigInt,
+    pub msg_all_time: BigInt,
+    pub msg_month: BigInt,
+    pub msg_week: BigInt,
+    pub msg_day: BigInt,
     pub last_msg: NaiveDateTime,
 
     // Rank (row #) / Total in category
-    pub msg_all_time_rank: Option<i64>,
-    pub msg_all_time_total: Option<i64>,
+    pub msg_all_time_rank: Option<BigInt>,
+    pub msg_all_time_total: Option<BigInt>,
 
-    pub msg_month_rank: Option<i64>,
-    pub msg_month_total: Option<i64>,
+    pub msg_month_rank: Option<BigInt>,
+    pub msg_month_total: Option<BigInt>,
 
-    pub msg_week_rank: Option<i64>,
-    pub msg_week_total: Option<i64>,
+    pub msg_week_rank: Option<BigInt>,
+    pub msg_week_total: Option<BigInt>,
 
-    pub msg_day_rank: Option<i64>,
-    pub msg_day_total: Option<i64>,
+    pub msg_day_rank: Option<BigInt>,
+    pub msg_day_total: Option<BigInt>,
 }
 
-fn get_rank(rank: Option<i64>, total: Option<i64>) -> (i64, i64) {
+fn get_rank(rank: Option<BigInt>, total: Option<BigInt>) -> (i64, i64) {
     match (rank, total) {
         // I don't think rank can be 0 since it's row_number
-        (Some(rank), Some(total)) => (rank, total),
+        (Some(rank), Some(total)) => (rank.0, total.0),
         _ => (0, 0),
     }
 }
 
-fn fmt_rank(rank: Option<i64>, total: Option<i64>) -> String {
+fn fmt_rank(rank: Option<BigInt>, total: Option<BigInt>) -> String {
     match (rank, total) {
         (Some(rank), Some(total)) => {
-            format!("{}/{}", rank, total)
+            format!("{}/{}", rank.0, total.0)
         }
         _ => "N/A".to_string(),
     }
@@ -102,6 +113,18 @@ impl UserLevelRanked {
         fmt_rank(self.msg_day_rank, self.msg_day_total)
     }
 
+    #[cfg(feature = "graphql")]
+    pub async fn from_id(
+        pool: &sqlx::PgPool,
+        user_id: BigInt,
+        guild_id: BigInt,
+    ) -> Result<Option<UserLevelRanked>> {
+        ranked_from_id_query(pool, user_id.0, guild_id.0)
+            .await
+            .map(|o| o.map(UserLevelRanked::reset_stale_ranks))
+    }
+
+    #[cfg(not(feature = "graphql"))]
     pub async fn from_id(
         ctx: &Context,
         user_id: UserId,
@@ -110,7 +133,7 @@ impl UserLevelRanked {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
-        ranked_from_id_query(&pool, user_id, guild_id)
+        ranked_from_id_query(&pool, i64::from(user_id), i64::from(guild_id))
             .await
             .map(|o| o.map(UserLevelRanked::reset_stale_ranks))
     }
@@ -118,14 +141,28 @@ impl UserLevelRanked {
 
 async fn ranked_from_id_query(
     pool: &sqlx::PgPool,
-    user_id: UserId,
-    guild_id: GuildId,
+    user_id: i64,
+    guild_id: i64,
 ) -> Result<Option<UserLevelRanked>> {
     sqlx::query_as!(
         UserLevelRanked,
         // If target user has not sent a message today, it would have incorrect ranks
         r#"
-            SELECT * 
+            SELECT user_id as "user_id: BigInt",
+                   guild_id as "guild_id: BigInt",
+                   msg_all_time as "msg_all_time: BigInt",
+                   msg_month as "msg_month: BigInt",
+                   msg_week as "msg_week: BigInt",
+                   msg_day as "msg_day: BigInt",
+                   last_msg,
+                   msg_all_time_rank as "msg_all_time_rank: BigInt",
+                   msg_all_time_total as "msg_all_time_total: BigInt",
+                   msg_month_rank as "msg_month_rank: BigInt",
+                   msg_month_total as "msg_month_total: BigInt",
+                   msg_week_rank as "msg_week_rank: BigInt",
+                   msg_week_total as "msg_week_total: BigInt",
+                   msg_day_rank as "msg_day_rank: BigInt",
+                   msg_day_total as "msg_day_total: BigInt"
                 FROM (
                     SELECT *,
                         ROW_NUMBER() OVER(PARTITION BY EXTRACT(DOY FROM last_msg) ORDER BY msg_day DESC) AS msg_day_rank,
@@ -143,8 +180,8 @@ async fn ranked_from_id_query(
                 ) t
             WHERE t.user_id = $2
         "#,
-        i64::from(guild_id),
-        i64::from(user_id),
+        guild_id,
+        user_id,
     )
     .fetch_optional(pool)
     .await

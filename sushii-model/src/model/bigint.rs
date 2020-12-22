@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Copy, Debug)]
 #[derive(sqlx::Type)]
 #[sqlx(transparent)]
 pub struct BigInt(pub i64);
