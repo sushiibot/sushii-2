@@ -4,10 +4,7 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 #[cfg(feature = "graphql")]
-use juniper::{
-    graphql_object, EmptySubscription, FieldResult, GraphQLEnum, 
-    GraphQLInputObject, GraphQLObject, ScalarValue,
-};
+use juniper::GraphQLObject;
 
 use crate::error::Result;
 use crate::keys::DbPool;
@@ -20,26 +17,25 @@ use crate::BigInt;
     derive(GraphQLObject),
 )]
 pub struct UserLevel {
-    #[sqlx(rename = "BIGINT")]
     pub user_id: BigInt,
-    pub guild_id: i64,
-    pub msg_all_time: i64,
-    pub msg_month: i64,
-    pub msg_week: i64,
-    pub msg_day: i64,
+    pub guild_id: BigInt,
+    pub msg_all_time: BigInt,
+    pub msg_month: BigInt,
+    pub msg_week: BigInt,
+    pub msg_day: BigInt,
     pub last_msg: NaiveDateTime,
 }
 
 impl UserLevel {
     pub fn new(user_id: UserId, guild_id: GuildId) -> Self {
         Self {
-            user_id: user_id.0.into(),
+            user_id: user_id.into(),
             guild_id: guild_id.into(),
             // msg_counts all default 5 since it would be created on first message
-            msg_all_time: 5,
-            msg_month: 5,
-            msg_week: 5,
-            msg_day: 5,
+            msg_all_time: 5u64.into(),
+            msg_month: 5u64.into(),
+            msg_week: 5u64.into(),
+            msg_day: 5u64.into(),
             last_msg: Utc::now().naive_utc(),
         }
     }
@@ -65,15 +61,15 @@ impl UserLevel {
         let now = Utc::now().naive_utc();
 
         if now.ordinal() != self.last_msg.ordinal() {
-            self.msg_day = 0;
+            self.msg_day = 0u64.into();
         }
 
         if now.iso_week() != self.last_msg.iso_week() {
-            self.msg_week = 0;
+            self.msg_week = 0u64.into();
         }
 
         if now.month() != self.last_msg.month() {
-            self.msg_month = 0;
+            self.msg_month = 0u64.into();
         }
 
         self
@@ -82,12 +78,12 @@ impl UserLevel {
     /// Increment all fields by 5
     fn inc_fields(mut self) -> Self {
         // Add enough to be rounded to 5
-        let to_add = 5 - self.msg_all_time % 5;
+        let to_add = 5 - self.msg_all_time.0 % 5;
 
-        self.msg_all_time += to_add;
-        self.msg_month += to_add;
-        self.msg_week += to_add;
-        self.msg_day += to_add;
+        self.msg_all_time.0 += to_add;
+        self.msg_month.0 += to_add;
+        self.msg_week.0 += to_add;
+        self.msg_day.0 += to_add;
 
         self
     }
@@ -120,11 +116,11 @@ async fn from_id_query(
         UserLevel,
         r#"
             SELECT user_id as "user_id: BigInt",
-                   guild_id,
-                   msg_all_time,
-                   msg_month,
-                   msg_week,
-                   msg_day,
+                   guild_id as "guild_id: BigInt",
+                   msg_all_time as "msg_all_time: BigInt",
+                   msg_month as "msg_month: BigInt",
+                   msg_week as "msg_week: BigInt",
+                   msg_day as "msg_day: BigInt",
                    last_msg
               FROM user_levels
              WHERE user_id = $1
@@ -151,14 +147,20 @@ async fn upsert_query(pool: &sqlx::PgPool, user_level: &UserLevel) -> Result<Use
                     msg_week = $5,
                     msg_day = $6,
                     last_msg = $7
-          RETURNING *
+          RETURNING user_id as "user_id: BigInt",
+                    guild_id as "guild_id: BigInt",
+                    msg_all_time as "msg_all_time: BigInt",
+                    msg_month as "msg_month: BigInt",
+                    msg_week as "msg_week: BigInt",
+                    msg_day as "msg_day: BigInt",
+                    last_msg
         "#,
         user_level.user_id.0,
-        user_level.guild_id,
-        user_level.msg_all_time,
-        user_level.msg_month,
-        user_level.msg_week,
-        user_level.msg_day,
+        user_level.guild_id.0,
+        user_level.msg_all_time.0,
+        user_level.msg_month.0,
+        user_level.msg_week.0,
+        user_level.msg_day.0,
         user_level.last_msg,
     )
     .fetch_one(pool)
