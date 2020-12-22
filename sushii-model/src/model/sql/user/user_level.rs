@@ -8,7 +8,7 @@ use juniper::GraphQLObject;
 
 use crate::error::Result;
 use crate::keys::DbPool;
-use crate::BigInt;
+use crate::model::BigInt;
 
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug)]
 #[cfg_attr(
