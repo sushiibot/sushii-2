@@ -88,6 +88,16 @@ impl UserLevel {
         self
     }
 
+    #[cfg(feature = "graphql")]
+    pub async fn from_id(
+        pool: &sqlx::PgPool,
+        user_id: BigInt,
+        guild_id: BigInt,
+    ) -> Result<Option<UserLevel>> {
+        from_id_query(pool, user_id.0, guild_id.0).await
+    }
+
+    #[cfg(not(feature = "graphql"))]
     pub async fn from_id(
         ctx: &Context,
         user_id: UserId,
@@ -96,7 +106,7 @@ impl UserLevel {
         let data = ctx.data.read().await;
         let pool = data.get::<DbPool>().unwrap();
 
-        from_id_query(&pool, user_id, guild_id).await
+        from_id_query(&pool, i64::from(user_id), i64::from(guild_id)).await
     }
 
     pub async fn save(&self, ctx: &Context) -> Result<UserLevel> {
@@ -109,8 +119,8 @@ impl UserLevel {
 
 async fn from_id_query(
     pool: &sqlx::PgPool,
-    user_id: UserId,
-    guild_id: GuildId,
+    user_id: i64,
+    guild_id: i64,
 ) -> Result<Option<UserLevel>> {
     sqlx::query_as!(
         UserLevel,
@@ -126,8 +136,8 @@ async fn from_id_query(
              WHERE user_id = $1
                AND guild_id = $2
         "#,
-        i64::from(user_id),
-        i64::from(guild_id),
+        user_id,
+        guild_id,
     )
     .fetch_optional(pool)
     .await

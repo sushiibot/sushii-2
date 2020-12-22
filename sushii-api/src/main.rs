@@ -1,21 +1,25 @@
 use actix_cors::Cors;
 use actix_web::{http::header, middleware, web, App, Error, HttpResponse, HttpServer};
 use juniper::{
-    tests::fixtures::starwars::schema::{Database, Query},
     EmptyMutation, EmptySubscription, RootNode,
 };
 use juniper_actix::{
     graphiql_handler as gqli_handler, graphql_handler, playground_handler as play_handler,
 };
 use tracing_subscriber::filter::{EnvFilter, LevelFilter};
+use sqlx::postgres::PgPoolOptions;
+use std::env;
 
-type Schema = RootNode<'static, Query, EmptyMutation<Database>, EmptySubscription<Database>>;
+mod model;
+use model::{Query, Context};
+
+type Schema = RootNode<'static, Query, EmptyMutation<Context>, EmptySubscription<Context>>;
 
 fn schema() -> Schema {
     Schema::new(
         Query,
-        EmptyMutation::<Database>::new(),
-        EmptySubscription::<Database>::new(),
+        EmptyMutation::<Context>::new(),
+        EmptySubscription::<Context>::new(),
     )
 }
 
@@ -29,20 +33,33 @@ async fn graphql(
     req: actix_web::HttpRequest,
     payload: actix_web::web::Payload,
     schema: web::Data<Schema>,
+    ctx: web::Data<Context>
 ) -> Result<HttpResponse, Error> {
-    let context = Database::new();
-    graphql_handler(&schema, &context, req, payload).await
+    graphql_handler(&schema, &ctx, req, payload).await
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    dotenv::dotenv().ok();
+
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env().add_directive(LevelFilter::INFO.into()))
         .init();
+    
+    let db_url = env::var("DATABASE_URL").expect("Missing DATABASE_URL in environment");
+
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&db_url)
+        .await
+        .expect("Failed to connect to database");
+
+    let context = Context::new(pool);
 
     let server = HttpServer::new(move || {
         App::new()
             .data(schema())
+            .data(context.clone())
             .wrap(middleware::Compress::default())
             .wrap(middleware::Logger::default())
             .wrap(

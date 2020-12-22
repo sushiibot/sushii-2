@@ -9,14 +9,14 @@ pub struct BigInt(pub i64);
 use juniper::{Value, ParseScalarResult, ParseScalarValue};
 
 #[cfg(feature = "graphql")]
-#[juniper::graphql_scalar(description = "BigInt")]
+#[juniper::graphql_scalar(description = "BigInt as string")]
 impl<S> GraphQLScalar for BigInt 
 where
     S: ScalarValue
 {
     // Define how to convert your custom scalar into a primitive type.
     fn resolve(&self) -> Value {
-        Value::scalar(self.0.to_string())
+        Value::scalar((self.0 as u64).to_string())
     }
 
     // Define how to parse a primitive type into your custom scalar.

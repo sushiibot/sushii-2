@@ -19,7 +19,7 @@ dependencies = [
  "parking_lot",
  "pin-project 0.4.27",
  "smallvec",
- "tokio",
+ "tokio 0.2.24",
  "tokio-util",
  "trust-dns-proto",
  "trust-dns-resolver",
@@ -37,7 +37,7 @@ dependencies = [
  "futures-sink",
  "log",
  "pin-project 0.4.27",
- "tokio",
+ "tokio 0.2.24",
  "tokio-util",
 ]
 
@@ -156,7 +156,7 @@ dependencies = [
  "futures-channel",
  "futures-util",
  "smallvec",
- "tokio",
+ "tokio 0.2.24",
 ]
 
 [[package]]
@@ -427,7 +427,7 @@ dependencies = [
  "futures-util",
  "log",
  "pin-project 1.0.2",
- "tokio",
+ "tokio 0.2.24",
  "tokio-rustls",
  "tungstenite",
  "webpki-roots",
@@ -922,6 +922,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "dataloader"
+version = "0.13.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f36890beb8382136bbeafc8429cb8c7479a70379d4946cfb36d8357fcdaf5f11"
+dependencies = [
+ "async-trait",
+ "tokio 0.3.6",
+]
+
+[[package]]
 name = "debugid"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1265,7 +1275,7 @@ dependencies = [
  "http",
  "indexmap",
  "slab",
- "tokio",
+ "tokio 0.2.24",
  "tokio-util",
  "tracing",
  "tracing-futures",
@@ -1393,7 +1403,7 @@ dependencies = [
  "itoa",
  "pin-project 1.0.2",
  "socket2",
- "tokio",
+ "tokio 0.2.24",
  "tower-service",
  "tracing",
  "want",
@@ -1410,7 +1420,7 @@ dependencies = [
  "hyper",
  "log",
  "rustls",
- "tokio",
+ "tokio 0.2.24",
  "tokio-rustls",
  "webpki",
 ]
@@ -1424,7 +1434,7 @@ dependencies = [
  "bytes",
  "hyper",
  "native-tls",
- "tokio",
+ "tokio 0.2.24",
  "tokio-tls",
 ]
 
@@ -1562,7 +1572,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "tokio",
+ "tokio 0.2.24",
 ]
 
 [[package]]
@@ -1603,7 +1613,7 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
- "tokio",
+ "tokio 0.2.24",
  "url",
 ]
 
@@ -1782,7 +1792,7 @@ dependencies = [
  "parking_lot",
  "quanta",
  "thiserror",
- "tokio",
+ "tokio 0.2.24",
 ]
 
 [[package]]
@@ -2355,7 +2365,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_urlencoded",
- "tokio",
+ "tokio 0.2.24",
  "tokio-rustls",
  "tokio-tls",
  "url",
@@ -2661,7 +2671,7 @@ dependencies = [
  "serde",
  "serde_json",
  "static_assertions",
- "tokio",
+ "tokio 0.2.24",
  "tracing",
  "tracing-futures",
  "typemap_rev",
@@ -2863,7 +2873,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "63fc5454c9dd7aaea3a0eeeb65ca40d06d0d8e7413a8184f7c3a3ffa5056190b"
 dependencies = [
  "once_cell",
- "tokio",
+ "tokio 0.2.24",
  "tokio-rustls",
 ]
 
@@ -2976,7 +2986,7 @@ dependencies = [
  "serenity",
  "sqlx",
  "sushii-model",
- "tokio",
+ "tokio 0.2.24",
  "tracing",
  "tracing-subscriber",
 ]
@@ -2987,8 +2997,12 @@ version = "0.1.0"
 dependencies = [
  "actix-cors",
  "actix-web",
+ "dataloader",
+ "dotenv",
  "juniper",
  "juniper_actix",
+ "sqlx",
+ "sushii-model",
  "tracing",
  "tracing-subscriber",
 ]
@@ -3008,7 +3022,7 @@ dependencies = [
  "serde_json",
  "serenity",
  "sqlx",
- "tokio",
+ "tokio 0.2.24",
  "tracing",
 ]
 
@@ -3178,6 +3192,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "tokio"
+version = "0.3.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "720ba21c25078711bf456d607987d95bce90f7c3bea5abe1db587862e7a1e87c"
+dependencies = [
+ "autocfg",
+ "pin-project-lite 0.2.0",
+ "slab",
+]
+
+[[package]]
 name = "tokio-macros"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3196,7 +3221,7 @@ checksum = "e12831b255bcfa39dc0436b01e19fea231a37db570686c06ee72c423479f889a"
 dependencies = [
  "futures-core",
  "rustls",
- "tokio",
+ "tokio 0.2.24",
  "webpki",
 ]
 
@@ -3207,7 +3232,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9a70f4fcd7b3b24fb194f837560168208f669ca8cb70d0c4b862944452396343"
 dependencies = [
  "native-tls",
- "tokio",
+ "tokio 0.2.24",
 ]
 
 [[package]]
@@ -3222,7 +3247,7 @@ dependencies = [
  "futures-sink",
  "log",
  "pin-project-lite 0.1.11",
- "tokio",
+ "tokio 0.2.24",
 ]
 
 [[package]]
@@ -3333,7 +3358,7 @@ dependencies = [
  "rand",
  "smallvec",
  "thiserror",
- "tokio",
+ "tokio 0.2.24",
  "url",
 ]
 
@@ -3353,7 +3378,7 @@ dependencies = [
  "resolv-conf",
  "smallvec",
  "thiserror",
- "tokio",
+ "tokio 0.2.24",
  "trust-dns-proto",
 ]
 
