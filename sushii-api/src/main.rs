@@ -1,17 +1,15 @@
 use actix_cors::Cors;
 use actix_web::{http::header, middleware, web, App, Error, HttpResponse, HttpServer};
-use juniper::{
-    EmptyMutation, EmptySubscription, RootNode,
-};
+use juniper::{EmptyMutation, EmptySubscription, RootNode};
 use juniper_actix::{
     graphiql_handler as gqli_handler, graphql_handler, playground_handler as play_handler,
 };
-use tracing_subscriber::filter::{EnvFilter, LevelFilter};
 use sqlx::postgres::PgPoolOptions;
 use std::env;
+use tracing_subscriber::filter::{EnvFilter, LevelFilter};
 
 mod model;
-use model::{Query, Context};
+use model::{Context, Query};
 
 type Schema = RootNode<'static, Query, EmptyMutation<Context>, EmptySubscription<Context>>;
 
@@ -33,8 +31,10 @@ async fn graphql(
     req: actix_web::HttpRequest,
     payload: actix_web::web::Payload,
     schema: web::Data<Schema>,
-    ctx: web::Data<Context>
+    pool: web::Data<sqlx::PgPool>,
 ) -> Result<HttpResponse, Error> {
+    let ctx = Context::new((*pool).clone());
+
     graphql_handler(&schema, &ctx, req, payload).await
 }
 
@@ -45,7 +45,7 @@ async fn main() -> std::io::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env().add_directive(LevelFilter::INFO.into()))
         .init();
-    
+
     let db_url = env::var("DATABASE_URL").expect("Missing DATABASE_URL in environment");
 
     let pool = PgPoolOptions::new()
@@ -54,12 +54,10 @@ async fn main() -> std::io::Result<()> {
         .await
         .expect("Failed to connect to database");
 
-    let context = Context::new(pool);
-
     let server = HttpServer::new(move || {
         App::new()
             .data(schema())
-            .data(context.clone())
+            .data(pool.clone())
             .wrap(middleware::Compress::default())
             .wrap(middleware::Logger::default())
             .wrap(

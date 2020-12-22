@@ -1,17 +1,15 @@
 use juniper::{graphql_object, FieldResult};
-
+use std::sync::Arc;
 use sushii_model::model::{sql::UserLevel, BigInt};
 
 #[derive(Clone)]
 pub struct Context {
-    pool: sqlx::PgPool,
+    pool: Arc<sqlx::PgPool>,
 }
 
 impl Context {
-    pub fn new(pool: sqlx::PgPool) -> Self {
-        Self {
-            pool
-        }
+    pub fn new(pool: Arc<sqlx::PgPool>) -> Self {
+        Self { pool }
     }
 }
 
