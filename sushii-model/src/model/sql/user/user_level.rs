@@ -13,7 +13,7 @@ use crate::BigInt;
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug)]
 #[cfg_attr(
     feature = "graphql",
-    graphql(description = "A humanoid creature in the Star Wars universe"),
+    graphql(description = "A user's level in a single guild"),
     derive(GraphQLObject),
 )]
 pub struct UserLevel {
