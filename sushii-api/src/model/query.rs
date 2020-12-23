@@ -1,8 +1,11 @@
 use juniper::{graphql_object, FieldResult};
 use std::sync::Arc;
-use sushii_model::model::{
-    sql::{UserGuildXP, UserLevel, UserLevelRanked},
-    BigInt,
+use sushii_model::{
+    model::{
+        sql::{UserGuildXP, UserLevel, UserLevelRanked},
+        BigInt,
+    },
+    Error,
 };
 
 use crate::{relay::PageInfo, relay_connection};
@@ -48,7 +51,7 @@ impl Query {
         Ok(user_level_ranked)
     }
 
-    async fn guild_ranks(
+    async fn user_guild_xp_connection(
         ctx: &Context,
         guild_id: BigInt,
         first: BigInt,
@@ -57,24 +60,33 @@ impl Query {
         let user_level_ranked =
             UserGuildXP::guild_top_all_time(&ctx.pool, guild_id, first, after).await?;
 
-        let con = UserGuildXPConnection {
-            edges: user_level_ranked
-                .into_iter()
-                .map(|node| {
-                    let cursor = base64::encode(
-                        [node.xp.0.to_le_bytes(), node.user_id.0.to_le_bytes()].concat(),
-                    );
+        let edges: Vec<UserGuildXPEdge> = user_level_ranked
+            .into_iter()
+            .map(|node| {
+                // Cursor [XP, user_id] bytes to base64
+                let cursor = base64::encode(
+                    [node.xp.0.to_le_bytes(), node.user_id.0.to_le_bytes()].concat(),
+                );
 
-                    UserGuildXPEdge { node, cursor }
-                })
-                .collect(),
-            page_info: PageInfo {
-                has_previous_page: false,
-                has_next_page: true,
-                start_cursor: "".into(),
-                end_cursor: "".into(),
-            },
+                UserGuildXPEdge { node, cursor }
+            })
+            .collect();
+
+        let page_info = PageInfo {
+            // No backwards pagination support for now
+            has_previous_page: false,
+            has_next_page: true,
+            start_cursor: edges
+                .first()
+                .map(|e| e.cursor.clone())
+                .ok_or_else(|| Error::Sushii("No data was returned".into()))?,
+            end_cursor: edges
+                .last()
+                .map(|e| e.cursor.clone())
+                .ok_or_else(|| Error::Sushii("No data was returned".into()))?,
         };
+
+        let con = UserGuildXPConnection { edges, page_info };
 
         Ok(con)
     }

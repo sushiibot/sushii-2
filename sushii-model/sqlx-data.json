@@ -13,63 +13,6 @@
       "nullable": []
     }
   },
-  "078024b64b74a6b2c2b98009a06f5098e84a67b0dcce02d8474913a8b21dbef0": {
-    "query": "\n            SELECT *\n              FROM user_levels\n             WHERE user_id = $1\n               AND guild_id = $2\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "msg_all_time",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "msg_month",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "msg_week",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "msg_day",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "last_msg",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "1814c42239dc3aa3bc31b81778b434d1196e1f2d75c79d83c2e7efea7dbd68af": {
     "query": "\n              SELECT *\n                FROM tags\n               WHERE guild_id = $1\n                 AND (tag_name > $2 OR $2 IS NULL)\n            ORDER BY tag_name ASC\n               LIMIT $3\n        ",
     "describe": {
@@ -831,68 +774,6 @@
       ]
     }
   },
-  "61127b25c7c6d73c3ef17c47190c939752bc7b43d2b9776beebab52291468a2d": {
-    "query": "\n        INSERT INTO user_levels (user_id, guild_id, msg_all_time, msg_month, msg_week, msg_day, last_msg)\n             VALUES ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (user_id, guild_id)\n          DO UPDATE\n                SET msg_all_time = $3,\n                    msg_month = $4,\n                    msg_week = $5,\n                    msg_day = $6,\n                    last_msg = $7\n          RETURNING user_id as \"user_id: _\",\n                    guild_id,\n                    msg_all_time,\n                    msg_month,\n                    msg_week,\n                    msg_day,\n                    last_msg\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id: _",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "msg_all_time",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "msg_month",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "msg_week",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "msg_day",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "last_msg",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Timestamp"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "6f06b01e8606a8e5b958100f3cbaae946bdfe70e35aaf6b5e5e5900ce13a03f4": {
     "query": "\n            SELECT *\n              FROM guild_configs\n             WHERE id = $1\n        ",
     "describe": {
@@ -1131,68 +1012,6 @@
       ]
     }
   },
-  "7a066c76a2e0feb652a9a2d1d20e7fbb01c35bcfc72dcef3e648e384894286d1": {
-    "query": "\n        INSERT INTO user_levels (user_id, guild_id, msg_all_time, msg_month, msg_week, msg_day, last_msg)\n             VALUES ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (user_id, guild_id)\n          DO UPDATE\n                SET msg_all_time = $3,\n                    msg_month = $4,\n                    msg_week = $5,\n                    msg_day = $6,\n                    last_msg = $7\n          RETURNING user_id as \"user_id: BigInt\",\n                    guild_id as \"user_id: BigInt\",\n                    msg_all_time as \"user_id: BigInt\",\n                    msg_month as \"user_id: BigInt\",\n                    msg_week as \"user_id: BigInt\",\n                    msg_day as \"user_id: BigInt\",\n                    last_msg\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "last_msg",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Timestamp"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "7f3f73abf9611a449d744022b08fbd0fec2f3ade0b82792b99acd5e28009356a": {
     "query": "\n              SELECT *\n                FROM mod_logs\n               WHERE guild_id = $1\n            ORDER BY case_id DESC\n               LIMIT $2\n        ",
     "describe": {
@@ -1268,131 +1087,6 @@
       ]
     }
   },
-  "8330a69a9d89940a5a24e0dde33f92afbeb5bd1b7f2aad6ab867f04e9a887753": {
-    "query": "\n        INSERT INTO user_levels (user_id, guild_id, msg_all_time, msg_month, msg_week, msg_day, last_msg)\n             VALUES ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (user_id, guild_id)\n          DO UPDATE\n                SET msg_all_time = $3,\n                    msg_month = $4,\n                    msg_week = $5,\n                    msg_day = $6,\n                    last_msg = $7\n          RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "msg_all_time",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "msg_month",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "msg_week",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "msg_day",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "last_msg",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Timestamp"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "8f0c1d219106702f66d4fde62889e402e0bbc1256dd39ea5402193738162f0fd": {
-    "query": "\n            SELECT *, user_id as \"user_id: BigInt\"\n              FROM user_levels\n             WHERE user_id = $1\n               AND guild_id = $2\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "msg_all_time",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "msg_month",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "msg_week",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "msg_day",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "last_msg",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 7,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "8f92c532801f6ffe5aec0cfa52d19a9342bfc152b5a51e9d6166a9fd8393eb02": {
     "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"guild_id: BigInt\",\n                   msg_all_time as \"msg_all_time: BigInt\",\n                   msg_month as \"msg_month: BigInt\",\n                   msg_week as \"msg_week: BigInt\",\n                   msg_day as \"msg_day: BigInt\",\n                   last_msg\n              FROM user_levels\n             WHERE user_id = $1\n               AND guild_id = $2\n        ",
     "describe": {
@@ -1450,8 +1144,8 @@
       ]
     }
   },
-  "94325ddbb51a6136603a8110e8b12ade03b397048b5d8bfae1a4e45128757c76": {
-    "query": "\n        INSERT INTO user_levels (user_id, guild_id, msg_all_time, msg_month, msg_week, msg_day, last_msg)\n             VALUES ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (user_id, guild_id)\n          DO UPDATE\n                SET msg_all_time = $3,\n                    msg_month = $4,\n                    msg_week = $5,\n                    msg_day = $6,\n                    last_msg = $7\n          RETURNING user_id as \"user_id: BigInt\",\n                    guild_id,\n                    msg_all_time,\n                    msg_month,\n                    msg_week,\n                    msg_day,\n                    last_msg\n        ",
+  "92e5b48dc18d5db2c1fc28474989b9e4ce36f7e631e26b2d02078e7fb49c29d8": {
+    "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"guild_id: BigInt\",\n                   msg_all_time as \"msg_all_time: BigInt\",\n                   msg_month as \"msg_month: BigInt\",\n                   msg_week as \"msg_week: BigInt\",\n                   msg_day as \"msg_day: BigInt\",\n                   last_msg,\n                   msg_all_time_rank as \"msg_all_time_rank: BigInt\",\n                   msg_all_time_total as \"msg_all_time_total: BigInt\",\n                   msg_month_rank as \"msg_month_rank: BigInt\",\n                   msg_month_total as \"msg_month_total: BigInt\",\n                   msg_week_rank as \"msg_week_rank: BigInt\",\n                   msg_week_total as \"msg_week_total: BigInt\",\n                   msg_day_rank as \"msg_day_rank: BigInt\",\n                   msg_day_total as \"msg_day_total: BigInt\"\n                FROM (\n                    SELECT *,\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(DOY FROM last_msg) ORDER BY msg_day DESC) AS msg_day_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(DOY FROM last_msg)) AS msg_day_total,\n\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(WEEK FROM last_msg) ORDER BY msg_week DESC) AS msg_week_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(WEEK FROM last_msg)) AS msg_week_total,\n\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(MONTH FROM last_msg) ORDER BY msg_month DESC) AS msg_month_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(MONTH FROM last_msg)) AS msg_month_total,\n\n                        ROW_NUMBER() OVER(ORDER BY msg_all_time DESC) AS msg_all_time_rank,\n                        COUNT(*) OVER() AS msg_all_time_total\n                    FROM user_levels WHERE guild_id = $1\n                ) t\n            WHERE t.user_id = $2\n        ",
     "describe": {
       "columns": [
         {
@@ -1461,102 +1155,27 @@
         },
         {
           "ordinal": 1,
-          "name": "guild_id",
+          "name": "guild_id: BigInt",
           "type_info": "Int8"
         },
         {
           "ordinal": 2,
-          "name": "msg_all_time",
+          "name": "msg_all_time: BigInt",
           "type_info": "Int8"
         },
         {
           "ordinal": 3,
-          "name": "msg_month",
+          "name": "msg_month: BigInt",
           "type_info": "Int8"
         },
         {
           "ordinal": 4,
-          "name": "msg_week",
+          "name": "msg_week: BigInt",
           "type_info": "Int8"
         },
         {
           "ordinal": 5,
-          "name": "msg_day",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "last_msg",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Timestamp"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "95d94662c09e3a73ada0b36d6770ad76db85a724edcc3240dff129de127c9e5b": {
-    "query": "\n            DELETE FROM mutes\n                  WHERE guild_id = $1\n                    AND user_id = $2\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "a29a90c4878865eb9ba3b426e58237c9489c034ff48f81b02813f91e1b0c1b26": {
-    "query": "\n            SELECT * \n                FROM (\n                    SELECT *,\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(DOY FROM last_msg) ORDER BY msg_day DESC) AS msg_day_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(DOY FROM last_msg)) AS msg_day_total,\n\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(WEEK FROM last_msg) ORDER BY msg_week DESC) AS msg_week_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(WEEK FROM last_msg)) AS msg_week_total,\n\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(MONTH FROM last_msg) ORDER BY msg_month DESC) AS msg_month_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(MONTH FROM last_msg)) AS msg_month_total,\n\n                        ROW_NUMBER() OVER(ORDER BY msg_all_time DESC) AS msg_all_time_rank,\n                        COUNT(*) OVER() AS msg_all_time_total\n                    FROM user_levels WHERE guild_id = $1\n                ) t\n            WHERE t.user_id = $2\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "msg_all_time",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "msg_month",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "msg_week",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "msg_day",
+          "name": "msg_day: BigInt",
           "type_info": "Int8"
         },
         {
@@ -1566,42 +1185,42 @@
         },
         {
           "ordinal": 7,
-          "name": "msg_day_rank",
+          "name": "msg_all_time_rank: BigInt",
           "type_info": "Int8"
         },
         {
           "ordinal": 8,
-          "name": "msg_day_total",
+          "name": "msg_all_time_total: BigInt",
           "type_info": "Int8"
         },
         {
           "ordinal": 9,
-          "name": "msg_week_rank",
+          "name": "msg_month_rank: BigInt",
           "type_info": "Int8"
         },
         {
           "ordinal": 10,
-          "name": "msg_week_total",
+          "name": "msg_month_total: BigInt",
           "type_info": "Int8"
         },
         {
           "ordinal": 11,
-          "name": "msg_month_rank",
+          "name": "msg_week_rank: BigInt",
           "type_info": "Int8"
         },
         {
           "ordinal": 12,
-          "name": "msg_month_total",
+          "name": "msg_week_total: BigInt",
           "type_info": "Int8"
         },
         {
           "ordinal": 13,
-          "name": "msg_all_time_rank",
+          "name": "msg_day_rank: BigInt",
           "type_info": "Int8"
         },
         {
           "ordinal": 14,
-          "name": "msg_all_time_total",
+          "name": "msg_day_total: BigInt",
           "type_info": "Int8"
         }
       ],
@@ -1630,66 +1249,17 @@
       ]
     }
   },
-  "a623784fee09db53b6775b445876bdaf3305dbc132621fb681763b1f001e697d": {
-    "query": "\n        INSERT INTO user_levels (user_id, guild_id, msg_all_time, msg_month, msg_week, msg_day, last_msg)\n             VALUES ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (user_id, guild_id)\n          DO UPDATE\n                SET msg_all_time = $3,\n                    msg_month = $4,\n                    msg_week = $5,\n                    msg_day = $6,\n                    last_msg = $7\n          RETURNING user_id as \"user_id: BigInt\",\n                   guild_id,\n                   msg_all_time,\n                   msg_month,\n                   msg_week,\n                   msg_day,\n                   last_msg\n        ",
+  "95d94662c09e3a73ada0b36d6770ad76db85a724edcc3240dff129de127c9e5b": {
+    "query": "\n            DELETE FROM mutes\n                  WHERE guild_id = $1\n                    AND user_id = $2\n        ",
     "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "msg_all_time",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "msg_month",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "msg_week",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "msg_day",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "last_msg",
-          "type_info": "Timestamp"
-        }
-      ],
+      "columns": [],
       "parameters": {
         "Left": [
           "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Timestamp"
+          "Int8"
         ]
       },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
+      "nullable": []
     }
   },
   "a7eebd3e865de3e77676ec83975c87df51f988295290c8e084f8f984885d5b15": {
@@ -1795,6 +1365,47 @@
       ]
     }
   },
+  "b03b91d0bd68b52056ca2351e9d1b70c36f650cd718cf7211c365daa2a491c71": {
+    "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"guild_id: BigInt\",\n                   msg_all_time as \"xp: BigInt\",\n                   (SELECT COUNT(*)\n                      FROM user_levels\n                     WHERE guild_id = $1) AS \"total!: BigInt\"\n              FROM user_levels\n             WHERE guild_id = $1\n               AND (msg_all_time < $2 OR $2 IS NULL)\n               AND (user_id < $3 OR $3 IS NULL)\n          ORDER BY \"xp: BigInt\" DESC\n             LIMIT $4\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "xp: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "total!: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null
+      ]
+    }
+  },
   "b10c97dde60793808f690f9fb36840b85fdbb37a7a79925d17eded73ca050dfe": {
     "query": "\n        INSERT INTO tags (owner_id, guild_id, tag_name, content, use_count, created)\n             VALUES ($1, $2, $3, $4, $5, $6)\n        ON CONFLICT (guild_id, tag_name)\n          DO UPDATE\n                SET tag_name = $3,\n                    content = $4,\n                    use_count = $5\n          RETURNING *\n        ",
     "describe": {
@@ -1850,63 +1461,6 @@
       ]
     }
   },
-  "bb6dfb5a655e99c12bd9bf5ee4078be73db086285f5c2e97aa8ac3d59621fb16": {
-    "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"user_id: BigInt\",\n                   msg_all_time as \"user_id: BigInt\",\n                   msg_month as \"user_id: BigInt\",\n                   msg_week as \"user_id: BigInt\",\n                   msg_day as \"user_id: BigInt\",\n                   last_msg\n              FROM user_levels\n             WHERE user_id = $1\n               AND guild_id = $2\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "last_msg",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "c0526535107d188f318ecc723f2d8629eef92266e9802414606a3f4fba3afbeb": {
     "query": "INSERT INTO guild_configs (\n                id                ,\n                name              ,\n                prefix            ,\n                join_msg          ,\n                join_msg_enabled  ,\n                join_react        ,\n                leave_msg         ,\n                leave_msg_enabled ,\n                msg_channel       ,\n                role_channel      ,\n                role_config       ,\n                role_enabled      ,\n                invite_guard      ,\n                log_msg           ,\n                log_msg_enabled   ,\n                log_mod           ,\n                log_mod_enabled   ,\n                log_member        ,\n                log_member_enabled,\n                mute_role         ,\n                mute_duration     ,\n                warn_dm_text      ,\n                warn_dm_enabled   ,\n                mute_dm_text      ,\n                mute_dm_enabled   ,\n                max_mention\n            )\n     VALUES ($1,  $2,  $3,  $4,  $5,  $6,  $7,  $8,  $9,  $10,\n             $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,\n             $21, $22, $23, $24, $25, $26)\nON CONFLICT (id)\n  DO UPDATE\n        SET -- id = $1, Don't need to update ID \n            name               = $2,\n            prefix             = $3,\n            join_msg           = $4,\n            join_msg_enabled   = $5,\n            join_react         = $6,\n            leave_msg          = $7,\n            leave_msg_enabled  = $8,\n            msg_channel        = $9,\n            role_channel       = $10,\n            role_config        = $11,\n            role_enabled       = $12,\n            invite_guard       = $13,\n            log_msg            = $14,\n            log_msg_enabled    = $15,\n            log_mod            = $16,\n            log_mod_enabled    = $17,\n            log_member         = $18,\n            log_member_enabled = $19,\n            mute_role          = $20,\n            mute_duration      = $21,\n            warn_dm_text       = $22,\n            warn_dm_enabled    = $23,\n            mute_dm_text       = $24,\n            mute_dm_enabled    = $25,\n            max_mention        = $26\n",
     "describe": {
@@ -1942,63 +1496,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "cc7bff11328244937fd60bc878c5f7fc59673688e68130e1d1c665f78dbd314d": {
-    "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id,\n                   msg_all_time,\n                   msg_month,\n                   msg_week,\n                   msg_day,\n                   last_msg\n              FROM user_levels\n             WHERE user_id = $1\n               AND guild_id = $2\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "msg_all_time",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "msg_month",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "msg_week",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "msg_day",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "last_msg",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
     }
   },
   "cf21bd565ae6274c44718984217076091fe7d163feb99065c55535c5b45c87dd": {
@@ -2318,69 +1815,6 @@
         ]
       },
       "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "f324b020f55009a7ab4596c1474b54421a1cf23b66618972503e3ab74479cbe4": {
-    "query": "\n            SELECT user_levels.*, user_id as \"user_id: BigInt\"\n              FROM user_levels\n             WHERE user_id = $1\n               AND guild_id = $2\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "msg_all_time",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "msg_month",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "msg_week",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "msg_day",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "last_msg",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 7,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
         false,
         false,
         false,
