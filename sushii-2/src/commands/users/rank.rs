@@ -65,7 +65,7 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .and_then(|xp| xp.to_i64())
         .unwrap_or(0);
 
-    let level_prog = UserLevelProgress::from_xp(user_level.msg_all_time);
+    let level_prog = UserLevelProgress::from_xp(user_level.msg_all_time.0);
     let level_prog_global = UserLevelProgress::from_xp(user_level_global);
 
     // Get user level or create a new one
