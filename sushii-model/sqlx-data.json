@@ -13,6 +13,40 @@
       "nullable": []
     }
   },
+  "172f358c6415521c115cfef16e99c607e431a31e4e4f10dc353517b11da2546d": {
+    "query": "\n                SELECT user_id as \"user_id: BigInt\",\n                       NULL as \"guild_id?: BigInt\",\n                       SUM(msg_all_time) AS \"xp: BigInt\"\n                FROM user_levels\n                WHERE (msg_all_time < $1 OR $1 IS NULL)\n                      AND (user_id < $2 OR $2 IS NULL)\n             GROUP BY user_id\n            ORDER BY \"xp: BigInt\" DESC,\n                     \"user_id: BigInt\" DESC\n                LIMIT $3\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id?: BigInt",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "xp: BigInt",
+          "type_info": "Numeric"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        null,
+        null
+      ]
+    }
+  },
   "1814c42239dc3aa3bc31b81778b434d1196e1f2d75c79d83c2e7efea7dbd68af": {
     "query": "\n              SELECT *\n                FROM tags\n               WHERE guild_id = $1\n                 AND (tag_name > $2 OR $2 IS NULL)\n            ORDER BY tag_name ASC\n               LIMIT $3\n        ",
     "describe": {
@@ -698,6 +732,145 @@
       ]
     }
   },
+  "55159a1144fa7d6be0d252a5c52f837328bef331d259a41abe554fd45fd74ae9": {
+    "query": "\n                SELECT user_id as \"user_id!: BigInt\",\n                       NULL as \"guild_id?: BigInt\",\n                       SUM(msg_all_time) AS \"xp: BigInt\"\n                FROM user_levels\n                WHERE (msg_all_time < $1 OR $1 IS NULL)\n                      AND (user_id < $2 OR $2 IS NULL)\n             GROUP BY user_id\n            ORDER BY \"xp: BigInt\" DESC,\n                     \"user_id!: BigInt\" DESC\n                LIMIT $3\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id!: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id?: BigInt",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "xp: BigInt",
+          "type_info": "Numeric"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        null,
+        null
+      ]
+    }
+  },
+  "572b13970e62bafe0a72ba490a36dfb63e0ec55903b1412cac290e4bef0c6450": {
+    "query": "\n            SELECT user_id as \"user_id!: BigInt\",\n                   guild_id as \"guild_id: BigInt\",\n                   msg_all_time as \"xp: BigInt\"\n              FROM user_levels\n             WHERE guild_id = $1\n               AND (msg_all_time < $2 OR $2 IS NULL)\n               AND (user_id < $3 OR $3 IS NULL)\n          ORDER BY \"xp: BigInt\" DESC,\n                   \"user_id!: BigInt\" DESC\n             LIMIT $4\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id!: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "xp: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "59a07f146c647ec2f91856c1343b352574d6b060f472369451d6807e6dc43648": {
+    "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"guild_id?: BigInt\",\n                   msg_all_time as \"xp: BigInt\"\n              FROM user_levels\n             WHERE guild_id = $1\n               AND (msg_all_time < $2 OR $2 IS NULL)\n               AND (user_id < $3 OR $3 IS NULL)\n          ORDER BY \"xp: BigInt\" DESC,\n                   \"user_id: BigInt\" DESC\n             LIMIT $4\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id?: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "xp: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "59db6f1948103101a63ab29b6342dd59a7b10d3501530edeb93dbcb13f958fdf": {
+    "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"guild_id: BigInt\",\n                   msg_all_time as \"xp: BigInt\"\n              FROM user_levels\n             WHERE guild_id = $1\n               AND (msg_all_time < $2 OR $2 IS NULL)\n               AND (user_id < $3 OR $3 IS NULL)\n          ORDER BY \"xp: BigInt\" DESC,\n                   \"user_id: BigInt\" DESC\n             LIMIT $4\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "xp: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "5e1184c3b9dd8e29c5340b2afae592afdb64386cab7633fe7d34847422f789f9": {
     "query": "\n        INSERT INTO users (id, is_patron, patron_emoji, rep, fishies, last_rep, last_fishies, profile_data, lastfm_username)\n             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET is_patron = $2,\n                    patron_emoji = $3,\n                    rep = $4,\n                    fishies = $5,\n                    last_rep = $6,\n                    last_fishies = $7,\n                    profile_data = $8,\n                    lastfm_username = $9\n          RETURNING *\n        ",
     "describe": {
@@ -771,6 +944,81 @@
         true,
         true,
         true
+      ]
+    }
+  },
+  "5ef4693413b2d0af5a8148dabef446b5f2fee47c25614b4bdf250c8b4a96d802": {
+    "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"guild_id: BigInt\",\n                   msg_all_time as \"xp: BigInt\",\n                   (SELECT COUNT(*)\n                      FROM user_levels\n                     WHERE guild_id = $1) AS \"total!: BigInt\"\n              FROM user_levels\n             WHERE guild_id = $1\n               AND (msg_all_time < $2 OR $2 IS NULL)\n               AND (user_id < $3 OR $3 IS NULL)\n          ORDER BY \"xp: BigInt\" DESC,\n                   \"user_id: BigInt\" DESC\n             LIMIT $4\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "xp: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "total!: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null
+      ]
+    }
+  },
+  "5fe6dc6c77dd5e60a6481f8dd1daeef62c924093b9313f3c3ca1822e6c9af64b": {
+    "query": "\n                SELECT user_id as \"user_id: BigInt\",\n                       NULL as \"guild_id?: BigInt\",\n                       SUM(msg_all_time) AS \"xp!: BigInt\"\n                FROM user_levels\n                WHERE (msg_all_time < $1 OR $1 IS NULL)\n                  AND (user_id < $2 OR $2 IS NULL)\n             GROUP BY user_id\n            ORDER BY \"xp!: BigInt\" DESC,\n                     \"user_id: BigInt\" DESC\n                LIMIT $3\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id?: BigInt",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "xp!: BigInt",
+          "type_info": "Numeric"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        null,
+        null
       ]
     }
   },
@@ -1315,6 +1563,26 @@
       ]
     }
   },
+  "a89d2858b3c85663d1ee5197669c6030af8b6cce0bd29c15fa22d77ff38d52f6": {
+    "query": "\n            SELECT COUNT(*)\n              FROM user_levels\n             WHERE guild_id = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "add265dd79458efe15555d7bf9ba83142789f8e2f74543ea9d06821cc6549fb1": {
     "query": "\n            SELECT *\n              FROM tags\n             WHERE guild_id = $1\n            OFFSET floor(random() * (\n                       SELECT COUNT(*)\n                         FROM tags))\n             LIMIT 1\n        ",
     "describe": {
@@ -1362,47 +1630,6 @@
         false,
         false,
         false
-      ]
-    }
-  },
-  "b03b91d0bd68b52056ca2351e9d1b70c36f650cd718cf7211c365daa2a491c71": {
-    "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"guild_id: BigInt\",\n                   msg_all_time as \"xp: BigInt\",\n                   (SELECT COUNT(*)\n                      FROM user_levels\n                     WHERE guild_id = $1) AS \"total!: BigInt\"\n              FROM user_levels\n             WHERE guild_id = $1\n               AND (msg_all_time < $2 OR $2 IS NULL)\n               AND (user_id < $3 OR $3 IS NULL)\n          ORDER BY \"xp: BigInt\" DESC\n             LIMIT $4\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "xp: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "total!: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        null
       ]
     }
   },
@@ -1458,6 +1685,26 @@
         false,
         false,
         false
+      ]
+    }
+  },
+  "b4e34661681d9833c2dff8f7b77660637aa69f1e94e70ca4b1579065a9018e37": {
+    "query": "\n            SELECT COUNT(*) as \"total!\"\n              FROM user_levels\n             WHERE guild_id = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "total!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        null
       ]
     }
   },
@@ -1773,6 +2020,41 @@
       "nullable": []
     }
   },
+  "ecbac2294b3c270cf1a4c3535ebf2c94ed5acf1646b27781bb328663d98fd8f9": {
+    "query": "\n                SELECT user_id as \"user_id: BigInt\",\n                    guild_id as \"guild_id?: BigInt\",\n                    msg_all_time as \"xp: BigInt\"\n                FROM user_levels\n                WHERE guild_id = $1\n                AND (msg_all_time < $2 OR $2 IS NULL)\n                AND (user_id < $3 OR $3 IS NULL)\n            ORDER BY \"xp: BigInt\" DESC,\n                    \"user_id: BigInt\" DESC\n                LIMIT $4\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id?: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "xp: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "efe682472850d573455b77483e2d8d549fb55d104e8ca84747cc9c0bee56436a": {
     "query": "\n              SELECT *\n                FROM tags\n               WHERE guild_id = $1\n            ORDER BY use_count DESC\n               LIMIT $2\n        ",
     "describe": {
@@ -1899,6 +2181,26 @@
       ]
     }
   },
+  "fafad32858912705d60d78fd8dd3bd5443761057502808615592c0941a83ca0c": {
+    "query": "\n            SELECT COUNT(*) as \"total!: BigInt\"\n              FROM user_levels\n             WHERE guild_id = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "total!: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "fba2cd2792841d120620c19eb8ad4f2f68e546e83a3b5eb567b6a4ffd14a5fe7": {
     "query": "\n                DELETE FROM messages\n                      WHERE channel_id = $1\n                            AND ctid NOT IN (\n                                  SELECT ctid\n                                    FROM messages\n                                ORDER BY created DESC\n                                   LIMIT 100\n                            )\n            ",
     "describe": {
@@ -1909,6 +2211,24 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "fc9e22ec79a10ca2f57b5ae42f3c0c5fbb5953c778b812465fa4d714198ea108": {
+    "query": "\n              SELECT COUNT(*) as \"total!: BigInt\"\n                FROM user_levels\n            GROUP BY user_id\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "total!: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        null
+      ]
     }
   }
 }
