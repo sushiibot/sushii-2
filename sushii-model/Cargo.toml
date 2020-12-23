@@ -9,6 +9,7 @@ graphql = ["juniper"]
 
 [dependencies]
 chrono = "0.4"
+base64 = "0.13.0"
 dashmap = "4.0.0-rc6"
 humantime = "2.0"
 rand = "0.7.3"

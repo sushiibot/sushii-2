@@ -8,6 +8,7 @@ use std::error::Error as StdError;
 use std::fmt::{Display, Error as FmtError, Formatter, Result as FmtResult};
 use std::io::Error as IoError;
 use std::result::Result as StdResult;
+use base64::DecodeError;
 
 pub type Result<T> = StdResult<T, Error>;
 
@@ -16,6 +17,7 @@ pub enum Error {
     // Sushii errors
     Sushii(String),
     // Crate errors
+    Decode(DecodeError),
     Fmt(FmtError),
     Io(IoError),
     Json(SerdeJsonError),
@@ -24,6 +26,12 @@ pub enum Error {
     Migrate(MigrateError),
     Var(VarError),
     Duration(DurationError),
+}
+
+impl From<DecodeError> for Error {
+    fn from(err: DecodeError) -> Error {
+        Error::Decode(err)
+    }
 }
 
 impl From<SerdeJsonError> for Error {
@@ -86,6 +94,7 @@ impl Display for Error {
             // Sushii
             Error::Sushii(ref inner) => inner.fmt(f),
             // Crates
+            Error::Decode(ref inner) => inner.fmt(f),
             Error::Fmt(ref inner) => inner.fmt(f),
             Error::Io(ref inner) => inner.fmt(f),
             Error::Json(ref inner) => inner.fmt(f),

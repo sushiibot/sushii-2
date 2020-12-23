@@ -4,8 +4,6 @@ version = "0.1.0"
 authors = ["drklee3 <derrick@dlee.dev>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 juniper_actix = "0.2.1"
 juniper = { version = "0.15.1", features = ["expose-test-schema"] }
@@ -16,7 +14,7 @@ tracing-subscriber = "0.2.15"
 dataloader = { version = "0.13", default-features = false, features = ["runtime-tokio"]}
 dotenv = "0.15.0"
 async-trait = "0.1.42"
-juniper_relay = "0.0.1"
+base64 = "0.13.0"
 
 [dependencies.sqlx]
 version = "0.4.1"

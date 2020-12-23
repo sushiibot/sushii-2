@@ -113,6 +113,7 @@ impl UserLevelRanked {
         fmt_rank(self.msg_day_rank, self.msg_day_total)
     }
 
+    /// Get a single user's rank
     #[cfg(feature = "graphql")]
     pub async fn from_id(
         pool: &sqlx::PgPool,
@@ -124,6 +125,7 @@ impl UserLevelRanked {
             .map(|o| o.map(UserLevelRanked::reset_stale_ranks))
     }
 
+    /// Get a single user's rank
     #[cfg(not(feature = "graphql"))]
     pub async fn from_id(
         ctx: &Context,

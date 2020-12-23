@@ -14,7 +14,7 @@ pub use self::{
     mod_log::ModLogEntry,
     mute::{delete_mute, Mute},
     user::{
-        user_data::UserData, user_level::UserLevel, user_level_global::UserLevelGlobal,
+        user_data::UserData, user_level::UserLevel, user_guild_xp::UserGuildXP, user_level_global::UserLevelGlobal,
         user_level_ranked::UserLevelRanked,
     },
 };

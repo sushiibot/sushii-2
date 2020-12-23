@@ -9,6 +9,7 @@ use std::env;
 use tracing_subscriber::filter::{EnvFilter, LevelFilter};
 
 mod model;
+mod relay;
 use model::{Context, Query};
 
 type Schema = RootNode<'static, Query, EmptyMutation<Context>, EmptySubscription<Context>>;
