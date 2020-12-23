@@ -57,12 +57,18 @@ impl Query {
         first: BigInt,
         after: Option<String>,
     ) -> FieldResult<UserXPConnection> {
-        let user_level_ranked =
-            UserXP::guild_top_all_time(&ctx.pool, guild_id, first, after).await?;
+        // Fetch 1 extra to see if theres a next page truncated later
+        let first_with_peek = BigInt(first.0 + 1);
 
-        let edges: Vec<UserXPEdge> = user_level_ranked
+        let (total_count, users) = UserXP::guild_top_all_time(&ctx.pool, guild_id, first_with_peek, after).await?;
+        let users_with_peek_len = users.len();
+
+        let edges: Vec<UserXPEdge> = users
             .into_iter()
-            .map(|node| {
+            .enumerate()
+            // Remove the last one if there is an extra peek element
+            .filter(|(i, _)| *i != first_with_peek.0 as usize - 1)
+            .map(|(_, node)| {
                 // Cursor [XP, user_id] bytes to base64
                 let cursor = base64::encode(
                     [node.xp.0.to_le_bytes(), node.user_id.0.to_le_bytes()].concat(),
@@ -75,7 +81,8 @@ impl Query {
         let page_info = PageInfo {
             // No backwards pagination support for now
             has_previous_page: false,
-            has_next_page: true,
+            // If can fetch 1 extra then there's a next page, if it's <= then there's not a next page
+            has_next_page: first_with_peek.0 as usize == users_with_peek_len,
             start_cursor: edges
                 .first()
                 .map(|e| e.cursor.clone())
@@ -86,7 +93,7 @@ impl Query {
                 .ok_or_else(|| Error::Sushii("No data was returned".into()))?,
         };
 
-        Ok(UserXPConnection { edges, page_info })
+        Ok(UserXPConnection { total_count, edges, page_info })
     }
 }
 

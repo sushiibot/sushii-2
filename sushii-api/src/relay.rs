@@ -24,6 +24,7 @@ macro_rules! relay_connection {
         #[derive(juniper::GraphQLObject)]
         #[graphql(context = $context)]
         pub struct $connection {
+            pub total_count: ::sushii_model::model::BigInt,
             pub edges: Vec<$edge>,
             pub page_info: $crate::relay::PageInfo,
         }

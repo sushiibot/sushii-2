@@ -33,7 +33,7 @@ impl UserXP {
         guild_id: BigInt,
         first: BigInt,
         after: Option<String>,
-    ) -> Result<Vec<UserXP>> {
+    ) -> Result<(BigInt, Vec<UserXP>)> {
         let after_bytes = if let Some(s) = after {
             let bytes = base64::decode(s)?;
 
@@ -52,8 +52,6 @@ impl UserXP {
             let xp = i64::from_le_bytes(xp_bytes);
             let user_id = i64::from_le_bytes(user_id_bytes);
 
-            dbg!(xp, user_id);
-
             Some((xp, user_id))
         } else {
             None
@@ -68,28 +66,39 @@ async fn guild_top_all_time_query(
     guild_id: i64,
     first: i64,
     after: Option<(i64, i64)>,
-) -> Result<Vec<UserXP>> {
-    sqlx::query_as!(
-        UserXP,
-        // Force guild_id to be nullable since we use None for global XP
-        r#"
-            SELECT user_id as "user_id: BigInt",
-                   guild_id as "guild_id?: BigInt",
-                   msg_all_time as "xp: BigInt"
+) -> Result<(BigInt, Vec<UserXP>)> {
+    let (total, users) = tokio::join!(
+        sqlx::query!(
+            r#"
+            SELECT COUNT(*) as "total!: BigInt"
               FROM user_levels
              WHERE guild_id = $1
-               AND (msg_all_time < $2 OR $2 IS NULL)
-               AND (user_id < $3 OR $3 IS NULL)
-          ORDER BY "xp: BigInt" DESC,
-                   "user_id: BigInt" DESC
-             LIMIT $4
-        "#,
-        guild_id,
-        after.map(|a| a.0),
-        after.map(|a| a.1),
-        first,
-    )
-    .fetch_all(pool)
-    .await
-    .map_err(Into::into)
+            "#,
+            guild_id,
+        )
+        .fetch_one(pool),
+        sqlx::query_as!(
+            UserXP,
+            // Force guild_id to be nullable since we use None for global XP
+            r#"
+                SELECT user_id as "user_id: BigInt",
+                    guild_id as "guild_id?: BigInt",
+                    msg_all_time as "xp: BigInt"
+                FROM user_levels
+                WHERE guild_id = $1
+                AND (msg_all_time < $2 OR $2 IS NULL)
+                AND (user_id < $3 OR $3 IS NULL)
+            ORDER BY "xp: BigInt" DESC,
+                    "user_id: BigInt" DESC
+                LIMIT $4
+            "#,
+            guild_id,
+            after.map(|a| a.0), // xp
+            after.map(|a| a.1), // user id
+            first,
+        )
+        .fetch_all(pool)
+    );
+
+    Ok((total?.total, users?))
 }
