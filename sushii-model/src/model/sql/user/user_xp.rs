@@ -44,6 +44,22 @@ impl UserXP {
 
         guild_top_all_time_query(pool, guild_id.0, first.0, after_bytes).await
     }
+
+    /// Get global all time ranks
+    #[cfg(feature = "graphql")]
+    pub async fn global_top_all_time(
+        pool: &sqlx::PgPool,
+        first: BigInt,
+        after: Option<String>,
+    ) -> Result<(BigInt, Vec<UserXP>)> {
+        let after_bytes = if let Some(s) = after {
+            Some(decode_cursor(&s)?)
+        } else {
+            None
+        };
+
+        global_top_all_time_query(pool, first.0, after_bytes).await
+    }
 }
 
 async fn guild_top_all_time_query(
@@ -78,6 +94,44 @@ async fn guild_top_all_time_query(
                 LIMIT $4
             "#,
             guild_id,
+            after.map(|a| a.0), // xp
+            after.map(|a| a.1), // user id
+            first,
+        )
+        .fetch_all(pool)
+    );
+
+    Ok((total?.total, users?))
+}
+
+async fn global_top_all_time_query(
+    pool: &sqlx::PgPool,
+    first: i64,
+    after: Option<(i64, i64)>,
+) -> Result<(BigInt, Vec<UserXP>)> {
+    let (total, users) = tokio::join!(
+        sqlx::query!(
+            r#"
+              SELECT COUNT(*) as "total!: BigInt"
+                FROM user_levels
+            GROUP BY user_id
+            "#,
+        )
+        .fetch_one(pool),
+        sqlx::query_as!(
+            UserXP,
+            r#"
+                SELECT user_id as "user_id: BigInt",
+                       NULL as "guild_id?: BigInt",
+                       SUM(msg_all_time) AS "xp!: BigInt"
+                FROM user_levels
+                WHERE (msg_all_time < $1 OR $1 IS NULL)
+                  AND (user_id < $2 OR $2 IS NULL)
+             GROUP BY user_id
+            ORDER BY "xp!: BigInt" DESC,
+                     "user_id: BigInt" DESC
+                LIMIT $3
+            "#,
             after.map(|a| a.0), // xp
             after.map(|a| a.1), // user id
             first,
