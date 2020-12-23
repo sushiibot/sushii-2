@@ -86,9 +86,7 @@ impl Query {
                 .ok_or_else(|| Error::Sushii("No data was returned".into()))?,
         };
 
-        let con = UserGuildXPConnection { edges, page_info };
-
-        Ok(con)
+        Ok(UserGuildXPConnection { edges, page_info })
     }
 }
 
