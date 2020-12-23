@@ -2,7 +2,7 @@ use juniper::{graphql_object, FieldResult};
 use std::sync::Arc;
 use sushii_model::{
     model::{
-        sql::{UserGuildXP, UserLevel, UserLevelRanked},
+        sql::{UserLevel, UserLevelRanked, UserXP},
         BigInt,
     },
     Error,
@@ -56,11 +56,11 @@ impl Query {
         guild_id: BigInt,
         first: BigInt,
         after: Option<String>,
-    ) -> FieldResult<UserGuildXPConnection> {
+    ) -> FieldResult<UserXPConnection> {
         let user_level_ranked =
-            UserGuildXP::guild_top_all_time(&ctx.pool, guild_id, first, after).await?;
+            UserXP::guild_top_all_time(&ctx.pool, guild_id, first, after).await?;
 
-        let edges: Vec<UserGuildXPEdge> = user_level_ranked
+        let edges: Vec<UserXPEdge> = user_level_ranked
             .into_iter()
             .map(|node| {
                 // Cursor [XP, user_id] bytes to base64
@@ -68,7 +68,7 @@ impl Query {
                     [node.xp.0.to_le_bytes(), node.user_id.0.to_le_bytes()].concat(),
                 );
 
-                UserGuildXPEdge { node, cursor }
+                UserXPEdge { node, cursor }
             })
             .collect();
 
@@ -86,8 +86,8 @@ impl Query {
                 .ok_or_else(|| Error::Sushii("No data was returned".into()))?,
         };
 
-        Ok(UserGuildXPConnection { edges, page_info })
+        Ok(UserXPConnection { edges, page_info })
     }
 }
 
-relay_connection!(UserGuildXPConnection, UserGuildXPEdge, UserGuildXP, Context);
+relay_connection!(UserXPConnection, UserXPEdge, UserXP, Context);

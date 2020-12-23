@@ -1,3 +1,4 @@
+use base64::DecodeError;
 use humantime::DurationError;
 use serde_json::Error as SerdeJsonError;
 use serenity::Error as SerenityError;
@@ -8,7 +9,6 @@ use std::error::Error as StdError;
 use std::fmt::{Display, Error as FmtError, Formatter, Result as FmtResult};
 use std::io::Error as IoError;
 use std::result::Result as StdResult;
-use base64::DecodeError;
 
 pub type Result<T> = StdResult<T, Error>;
 

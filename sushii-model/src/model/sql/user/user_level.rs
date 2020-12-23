@@ -14,7 +14,7 @@ use crate::model::BigInt;
 #[cfg_attr(
     feature = "graphql",
     graphql(description = "A user's level in a single guild"),
-    derive(GraphQLObject),
+    derive(GraphQLObject)
 )]
 pub struct UserLevel {
     pub user_id: BigInt,

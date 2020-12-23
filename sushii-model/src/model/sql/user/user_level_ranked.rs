@@ -2,9 +2,9 @@ use chrono::{naive::NaiveDateTime, offset::Utc, Datelike};
 use serde::{Deserialize, Serialize};
 
 #[cfg(not(feature = "graphql"))]
-use serenity::{model::prelude::*, prelude::*};
-#[cfg(not(feature = "graphql"))]
 use crate::keys::DbPool;
+#[cfg(not(feature = "graphql"))]
+use serenity::{model::prelude::*, prelude::*};
 
 #[cfg(feature = "graphql")]
 use juniper::GraphQLObject;
@@ -16,7 +16,7 @@ use crate::model::BigInt;
 #[cfg_attr(
     feature = "graphql",
     graphql(description = "A user's level and ranks in a single guild"),
-    derive(GraphQLObject),
+    derive(GraphQLObject)
 )]
 pub struct UserLevelRanked {
     pub user_id: BigInt,
