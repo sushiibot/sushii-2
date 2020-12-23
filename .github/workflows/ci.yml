@@ -6,6 +6,7 @@ jobs:
     build-packages:
         name: Build and Test ${{ matrix.package }}
         strategy:
+            fail-fast: false
             matrix:
                 package:
                     - sushii-2
