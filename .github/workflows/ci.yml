@@ -3,22 +3,23 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-    build:
-        continue-on-error: ${{ matrix.toolchain == 'nightly' }}
+    build-packages:
+        name: Build and Test ${{ matrix.package }}
         strategy:
             matrix:
-                toolchain:
-                    - stable
-                    - beta
-                    - nightly
+                package:
+                    - sushii-2
+                    - sushii-api
+                    - sushii-model
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
 
             - name: Select toolchain
+              id: toolchain
               uses: actions-rs/toolchain@v1
               with:
-                  toolchain: ${{ matrix.toolchain }}
+                  toolchain: stable
                   override: true
 
             - uses: actions/cache@v2
@@ -27,14 +28,16 @@ jobs:
                       ~/.cargo/registry
                       ~/.cargo/git
                       target
-                  key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+                  key: ${{ runner.os }}-test-rustc-${{ steps.toolchain.outputs.rustc_hash }}-${{ hashFiles('**/Cargo.lock') }}
 
-            - name: Build sushii
+            - name: Build ${{ matrix.package }}
               uses: actions-rs/cargo@v1
+              working-directory: ${{ matrix.package }}
               with:
                   command: build
 
-            - name: Test sushii
+            - name: Test ${{ matrix.package }}
               uses: actions-rs/cargo@v1
+              working-directory: ${{ matrix.package }}
               with:
                   command: test
