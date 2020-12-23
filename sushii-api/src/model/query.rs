@@ -6,6 +6,7 @@ use sushii_model::{
         BigInt,
     },
     Error,
+    cursor::encode_cursor
 };
 
 use crate::{relay::PageInfo, relay_connection};
@@ -70,9 +71,7 @@ impl Query {
             .filter(|(i, _)| *i != first_with_peek.0 as usize - 1)
             .map(|(_, node)| {
                 // Cursor [XP, user_id] bytes to base64
-                let cursor = base64::encode(
-                    [node.xp.0.to_le_bytes(), node.user_id.0.to_le_bytes()].concat(),
-                );
+                let cursor = encode_cursor(node.xp.0, node.user_id.0);
 
                 UserXPEdge { node, cursor }
             })

@@ -7,8 +7,10 @@ use serenity::{model::prelude::*, prelude::*};
 
 #[cfg(feature = "graphql")]
 use juniper::GraphQLObject;
+#[cfg(feature = "graphql")]
+use crate::cursor::decode_cursor;
 
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::model::BigInt;
 
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug)]
@@ -35,24 +37,7 @@ impl UserXP {
         after: Option<String>,
     ) -> Result<(BigInt, Vec<UserXP>)> {
         let after_bytes = if let Some(s) = after {
-            let bytes = base64::decode(s)?;
-
-            // 2 i64's
-            if bytes.len() != 16 {
-                return Err(Error::Sushii("Invalid cursor length (not 16 bytes)".into()));
-            }
-
-            // Convert slice to array
-            let mut xp_bytes: [u8; 8] = Default::default();
-            xp_bytes.copy_from_slice(&bytes[..8]);
-            let mut user_id_bytes: [u8; 8] = Default::default();
-            user_id_bytes.copy_from_slice(&bytes[8..]);
-
-            // Convert byte array to i64
-            let xp = i64::from_le_bytes(xp_bytes);
-            let user_id = i64::from_le_bytes(user_id_bytes);
-
-            Some((xp, user_id))
+            Some(decode_cursor(&s)?)
         } else {
             None
         };
