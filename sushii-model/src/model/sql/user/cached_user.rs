@@ -1,7 +1,7 @@
-use serde::{Deserialize, Serialize};
 use chrono::naive::NaiveDateTime;
 #[cfg(not(feature = "graphql"))]
 use chrono::offset::Utc;
+use serde::{Deserialize, Serialize};
 
 #[cfg(not(feature = "graphql"))]
 use crate::keys::DbPool;
@@ -9,7 +9,7 @@ use crate::keys::DbPool;
 use serenity::{model::prelude::*, prelude::*};
 
 #[cfg(feature = "graphql")]
-use juniper::{GraphQLObject};
+use juniper::GraphQLObject;
 
 use crate::error::Result;
 use crate::model::BigInt;
@@ -30,19 +30,13 @@ pub struct CachedUser {
 
 impl CachedUser {
     #[cfg(feature = "graphql")]
-    pub async fn from_id(
-        pool: &sqlx::PgPool,
-        user_id: BigInt,
-    ) -> Result<Option<Self>> {
+    pub async fn from_id(pool: &sqlx::PgPool, user_id: BigInt) -> Result<Option<Self>> {
         from_id_query(pool, user_id.0).await
     }
 
     /// Updates user
     #[cfg(not(feature = "graphql"))]
-    pub async fn update(
-        ctx: &Context,
-        user: &User,
-    ) -> Result<()> {
+    pub async fn update(ctx: &Context, user: &User) -> Result<()> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         update_query(&pool, user).await
@@ -50,10 +44,7 @@ impl CachedUser {
 }
 
 #[cfg(feature = "graphql")]
-async fn from_id_query(
-        pool: &sqlx::PgPool,
-        user_id: i64,
-) -> Result<Option<CachedUser>> {
+async fn from_id_query(pool: &sqlx::PgPool, user_id: i64) -> Result<Option<CachedUser>> {
     sqlx::query_as!(
         CachedUser,
         r#"
@@ -72,12 +63,8 @@ async fn from_id_query(
     .map_err(Into::into)
 }
 
-
 #[cfg(not(feature = "graphql"))]
-async fn update_query(
-    pool: &sqlx::PgPool,
-    user: &User,
-) -> Result<()> {
+async fn update_query(pool: &sqlx::PgPool, user: &User) -> Result<()> {
     // look for entries older than 1 day
     let rec = sqlx::query!(
         r#"

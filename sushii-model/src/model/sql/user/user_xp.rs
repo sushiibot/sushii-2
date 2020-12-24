@@ -6,9 +6,12 @@ use crate::keys::DbPool;
 use serenity::{model::prelude::*, prelude::*};
 
 #[cfg(feature = "graphql")]
-use juniper::{graphql_object, FieldResult};
+use crate::{
+    cursor::decode_cursor,
+    model::{juniper::Context, sql::CachedUser},
+};
 #[cfg(feature = "graphql")]
-use crate::{cursor::decode_cursor, model::{juniper::Context, sql::CachedUser}};
+use juniper::{graphql_object, FieldResult, GraphQLObject};
 
 use crate::error::Result;
 use crate::model::BigInt;
@@ -58,13 +61,29 @@ impl UserXP {
 }
 
 #[cfg(feature = "graphql")]
-#[graphql_object(context = Context)]
+#[graphql_object(
+    context = Context,
+    description = "User XP in a given timeframe and given scope (guild or global)"
+)]
 impl UserXP {
-    async fn user(
-        ctx: &Context,
-        user_id: BigInt,
-    ) -> FieldResult<Option<CachedUser>> {
-        CachedUser::from_id(&ctx.pool, user_id).await.map_err(Into::into)
+    // Gotta do this for each field
+    // https://github.com/graphql-rust/juniper/issues/553
+    fn user_id(&self) -> BigInt {
+        self.user_id
+    }
+
+    fn guild_id(&self) -> Option<BigInt> {
+        self.guild_id
+    }
+
+    fn xp(&self) -> BigInt {
+        self.xp
+    }
+
+    async fn user(ctx: &Context) -> FieldResult<Option<CachedUser>> {
+        CachedUser::from_id(&ctx.pool, self.user_id)
+            .await
+            .map_err(Into::into)
     }
 }
 

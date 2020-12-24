@@ -1,12 +1,12 @@
 use juniper::{graphql_object, FieldResult};
 use sushii_model::{
+    cursor::encode_cursor,
     model::{
+        juniper::Context,
         sql::{UserLevel, UserLevelRanked, UserXP},
         BigInt,
-        juniper::Context,
     },
     Error,
-    cursor::encode_cursor
 };
 
 use crate::{relay::PageInfo, relay_connection};
@@ -48,7 +48,8 @@ impl Query {
         // Fetch 1 extra to see if theres a next page truncated later
         let first_with_peek = BigInt(first.0 + 1);
 
-        let (total_count, users) = UserXP::guild_top_all_time(&ctx.pool, guild_id, first_with_peek, after).await?;
+        let (total_count, users) =
+            UserXP::guild_top_all_time(&ctx.pool, guild_id, first_with_peek, after).await?;
         let users_with_peek_len = users.len();
 
         let edges: Vec<UserXPEdge> = users
@@ -79,7 +80,11 @@ impl Query {
                 .ok_or_else(|| Error::Sushii("No data was returned".into()))?,
         };
 
-        Ok(UserXPConnection { total_count, edges, page_info })
+        Ok(UserXPConnection {
+            total_count,
+            edges,
+            page_info,
+        })
     }
 }
 

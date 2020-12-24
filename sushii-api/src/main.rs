@@ -1,13 +1,16 @@
 use actix_cors::Cors;
-use actix_web::{http::{header, Method}, middleware, web, App, Error, Route, HttpResponse, HttpServer};
+use actix_web::{
+    http::{header, Method},
+    middleware, web, App, Error, HttpResponse, HttpServer, Route,
+};
 use juniper::{EmptyMutation, EmptySubscription, RootNode};
 use juniper_actix::{
     graphiql_handler as gqli_handler, graphql_handler, playground_handler as play_handler,
 };
 use sqlx::postgres::PgPoolOptions;
 use std::env;
-use tracing_subscriber::filter::{EnvFilter, LevelFilter};
 use sushii_model::model::juniper::Context;
+use tracing_subscriber::filter::{EnvFilter, LevelFilter};
 
 mod model;
 mod relay;
@@ -46,7 +49,10 @@ async fn cors_event() -> Result<HttpResponse, Error> {
     Ok(HttpResponse::Ok()
         .header("Access-Control-Allow-Origin", "*")
         .header("Access-Control-Allow-Methods", "PUT, GET, OPTIONS")
-        .header("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept")
+        .header(
+            "Access-Control-Allow-Headers",
+            "Content-Type, Authorization, Accept",
+        )
         .body(""))
 }
 
@@ -73,16 +79,15 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Compress::default())
             .wrap(middleware::Logger::default())
             .wrap(
-                Cors::permissive()
-                /*
-                Cors::default()
-                    .send_wildcard()
-                    .allowed_methods(vec!["POST", "GET", "OPTIONS"])
-                    .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
-                    .allowed_header(header::CONTENT_TYPE)
-                    .supports_credentials()
-                    .max_age(3600),
-                    */
+                Cors::permissive(), /*
+                                    Cors::default()
+                                        .send_wildcard()
+                                        .allowed_methods(vec!["POST", "GET", "OPTIONS"])
+                                        .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
+                                        .allowed_header(header::CONTENT_TYPE)
+                                        .supports_credentials()
+                                        .max_age(3600),
+                                        */
             )
             .service(
                 web::resource("/")

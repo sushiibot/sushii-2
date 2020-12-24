@@ -1,6 +1,7 @@
 use crate::tasks;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 
+mod cache_user;
 mod join_msg;
 mod member_log;
 mod mention;
@@ -9,7 +10,6 @@ mod msg_log;
 mod raw_event_handler;
 mod roles;
 mod user_levels;
-mod cache_user;
 
 pub use raw_event_handler::RawHandler;
 

@@ -14,8 +14,7 @@ pub use self::{
     mod_log::ModLogEntry,
     mute::{delete_mute, Mute},
     user::{
-        user_data::UserData, user_level::UserLevel, user_level_global::UserLevelGlobal,
-        user_level_ranked::UserLevelRanked, user_xp::UserXP,
-        cached_user::CachedUser,
+        cached_user::CachedUser, user_data::UserData, user_level::UserLevel,
+        user_level_global::UserLevelGlobal, user_level_ranked::UserLevelRanked, user_xp::UserXP,
     },
 };

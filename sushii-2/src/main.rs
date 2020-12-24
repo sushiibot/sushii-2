@@ -18,10 +18,10 @@ mod model;
 mod prelude;
 mod tasks;
 
-use sushii_model::keys::{DbPool, SushiiCache};
 use crate::error::Result;
 use crate::keys::{CacheAndHttpContainer, ReqwestContainer, ShardManagerContainer};
 use crate::model::{sql::GuildConfig, Metrics, SushiiConfig};
+use sushii_model::keys::{DbPool, SushiiCache};
 
 #[tokio::main]
 async fn main() -> Result<()> {
