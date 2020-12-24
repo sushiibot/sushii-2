@@ -1,6 +1,6 @@
 #[cfg(not(feature = "graphql"))]
-use chrono::offset::Utc;
-use chrono::{naive::NaiveDateTime, Duration};
+use chrono::{offset::Utc, Duration};
+use chrono::{naive::NaiveDateTime};
 use serde::{Deserialize, Serialize};
 
 #[cfg(not(feature = "graphql"))]

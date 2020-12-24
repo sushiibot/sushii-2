@@ -24,3 +24,20 @@ pub fn decode_cursor(s: &str) -> Result<(i64, i64)> {
 pub fn encode_cursor(xp: i64, user_id: i64) -> String {
     base64::encode([xp.to_le_bytes(), user_id.to_le_bytes()].concat())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn encode_decode_cursor() {
+        let xp = 123456789;
+        let id = 987654321;
+
+        let enc = encode_cursor(xp, id);
+        let (dec_xp, dec_id) = decode_cursor(&enc).expect("Decode cursor");
+
+        assert_eq!(dec_xp, xp);
+        assert_eq!(dec_id, id);
+    }
+}

@@ -110,8 +110,7 @@ async fn guild_top_all_time_query(
                        msg_all_time as "xp: BigInt"
                 FROM user_levels
                 WHERE guild_id = $1
-                AND (msg_all_time < $2 OR $2 IS NULL)
-                AND (user_id < $3 OR $3 IS NULL)
+                AND ((msg_all_time, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)
             ORDER BY "xp: BigInt" DESC,
                     "user_id: BigInt" DESC
                 LIMIT $4
@@ -148,8 +147,7 @@ async fn global_top_all_time_query(
                        NULL as "guild_id?: BigInt",
                        SUM(msg_all_time) AS "xp!: BigInt"
                 FROM user_levels
-                WHERE (msg_all_time < $1 OR $1 IS NULL)
-                  AND (user_id < $2 OR $2 IS NULL)
+                WHERE ((msg_all_time, user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)
              GROUP BY user_id
             ORDER BY "xp!: BigInt" DESC,
                      "user_id: BigInt" DESC
