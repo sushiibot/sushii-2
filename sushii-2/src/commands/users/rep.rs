@@ -29,6 +29,13 @@ async fn rep(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     };
 
+    if target_id == msg.author.id.0 {
+        msg.reply(&ctx, "Error: You can't rep yourself sorry :(")
+            .await?;
+
+        return Ok(());
+    }
+
     let target_user = target_id.to_user(&ctx).await?;
 
     if target_user.bot {
