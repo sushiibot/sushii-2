@@ -70,7 +70,7 @@ async fn update_query(pool: &sqlx::PgPool, user: &User) -> Result<()> {
         r#"
             SELECT COUNT(*) as "count!"
               FROM cached_users
-             WHERE last_checked < NOW() - INTERVAL '1 DAY'
+             WHERE last_checked > NOW() - INTERVAL '1 DAY'
                AND id = $1
         "#,
         i64::from(user.id)
@@ -79,14 +79,15 @@ async fn update_query(pool: &sqlx::PgPool, user: &User) -> Result<()> {
     .await?;
 
     // Updated within a day, skip
-    if rec.count == 0 {
+    // 1 if last_checked is within 1 day
+    if rec.count == 1 {
         return Ok(());
     }
 
     sqlx::query!(
         r#"
         INSERT INTO cached_users
-             VALUES ($1, $2, $3, $4)
+             VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT (id)
           DO UPDATE
                 SET avatar_url = $2,
