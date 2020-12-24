@@ -9,6 +9,7 @@ mod msg_log;
 mod raw_event_handler;
 mod roles;
 mod user_levels;
+mod cache_user;
 
 pub use raw_event_handler::RawHandler;
 
@@ -35,6 +36,7 @@ impl EventHandler for Handler {
             user_levels::message(&ctx, &msg),
             msg_log::message(&ctx, &msg),
             mention::message(&ctx, &msg),
+            cache_user::message(&ctx, &msg),
         );
     }
 

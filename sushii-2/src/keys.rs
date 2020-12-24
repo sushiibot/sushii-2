@@ -4,14 +4,9 @@ use serenity::{
     prelude::{Mutex, TypeMapKey},
     CacheAndHttp,
 };
-use sqlx::PgPool;
 use std::sync::Arc;
 
-pub use crate::model::{Metrics, SushiiCache, SushiiConfig};
-
-impl TypeMapKey for SushiiCache {
-    type Value = SushiiCache;
-}
+pub use crate::model::{Metrics, SushiiConfig};
 
 impl TypeMapKey for SushiiConfig {
     type Value = Arc<SushiiConfig>;
@@ -19,12 +14,6 @@ impl TypeMapKey for SushiiConfig {
 
 impl TypeMapKey for Metrics {
     type Value = Arc<Metrics>;
-}
-
-pub struct DbPool;
-
-impl TypeMapKey for DbPool {
-    type Value = PgPool;
 }
 
 pub struct ShardManagerContainer;
