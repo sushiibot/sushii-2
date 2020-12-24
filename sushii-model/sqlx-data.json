@@ -1,5 +1,21 @@
 {
   "db": "PostgreSQL",
+  "014c0466bc5b56c3d78b3b83778d333c0885e131c5be7686339f01bab6a7a8d5": {
+    "query": "\n        INSERT INTO cached_users\n             VALUES ($1, $2, $3, $4, $5)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET avatar_url = $2,\n                    name = $3,\n                    discriminator = $4,\n                    last_checked = $5\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Text",
+          "Int4",
+          "Timestamp"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "058894c420fd2d4dec5a0f1af1f21133fad33bbdcf49d90e40d7c9a5b51a08d6": {
     "query": "\n        INSERT INTO cached_users\n             VALUES ($1, $2, $3, $4)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET avatar_url = $2,\n                    name = $3,\n                    discriminator = $4,\n                    last_checked = $5\n        ",
     "describe": {
@@ -859,50 +875,6 @@
       ]
     }
   },
-  "62a96c9f0f96da5701b558e4d332a6049bca62e3d02ea5319cb5fb6d126f7b08": {
-    "query": "\n            SELECT *\n              FROM cached_users\n             WHERE id = $1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "avatar_url",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "discriminator",
-          "type_info": "Int4"
-        },
-        {
-          "ordinal": 4,
-          "name": "last_checked",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "6f06b01e8606a8e5b958100f3cbaae946bdfe70e35aaf6b5e5e5900ce13a03f4": {
     "query": "\n            SELECT *\n              FROM guild_configs\n             WHERE id = $1\n        ",
     "describe": {
@@ -1435,6 +1407,50 @@
       "nullable": []
     }
   },
+  "a6eafc7c03971c8b673ff2af4f4ef661766f2914edf1248cd82c70484a393184": {
+    "query": "\n            SELECT id as \"id: BigInt\",\n                   avatar_url,\n                   name,\n                   discriminator,\n                   last_checked\n              FROM cached_users\n             WHERE id = ANY($1)\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "avatar_url",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "discriminator",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 4,
+          "name": "last_checked",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8Array"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "a7eebd3e865de3e77676ec83975c87df51f988295290c8e084f8f984885d5b15": {
     "query": "\n              SELECT *\n                FROM tags\n               WHERE guild_id = $1\n                 AND tag_name ILIKE '%' || $2 || '%'\n                 AND (tag_name > $3 OR $3 IS NULL)\n            ORDER BY tag_name ASC\n               LIMIT $4\n        ",
     "describe": {
@@ -1593,6 +1609,26 @@
       ]
     }
   },
+  "b51160057f08d99edddd8af25e0d995003bc972d96755116d623428ace16495d": {
+    "query": "\n            SELECT COUNT(*) as \"count!\"\n              FROM cached_users\n             WHERE last_checked > NOW() - INTERVAL '1 DAY'\n               AND id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "c0526535107d188f318ecc723f2d8629eef92266e9802414606a3f4fba3afbeb": {
     "query": "INSERT INTO guild_configs (\n                id                ,\n                name              ,\n                prefix            ,\n                join_msg          ,\n                join_msg_enabled  ,\n                join_react        ,\n                leave_msg         ,\n                leave_msg_enabled ,\n                msg_channel       ,\n                role_channel      ,\n                role_config       ,\n                role_enabled      ,\n                invite_guard      ,\n                log_msg           ,\n                log_msg_enabled   ,\n                log_mod           ,\n                log_mod_enabled   ,\n                log_member        ,\n                log_member_enabled,\n                mute_role         ,\n                mute_duration     ,\n                warn_dm_text      ,\n                warn_dm_enabled   ,\n                mute_dm_text      ,\n                mute_dm_enabled   ,\n                max_mention\n            )\n     VALUES ($1,  $2,  $3,  $4,  $5,  $6,  $7,  $8,  $9,  $10,\n             $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,\n             $21, $22, $23, $24, $25, $26)\nON CONFLICT (id)\n  DO UPDATE\n        SET -- id = $1, Don't need to update ID \n            name               = $2,\n            prefix             = $3,\n            join_msg           = $4,\n            join_msg_enabled   = $5,\n            join_react         = $6,\n            leave_msg          = $7,\n            leave_msg_enabled  = $8,\n            msg_channel        = $9,\n            role_channel       = $10,\n            role_config        = $11,\n            role_enabled       = $12,\n            invite_guard       = $13,\n            log_msg            = $14,\n            log_msg_enabled    = $15,\n            log_mod            = $16,\n            log_mod_enabled    = $17,\n            log_member         = $18,\n            log_member_enabled = $19,\n            mute_role          = $20,\n            mute_duration      = $21,\n            warn_dm_text       = $22,\n            warn_dm_enabled    = $23,\n            mute_dm_text       = $24,\n            mute_dm_enabled    = $25,\n            max_mention        = $26\n",
     "describe": {
@@ -1624,21 +1660,6 @@
           "Bool",
           "Text",
           "Bool",
-          "Int4"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "c55afb9baf6d6735cb3e412ff94a213814b6580d2c987dba06ada7c62695b105": {
-    "query": "\n        INSERT INTO cached_users\n             VALUES ($1, $2, $3, $4)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET avatar_url = $2,\n                    name = $3,\n                    discriminator = $4\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Text",
           "Int4"
         ]
       },
@@ -1690,26 +1711,6 @@
         true,
         false,
         true
-      ]
-    }
-  },
-  "cfe892bddaccc27f8d827c8d42a8bb9b5a58728330eeffde96e278b973bfcb1c": {
-    "query": "\n            SELECT COUNT(*) as count\n              FROM cached_users\n             WHERE last_checked < NOW() - INTERVAL '1 DAY'\n               AND id = $1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        null
       ]
     }
   },
@@ -1940,41 +1941,6 @@
       "nullable": []
     }
   },
-  "ecbac2294b3c270cf1a4c3535ebf2c94ed5acf1646b27781bb328663d98fd8f9": {
-    "query": "\n                SELECT user_id as \"user_id: BigInt\",\n                    guild_id as \"guild_id?: BigInt\",\n                    msg_all_time as \"xp: BigInt\"\n                FROM user_levels\n                WHERE guild_id = $1\n                AND (msg_all_time < $2 OR $2 IS NULL)\n                AND (user_id < $3 OR $3 IS NULL)\n            ORDER BY \"xp: BigInt\" DESC,\n                    \"user_id: BigInt\" DESC\n                LIMIT $4\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id?: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "xp: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "efe682472850d573455b77483e2d8d549fb55d104e8ca84747cc9c0bee56436a": {
     "query": "\n              SELECT *\n                FROM tags\n               WHERE guild_id = $1\n            ORDER BY use_count DESC\n               LIMIT $2\n        ",
     "describe": {
@@ -2033,26 +1999,6 @@
         {
           "ordinal": 0,
           "name": "count!",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
-  "f59d0fd84e5c4fe7d4f8de1c93202f15ea6aa90e45ae04a23f77a2491de4c3bc": {
-    "query": "\n            SELECT COUNT(*)\n              FROM cached_users\n             WHERE last_checked < NOW() - INTERVAL '1 DAY'\n               AND id = $1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count",
           "type_info": "Int8"
         }
       ],

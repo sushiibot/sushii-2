@@ -1,6 +1,6 @@
-use chrono::naive::NaiveDateTime;
 #[cfg(not(feature = "graphql"))]
 use chrono::offset::Utc;
+use chrono::{naive::NaiveDateTime, Duration};
 use serde::{Deserialize, Serialize};
 
 #[cfg(not(feature = "graphql"))]
@@ -55,7 +55,6 @@ impl CachedUser {
     }
 }
 
-#[cfg(feature = "graphql")]
 async fn from_id_query(pool: &sqlx::PgPool, user_id: i64) -> Result<Option<CachedUser>> {
     sqlx::query_as!(
         CachedUser,
@@ -97,23 +96,15 @@ async fn from_ids_query(pool: &sqlx::PgPool, user_ids: &[i64]) -> Result<Vec<Cac
 
 #[cfg(not(feature = "graphql"))]
 async fn update_query(pool: &sqlx::PgPool, user: &User) -> Result<()> {
-    // look for entries older than 1 day
-    let rec = sqlx::query!(
-        r#"
-            SELECT COUNT(*) as "count!"
-              FROM cached_users
-             WHERE last_checked > NOW() - INTERVAL '1 DAY'
-               AND id = $1
-        "#,
-        i64::from(user.id)
-    )
-    .fetch_one(pool)
-    .await?;
+    let cached_user = from_id_query(pool, user.id.0 as i64).await?;
 
-    // Updated within a day, skip
-    // 1 if last_checked is within 1 day
-    if rec.count == 1 {
-        return Ok(());
+    if let Some(cached_user) = cached_user {
+        let now = Utc::now().naive_utc();
+
+        // If not yet 1 day since last check, skip
+        if now < (cached_user.last_checked + Duration::days(1)) {
+            return Ok(());
+        }
     }
 
     sqlx::query!(
