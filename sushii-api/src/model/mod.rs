@@ -1,3 +1,3 @@
 pub mod query;
 
-pub use self::query::{Context, Query};
+pub use self::query::Query;

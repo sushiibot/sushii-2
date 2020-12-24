@@ -6,19 +6,14 @@ use crate::keys::DbPool;
 use serenity::{model::prelude::*, prelude::*};
 
 #[cfg(feature = "graphql")]
-use juniper::GraphQLObject;
+use juniper::{graphql_object, FieldResult};
 #[cfg(feature = "graphql")]
-use crate::cursor::decode_cursor;
+use crate::{cursor::decode_cursor, model::{juniper::Context, sql::CachedUser}};
 
 use crate::error::Result;
 use crate::model::BigInt;
 
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug)]
-#[cfg_attr(
-    feature = "graphql",
-    graphql(description = "A user's XP and rank in a single guild"),
-    derive(GraphQLObject)
-)]
 pub struct UserXP {
     pub user_id: BigInt,
     /// Guild ID or None if global
@@ -62,6 +57,17 @@ impl UserXP {
     }
 }
 
+#[cfg(feature = "graphql")]
+#[graphql_object(context = Context)]
+impl UserXP {
+    async fn user(
+        ctx: &Context,
+        user_id: BigInt,
+    ) -> FieldResult<Option<CachedUser>> {
+        CachedUser::from_id(&ctx.pool, user_id).await.map_err(Into::into)
+    }
+}
+
 async fn guild_top_all_time_query(
     pool: &sqlx::PgPool,
     guild_id: i64,
@@ -83,8 +89,8 @@ async fn guild_top_all_time_query(
             // Force guild_id to be nullable since we use None for global XP
             r#"
                 SELECT user_id as "user_id: BigInt",
-                    guild_id as "guild_id?: BigInt",
-                    msg_all_time as "xp: BigInt"
+                       guild_id as "guild_id?: BigInt",
+                       msg_all_time as "xp: BigInt"
                 FROM user_levels
                 WHERE guild_id = $1
                 AND (msg_all_time < $2 OR $2 IS NULL)

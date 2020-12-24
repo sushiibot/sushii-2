@@ -1,28 +1,15 @@
 use juniper::{graphql_object, FieldResult};
-use std::sync::Arc;
 use sushii_model::{
     model::{
         sql::{UserLevel, UserLevelRanked, UserXP},
         BigInt,
+        juniper::Context,
     },
     Error,
     cursor::encode_cursor
 };
 
 use crate::{relay::PageInfo, relay_connection};
-
-#[derive(Clone)]
-pub struct Context {
-    pool: Arc<sqlx::PgPool>,
-}
-
-impl Context {
-    pub fn new(pool: Arc<sqlx::PgPool>) -> Self {
-        Self { pool }
-    }
-}
-
-impl juniper::Context for Context {}
 
 pub struct Query;
 

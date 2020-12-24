@@ -16,5 +16,6 @@ pub use self::{
     user::{
         user_data::UserData, user_level::UserLevel, user_level_global::UserLevelGlobal,
         user_level_ranked::UserLevelRanked, user_xp::UserXP,
+        cached_user::CachedUser,
     },
 };
