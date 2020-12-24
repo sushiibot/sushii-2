@@ -11,7 +11,7 @@ use crate::{
     model::{juniper::Context, sql::CachedUser},
 };
 #[cfg(feature = "graphql")]
-use juniper::{graphql_object, FieldResult, GraphQLObject};
+use juniper::graphql_object;
 
 use crate::error::Result;
 use crate::model::BigInt;
@@ -80,10 +80,8 @@ impl UserXP {
         self.xp
     }
 
-    async fn user(ctx: &Context) -> FieldResult<Option<CachedUser>> {
-        CachedUser::from_id(&ctx.pool, self.user_id)
-            .await
-            .map_err(Into::into)
+    async fn user(ctx: &Context) -> Option<CachedUser> {
+        ctx.cached_user_loader.load(self.user_id.0).await
     }
 }
 

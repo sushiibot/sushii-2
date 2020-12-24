@@ -9,7 +9,13 @@ use crate::keys::DbPool;
 use serenity::{model::prelude::*, prelude::*};
 
 #[cfg(feature = "graphql")]
+use dataloader::{non_cached::Loader, BatchFn};
+#[cfg(feature = "graphql")]
 use juniper::GraphQLObject;
+#[cfg(feature = "graphql")]
+use serenity::async_trait;
+#[cfg(feature = "graphql")]
+use std::{collections::HashMap, sync::Arc};
 
 use crate::error::Result;
 use crate::model::BigInt;
@@ -32,6 +38,12 @@ impl CachedUser {
     #[cfg(feature = "graphql")]
     pub async fn from_id(pool: &sqlx::PgPool, user_id: BigInt) -> Result<Option<Self>> {
         from_id_query(pool, user_id.0).await
+    }
+
+    /// Gets multiple cached users by a list of user IDs
+    #[cfg(feature = "graphql")]
+    pub async fn from_ids(pool: &sqlx::PgPool, user_ids: &[i64]) -> Result<Vec<Self>> {
+        from_ids_query(pool, user_ids).await
     }
 
     /// Updates user
@@ -59,6 +71,26 @@ async fn from_id_query(pool: &sqlx::PgPool, user_id: i64) -> Result<Option<Cache
         user_id
     )
     .fetch_optional(pool)
+    .await
+    .map_err(Into::into)
+}
+
+#[cfg(feature = "graphql")]
+async fn from_ids_query(pool: &sqlx::PgPool, user_ids: &[i64]) -> Result<Vec<CachedUser>> {
+    sqlx::query_as!(
+        CachedUser,
+        r#"
+            SELECT id as "id: BigInt",
+                   avatar_url,
+                   name,
+                   discriminator,
+                   last_checked
+              FROM cached_users
+             WHERE id = ANY($1)
+        "#,
+        user_ids
+    )
+    .fetch_all(pool)
     .await
     .map_err(Into::into)
 }
@@ -106,3 +138,48 @@ async fn update_query(pool: &sqlx::PgPool, user: &User) -> Result<()> {
 
     Ok(())
 }
+
+#[cfg(feature = "graphql")]
+pub struct CachedUserBatcher {
+    pub pool: Arc<sqlx::PgPool>,
+}
+
+#[cfg(feature = "graphql")]
+impl CachedUserBatcher {
+    pub fn new(pool: Arc<sqlx::PgPool>) -> Self {
+        Self { pool }
+    }
+}
+
+#[cfg(feature = "graphql")]
+#[async_trait]
+impl BatchFn<i64, Option<CachedUser>> for CachedUserBatcher {
+    // A hashmap is used, as we need to return an array which maps each original key to a CachedUser.
+    async fn load(&mut self, keys: &[i64]) -> HashMap<i64, Option<CachedUser>> {
+        let mut keys_map: HashMap<i64, Option<CachedUser>> =
+            keys.into_iter().map(|id| (*id, None)).collect();
+
+        let map: HashMap<i64, Option<CachedUser>> =
+            match CachedUser::from_ids(&self.pool, keys).await {
+                Ok(v) => {
+                    // Overwrite default missing keys with found Some(values)
+                    keys_map.extend(v.into_iter().map(|u| (u.id.0, Some(u))));
+
+                    keys_map
+                }
+                Err(e) => {
+                    tracing::warn!("Error batch loading cached users: {}", e);
+                    // if empty, just throw out errors and use None
+                    // kinda ugly workaround since we can't return a Result<> directly
+                    // Result won't work since Clone on error is required, but
+                    // inner Error types don't derive clone
+                    keys_map
+                }
+            };
+
+        map
+    }
+}
+
+#[cfg(feature = "graphql")]
+pub type CachedUserLoader = Loader<i64, Option<CachedUser>, CachedUserBatcher>;
