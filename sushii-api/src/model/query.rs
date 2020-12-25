@@ -4,7 +4,7 @@ use sushii_model::{
     model::{
         juniper::Context,
         sql::{UserLevel, UserLevelRanked, UserXP},
-        BigInt,
+        BigInt, user::TimeFrame
     },
     Error,
 };
@@ -42,6 +42,7 @@ impl Query {
     async fn user_guild_xp_connection(
         ctx: &Context,
         guild_id: BigInt,
+        timeframe: TimeFrame,
         first: BigInt,
         after: Option<String>,
     ) -> FieldResult<UserXPConnection> {
@@ -49,7 +50,7 @@ impl Query {
         let first_with_peek = BigInt(first.0 + 1);
 
         let (total_count, users) =
-            UserXP::guild_top_all_time(&ctx.pool, guild_id, first_with_peek, after).await?;
+            UserXP::guild_top(&ctx.pool, guild_id, timeframe, first_with_peek, after).await?;
         let users_with_peek_len = users.len();
 
         let edges: Vec<UserXPEdge> = users

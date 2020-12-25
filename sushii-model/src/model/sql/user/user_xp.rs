@@ -6,14 +6,14 @@ use crate::keys::DbPool;
 use serenity::{model::prelude::*, prelude::*};
 
 #[cfg(feature = "graphql")]
+use crate::model::user::{TimeFrame, UserLevelProgress};
+#[cfg(feature = "graphql")]
 use crate::{
     cursor::decode_cursor,
     model::{juniper::Context, sql::CachedUser},
 };
 #[cfg(feature = "graphql")]
 use juniper::graphql_object;
-#[cfg(feature = "graphql")]
-use crate::model::user::UserLevelProgress;
 
 use crate::error::Result;
 use crate::model::BigInt;
@@ -30,9 +30,10 @@ pub struct UserXP {
 impl UserXP {
     /// Get guild all time ranks
     #[cfg(feature = "graphql")]
-    pub async fn guild_top_all_time(
+    pub async fn guild_top(
         pool: &sqlx::PgPool,
         guild_id: BigInt,
+        timeframe: TimeFrame,
         first: BigInt,
         after: Option<String>,
     ) -> Result<(BigInt, Vec<UserXP>)> {
@@ -42,7 +43,7 @@ impl UserXP {
             None
         };
 
-        guild_top_all_time_query(pool, guild_id.0, first.0, after_bytes).await
+        guild_top_query(pool, guild_id.0, timeframe, first.0, after_bytes).await
     }
 
     /// Get global all time ranks
@@ -91,45 +92,196 @@ impl UserXP {
     }
 }
 
-async fn guild_top_all_time_query(
+async fn guild_timeframe_user_count(
     pool: &sqlx::PgPool,
     guild_id: i64,
+    timeframe: TimeFrame,
+) -> Result<BigInt> {
+    // Timeframes also match year, so that old inactive users aren't considered
+    // ie. if month could match from last year, but not that significant
+    match timeframe {
+        TimeFrame::AllTime => {
+            sqlx::query!(
+                r#"
+                SELECT COUNT(*) as "total!: BigInt"
+                    FROM user_levels
+                    WHERE guild_id = $1
+                "#,
+                guild_id,
+            )
+            .fetch_one(pool)
+            .await
+            .map(|r| r.total)
+        }
+        TimeFrame::Day => {
+            sqlx::query!(
+                r#"
+                SELECT COUNT(*) as "total!: BigInt"
+                  FROM user_levels
+                 WHERE guild_id = $1
+                   AND EXTRACT(DOY FROM last_msg) = EXTRACT(DOY FROM NOW())
+                   AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
+                "#,
+                guild_id,
+            )
+            .fetch_one(pool)
+            .await
+            .map(|r| r.total)
+        }
+        TimeFrame::Week => {
+             sqlx::query!(
+                r#"
+                SELECT COUNT(*) as "total!: BigInt"
+                  FROM user_levels
+                 WHERE guild_id = $1
+                   AND EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())
+                   AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
+                "#,
+                guild_id,
+            )
+            .fetch_one(pool)
+            .await
+            .map(|r| r.total)
+        }
+        TimeFrame::Month => {
+            sqlx::query!(
+                r#"
+                SELECT COUNT(*) as "total!: BigInt"
+                  FROM user_levels
+                 WHERE guild_id = $1
+                   AND EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())
+                   AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
+                "#,
+                guild_id,
+            )
+            .fetch_one(pool)
+            .await
+            .map(|r| r.total)
+        }
+    }
+    .map_err(Into::into)
+}
+
+async fn guild_timeframe_users(
+    pool: &sqlx::PgPool,
+    guild_id: i64,
+    timeframe: TimeFrame,
+    first: i64,
+    after: Option<(i64, i64)>,
+) -> Result<Vec<UserXP>> {
+    match timeframe {
+        TimeFrame::AllTime => {
+            sqlx::query_as!(
+                UserXP,
+                // Force guild_id to be nullable since we use None for global XP
+                r#"
+                    SELECT user_id as "user_id: BigInt",
+                           guild_id as "guild_id?: BigInt",
+                           msg_all_time as "xp: BigInt"
+                      FROM user_levels
+                     WHERE guild_id = $1
+                       AND ((msg_all_time, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)
+                  ORDER BY "xp: BigInt" DESC,
+                           "user_id: BigInt" DESC
+                     LIMIT $4
+                "#,
+                guild_id,
+                after.map(|a| a.0), // xp
+                after.map(|a| a.1), // user id
+                first,
+            )
+            .fetch_all(pool)
+            .await
+        }
+        TimeFrame::Day => {
+            sqlx::query_as!(
+                UserXP,
+                r#"
+                    SELECT user_id as "user_id: BigInt",
+                           guild_id as "guild_id?: BigInt",
+                           msg_all_time as "xp: BigInt"
+                      FROM user_levels
+                     WHERE guild_id = $1
+                       AND ((msg_all_time, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)
+                       AND EXTRACT(DOY FROM last_msg) = EXTRACT(DOY FROM NOW())
+                       AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
+                  ORDER BY "xp: BigInt" DESC,
+                           "user_id: BigInt" DESC
+                     LIMIT $4
+                "#,
+                guild_id,
+                after.map(|a| a.0), // xp
+                after.map(|a| a.1), // user id
+                first,
+            )
+            .fetch_all(pool)
+            .await
+        }
+        TimeFrame::Week => {
+            sqlx::query_as!(
+                UserXP,
+                r#"
+                    SELECT user_id as "user_id: BigInt",
+                           guild_id as "guild_id?: BigInt",
+                           msg_all_time as "xp: BigInt"
+                      FROM user_levels
+                     WHERE guild_id = $1
+                       AND ((msg_all_time, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)
+                       AND EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())
+                       AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
+                  ORDER BY "xp: BigInt" DESC,
+                           "user_id: BigInt" DESC
+                     LIMIT $4
+                "#,
+                guild_id,
+                after.map(|a| a.0), // xp
+                after.map(|a| a.1), // user id
+                first,
+            )
+            .fetch_all(pool)
+            .await
+        }
+        TimeFrame::Month => {
+            sqlx::query_as!(
+                UserXP,
+                r#"
+                    SELECT user_id as "user_id: BigInt",
+                           guild_id as "guild_id?: BigInt",
+                           msg_all_time as "xp: BigInt"
+                      FROM user_levels
+                     WHERE guild_id = $1
+                       AND ((msg_all_time, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)
+                       AND EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())
+                       AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
+                  ORDER BY "xp: BigInt" DESC,
+                           "user_id: BigInt" DESC
+                     LIMIT $4
+                "#,
+                guild_id,
+                after.map(|a| a.0), // xp
+                after.map(|a| a.1), // user id
+                first,
+            )
+            .fetch_all(pool)
+            .await
+        }
+    }
+    .map_err(Into::into)
+}
+
+async fn guild_top_query(
+    pool: &sqlx::PgPool,
+    guild_id: i64,
+    timeframe: TimeFrame,
     first: i64,
     after: Option<(i64, i64)>,
 ) -> Result<(BigInt, Vec<UserXP>)> {
     let (total, users) = tokio::join!(
-        sqlx::query!(
-            r#"
-            SELECT COUNT(*) as "total!: BigInt"
-              FROM user_levels
-             WHERE guild_id = $1
-            "#,
-            guild_id,
-        )
-        .fetch_one(pool),
-        sqlx::query_as!(
-            UserXP,
-            // Force guild_id to be nullable since we use None for global XP
-            r#"
-                SELECT user_id as "user_id: BigInt",
-                       guild_id as "guild_id?: BigInt",
-                       msg_all_time as "xp: BigInt"
-                FROM user_levels
-                WHERE guild_id = $1
-                AND ((msg_all_time, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)
-            ORDER BY "xp: BigInt" DESC,
-                    "user_id: BigInt" DESC
-                LIMIT $4
-            "#,
-            guild_id,
-            after.map(|a| a.0), // xp
-            after.map(|a| a.1), // user id
-            first,
-        )
-        .fetch_all(pool)
+        guild_timeframe_user_count(pool, guild_id, timeframe),
+        guild_timeframe_users(pool, guild_id, timeframe, first, after),
     );
 
-    Ok((total?.total, users?))
+    Ok((total?, users?))
 }
 
 async fn global_top_all_time_query(

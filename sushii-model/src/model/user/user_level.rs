@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
 #[cfg(feature = "graphql")]
 use juniper::GraphQLObject;
+use serde::{Deserialize, Serialize};
 
 use crate::model::BigInt;
 
