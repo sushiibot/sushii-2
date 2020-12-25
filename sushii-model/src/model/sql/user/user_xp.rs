@@ -5,7 +5,6 @@ use crate::keys::DbPool;
 #[cfg(not(feature = "graphql"))]
 use serenity::{model::prelude::*, prelude::*};
 
-
 #[cfg(feature = "graphql")]
 use juniper::graphql_object;
 #[cfg(feature = "graphql")]
@@ -41,13 +40,13 @@ impl UserXP {
         first: BigInt,
         after: Option<String>,
     ) -> Result<(BigInt, Vec<UserXP>)> {
-        let after_bytes = if let Some(s) = after {
+        let after = if let Some(s) = after {
             Some(decode_cursor(&s)?)
         } else {
             None
         };
 
-        guild_top_query(pool, guild_id.0, timeframe, first.0, after_bytes).await
+        guild_top_query(pool, guild_id.0, timeframe, first.0, after).await
     }
 
     /// Get global all time ranks
@@ -58,13 +57,13 @@ impl UserXP {
         first: BigInt,
         after: Option<String>,
     ) -> Result<(BigInt, Vec<UserXP>)> {
-        let after_bytes = if let Some(s) = after {
+        let after = if let Some(s) = after {
             Some(decode_cursor(&s)?)
         } else {
             None
         };
 
-        global_top_query(pool, timeframe, first.0, after_bytes).await
+        global_top_query(pool, timeframe, first.0, after).await
     }
 }
 
@@ -299,9 +298,8 @@ async fn global_timeframe_user_count(
         TimeFrame::AllTime => {
             sqlx::query!(
                 r#"
-                  SELECT COUNT(user_id) as "total!: BigInt"
+                  SELECT COUNT(DISTINCT user_id) as "total!: BigInt"
                     FROM user_levels
-                GROUP BY user_id
                 "#,
             )
             .fetch_one(pool)
@@ -311,11 +309,10 @@ async fn global_timeframe_user_count(
         TimeFrame::Day => {
             sqlx::query!(
                 r#"
-                  SELECT COUNT(user_id) as "total!: BigInt"
+                  SELECT COUNT(DISTINCT user_id) as "total!: BigInt"
                     FROM user_levels
                    WHERE EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())
                      AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())
-                GROUP BY user_id
                 "#,
             )
             .fetch_one(pool)
@@ -325,11 +322,10 @@ async fn global_timeframe_user_count(
         TimeFrame::Week => {
              sqlx::query!(
                 r#"
-                SELECT COUNT(user_id) as "total!: BigInt"
-                  FROM user_levels
-                 WHERE EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())
-                   AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())
-                GROUP BY user_id
+                  SELECT COUNT(DISTINCT user_id) as "total!: BigInt"
+                    FROM user_levels
+                   WHERE EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())
+                     AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())
                 "#,
             )
             .fetch_one(pool)
@@ -339,11 +335,10 @@ async fn global_timeframe_user_count(
         TimeFrame::Month => {
             sqlx::query!(
                 r#"
-                  SELECT COUNT(user_id) as "total!: BigInt"
+                  SELECT COUNT(DISTINCT user_id) as "total!: BigInt"
                     FROM user_levels
                    WHERE EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())
                      AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
-                GROUP BY user_id
                 "#,
             )
             .fetch_one(pool)
@@ -362,12 +357,13 @@ async fn global_timeframe_users(
 ) -> Result<Vec<UserXP>> {
     match timeframe {
         TimeFrame::AllTime => {
+            tracing::warn!("all time query");
             sqlx::query_as!(
                 UserXP,
                 r#"
                     SELECT user_id as "user_id: BigInt",
                            NULL as "guild_id?: BigInt",
-                           SUM(msg_all_time) AS "xp!: BigInt"
+                           CAST(SUM(msg_all_time) AS BIGINT) AS "xp!: BigInt"
                       FROM user_levels
                      WHERE ((msg_all_time, user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)
                   GROUP BY user_id
@@ -388,7 +384,7 @@ async fn global_timeframe_users(
                 r#"
                     SELECT user_id as "user_id: BigInt",
                            NULL as "guild_id?: BigInt",
-                           SUM(msg_day) AS "xp!: BigInt"
+                           CAST(SUM(msg_day) AS BIGINT) AS "xp!: BigInt"
                       FROM user_levels
                      WHERE EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())
                        AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())
@@ -412,7 +408,7 @@ async fn global_timeframe_users(
                 r#"
                     SELECT user_id as "user_id: BigInt",
                            NULL as "guild_id?: BigInt",
-                           SUM(msg_week) AS "xp!: BigInt"
+                           CAST(SUM(msg_week) AS BIGINT) AS "xp!: BigInt"
                       FROM user_levels
                      WHERE EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())
                        AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())
@@ -436,7 +432,7 @@ async fn global_timeframe_users(
                 r#"
                     SELECT user_id as "user_id: BigInt",
                            NULL as "guild_id?: BigInt",
-                           SUM(msg_month) AS "xp!: BigInt"
+                           CAST(SUM(msg_month) AS BIGINT) AS "xp!: BigInt"
                       FROM user_levels
                      WHERE EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())
                        AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
