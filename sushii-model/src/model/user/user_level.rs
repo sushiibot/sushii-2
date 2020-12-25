@@ -1,11 +1,20 @@
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "graphql")]
+use juniper::GraphQLObject;
+
+use crate::model::BigInt;
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
+#[cfg_attr(
+    feature = "graphql",
+    graphql(description = "A user's level progress"),
+    derive(GraphQLObject)
+)]
 pub struct UserLevelProgress {
-    pub level: i64,
-    pub next_level_xp_required: i64,
-    pub next_level_xp_progress: i64,
-    pub next_level_xp_percentage: u64,
+    pub level: BigInt,
+    pub next_level_xp_required: BigInt,
+    pub next_level_xp_progress: BigInt,
+    pub next_level_xp_percentage: BigInt,
 }
 
 impl UserLevelProgress {
@@ -28,10 +37,10 @@ impl UserLevelProgress {
             ((next_level_xp_progress as f64 / next_level_xp_required as f64) * 100.0) as u64;
 
         Self {
-            level,
-            next_level_xp_required,
-            next_level_xp_progress,
-            next_level_xp_percentage,
+            level: level.into(),
+            next_level_xp_required: next_level_xp_required.into(),
+            next_level_xp_progress: next_level_xp_progress.into(),
+            next_level_xp_percentage: next_level_xp_percentage.into(),
         }
     }
 }

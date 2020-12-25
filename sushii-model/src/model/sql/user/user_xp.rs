@@ -12,6 +12,8 @@ use crate::{
 };
 #[cfg(feature = "graphql")]
 use juniper::graphql_object;
+#[cfg(feature = "graphql")]
+use crate::model::user::UserLevelProgress;
 
 use crate::error::Result;
 use crate::model::BigInt;
@@ -82,6 +84,10 @@ impl UserXP {
 
     async fn user(ctx: &Context) -> Option<CachedUser> {
         ctx.cached_user_loader.load(self.user_id.0).await
+    }
+
+    fn xp_progress(&self) -> UserLevelProgress {
+        UserLevelProgress::from_xp(self.xp.0)
     }
 }
 

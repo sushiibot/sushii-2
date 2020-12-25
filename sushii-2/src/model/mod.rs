@@ -4,7 +4,6 @@ pub mod moderation;
 pub mod pagination;
 pub mod sushii_cache;
 pub mod sushii_config;
-pub mod user;
 
 // SQL models external to share with API server
 pub use sushii_model::model::sql;

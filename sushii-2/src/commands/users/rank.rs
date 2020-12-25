@@ -6,9 +6,9 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 use std::borrow::Cow;
 
+use sushii_model::model::user::UserLevelProgress;
 use crate::keys::*;
 use crate::model::sql::*;
-use crate::model::user::*;
 use crate::utils::user::parse_id;
 
 #[command]
@@ -152,7 +152,7 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
                         e.field(
                             "Level",
-                            format!("{} (Global: {})", level_prog.level, level_prog_global.level),
+                            format!("{} (Global: {})", level_prog.level.0, level_prog_global.level.0),
                             false,
                         );
 
