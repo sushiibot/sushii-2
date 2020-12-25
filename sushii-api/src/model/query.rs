@@ -4,7 +4,8 @@ use sushii_model::{
     model::{
         juniper::Context,
         sql::{UserLevel, UserLevelRanked, UserXP},
-        BigInt, user::TimeFrame
+        user::TimeFrame,
+        BigInt,
     },
     Error,
 };
@@ -39,9 +40,10 @@ impl Query {
         Ok(user_level_ranked)
     }
 
-    async fn user_guild_xp_connection(
+    async fn user_xp_leaderboard_connection(
         ctx: &Context,
-        guild_id: BigInt,
+        /// If None, global ranks
+        guild_id: Option<BigInt>,
         timeframe: TimeFrame,
         first: BigInt,
         after: Option<String>,
@@ -49,8 +51,12 @@ impl Query {
         // Fetch 1 extra to see if theres a next page truncated later
         let first_with_peek = BigInt(first.0 + 1);
 
-        let (total_count, users) =
-            UserXP::guild_top(&ctx.pool, guild_id, timeframe, first_with_peek, after).await?;
+        let (total_count, users) = if let Some(guild_id) = guild_id {
+            UserXP::guild_top(&ctx.pool, guild_id, timeframe, first_with_peek, after).await?
+        } else {
+            UserXP::global_top(&ctx.pool, timeframe, first_with_peek, after).await?
+        };
+
         let users_with_peek_len = users.len();
 
         let edges: Vec<UserXPEdge> = users
