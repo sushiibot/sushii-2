@@ -8,3 +8,5 @@
 **/.gitignore
 **/.env*
 **/*.md
+
+**/sqlx-data.*.json
