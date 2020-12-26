@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
     test-packages:
-        name: Test ${{ matrix.package }}
+        name: Test ${{ matrix.package }} ${{ matrix.args }}
         strategy:
             fail-fast: false
             matrix:
@@ -14,7 +14,7 @@ jobs:
                     - sushii-model
                 include:
                     - package: sushii-api
-                      args: --features graphql
+                      args: --all-features
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
