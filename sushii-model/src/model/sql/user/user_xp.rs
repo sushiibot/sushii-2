@@ -96,6 +96,7 @@ impl UserXP {
     }
 }
 
+#[cfg(feature = "graphql")]
 async fn guild_timeframe_user_count(
     pool: &sqlx::PgPool,
     guild_id: i64,
@@ -166,6 +167,7 @@ async fn guild_timeframe_user_count(
     .map_err(Into::into)
 }
 
+#[cfg(feature = "graphql")]
 async fn guild_timeframe_users(
     pool: &sqlx::PgPool,
     guild_id: i64,
@@ -273,6 +275,7 @@ async fn guild_timeframe_users(
     .map_err(Into::into)
 }
 
+#[cfg(feature = "graphql")]
 async fn guild_top_query(
     pool: &sqlx::PgPool,
     guild_id: i64,
@@ -288,6 +291,7 @@ async fn guild_top_query(
     Ok((total?, users?))
 }
 
+#[cfg(feature = "graphql")]
 async fn global_timeframe_user_count(
     pool: &sqlx::PgPool,
     timeframe: TimeFrame,
@@ -349,6 +353,7 @@ async fn global_timeframe_user_count(
     .map_err(Into::into)
 }
 
+#[cfg(feature = "graphql")]
 async fn global_timeframe_users(
     pool: &sqlx::PgPool,
     timeframe: TimeFrame,
@@ -454,6 +459,7 @@ async fn global_timeframe_users(
     .map_err(Into::into)
 }
 
+#[cfg(feature = "graphql")]
 async fn global_top_query(
     pool: &sqlx::PgPool,
     timeframe: TimeFrame,
