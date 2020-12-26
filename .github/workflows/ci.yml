@@ -10,8 +10,9 @@ jobs:
             matrix:
                 package:
                     - sushii-2
-                    - sushii-api
                     - sushii-model
+                include:
+                    - package: sushii-api
                 include:
                     - package: sushii-api
                       args: --all-features
