@@ -1,5 +1,5 @@
-Dockerfile
-docker-compose.yml
+**/Dockerfile
+**/docker-compose.yml
 
 **/target
 
@@ -7,3 +7,4 @@ docker-compose.yml
 **/.github
 **/.gitignore
 **/.env*
+**/*.md
