@@ -1,0 +1,7 @@
+[tasks.build-sushii-docker]
+command = "docker"
+args = ["build", "-f", "sushii-2/Dockerfile", "."]
+
+[tasks.build-api-docker]
+command = "docker"
+args = ["build", "-f", "sushii-api/Dockerfile", "."]
