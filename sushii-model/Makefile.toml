@@ -1,0 +1,9 @@
+[tasks.sqlx-prepare]
+script = """
+cargo sqlx prepare
+mv sqlx-data.json sqlx-data.default.json
+cargo sqlx prepare -- --all-features
+mv sqlx-data.json sqlx-data.graphql.json
+
+jq -s '.[0] * .[1]' sqlx-data.default.json sqlx-data.graphql.json > sqlx-data.json
+"""
