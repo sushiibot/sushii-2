@@ -42,7 +42,6 @@ impl Query {
 
     async fn user_xp_leaderboard_connection(
         ctx: &Context,
-        /// If None, global ranks
         guild_id: Option<BigInt>,
         timeframe: TimeFrame,
         first: BigInt,
@@ -51,6 +50,7 @@ impl Query {
         // Fetch 1 extra to see if theres a next page truncated later
         let first_with_peek = BigInt(first.0 + 1);
 
+        // If None, global ranks
         let (total_count, users) = if let Some(guild_id) = guild_id {
             UserXP::guild_top(&ctx.pool, guild_id, timeframe, first_with_peek, after).await?
         } else {

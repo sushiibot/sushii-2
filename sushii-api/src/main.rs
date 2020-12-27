@@ -1,8 +1,5 @@
 use actix_cors::Cors;
-use actix_web::{
-    http::{header, Method},
-    middleware, web, App, Error, HttpResponse, HttpServer, Route,
-};
+use actix_web::{middleware, web, App, Error, HttpResponse, HttpServer};
 use juniper::{EmptyMutation, EmptySubscription, RootNode};
 use juniper_actix::{
     graphiql_handler as gqli_handler, graphql_handler, playground_handler as play_handler,
@@ -45,17 +42,6 @@ async fn graphql(
     graphql_handler(&schema, &ctx, req, payload).await
 }
 
-async fn cors_event() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::Ok()
-        .header("Access-Control-Allow-Origin", "*")
-        .header("Access-Control-Allow-Methods", "PUT, GET, OPTIONS")
-        .header(
-            "Access-Control-Allow-Headers",
-            "Content-Type, Authorization, Accept",
-        )
-        .body(""))
-}
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
@@ -72,6 +58,9 @@ async fn main() -> std::io::Result<()> {
         .await
         .expect("Failed to connect to database");
 
+    let allowed_origin =
+        env::var("ALLOWED_ORIGIN").unwrap_or_else(|_| "http://localhost:3000".into());
+
     let server = HttpServer::new(move || {
         App::new()
             .data(schema())
@@ -79,21 +68,25 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Compress::default())
             .wrap(middleware::Logger::default())
             .wrap(
-                Cors::permissive(), /*
-                                    Cors::default()
-                                        .send_wildcard()
-                                        .allowed_methods(vec!["POST", "GET", "OPTIONS"])
-                                        .allowed_headers(vec![header::AUTHORIZATION, header::ACCEPT])
-                                        .allowed_header(header::CONTENT_TYPE)
-                                        .supports_credentials()
-                                        .max_age(3600),
-                                        */
+                Cors::default()
+                    .allowed_origin(&allowed_origin)
+                    .allowed_origin_fn(|origin, head| {
+                        dbg!(origin, head);
+
+                        true
+                    })
+                    .allow_any_header()
+                    .allowed_methods(vec!["GET", "HEAD", "POST", "OPTIONS"])
+                    // Local testing origins
+                    .allowed_origin("http://127.0.0.1:8080")
+                    .allowed_origin("http://localhost:3000")
+                    .allowed_origin("http://localhost:3000/leaderboard")
+                    .max_age(3600),
             )
             .service(
                 web::resource("/")
                     .route(web::post().to(graphql))
-                    .route(web::get().to(graphql))
-                    .route(Route::new().method(Method::OPTIONS).to(cors_event)),
+                    .route(web::get().to(graphql)),
             )
             .service(web::resource("/playground").route(web::get().to(playground_handler)))
             .service(web::resource("/graphiql").route(web::get().to(graphiql_handler)))
