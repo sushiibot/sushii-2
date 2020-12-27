@@ -80,7 +80,6 @@ async fn main() -> std::io::Result<()> {
                     // Local testing origins
                     .allowed_origin("http://127.0.0.1:8080")
                     .allowed_origin("http://localhost:3000")
-                    .allowed_origin("http://localhost:3000/leaderboard")
                     .max_age(3600),
             )
             .service(

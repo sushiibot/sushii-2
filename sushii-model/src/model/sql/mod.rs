@@ -5,6 +5,7 @@ pub mod user;
 
 pub use self::{
     guild::{
+        cached_guild::CachedGuild,
         guild_config::GuildConfig,
         guild_roles::{GuildGroup, GuildRole, GuildRoles},
         guild_setting::{GuildSetting, GuildSettingAction},

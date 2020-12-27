@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-#[cfg(not(feature = "graphql"))]
-use crate::keys::DbPool;
-#[cfg(not(feature = "graphql"))]
-use serenity::{model::prelude::*, prelude::*};
+// #[cfg(not(feature = "graphql"))]
+// use crate::keys::DbPool;
+// #[cfg(not(feature = "graphql"))]
+// use serenity::{model::prelude::*, prelude::*};
 
 #[cfg(feature = "graphql")]
 use juniper::graphql_object;
@@ -18,6 +18,7 @@ use crate::{
     model::{juniper::Context, sql::CachedUser},
 };
 
+#[cfg(feature = "graphql")]
 use crate::error::Result;
 use crate::model::BigInt;
 
@@ -105,64 +106,56 @@ async fn guild_timeframe_user_count(
     // Timeframes also match year, so that old inactive users aren't considered
     // ie. if month could match from last year, but not that significant
     match timeframe {
-        TimeFrame::AllTime => {
-            sqlx::query!(
-                r#"
+        TimeFrame::AllTime => sqlx::query!(
+            r#"
                 SELECT COUNT(*) as "total!: BigInt"
                     FROM user_levels
                     WHERE guild_id = $1
                 "#,
-                guild_id,
-            )
-            .fetch_one(pool)
-            .await
-            .map(|r| r.total)
-        }
-        TimeFrame::Day => {
-            sqlx::query!(
-                r#"
+            guild_id,
+        )
+        .fetch_one(pool)
+        .await
+        .map(|r| r.total),
+        TimeFrame::Day => sqlx::query!(
+            r#"
                 SELECT COUNT(*) as "total!: BigInt"
                   FROM user_levels
                  WHERE guild_id = $1
                    AND EXTRACT(DOY FROM last_msg) = EXTRACT(DOY FROM NOW())
                    AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
                 "#,
-                guild_id,
-            )
-            .fetch_one(pool)
-            .await
-            .map(|r| r.total)
-        }
-        TimeFrame::Week => {
-             sqlx::query!(
-                r#"
+            guild_id,
+        )
+        .fetch_one(pool)
+        .await
+        .map(|r| r.total),
+        TimeFrame::Week => sqlx::query!(
+            r#"
                 SELECT COUNT(*) as "total!: BigInt"
                   FROM user_levels
                  WHERE guild_id = $1
                    AND EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())
                    AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
                 "#,
-                guild_id,
-            )
-            .fetch_one(pool)
-            .await
-            .map(|r| r.total)
-        }
-        TimeFrame::Month => {
-            sqlx::query!(
-                r#"
+            guild_id,
+        )
+        .fetch_one(pool)
+        .await
+        .map(|r| r.total),
+        TimeFrame::Month => sqlx::query!(
+            r#"
                 SELECT COUNT(*) as "total!: BigInt"
                   FROM user_levels
                  WHERE guild_id = $1
                    AND EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())
                    AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
                 "#,
-                guild_id,
-            )
-            .fetch_one(pool)
-            .await
-            .map(|r| r.total)
-        }
+            guild_id,
+        )
+        .fetch_one(pool)
+        .await
+        .map(|r| r.total),
     }
     .map_err(Into::into)
 }
@@ -292,63 +285,52 @@ async fn guild_top_query(
 }
 
 #[cfg(feature = "graphql")]
-async fn global_timeframe_user_count(
-    pool: &sqlx::PgPool,
-    timeframe: TimeFrame,
-) -> Result<BigInt> {
+async fn global_timeframe_user_count(pool: &sqlx::PgPool, timeframe: TimeFrame) -> Result<BigInt> {
     // Timeframes also match year, so that old inactive users aren't considered
     // ie. if month could match from last year, but not that significant
     match timeframe {
-        TimeFrame::AllTime => {
-            sqlx::query!(
-                r#"
+        TimeFrame::AllTime => sqlx::query!(
+            r#"
                   SELECT COUNT(DISTINCT user_id) as "total!: BigInt"
                     FROM user_levels
                 "#,
-            )
-            .fetch_one(pool)
-            .await
-            .map(|r| r.total)
-        }
-        TimeFrame::Day => {
-            sqlx::query!(
-                r#"
+        )
+        .fetch_one(pool)
+        .await
+        .map(|r| r.total),
+        TimeFrame::Day => sqlx::query!(
+            r#"
                   SELECT COUNT(DISTINCT user_id) as "total!: BigInt"
                     FROM user_levels
                    WHERE EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())
                      AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())
                 "#,
-            )
-            .fetch_one(pool)
-            .await
-            .map(|r| r.total)
-        }
-        TimeFrame::Week => {
-             sqlx::query!(
-                r#"
+        )
+        .fetch_one(pool)
+        .await
+        .map(|r| r.total),
+        TimeFrame::Week => sqlx::query!(
+            r#"
                   SELECT COUNT(DISTINCT user_id) as "total!: BigInt"
                     FROM user_levels
                    WHERE EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())
                      AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())
                 "#,
-            )
-            .fetch_one(pool)
-            .await
-            .map(|r| r.total)
-        }
-        TimeFrame::Month => {
-            sqlx::query!(
-                r#"
+        )
+        .fetch_one(pool)
+        .await
+        .map(|r| r.total),
+        TimeFrame::Month => sqlx::query!(
+            r#"
                   SELECT COUNT(DISTINCT user_id) as "total!: BigInt"
                     FROM user_levels
                    WHERE EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())
                      AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
                 "#,
-            )
-            .fetch_one(pool)
-            .await
-            .map(|r| r.total)
-        }
+        )
+        .fetch_one(pool)
+        .await
+        .map(|r| r.total),
     }
     .map_err(Into::into)
 }
@@ -401,7 +383,7 @@ async fn global_timeframe_users(
                     LIMIT $3
                 "#,
                 after.map(|a| Decimal::from(a.0)), // xp
-                after.map(|a| a.1), // user id
+                after.map(|a| a.1),                // user id
                 first,
             )
             .fetch_all(pool)
@@ -425,7 +407,7 @@ async fn global_timeframe_users(
                     LIMIT $3
                 "#,
                 after.map(|a| Decimal::from(a.0)), // xp
-                after.map(|a| a.1), // user id
+                after.map(|a| a.1),                // user id
                 first,
             )
             .fetch_all(pool)
@@ -449,7 +431,7 @@ async fn global_timeframe_users(
                     LIMIT $3
                 "#,
                 after.map(|a| Decimal::from(a.0)), // xp
-                after.map(|a| a.1), // user id
+                after.map(|a| a.1),                // user id
                 first,
             )
             .fetch_all(pool)

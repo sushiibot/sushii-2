@@ -81,6 +81,24 @@
       ]
     }
   },
+  "1caf7004072f6b710d2a8f81c059a5b2ff02ec9f67d4f56740f4085e32e304c7": {
+    "query": "\n        INSERT INTO cached_guilds\n             VALUES ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET name = $2,\n                    member_count = $3,\n                    icon_url = $4,\n                    features = $5,\n                    splash_url = $6,\n                    banner_url = $7\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Int8",
+          "Text",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "1ff5fca2c6ae1d6d51fb54b0a5572b7bc5b8bf6bc0e43c2e39c6d45b342f186b": {
     "query": "\n            SELECT *\n              FROM mod_logs\n             WHERE guild_id = $1\n               AND user_id = $2\n        ",
     "describe": {
@@ -2399,6 +2417,62 @@
         false,
         null,
         null
+      ]
+    }
+  },
+  "cc144e2f1f5e317ec63a5670ffe26f70acc9dfff16105dadeeda43c65054bcb8": {
+    "query": "\n            SELECT id as \"id: BigInt\",\n                   name,\n                   member_count as \"member_count: BigInt\",\n                   icon_url,\n                   features,\n                   splash_url,\n                   banner_url\n              FROM cached_guilds\n             WHERE id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "member_count: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "icon_url",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "features",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "splash_url",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "banner_url",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
       ]
     }
   }

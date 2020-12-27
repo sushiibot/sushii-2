@@ -1,6 +1,7 @@
 use crate::tasks;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 
+mod cache_guild;
 mod cache_user;
 mod join_msg;
 mod member_log;
@@ -66,6 +67,19 @@ impl EventHandler for Handler {
 
     async fn guild_ban_removal(&self, ctx: Context, guild_id: GuildId, unbanned_user: User) {
         mod_log::ban::guild_ban_removal(&ctx, &guild_id, &unbanned_user).await;
+    }
+
+    async fn guild_create(&self, ctx: Context, guild: Guild, is_new: bool) {
+        cache_guild::guild_create(&ctx, &guild, is_new).await;
+    }
+
+    async fn guild_update(
+        &self,
+        ctx: Context,
+        old_guild_if_avail: Option<Guild>,
+        partial_guild: PartialGuild,
+    ) {
+        cache_guild::guild_update(&ctx, &old_guild_if_avail, &partial_guild).await;
     }
 
     async fn guild_member_update(
