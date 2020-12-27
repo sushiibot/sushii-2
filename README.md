@@ -12,7 +12,11 @@ wip... again.
 sushii-2 is split up into a handful of packages, which uses a shared PostgreSQL
 database.
 
-* [`sushii-2`](./sushii-2) - Discord bot process
-* [`sushii-api`](./sushii-api) - GraphQL API server
-* [`sushii-model`](./sushii-model) - Shared models and SQL queries
+* [`sushii-2`] - Discord bot process
+* [`sushii-api`] - GraphQL API server used by [`sushii-web`]
+* [`sushii-model`] - Shared models and SQL queries
 
+[`sushii-2`]: ./sushii-2
+[`sushii-api`]: ./sushii-api
+[`sushii-model`]: ./sushii-model
+[`sushii-web`]: https://github.com/sushiibot/sushii-web
