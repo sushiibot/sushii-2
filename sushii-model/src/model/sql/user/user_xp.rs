@@ -90,6 +90,16 @@ impl UserXP {
         self.xp
     }
 
+    /// Levels gained in given timeframe, None if all time
+    fn timeframe_gained_levels(&self) -> Option<BigInt> {
+        self.xp_diff.map(|diff| {
+            let total_prog = UserLevelProgress::from_xp(self.xp.0);
+            let diff_prog = UserLevelProgress::from_xp(self.xp.0 - diff.0);
+
+            (total_prog.level.0 - diff_prog.level.0).into()
+        })
+    }
+
     async fn user(ctx: &Context) -> Option<CachedUser> {
         ctx.cached_user_loader.load(self.user_id.0).await
     }
