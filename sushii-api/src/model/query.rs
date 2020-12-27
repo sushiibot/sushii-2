@@ -3,7 +3,7 @@ use sushii_model::{
     cursor::encode_cursor,
     model::{
         juniper::Context,
-        sql::{UserLevel, UserLevelRanked, UserXP},
+        sql::{CachedGuild, UserLevel, UserLevelRanked, UserXP},
         user::TimeFrame,
         BigInt,
     },
@@ -38,6 +38,12 @@ impl Query {
         let user_level_ranked = UserLevelRanked::from_id(&ctx.pool, user_id, guild_id).await?;
 
         Ok(user_level_ranked)
+    }
+
+    async fn guild(ctx: &Context, guild_id: BigInt) -> FieldResult<Option<CachedGuild>> {
+        CachedGuild::from_id(&ctx.pool, guild_id)
+            .await
+            .map_err(Into::into)
     }
 
     async fn user_xp_leaderboard_connection(
