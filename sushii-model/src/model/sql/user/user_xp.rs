@@ -27,8 +27,10 @@ pub struct UserXP {
     pub user_id: BigInt,
     /// Guild ID or None if global
     pub guild_id: Option<BigInt>,
-    /// User XP in a time period
+    /// User's total XP in a time period
     pub xp: BigInt,
+    /// User's gained XP in a time period, None in All time
+    pub xp_diff: Option<BigInt>,
 }
 
 impl UserXP {
@@ -122,8 +124,8 @@ async fn guild_timeframe_user_count(
                 SELECT COUNT(*) as "total!: BigInt"
                   FROM user_levels
                  WHERE guild_id = $1
-                   AND EXTRACT(DOY FROM last_msg) = EXTRACT(DOY FROM NOW())
-                   AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
+                   AND EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())
+                   AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())
                 "#,
             guild_id,
         )
@@ -136,7 +138,7 @@ async fn guild_timeframe_user_count(
                   FROM user_levels
                  WHERE guild_id = $1
                    AND EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())
-                   AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
+                   AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())
                 "#,
             guild_id,
         )
@@ -176,7 +178,8 @@ async fn guild_timeframe_users(
                 r#"
                     SELECT user_id as "user_id: BigInt",
                            guild_id as "guild_id?: BigInt",
-                           msg_all_time as "xp: BigInt"
+                           msg_all_time as "xp: BigInt",
+                           NULL as "xp_diff?: BigInt"
                       FROM user_levels
                      WHERE guild_id = $1
                        AND ((msg_all_time, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)
@@ -198,13 +201,14 @@ async fn guild_timeframe_users(
                 r#"
                     SELECT user_id as "user_id: BigInt",
                            guild_id as "guild_id?: BigInt",
-                           msg_all_time as "xp: BigInt"
+                           msg_all_time as "xp: BigInt",
+                           msg_day as "xp_diff?: BigInt"
                       FROM user_levels
                      WHERE guild_id = $1
-                       AND ((msg_all_time, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)
-                       AND EXTRACT(DOY FROM last_msg) = EXTRACT(DOY FROM NOW())
-                       AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
-                  ORDER BY "xp: BigInt" DESC,
+                       AND ((msg_day, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)
+                       AND EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())
+                       AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())
+                  ORDER BY "xp_diff?: BigInt" DESC,
                            "user_id: BigInt" DESC
                      LIMIT $4
                 "#,
@@ -222,13 +226,14 @@ async fn guild_timeframe_users(
                 r#"
                     SELECT user_id as "user_id: BigInt",
                            guild_id as "guild_id?: BigInt",
-                           msg_all_time as "xp: BigInt"
+                           msg_all_time as "xp: BigInt",
+                           msg_week as "xp_diff?: BigInt"
                       FROM user_levels
                      WHERE guild_id = $1
-                       AND ((msg_all_time, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)
+                       AND ((msg_week, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)
                        AND EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())
-                       AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
-                  ORDER BY "xp: BigInt" DESC,
+                       AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())
+                  ORDER BY "xp_diff?: BigInt" DESC,
                            "user_id: BigInt" DESC
                      LIMIT $4
                 "#,
@@ -246,13 +251,14 @@ async fn guild_timeframe_users(
                 r#"
                     SELECT user_id as "user_id: BigInt",
                            guild_id as "guild_id?: BigInt",
-                           msg_all_time as "xp: BigInt"
+                           msg_all_time as "xp: BigInt",
+                           msg_month as "xp_diff?: BigInt"
                       FROM user_levels
                      WHERE guild_id = $1
-                       AND ((msg_all_time, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)
+                       AND ((msg_month, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)
                        AND EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())
                        AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
-                  ORDER BY "xp: BigInt" DESC,
+                  ORDER BY "xp_diff?: BigInt" DESC,
                            "user_id: BigInt" DESC
                      LIMIT $4
                 "#,
@@ -350,7 +356,8 @@ async fn global_timeframe_users(
                 r#"
                     SELECT user_id as "user_id: BigInt",
                            NULL as "guild_id?: BigInt",
-                           CAST(SUM(msg_all_time) AS BIGINT) AS "xp!: BigInt"
+                           CAST(SUM(msg_all_time) AS BIGINT) AS "xp!: BigInt",
+                           NULL as "xp_diff?: BigInt"
                       FROM user_levels
                      WHERE ((msg_all_time, user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)
                   GROUP BY user_id
@@ -371,7 +378,8 @@ async fn global_timeframe_users(
                 r#"
                     SELECT user_id as "user_id: BigInt",
                            NULL as "guild_id?: BigInt",
-                           CAST(SUM(msg_day) AS BIGINT) AS "xp!: BigInt"
+                           CAST(SUM(msg_day) AS BIGINT) AS "xp!: BigInt",
+                           NULL as "xp_diff?: BigInt"
                       FROM user_levels
                      WHERE EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())
                        AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())
@@ -395,7 +403,8 @@ async fn global_timeframe_users(
                 r#"
                     SELECT user_id as "user_id: BigInt",
                            NULL as "guild_id?: BigInt",
-                           CAST(SUM(msg_week) AS BIGINT) AS "xp!: BigInt"
+                           CAST(SUM(msg_week) AS BIGINT) AS "xp!: BigInt",
+                           NULL as "xp_diff?: BigInt"
                       FROM user_levels
                      WHERE EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())
                        AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())
@@ -419,7 +428,8 @@ async fn global_timeframe_users(
                 r#"
                     SELECT user_id as "user_id: BigInt",
                            NULL as "guild_id?: BigInt",
-                           CAST(SUM(msg_month) AS BIGINT) AS "xp!: BigInt"
+                           CAST(SUM(msg_month) AS BIGINT) AS "xp!: BigInt",
+                           NULL as "xp_diff?: BigInt"
                       FROM user_levels
                      WHERE EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())
                        AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())
