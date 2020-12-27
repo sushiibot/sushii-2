@@ -120,6 +120,23 @@ services:
             - sushii_net
         labels:
             - traefik.enable=false
+    sushii-api:
+        image: ghcr.io/sushiibot/sushii-api:latest
+        container_name: sushii-api
+        restart: unless-stopped
+        depends_on:
+            - postgres
+        expose:
+            - "8080"
+        env_file:
+            - .env
+        networks:
+            - sushii_net
+            - web
+        labels:
+            - "traefik.http.routers.sushii-api.rule=Host(`api.sushii.xyz`)"
+            - "traefik.http.routers.sushii-api.entrypoints=secure"
+            - "traefik.http.routers.sushii-api.tls.certresolver=acme"
     sushii:
         image: ghcr.io/sushiibot/sushii-2:latest
         container_name: sushii

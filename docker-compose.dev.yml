@@ -4,4 +4,12 @@ services:
         ports:
             - "5432:5432"
     sushii:
-        build: ./sushii-2/
+        build:
+            dockerfile: ./sushii-2/Dockerfile
+            context: .
+    sushii-api:
+        build:
+            dockerfile: ./sushii-api/Dockerfile
+            context: .
+        ports:
+            - "8080:8080"
