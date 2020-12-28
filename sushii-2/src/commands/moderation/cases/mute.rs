@@ -321,7 +321,7 @@ async fn listmutes(ctx: &Context, msg: &Message) -> CommandResult {
     let mut s = String::new();
 
     if !definite_mutes.is_empty() {
-        let _ = write!(s, "`total` | `remaining`");
+        let _ = writeln!(s, "`total` | `remaining`");
     }
 
     for mute in definite_mutes {
