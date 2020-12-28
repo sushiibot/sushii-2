@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -  `serverinfo` command
 -  Respond with prefix info when bot is mentioned
 -  Add member logs
+-  Leaderboards
 
 ### Changed
 
