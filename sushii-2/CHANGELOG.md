@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [0.1.14] 2020-12-27
 
 ### Fixed
 
@@ -209,7 +209,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Prevent role handler from running outside of role channels
 -   Fix mod log entry saving
 
-[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.13...HEAD
+[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.14...HEAD
+[0.1.14]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.13...sushii-2-v0.1.14
 [0.1.13]: https://github.com/sushiibot/sushii-2/compare/v0.1.12...sushii-2-v0.1.13
 [0.1.12]: https://github.com/sushiibot/sushii-2/compare/v0.1.11...v0.1.12
 [0.1.11]: https://github.com/sushiibot/sushii-2/compare/v0.1.10...v0.1.11
