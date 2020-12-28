@@ -90,6 +90,10 @@ impl UserXP {
         self.xp
     }
 
+    fn xp_diff(&self) -> Option<BigInt> {
+        self.xp_diff
+    }
+
     /// Levels gained in given timeframe, None if all time
     fn timeframe_gained_levels(&self) -> Option<BigInt> {
         self.xp_diff.map(|diff| {
@@ -388,8 +392,8 @@ async fn global_timeframe_users(
                 r#"
                     SELECT user_id as "user_id: BigInt",
                            NULL as "guild_id?: BigInt",
-                           CAST(SUM(msg_day) AS BIGINT) AS "xp!: BigInt",
-                           NULL as "xp_diff?: BigInt"
+                           CAST(SUM(msg_all_time) AS BIGINT) AS "xp!: BigInt",
+                           CAST(SUM(msg_day) AS BIGINT) AS "xp_diff?: BigInt"
                       FROM user_levels
                      WHERE EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())
                        AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())
@@ -413,8 +417,8 @@ async fn global_timeframe_users(
                 r#"
                     SELECT user_id as "user_id: BigInt",
                            NULL as "guild_id?: BigInt",
-                           CAST(SUM(msg_week) AS BIGINT) AS "xp!: BigInt",
-                           NULL as "xp_diff?: BigInt"
+                           CAST(SUM(msg_all_time) AS BIGINT) AS "xp!: BigInt",
+                           CAST(SUM(msg_week) AS BIGINT) AS "xp_diff?: BigInt"
                       FROM user_levels
                      WHERE EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())
                        AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())
@@ -438,8 +442,8 @@ async fn global_timeframe_users(
                 r#"
                     SELECT user_id as "user_id: BigInt",
                            NULL as "guild_id?: BigInt",
-                           CAST(SUM(msg_month) AS BIGINT) AS "xp!: BigInt",
-                           NULL as "xp_diff?: BigInt"
+                           CAST(SUM(msg_all_time) AS BIGINT) AS "xp!: BigInt",
+                           CAST(SUM(msg_month) AS BIGINT) AS "xp_diff?: BigInt"
                       FROM user_levels
                      WHERE EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())
                        AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())

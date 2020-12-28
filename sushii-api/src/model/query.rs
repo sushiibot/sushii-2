@@ -40,6 +40,7 @@ impl Query {
         Ok(user_level_ranked)
     }
 
+    /// Get a guild's cached info
     async fn guild(ctx: &Context, guild_id: BigInt) -> FieldResult<Option<CachedGuild>> {
         CachedGuild::from_id(&ctx.pool, guild_id)
             .await
