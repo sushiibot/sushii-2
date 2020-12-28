@@ -320,16 +320,20 @@ async fn listmutes(ctx: &Context, msg: &Message) -> CommandResult {
 
     let mut s = String::new();
 
+    if !definite_mutes.is_empty() {
+        let _ = write!(s, "`total` | `remaining`");
+    }
+
     for mute in definite_mutes {
         if let Some(d) = mute.get_human_duration() {
             let _ = write!(s, "`{}`", d);
         }
 
         if let Some(d) = mute.get_human_duration_remaining() {
-            let _ = write!(s, " | `{}` remaining", d);
+            let _ = write!(s, " | `{}`", d);
         }
 
-        let _ = writeln!(s, ": <@{}>", mute.user_id as u64);
+        let _ = writeln!(s, " <@{}>", mute.user_id as u64);
     }
 
     if !indefinite_mutes.is_empty() {
