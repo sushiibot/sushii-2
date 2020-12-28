@@ -27,6 +27,7 @@ jobs:
                   then
                       echo ::set-output name=image::${{ env.SUSHII_2_IMAGE_NAME}}
                       echo ::set-output name=docker_file::"./sushii-2/Dockerfile"
+                      echo ::set-output name=title::"sushii-2"
                       echo ::set-output name=description::"Moderation bot for Discord"
                       exit 0
                   fi
@@ -35,6 +36,7 @@ jobs:
                   then
                       echo ::set-output name=image::${{ env.SUSHII_API_IMAGE_NAME}}
                       echo ::set-output name=docker_file::"./sushii-api/Dockerfile"
+                      echo ::set-output name=title::"sushii-api"
                       echo ::set-output name=description::"GraphQL API server for sushii2"
                       exit 0
                   fi
@@ -80,4 +82,5 @@ jobs:
                   tags: ${{ steps.docker_meta.outputs.tags }}
                   labels: |
                       ${{ steps.docker_meta.outputs.labels }}
+                      org.opencontainers.image.title=${{ steps.docker_image_select.outputs.title }}
                       org.opencontainers.image.description=${{ steps.docker_image_select.outputs.description }}
