@@ -373,13 +373,13 @@ async fn global_timeframe_users(
                            CAST(SUM(msg_all_time) AS BIGINT) AS "xp!: BigInt",
                            NULL as "xp_diff?: BigInt"
                       FROM user_levels
-                     WHERE ((msg_all_time, user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)
                   GROUP BY user_id
+                    HAVING ((SUM(msg_all_time), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)
                   ORDER BY "xp!: BigInt" DESC,
                            "user_id: BigInt" DESC
                     LIMIT $3
                 "#,
-                after.map(|a| a.0), // xp
+                after.map(|a| Decimal::from(a.0)), // xp
                 after.map(|a| a.1), // user id
                 first,
             )
