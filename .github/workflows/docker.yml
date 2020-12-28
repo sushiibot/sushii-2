@@ -3,8 +3,8 @@ name: Docker
 on:
     push:
         tags:
-            - "sushii-2 v*"
-            - "sushii-api v*"
+            - "sushii-2-v*"
+            - "sushii-api-v*"
 
 env:
     SUSHII_2_IMAGE_NAME: ghcr.io/sushiibot/sushii-2
