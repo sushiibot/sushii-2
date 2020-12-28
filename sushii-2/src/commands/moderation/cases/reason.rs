@@ -155,7 +155,10 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     for mut entry in entries {
         let msg_id = match entry.msg_id {
             Some(id) => id,
-            None => continue,
+            None => {
+                tracing::warn!(?entry, "Missing msg_id for case");
+                continue;
+            },
         };
 
         let mut message = match channel.message(&ctx.http, msg_id as u64).await {

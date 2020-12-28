@@ -119,6 +119,8 @@ impl<'a> ModLogReporter<'a> {
             {
                 Ok(msg) => {
                     entry.msg_id.replace(msg.id.0 as i64);
+                    // Save msg_id, as we saved above earlier
+                    entry.save(ctx).await?;
                 }
                 Err(e) => tracing::error!("Failed to send mod log entry message: {}", e),
             }
