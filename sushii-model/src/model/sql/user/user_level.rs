@@ -50,14 +50,17 @@ impl UserLevel {
 
     /// Increments values with the time intervals reset accordingly
     pub fn inc(mut self) -> Self {
+        self.reset_intervals().inc_fields();
+
         // Set last_message to now, so that next XP inc is minimum 1 minute later
+        // Must be set AFTER intervals are reset, otherwise they will never be reset
         self.last_msg = Utc::now().naive_utc();
 
-        self.reset_intervals().inc_fields()
+        self
     }
 
     /// Resets intervals that have expired
-    fn reset_intervals(mut self) -> Self {
+    fn reset_intervals(&mut self) -> &mut Self {
         let now = Utc::now().naive_utc();
 
         if now.ordinal() != self.last_msg.ordinal() {
@@ -76,7 +79,7 @@ impl UserLevel {
     }
 
     /// Increment all fields by 5
-    fn inc_fields(mut self) -> Self {
+    fn inc_fields(&mut self) -> &mut Self {
         // Add enough to be rounded to 5
         let to_add = 5 - self.msg_all_time.0 % 5;
 
