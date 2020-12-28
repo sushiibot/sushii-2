@@ -25,7 +25,7 @@ jobs:
 
                   if [[ ${GITHUB_REF#refs/*/} == sushii-2* ]]
                   then
-                      echo ::set-output name=$SUSHII_2_IMAGE_NAME
+                      echo ::set-output name=${{ env.SUSHII_2_IMAGE_NAME}}
                       echo ::set-output docker_file="./sushii-2/Dockerfile"
                       echo ::set-output description="Moderation bot for Discord"
                       exit 0
@@ -33,7 +33,7 @@ jobs:
 
                   if [[ ${GITHUB_REF#refs/*/} == sushii-api* ]]
                   then
-                      echo ::set-output name=$SUSHII_API_IMAGE_NAME
+                      echo ::set-output name=${{ env.SUSHII_API_IMAGE_NAME}}
                       echo ::set-output docker_file="./sushii-api/Dockerfile"
                       echo ::set-output description="GraphQL API server for sushii2"
                       exit 0
