@@ -50,6 +50,13 @@ async fn main() -> std::io::Result<()> {
         .with_env_filter(EnvFilter::from_default_env().add_directive(LevelFilter::INFO.into()))
         .init();
 
+    let interface_port = env::var("INTERFACE_PORT")
+        .unwrap_or_else(|_| {
+            tracing::warn!("INTERFACE_PORT not in environment, falling back to 127.0.0.1:8080");
+            
+            "127.0.0.1:8080".into()
+        });
+
     let db_url = env::var("DATABASE_URL").expect("Missing DATABASE_URL in environment");
 
     let pool = PgPoolOptions::new()
@@ -90,5 +97,5 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/playground").route(web::get().to(playground_handler)))
             .service(web::resource("/graphiql").route(web::get().to(graphiql_handler)))
     });
-    server.bind("127.0.0.1:8080").unwrap().run().await
+    server.bind(&interface_port).unwrap().run().await
 }
