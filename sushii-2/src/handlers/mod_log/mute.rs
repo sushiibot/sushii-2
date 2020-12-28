@@ -140,10 +140,13 @@ async fn _guild_member_update(
 
     tracing::debug!(?mute_entry, ?entry, "Added mod log entry");
 
-    if let Some(mute_entry) = mute_entry {
+    let mute_entry = if let Some(mute_entry) = mute_entry {
         // Add the mod log case id and save it to db
-        mute_entry.case_id(entry.case_id).save(&ctx).await?;
-    }
+        // Return again to use it below
+        Some(mute_entry.case_id(entry.case_id).save(&ctx).await?)
+    } else {
+        None
+    };
 
     // If dm isn't enabled skip the rest
     if !guild_conf.mute_dm_enabled {
@@ -167,6 +170,11 @@ async fn _guild_member_update(
         } else {
             write!(s, "Reason: No reason given")?;
         }
+    }
+
+    if let Some(dur_str) = mute_entry.and_then(|m| m.get_human_duration()) {
+        writeln!(s)?;
+        write!(s, "Duration: {}", dur_str)?;
     }
 
     new_member.user.dm(ctx, |m| m.content(s)).await?;
