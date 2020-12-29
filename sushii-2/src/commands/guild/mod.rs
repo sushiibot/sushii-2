@@ -1,10 +1,11 @@
 use serenity::framework::standard::macros::group;
 
+mod first;
 mod leaderboard;
 mod serverinfo;
 
-use self::{leaderboard::*, serverinfo::*};
+use self::{first::*, leaderboard::*, serverinfo::*};
 
 #[group]
-#[commands(serverinfo, leaderboard)]
+#[commands(serverinfo, leaderboard, first)]
 pub struct Guild;

@@ -1,6 +1,6 @@
 use metrics::{counter, decrement_gauge, increment_gauge, register_counter, register_gauge};
 use metrics_exporter_prometheus::PrometheusBuilder;
-use metrics_util::layers::{PrefixLayer, Layer};
+use metrics_util::layers::{Layer, PrefixLayer};
 use serenity::{model::prelude::*, prelude::*};
 use std::net::SocketAddr;
 
@@ -44,7 +44,7 @@ impl Metrics {
         // Spawn metrics hyper server in background
         tokio::spawn(async move {
             if let Err(e) = exporter.await {
-                tracing::warn!("Metrics exporter error: {}" ,e);
+                tracing::warn!("Metrics exporter error: {}", e);
             }
         });
 

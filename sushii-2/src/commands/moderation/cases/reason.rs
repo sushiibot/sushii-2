@@ -158,7 +158,7 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             None => {
                 tracing::warn!(?entry, "Missing msg_id for case");
                 continue;
-            },
+            }
         };
 
         let mut message = match channel.message(&ctx.http, msg_id as u64).await {
