@@ -2972,6 +2972,7 @@ dependencies = [
  "lazy_static",
  "metrics",
  "metrics-exporter-prometheus",
+ "metrics-util",
  "num-format",
  "num-traits",
  "num_cpus",

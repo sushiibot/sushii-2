@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
 
     sqlx::migrate!("./migrations").run(&pool).await?;
 
-    let metrics = Arc::new(Metrics::new(&sushii_conf));
+    let metrics = Arc::new(Metrics::new(&sushii_conf).await);
 
     let http = Http::new_with_token(&sushii_conf.discord_token);
 

@@ -1,5 +1,6 @@
 use metrics::{counter, decrement_gauge, increment_gauge, register_counter, register_gauge};
 use metrics_exporter_prometheus::PrometheusBuilder;
+use metrics_util::layers::{PrefixLayer, Layer};
 use serenity::{model::prelude::*, prelude::*};
 use std::net::SocketAddr;
 
@@ -26,20 +27,32 @@ impl UserType {
 pub struct Metrics;
 
 impl Metrics {
-    pub fn new(conf: &SushiiConfig) -> Self {
+    pub async fn new(conf: &SushiiConfig) -> Self {
         let addr: SocketAddr = (conf.metrics_interface, conf.metrics_port).into();
         tracing::info!("Metrics server listening on http://{}", addr);
 
         // Start metrics server
-        PrometheusBuilder::new()
+        let (recorder, exporter) = PrometheusBuilder::new()
             .listen_address(addr)
-            .install()
-            .expect("Failed to install Prometheus recorder");
+            .build_with_exporter()
+            .expect("Failed to build metrics recorder");
 
-        register_counter!("sushii_messages", "number of messages received");
-        register_counter!("sushii_events", "number of events received");
-        register_gauge!("sushii_guilds_total", "number of total guilds");
-        register_gauge!("sushii_members_total", "number of total members");
+        let prefix = PrefixLayer::new("sushii_");
+        let layered = prefix.layer(recorder);
+        metrics::set_boxed_recorder(Box::new(layered)).expect("Failed to install recorder");
+
+        // Spawn metrics hyper server in background
+        tokio::spawn(async move {
+            if let Err(e) = exporter.await {
+                tracing::warn!("Metrics exporter error: {}" ,e);
+            }
+        });
+
+        register_counter!("messages", "number of messages received");
+        register_counter!("commands", "number of commands received");
+        register_counter!("events", "number of events received");
+        register_gauge!("guilds", "number of total guilds");
+        register_gauge!("members", "number of total members");
 
         Self
     }
@@ -49,30 +62,30 @@ impl Metrics {
             Event::MessageCreate(MessageCreateEvent { message, .. }) => {
                 // Regular user
                 if !message.author.bot {
-                    counter!("sushii_messages", 1, "user_type" => UserType::user.as_str());
+                    counter!("messages", 1, "user_type" => UserType::user.as_str());
                 // Sushii messages
                 } else if message.is_own(&ctx.cache).await {
-                    counter!("sushii_messages", 1, "user_type" => UserType::own.as_str());
+                    counter!("messages", 1, "user_type" => UserType::own.as_str());
                 // Other bot messages
                 } else {
-                    counter!("sushii_messages", 1, "user_type" => UserType::other_bot.as_str());
+                    counter!("messages", 1, "user_type" => UserType::other_bot.as_str());
                 }
             }
             Event::GuildCreate(GuildCreateEvent { guild, .. }) => {
-                increment_gauge!("sushii_guilds_total", 1.0);
-                increment_gauge!("sushii_members_total", guild.member_count as f64);
+                increment_gauge!("guilds", 1.0);
+                increment_gauge!("members", guild.member_count as f64);
             }
             Event::GuildDelete(_) => {
-                decrement_gauge!("sushii_guilds_total", 1.0);
+                decrement_gauge!("guilds", 1.0);
 
                 // self.members stale value,
                 // don't have the guild anymore so don't know how many to sub()
             }
             Event::GuildMemberAdd(_) => {
-                increment_gauge!("sushii_members_total", 1.0);
+                increment_gauge!("members", 1.0);
             }
             Event::GuildMemberRemove(_) => {
-                decrement_gauge!("sushii_members_total", 1.0);
+                decrement_gauge!("members", 1.0);
             }
             _ => {}
         }
@@ -120,6 +133,6 @@ impl Metrics {
             _ => "UNKNOWN",
         };
 
-        counter!("sushii_events", 1, "event_type" => event_name);
+        counter!("events", 1, "event_type" => event_name);
     }
 }

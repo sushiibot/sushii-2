@@ -66,5 +66,5 @@ pub async fn after(ctx: &Context, msg: &Message, cmd_name: &str, error: Result<(
             .await;
     }
 
-    metrics::counter!("sushii_commands", 1, "command_name" => cmd_name.to_string());
+    metrics::counter!("commands", 1, "command_name" => cmd_name.to_string());
 }

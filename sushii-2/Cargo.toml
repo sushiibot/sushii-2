@@ -40,6 +40,10 @@ branch = "main"
 git = "https://github.com/metrics-rs/metrics.git"
 branch = "main"
 
+[dependencies.metrics-util]
+git = "https://github.com/metrics-rs/metrics.git"
+branch = "main"
+
 [dependencies.lastfm-rs]
 git = "https://github.com/KamranMackey/lastfm-rs"
 branch = "main"
