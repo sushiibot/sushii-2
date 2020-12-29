@@ -7,7 +7,7 @@ use juniper_actix::{
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use sushii_model::model::juniper::Context;
-use tracing_subscriber::filter::{EnvFilter, LevelFilter};
+use tracing_subscriber::filter::EnvFilter;
 
 mod model;
 mod relay;
@@ -47,7 +47,7 @@ async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
 
     tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env().add_directive(LevelFilter::INFO.into()))
+        .with_env_filter(EnvFilter::from_default_env())
         .init();
 
     let interface_port = env::var("INTERFACE_PORT")
