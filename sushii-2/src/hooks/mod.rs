@@ -52,7 +52,7 @@ pub async fn dispatch_error(ctx: &Context, msg: &Message, error: DispatchError) 
 }
 
 #[hook]
-pub async fn after(ctx: &Context, msg: &Message, _: &str, error: Result<(), CommandError>) {
+pub async fn after(ctx: &Context, msg: &Message, cmd_name: &str, error: Result<(), CommandError>) {
     // Errors here are only from sushii errors, not user input errors
     if let Err(e) = error {
         tracing::error!(?msg, %e, "Error running command");
@@ -65,4 +65,6 @@ pub async fn after(ctx: &Context, msg: &Message, _: &str, error: Result<(), Comm
             .say(&ctx, "Something went wrong while running this command :(")
             .await;
     }
+
+    metrics::counter!("sushii_commands", 1, "command_name" => cmd_name.to_string());
 }
