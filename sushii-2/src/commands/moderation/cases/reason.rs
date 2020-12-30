@@ -200,7 +200,7 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 entries = entries.into_iter().filter(|e| e.reason.is_none()).collect();
             }
             Some(r) if r == "abort" => {
-                msg.reply(ctx, "Aborted.").await?;
+                msg.reply(ctx, "Aborted, no case reasons were updated.").await?;
                 return Ok(());
             }
             Some(r) => {
