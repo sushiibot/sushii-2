@@ -18,10 +18,7 @@ async fn first(ctx: &Context, msg: &Message) -> CommandResult {
         };
 
         msg.channel_id
-            .say(
-                ctx,
-                format!("First message in this channel:\n{}", link),
-            )
+            .say(ctx, format!("First message in this channel:\n{}", link))
             .await?;
     } else {
         msg.channel_id

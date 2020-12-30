@@ -4,9 +4,13 @@ use serenity::builder::CreateEmbed;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use std::fmt::Write;
+use std::time::Duration;
 
-use crate::keys::CacheAndHttpContainer;
-use crate::model::sql::{GuildConfig, ModLogEntry};
+use crate::model::{
+    sql::{GuildConfig, ModLogEntry},
+    Confirmation,
+};
 
 enum CaseRange {
     /// A single case ID
@@ -105,7 +109,7 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         return Ok(());
     };
 
-    let entries = match case_range {
+    let mut entries = match case_range {
         CaseRange::Single(id) => ModLogEntry::get_range_entries(&ctx, guild_id, id, id).await?,
         CaseRange::Range { start, end } => {
             ModLogEntry::get_range_entries(&ctx, guild_id, start, end).await?
@@ -134,17 +138,92 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     };
 
-    let data = &ctx.data.read().await;
-    let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
+    let num_with_reason =
+        entries.iter().fold(
+            0,
+            |acc, entry| {
+                if entry.reason.is_some() {
+                    acc + 1
+                } else {
+                    acc
+                }
+            },
+        );
+
+    // Get confirmation if theres some cases already with reason se
+    if num_with_reason > 0 {
+        let mut desc = "There ".to_string();
+
+        if num_with_reason == 1 {
+            write!(desc, "is {}/{} case ", num_with_reason, entries.len())?;
+        } else {
+            write!(desc, "are {}/{} cases ", num_with_reason, entries.len())?;
+        }
+
+        writeln!(desc, "with a reason already set.")?;
+
+        writeln!(desc)?;
+        writeln!(desc, "React to choose and confirm your action")?;
+
+        let mut opts = Vec::new();
+
+        writeln!(desc, ":a: Overwrite all case reasons")?;
+        opts.push((ReactionType::Unicode("🅰️".into()), "overwrite"));
+        // If all cases have a reason, it's either overwrite all, or write none
+        if num_with_reason != entries.len() {
+            writeln!(desc, ":regional_indicator_s: Update only cases without a reason (skip cases already with a reason)")?;
+            opts.push((ReactionType::Unicode("🇸".into()), "only_unset"));
+        }
+
+        writeln!(desc, ":x: Abort, don't update any case reasons")?;
+        opts.push((ReactionType::Unicode("❌".into()), "abort"));
+
+        let reason = reason.to_owned();
+
+        let mut confirm = Confirmation::new(msg.author.id, move |e| {
+            e.title("Warning");
+            e.description(desc.clone());
+            e.field("Reason", reason, false);
+            e.footer(|f| f.text("Aborts in 1 minute"));
+
+            e
+        })
+        .options(opts)
+        .timeout(Duration::from_secs(60));
+
+        match confirm.await_confirmation(ctx, msg.channel_id).await? {
+            Some(r) if r == "overwrite" => {
+                // Overwrite means just do nothing and continue
+            }
+            Some(r) if r == "only_unset" => {
+                // Filter out cases with a reason set
+                entries = entries.into_iter().filter(|e| e.reason.is_none()).collect();
+            }
+            Some(r) if r == "abort" => {
+                msg.reply(ctx, "Aborted.").await?;
+                return Ok(());
+            }
+            Some(r) => {
+                tracing::error!("Unhandled confirmation option: {}", r);
+                msg.reply(ctx, "Error: Invalid options").await?;
+                return Ok(());
+            }
+            None => {
+                msg.reply(ctx, "No response after 1 minute, aborting.")
+                    .await?;
+                return Ok(());
+            }
+        }
+    }
 
     // Since take ownership of entries in the iteration, just saving the length
     let num_entries = entries.len();
 
-    let num_cases_str = match case_range {
-        CaseRange::Single(_) => "1 case".into(),
-        CaseRange::Range { start, end } => format!("{} cases ({}-{})", num_entries, start, end),
-        CaseRange::Latest => "latest 1 case".into(),
-        CaseRange::LatestCount(_) => format!("latest {} cases", num_entries),
+    // Needs to be updated when confirmation modifies entries
+    let num_cases_str = if num_entries == 1 {
+        "1 case".into()
+    } else {
+        format!("{} cases", num_entries)
     };
 
     let mut sent_msg = msg
@@ -211,7 +290,7 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         });
 
         if let Err(e) = message
-            .edit(&cache_http, |m| {
+            .edit(ctx, |m| {
                 m.embed(|e| {
                     *e = CreateEmbed::from(embed);
                     e.author(|a| {

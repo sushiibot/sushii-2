@@ -162,18 +162,19 @@ async fn _guild_member_update(
         .unwrap_or_else(|| format!("Unknown Guild (ID: {})", new_member.guild_id.0));
 
     // Dm user
-    let mut s = format!("You have been {}d in {}", action, guild_name);
+    let mut s = String::new();
+
+    writeln!(s, "You have been {}d in {}", action, guild_name)?;
 
     if action == "mute" {
         if let Some(ref reason) = entry.reason {
-            write!(s, "Reason: {}", reason)?;
+            writeln!(s, "Reason: {}", reason)?;
         } else {
-            write!(s, "Reason: No reason given")?;
+            writeln!(s, "Reason: No reason given")?;
         }
     }
 
     if let Some(dur_str) = mute_entry.and_then(|m| m.get_human_duration()) {
-        writeln!(s)?;
         write!(s, "Duration: {}", dur_str)?;
     }
 
