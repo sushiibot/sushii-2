@@ -135,6 +135,7 @@ services:
             - web
         labels:
             - "traefik.docker.network=web"
+            - "traefik.http.services.sushii-api.loadbalancer.server.port=8080"
             - "traefik.http.routers.sushii-api.rule=Host(`api.sushii.xyz`)"
             - "traefik.http.routers.sushii-api.entrypoints=secure"
             - "traefik.http.routers.sushii-api.tls.certresolver=acme"
