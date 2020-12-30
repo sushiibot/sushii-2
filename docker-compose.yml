@@ -134,6 +134,7 @@ services:
             - sushii_net
             - web
         labels:
+            - "traefik.docker.network=web"
             - "traefik.http.routers.sushii-api.rule=Host(`api.sushii.xyz`)"
             - "traefik.http.routers.sushii-api.entrypoints=secure"
             - "traefik.http.routers.sushii-api.tls.certresolver=acme"
