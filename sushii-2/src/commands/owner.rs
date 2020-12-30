@@ -1,6 +1,7 @@
-use serenity::framework::standard::{macros::command, CommandResult};
+use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use serenity::utils::parse_channel;
 
 use crate::keys::ShardManagerContainer;
 
@@ -13,6 +14,37 @@ async fn quit(ctx: &Context, msg: &Message) -> CommandResult {
     msg.channel_id.say(ctx, "bye").await?;
 
     manager.lock().await.shutdown_all().await;
+
+    Ok(())
+}
+
+#[command]
+#[owners_only]
+async fn say(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    let channel_str = args.single::<String>()?;
+
+    let channel_id = match channel_str
+        .parse::<u64>()
+        .ok()
+        .or_else(|| parse_channel(channel_str))
+    {
+        Some(id) => id,
+        None => {
+            msg.reply(ctx, "Invalid channel").await?;
+
+            return Ok(());
+        }
+    };
+
+    let s = args.rest().trim();
+
+    if s.is_empty() {
+        msg.reply(ctx, "Empty message").await?;
+
+        return Ok(());
+    }
+
+    ChannelId(channel_id).say(ctx, s).await?;
 
     Ok(())
 }
