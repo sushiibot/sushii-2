@@ -129,7 +129,7 @@ impl ModActionExecutor {
                             user,
                             0u8,
                             format!(
-                                "[Ban by user: {} (ID: {})] {}",
+                                "[Ban by {} (ID: {})] {}",
                                 &msg.author.tag(),
                                 &msg.author.id.0,
                                 &reason
@@ -143,7 +143,7 @@ impl ModActionExecutor {
                             user,
                             0u8,
                             format!(
-                                "[Ban by user: {} (ID: {})] No reason provided",
+                                "[Ban by {} (ID: {})] No reason provided",
                                 &msg.author.tag(),
                                 &msg.author.id.0,
                             ),
@@ -161,7 +161,7 @@ impl ModActionExecutor {
                             &ctx.http,
                             user,
                             &format!(
-                                "[Kick by user: {} (ID: {})] {}",
+                                "[Kick by {} (ID: {})] {}",
                                 &msg.author.tag(),
                                 &msg.author.id.0,
                                 &reason
@@ -174,7 +174,7 @@ impl ModActionExecutor {
                             &ctx.http,
                             user,
                             &format!(
-                                "[Kick by user: {} (ID: {})] No reason provided",
+                                "[Kick by {} (ID: {})] No reason provided",
                                 &msg.author.tag(),
                                 &msg.author.id.0,
                             ),

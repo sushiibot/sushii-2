@@ -178,7 +178,8 @@ async fn _guild_member_update(
         write!(s, "Duration: {}", dur_str)?;
     }
 
-    new_member.user.dm(ctx, |m| m.content(s)).await?;
+    // Ignore if dm fails, could be disabled
+    let _ = new_member.user.dm(ctx, |m| m.content(s)).await;
 
     Ok(())
 }

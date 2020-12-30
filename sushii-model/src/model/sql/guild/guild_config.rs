@@ -456,6 +456,11 @@ impl fmt::Display for GuildConfig {
                 None,
             ),
             (
+                "Warn DM",
+                Some(self.warn_dm_text.clone()),
+                Some(self.warn_dm_enabled),
+            ),
+            (
                 "Mute DM",
                 Some(self.mute_dm_text.clone()),
                 Some(self.mute_dm_enabled),
