@@ -1,13 +1,13 @@
 use crate::tasks;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 
-mod cache_guild;
-mod cache_user;
+mod cache;
 mod join_msg;
 mod member_log;
 mod mention;
 mod mod_log;
 mod msg_log;
+mod notification;
 mod raw_event_handler;
 mod roles;
 mod user_levels;
@@ -37,7 +37,8 @@ impl EventHandler for Handler {
             user_levels::message(&ctx, &msg),
             msg_log::message(&ctx, &msg),
             mention::message(&ctx, &msg),
-            cache_user::message(&ctx, &msg),
+            cache::cache_user::message(&ctx, &msg),
+            notification::message(&ctx, &msg),
         );
     }
 
@@ -70,7 +71,7 @@ impl EventHandler for Handler {
     }
 
     async fn guild_create(&self, ctx: Context, guild: Guild, is_new: bool) {
-        cache_guild::guild_create(&ctx, &guild, is_new).await;
+        cache::cache_guild::guild_create(&ctx, &guild, is_new).await;
     }
 
     async fn guild_update(
@@ -79,7 +80,7 @@ impl EventHandler for Handler {
         old_guild_if_avail: Option<Guild>,
         partial_guild: PartialGuild,
     ) {
-        cache_guild::guild_update(&ctx, &old_guild_if_avail, &partial_guild).await;
+        cache::cache_guild::guild_update(&ctx, &old_guild_if_avail, &partial_guild).await;
     }
 
     async fn guild_member_update(

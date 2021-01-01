@@ -5,6 +5,7 @@ pub mod help;
 pub mod lastfm;
 pub mod meta;
 pub mod moderation;
+pub mod notifications;
 pub mod owner;
 pub mod prefix;
 pub mod roles;

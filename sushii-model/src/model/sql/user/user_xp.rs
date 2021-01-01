@@ -380,7 +380,7 @@ async fn global_timeframe_users(
                     LIMIT $3
                 "#,
                 after.map(|a| Decimal::from(a.0)), // xp
-                after.map(|a| a.1), // user id
+                after.map(|a| a.1),                // user id
                 first,
             )
             .fetch_all(pool)
