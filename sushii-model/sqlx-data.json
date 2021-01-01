@@ -81,6 +81,39 @@
       ]
     }
   },
+  "1890cf504f9a0d215757052d1d6db7c166bc7f50067a66e019a8331374806d63": {
+    "query": "\n            SELECT *\n              FROM notifications\n             WHERE user_id = $1\n               AND keyword = $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "keyword",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "1caf7004072f6b710d2a8f81c059a5b2ff02ec9f67d4f56740f4085e32e304c7": {
     "query": "\n        INSERT INTO cached_guilds\n             VALUES ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET name = $2,\n                    member_count = $3,\n                    icon_url = $4,\n                    features = $5,\n                    splash_url = $6,\n                    banner_url = $7\n        ",
     "describe": {
@@ -552,6 +585,71 @@
       },
       "nullable": [
         null
+      ]
+    }
+  },
+  "3c976a15b7537a11c192b2d8308134c7c0e000081e3668b644138338f8bf9e43": {
+    "query": "\n            SELECT *\n              FROM notifications\n             WHERE user_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "keyword",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "3dbee7296755bc947ebbe32883495a15413709f143fd16118779fcc083765552": {
+    "query": "\n            WITH words(word) AS (\n                SELECT s\n                  FROM regexp_split_to_table(lower($2), '[^[:alnum:]]+') s\n                 WHERE s <> ''\n            )\n            SELECT notifications.*\n              FROM notifications, words\n             WHERE (guild_id = $1 OR guild_id = 0)\n               AND LOWER(keyword) = word\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "keyword",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
       ]
     }
   },
@@ -1933,6 +2031,40 @@
         true,
         true,
         true
+      ]
+    }
+  },
+  "fa1e25ff6c0575c40750a687eb2a12f253cf31011d84b6387daf83a8d5311f75": {
+    "query": "\n        INSERT INTO notifications (user_id, guild_id, keyword)\n             VALUES ($1, $2, $3)\n          RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "keyword",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
       ]
     }
   },
