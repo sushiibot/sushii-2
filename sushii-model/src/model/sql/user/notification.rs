@@ -46,7 +46,14 @@ impl Notification {
     pub async fn save(&self, ctx: &Context) -> Result<Notification> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
-        insert_query(&pool, &self).await
+        upsert_query(&pool, &self).await
+    }
+
+    /// Save a notification to DB
+    pub async fn delete(&self, ctx: &Context) -> Result<()> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
+        delete_query(&pool, &self).await
     }
 }
 
@@ -115,12 +122,17 @@ async fn get_matching_query(
     .map_err(Into::into)
 }
 
-async fn insert_query(pool: &sqlx::PgPool, notification: &Notification) -> Result<Notification> {
+async fn upsert_query(pool: &sqlx::PgPool, notification: &Notification) -> Result<Notification> {
+    // Only time we want to update an existing notification is for changing
+    // guild -> global or vice versa
     sqlx::query_as!(
         Notification,
         r#"
         INSERT INTO notifications (user_id, guild_id, keyword)
              VALUES ($1, $2, $3)
+        ON CONFLICT (user_id, keyword)
+          DO UPDATE
+                SET guild_id = $2
           RETURNING *
         "#,
         notification.user_id,
@@ -131,3 +143,22 @@ async fn insert_query(pool: &sqlx::PgPool, notification: &Notification) -> Resul
     .await
     .map_err(Into::into)
 }
+
+async fn delete_query(pool: &sqlx::PgPool, notification: &Notification) -> Result<()> {
+    sqlx::query!(
+        r#"
+        DELETE FROM notifications
+              WHERE user_id = $1
+                AND guild_id = $2
+                AND keyword = $3
+        "#,
+        notification.user_id,
+        notification.guild_id,
+        notification.keyword,
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
