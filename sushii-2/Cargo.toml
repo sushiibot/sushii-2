@@ -61,6 +61,4 @@ features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "of
 [dependencies.serenity]
 git = "https://github.com/serenity-rs/serenity"
 branch = "current"
-# path = "../serenity"
-# version = "0.9.2"
 features = ["default", "collector"]

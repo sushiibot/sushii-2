@@ -118,7 +118,8 @@ async fn main() -> Result<()> {
                 | GatewayIntents::GUILD_BANS
                 | GatewayIntents::GUILD_MESSAGES
                 | GatewayIntents::GUILD_MESSAGE_REACTIONS
-                | GatewayIntents::DIRECT_MESSAGES, // | GatewayIntents::GUILD_PRESENCES,
+                | GatewayIntents::DIRECT_MESSAGES
+                | GatewayIntents::DIRECT_MESSAGE_REACTIONS
         )
         .framework(framework)
         .event_handler(handlers::Handler)

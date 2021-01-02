@@ -46,7 +46,7 @@ impl Notification {
     pub async fn save(&self, ctx: &Context) -> Result<Notification> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
-        upsert_query(&pool, &self).await
+        insert_query(&pool, &self).await
     }
 
     /// Save a notification to DB
@@ -122,17 +122,12 @@ async fn get_matching_query(
     .map_err(Into::into)
 }
 
-async fn upsert_query(pool: &sqlx::PgPool, notification: &Notification) -> Result<Notification> {
-    // Only time we want to update an existing notification is for changing
-    // guild -> global or vice versa
+async fn insert_query(pool: &sqlx::PgPool, notification: &Notification) -> Result<Notification> {
     sqlx::query_as!(
         Notification,
         r#"
         INSERT INTO notifications (user_id, guild_id, keyword)
              VALUES ($1, $2, $3)
-        ON CONFLICT (user_id, keyword)
-          DO UPDATE
-                SET guild_id = $2
           RETURNING *
         "#,
         notification.user_id,

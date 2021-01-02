@@ -1633,40 +1633,6 @@
       "nullable": []
     }
   },
-  "c3e1004f33651b8d26c42f3e92345a0ae0233f49d0a8f6c79cb1cd922b4e5ba8": {
-    "query": "\n        INSERT INTO notifications (user_id, guild_id, keyword)\n             VALUES ($1, $2, $3)\n        ON CONFLICT (user_id, keyword)\n          DO UPDATE\n                SET guild_id = $2\n          RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "keyword",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "cf21bd565ae6274c44718984217076091fe7d163feb99065c55535c5b45c87dd": {
     "query": "\n            SELECT *\n              FROM mutes\n             WHERE end_time < timezone('UTC', now())\n        ",
     "describe": {
@@ -2079,6 +2045,40 @@
         true,
         true,
         true
+      ]
+    }
+  },
+  "fa1e25ff6c0575c40750a687eb2a12f253cf31011d84b6387daf83a8d5311f75": {
+    "query": "\n        INSERT INTO notifications (user_id, guild_id, keyword)\n             VALUES ($1, $2, $3)\n          RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "keyword",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
       ]
     }
   },

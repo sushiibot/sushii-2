@@ -45,7 +45,7 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
         }
 
         let s = format!(
-            ":speech_left: {} mentioned `{}` in {} on {}\n\n> {}\n\n[Jump to message]({})",
+            ":speech_left: {} mentioned `{}` in {} on {}\n> {}\n[Jump to message]({})",
             msg.author.tag(),
             noti.keyword,
             msg.channel_id.mention(),

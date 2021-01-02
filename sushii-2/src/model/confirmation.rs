@@ -84,8 +84,8 @@ impl Confirmation {
             None
         };
 
-        if let Err(e) = msg.delete(ctx).await {
-            tracing::warn!("Failed to delete confirmation message: {}", e);
+        if let Err(e) = channel.delete_message(ctx, msg.id).await {
+            tracing::warn!("Failed to delete confirmation message: {:#?}", e);
         }
 
         Ok(res)
