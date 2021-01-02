@@ -1,7 +1,6 @@
 use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use std::collections::HashMap;
 use std::fmt::Write;
 
 use crate::model::sql::*;
@@ -18,31 +17,51 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
         return Ok(());
     };
 
+    let notis_global: Vec<_> = notis.iter().filter(|n| n.guild_id == 0).collect();
+    let mut notis_guild: Vec<_> = notis.iter().filter(|n| n.guild_id != 0).collect();
+    notis_guild.sort_by(|a, b| a.guild_id.cmp(&b.guild_id));
+
     let mut s = String::new();
 
-    let mut guild_names: HashMap<u64, String> = HashMap::new();
+    // Global notifications
+    if !notis_global.is_empty() {
+        writeln!(s, "**Global Notifications**")?;
+    }
 
-    for noti in notis {
-        let guild_name = if noti.guild_id != 0 {
-            match guild_names.get(&(noti.guild_id as u64)) {
-                Some(n) => n,
-                None => {
-                    let name = ctx
-                        .cache
-                        .guild_field(noti.guild_id as u64, |g| g.name.clone())
-                        .await
-                        .unwrap_or_else(|| "Unknown guild".into());
+    for noti in notis_global {
+        writeln!(s, "`{}`", noti.keyword)?;
+    }
 
-                    guild_names.insert(noti.guild_id as u64, name);
-                    // Get from hashmap so don't have to clone
-                    guild_names.get(&(noti.guild_id as u64)).unwrap()
-                }
+    // Add space between global and guild notifications
+    if !notis_global.is_empty() && !notis_guild.is_empty() {
+        writeln!(s)?;
+    }
+
+    // Guild notifications
+    if !notis_guild.is_empty() {
+        writeln!(s, "**Server Notifications**")?;
+    }
+
+    let mut last_guild_id = 0;
+
+    for (i, noti) in notis_guild.iter().enumerate() {
+        if last_guild_id != noti.guild_id {
+            last_guild_id = noti.guild_id;
+
+            let name = ctx
+                .cache
+                .guild_field(noti.guild_id as u64, |g| g.name.clone())
+                .await
+                .unwrap_or_else(|| "Unknown guild".into());
+
+            if i != 0 {
+                writeln!(s)?;
             }
-        } else {
-            "global"
-        };
 
-        writeln!(s, "{} - `{}`", guild_name, noti.keyword)?;
+            writeln!(s, "> **{}**", name)?;
+        }
+
+        writeln!(s, "> `{}`", noti.keyword)?;
     }
 
     let res = msg
@@ -65,13 +84,10 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
             Check if you have them enabled!",
         )
         .await?;
-    } else {
-        msg.channel_id.say(
-            ctx,
-            ":mailbox_with_mail: Sent a DM!",
-        )
-        .await?;
-
+    } else if !msg.is_private() {
+        msg.channel_id
+            .say(ctx, ":mailbox_with_mail: Sent a DM!")
+            .await?;
     }
 
     Ok(())

@@ -15,7 +15,7 @@ async fn add(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     if global_and_keyword.is_empty() {
         msg.channel_id
-            .say(&ctx, "Error: Please give a keyword.  To add a global notification, add `global` in front (e.g. `global yourkeyword`).")
+            .say(&ctx, "Error: Please give a keyword. To add a global notification, add `global` in front (e.g. `global yourkeyword`).")
             .await?;
 
         return Ok(());
@@ -37,7 +37,7 @@ async fn add(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         return Ok(());
     };
 
-    let noti_guild_id = if is_global { msg.guild_id } else { None };
+    let noti_guild_id = if is_global { None } else { msg.guild_id };
 
     // Save the actual notification
     Notification::new(msg.author.id, noti_guild_id, keyword)
