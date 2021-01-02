@@ -16,7 +16,7 @@ pub mod users;
 use self::{help::*, meta::*, owner::*, prefix::*};
 
 #[group]
-#[commands(quit)]
+#[commands(quit, say, listservers)]
 pub struct Owner;
 
 #[group]

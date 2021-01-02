@@ -2,6 +2,7 @@ use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::utils::parse_channel;
+use std::fmt::Write;
 
 use crate::keys::ShardManagerContainer;
 
@@ -45,6 +46,26 @@ async fn say(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     }
 
     ChannelId(channel_id).say(ctx, s).await?;
+
+    Ok(())
+}
+
+#[command]
+#[owners_only]
+async fn listservers(ctx: &Context, msg: &Message) -> CommandResult {
+    let mut s = String::new();
+
+    for guild_id in ctx.cache.guilds().await {
+        let guild_name = ctx
+            .cache
+            .guild_field(guild_id, |g| g.name.clone())
+            .await
+            .unwrap_or_else(|| "Unknown guild".into());
+
+        writeln!(s, "`{}` - {}", guild_id.0, guild_name)?;
+    }
+
+    msg.reply(ctx, s).await?;
 
     Ok(())
 }
