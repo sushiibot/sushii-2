@@ -1,4 +1,5 @@
 use serenity::{model::prelude::*, prelude::*};
+use std::time::Instant;
 
 use crate::error::Result;
 use crate::model::sql::*;
@@ -29,7 +30,13 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
         .await
         .unwrap_or_else(|| "Unknown guild".into());
 
+    // Get notifications from db with start/end times
+    let start = Instant::now();
     let triggered_notis = Notification::get_matching(ctx, guild_id, &msg.content).await?;
+    let delta = Instant::now() - start;
+
+    metrics::histogram!("pg_notification_query_time", delta);
+    metrics::counter!("pg_notification_query_count", triggered_notis.len() as u64);
 
     for noti in triggered_notis {
         // Don't notify self

@@ -1,4 +1,4 @@
-use metrics::{counter, decrement_gauge, increment_gauge, register_counter, register_gauge};
+use metrics::{counter, decrement_gauge, increment_gauge, register_counter, register_histogram, register_gauge};
 use metrics_exporter_prometheus::PrometheusBuilder;
 use metrics_util::layers::{Layer, PrefixLayer};
 use serenity::{model::prelude::*, prelude::*};
@@ -53,6 +53,10 @@ impl Metrics {
         register_counter!("events", "number of events received");
         register_gauge!("guilds", "number of total guilds");
         register_gauge!("members", "number of total members");
+
+        // Db queries
+        register_histogram!("pg_notification_query_time", "PostgreSQL query time to get triggered notifications");
+        register_counter!("pg_notification_query_count", "Number of triggered notifications");
 
         Self
     }

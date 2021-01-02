@@ -28,7 +28,7 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
         writeln!(s, "**Global Notifications**")?;
     }
 
-    for noti in notis_global {
+    for noti in notis_global.iter() {
         writeln!(s, "`{}`", noti.keyword)?;
     }
 
