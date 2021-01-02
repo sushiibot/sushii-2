@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.1.16] - 2021-01-02
+
 ### Added
 
--  Keyword notifications
+-  Keyword notifications (`noti add`, `noti list`, `noti delete`)
 
-## [0.1.15] 2020-12-29
+## [0.1.15] - 2020-12-29
 
 ### Added
 
@@ -22,14 +24,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -  Fix mute DM formatting and add duration
 
-## [0.1.14] 2020-12-27
+## [0.1.14] - 2020-12-27
 
 ### Fixed
 
 -  Set user level last_msg after resetting intervals instead of before
 -  Save mod log entry msg_id after sending mod log message
 
-## [0.1.13] 2020-12-27
+## [0.1.13] - 2020-12-27
 
 ### Added
 
@@ -226,7 +228,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Prevent role handler from running outside of role channels
 -   Fix mod log entry saving
 
-[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.15...HEAD
+[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.16...HEAD
+[0.1.16]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.15...sushii-2-v0.1.16
 [0.1.15]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.14...sushii-2-v0.1.15
 [0.1.14]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.13...sushii-2-v0.1.14
 [0.1.13]: https://github.com/sushiibot/sushii-2/compare/v0.1.12...sushii-2-v0.1.13
