@@ -33,9 +33,9 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
 
     for noti in triggered_notis {
         // Don't notify self
-        // if noti.user_id as u64 == msg.author.id.0 {
-        //     continue;
-        // }
+        if noti.user_id as u64 == msg.author.id.0 {
+            continue;
+        }
 
         let s = format!(
             ":speech_left: {} mentioned `{}` in {} on {}\n\n> {}\n\n[Jump to message]({})",

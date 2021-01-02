@@ -1,10 +1,11 @@
 use serenity::framework::standard::macros::group;
 
-pub mod add;
+mod add;
+mod list;
 
-use self::add::*;
+use self::{add::*, list::*};
 
 #[group]
-#[commands(add)]
+#[commands(add, list)]
 #[prefixes("noti", "notification")]
 pub struct Notifications;
