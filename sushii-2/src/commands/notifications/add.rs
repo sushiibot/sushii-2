@@ -105,9 +105,7 @@ async fn add(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                 existing_noti.delete(ctx).await?;
             }
             Some(r) if r == "no" => {
-                dm_chan
-                    .say(ctx, "Alright! No changes are made.")
-                    .await?;
+                dm_chan.say(ctx, "Alright! No changes are made.").await?;
 
                 return Ok(());
             }

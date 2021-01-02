@@ -84,6 +84,7 @@ impl Confirmation {
             None
         };
 
+        // Channel::delete_message bypasses cache
         if let Err(e) = channel.delete_message(ctx, msg.id).await {
             tracing::warn!("Failed to delete confirmation message: {:#?}", e);
         }

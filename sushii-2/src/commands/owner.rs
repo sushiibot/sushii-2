@@ -53,7 +53,7 @@ async fn say(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 #[command]
 #[owners_only]
 async fn listservers(ctx: &Context, msg: &Message) -> CommandResult {
-    let mut s = String::new();
+    let mut s = format!("{} total guilds cached", ctx.cache.guild_count().await);
 
     for guild_id in ctx.cache.guilds().await {
         let guild_name = ctx
