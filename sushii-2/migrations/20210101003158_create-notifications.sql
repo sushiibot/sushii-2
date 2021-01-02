@@ -7,3 +7,4 @@ CREATE TABLE notifications (
 );
 
 CREATE INDEX notification_keyword_idx ON notifications (keyword);
+CREATE INDEX notification_guild_id_idx ON notifications (guild_id);
