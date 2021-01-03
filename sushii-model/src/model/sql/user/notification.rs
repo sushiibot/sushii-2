@@ -13,19 +13,19 @@ pub struct Notification {
 }
 
 impl Notification {
-    pub fn new(user_id: UserId, guild_id: Option<GuildId>, keyword: impl Into<String>) -> Self {
+    pub fn new(user_id: UserId, guild_id: GuildId, keyword: impl Into<String>) -> Self {
         Self {
             user_id: user_id.into(),
-            guild_id: guild_id.map_or(0, Into::into),
+            guild_id: guild_id.into(),
             keyword: keyword.into(),
         }
     }
 
     /// Gets a single user's notification
-    pub async fn user_notification(ctx: &Context, user_id: UserId, keyword: &str) -> Result<Option<Self>> {
+    pub async fn user_notification(ctx: &Context, user_id: UserId, guild_id: GuildId, keyword: &str) -> Result<Option<Self>> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
-        user_notification_query(&pool, user_id, keyword).await
+        user_notification_query(&pool, user_id, guild_id, keyword).await
     }
 
     /// Gets all of a user's notifications
@@ -60,6 +60,7 @@ impl Notification {
 async fn user_notification_query(
     pool: &sqlx::PgPool,
     user_id: UserId,
+    guild_id: GuildId,
     keyword: &str,
 ) -> Result<Option<Notification>> {
     sqlx::query_as!(
@@ -68,10 +69,12 @@ async fn user_notification_query(
             SELECT *
               FROM notifications
              WHERE user_id = $1
-               AND keyword = $2
+               AND guild_id = $2
+               AND keyword = $3
         "#,
         i64::from(user_id),
-        keyword
+        i64::from(guild_id),
+        keyword,
     )
     .fetch_optional(pool)
     .await
@@ -111,7 +114,7 @@ async fn get_matching_query(
             )
             SELECT DISTINCT notifications.*
               FROM notifications, words
-             WHERE (guild_id = $1 OR guild_id = 0)
+             WHERE guild_id = $1
                AND keyword = word
         "#,
         i64::from(guild_id),
