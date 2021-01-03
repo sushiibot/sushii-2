@@ -32,15 +32,25 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
 
     // Get notifications from db with start/end times
     let start = Instant::now();
-    let triggered_notis = Notification::get_matching(ctx, guild_id, &msg.content).await?;
+    let mut triggered_notis = Notification::get_matching(ctx, guild_id, &msg.content).await?;
     let delta = Instant::now() - start;
 
     metrics::histogram!("pg_notification_query_time", delta);
     metrics::counter!("pg_notification_query_count", triggered_notis.len() as u64);
 
+    // Dedup notifications so that users only get 1 notification
+    triggered_notis.sort_by(|a, b| a.user_id.cmp(&b.user_id));
+    triggered_notis.dedup_by(|a, b| a.user_id == b.user_id);
+
     for noti in triggered_notis {
         // Don't notify self
         if noti.user_id as u64 == msg.author.id.0 {
+            continue;
+        }
+
+        // Check if keyword user is in the guild where message was sent
+        if let Err(_) = guild_id.member(ctx, noti.user_id as u64).await {
+            // Failed to get member, so either not in guild or something broke, go to next one
             continue;
         }
 

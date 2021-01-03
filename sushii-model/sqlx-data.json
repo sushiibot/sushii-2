@@ -620,39 +620,6 @@
       ]
     }
   },
-  "3dbee7296755bc947ebbe32883495a15413709f143fd16118779fcc083765552": {
-    "query": "\n            WITH words(word) AS (\n                SELECT s\n                  FROM regexp_split_to_table(lower($2), '[^[:alnum:]]+') s\n                 WHERE s <> ''\n            )\n            SELECT notifications.*\n              FROM notifications, words\n             WHERE (guild_id = $1 OR guild_id = 0)\n               AND LOWER(keyword) = word\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "keyword",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "41aa40fa135264fec551a341b52f05a347030ea7ec7caad73e71556b5de45133": {
     "query": "\n        INSERT INTO user_levels (user_id, guild_id, msg_all_time, msg_month, msg_week, msg_day, last_msg)\n             VALUES ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (user_id, guild_id)\n          DO UPDATE\n                SET msg_all_time = $3,\n                    msg_month = $4,\n                    msg_week = $5,\n                    msg_day = $6,\n                    last_msg = $7\n          RETURNING user_id as \"user_id: BigInt\",\n                    guild_id as \"guild_id: BigInt\",\n                    msg_all_time as \"msg_all_time: BigInt\",\n                    msg_month as \"msg_month: BigInt\",\n                    msg_week as \"msg_week: BigInt\",\n                    msg_day as \"msg_day: BigInt\",\n                    last_msg\n        ",
     "describe": {
@@ -1438,6 +1405,40 @@
       "nullable": []
     }
   },
+  "a37c84eaf91b8f8e6f7d3ce92f3d783625673a7dec3540eb3c7f2a24b283158a": {
+    "query": "\n        INSERT INTO notifications (user_id, guild_id, keyword)\n             VALUES ($1, $2, LOWER($3))\n          RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "keyword",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "a7eebd3e865de3e77676ec83975c87df51f988295290c8e084f8f984885d5b15": {
     "query": "\n              SELECT *\n                FROM tags\n               WHERE guild_id = $1\n                 AND tag_name ILIKE '%' || $2 || '%'\n                 AND (tag_name > $3 OR $3 IS NULL)\n            ORDER BY tag_name ASC\n               LIMIT $4\n        ",
     "describe": {
@@ -1678,6 +1679,39 @@
         true,
         false,
         true
+      ]
+    }
+  },
+  "cf991360f47e6662f114e2c0c8a792178b1523549a4eb18b40f26415c0fe0dfd": {
+    "query": "\n            WITH words(word) AS (\n                SELECT s\n                  FROM regexp_split_to_table(LOWER($2), '[^[:alnum:]]+') s\n                 WHERE s <> ''\n            )\n            SELECT DISTINCT notifications.*\n              FROM notifications, words\n             WHERE (guild_id = $1 OR guild_id = 0)\n               AND keyword = word\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "keyword",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
       ]
     }
   },
@@ -2045,40 +2079,6 @@
         true,
         true,
         true
-      ]
-    }
-  },
-  "fa1e25ff6c0575c40750a687eb2a12f253cf31011d84b6387daf83a8d5311f75": {
-    "query": "\n        INSERT INTO notifications (user_id, guild_id, keyword)\n             VALUES ($1, $2, $3)\n          RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "keyword",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false
       ]
     }
   },

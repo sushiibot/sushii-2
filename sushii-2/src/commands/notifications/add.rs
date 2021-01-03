@@ -129,14 +129,15 @@ async fn add(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let noti_guild_id = if is_global { None } else { msg.guild_id };
 
     // Save the actual notification
-    Notification::new(msg.author.id, noti_guild_id, keyword)
+    let new_noti = Notification::new(msg.author.id, noti_guild_id, keyword)
         .save(ctx)
         .await?;
 
+    // Keyword is converted to lowercase
     let s = format!(
         "Added a {}notification keyword: `{}`",
         if is_global { "global " } else { "" },
-        keyword
+        new_noti.keyword
     );
 
     if let Err(_) = msg.author.dm(ctx, |m| m.content(s)).await {

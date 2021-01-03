@@ -106,13 +106,13 @@ async fn get_matching_query(
         r#"
             WITH words(word) AS (
                 SELECT s
-                  FROM regexp_split_to_table(lower($2), '[^[:alnum:]]+') s
+                  FROM regexp_split_to_table(LOWER($2), '[^[:alnum:]]+') s
                  WHERE s <> ''
             )
-            SELECT notifications.*
+            SELECT DISTINCT notifications.*
               FROM notifications, words
              WHERE (guild_id = $1 OR guild_id = 0)
-               AND LOWER(keyword) = word
+               AND keyword = word
         "#,
         i64::from(guild_id),
         text,
@@ -127,7 +127,7 @@ async fn insert_query(pool: &sqlx::PgPool, notification: &Notification) -> Resul
         Notification,
         r#"
         INSERT INTO notifications (user_id, guild_id, keyword)
-             VALUES ($1, $2, $3)
+             VALUES ($1, $2, LOWER($3))
           RETURNING *
         "#,
         notification.user_id,
