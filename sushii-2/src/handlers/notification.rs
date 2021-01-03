@@ -48,10 +48,25 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
             continue;
         }
 
-        // Check if keyword user is in the guild where message was sent
-        if let Err(_) = guild_id.member(ctx, noti.user_id as u64).await {
-            // Failed to get member, so either not in guild or something broke, go to next one
-            continue;
+        let channel = match ctx.cache.guild_channel(msg.channel_id).await {
+            Some(channel) => channel,
+            None => {
+                tracing::warn("Notification trigger message channel not cached: {}", msg);
+
+                // If this fails, then the other iterations will fail too
+                return Ok(());
+            },
+        };
+
+        // Returns Err if user isn't in guild
+        match channel.permissions_for_user(&ctx.cache, noti.user_id as u64).await {
+            Ok(permissions) => {
+                // User in guild but no permissions to read messages
+                if !permissions.read_messages() {
+                    continue;
+                }
+            },
+            Err(_) => continue,
         }
 
         let s = format!(
