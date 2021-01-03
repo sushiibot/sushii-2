@@ -109,7 +109,8 @@ async fn main() -> Result<()> {
         .group(&commands::moderation::MODERATION_GROUP)
         .group(&commands::settings::SETTINGS_GROUP)
         .group(&commands::roles::ROLES_GROUP)
-        .group(&commands::OWNER_GROUP);
+        .group(&commands::OWNER_GROUP)
+        .normal_message(hooks::normal_message);
 
     let mut client = Client::builder(&sushii_conf.discord_token)
         .intents(

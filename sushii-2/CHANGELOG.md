@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Changed
+
+- Remove global keywords for performance reasons, users need to set keywords per guild
+- Allow `tag get` without the tag command prefix. Now supports `[prefix][tag name]` like regular commands.
+
 ## [0.1.16] - 2021-01-02
 
 ### Added

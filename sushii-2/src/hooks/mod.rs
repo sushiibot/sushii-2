@@ -4,6 +4,9 @@ use serenity::framework::standard::DispatchError;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
+pub mod normal_message;
+pub use self::normal_message::normal_message;
+
 use crate::model::sql::GuildConfig;
 
 #[hook]
