@@ -51,7 +51,7 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
         let channel = match ctx.cache.guild_channel(msg.channel_id).await {
             Some(channel) => channel,
             None => {
-                tracing::warn("Notification trigger message channel not cached: {}", msg);
+                tracing::warn!(?msg, "Notification trigger message channel not cached");
 
                 // If this fails, then the other iterations will fail too
                 return Ok(());
