@@ -4,11 +4,12 @@ mod loved;
 mod np;
 mod recent;
 mod set;
+mod topartists;
 
-use self::{loved::*, np::*, recent::*, set::*};
+use self::{loved::*, np::*, recent::*, set::*, topartists::*};
 
 #[group]
 #[prefix("fm")]
 #[default_command(np)]
-#[commands(np, set, recent, loved)]
+#[commands(np, set, recent, loved, topartists)]
 pub struct LastFm;

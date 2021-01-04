@@ -1,4 +1,5 @@
 use futures::StreamExt;
+use lastfm_rs::user::top_artists::Period;
 use serenity::collector::reaction_collector::ReactionAction;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
@@ -10,25 +11,35 @@ use std::time::Duration;
 use crate::error::Error;
 use crate::keys::*;
 use crate::model::sql::*;
-use crate::utils::user::parse_id;
 
 #[command]
 #[only_in("guild")]
-async fn recent(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    let target_id = if args.is_empty() {
-        msg.author.id
+async fn topartists(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+    let period = if args.is_empty() {
+        Period::Overall
     } else {
-        match args.single::<String>().ok().and_then(parse_id) {
-            Some(id) => UserId(id),
-            None => {
-                msg.reply(&ctx, "Error: Invalid user given").await?;
+        match args.rest() {
+            "overall" | "all" => Period::Overall,
+            "7day" | "7 day" | "7 days" | "week" | "1week" => Period::SevenDays,
+            "1month" | "1months" | "1 month" | "1 months" | "month" => Period::OneMonth,
+            "3month" | "3months" | "3 month" | "3 months" => Period::ThreeMonths,
+            "6month" | "6months" | "6 month" | "6 months" => Period::SixMonths,
+            "12month" | "12months" | "12 month" | "12 months" | "year" => Period::TwelveMonths,
+            _ => {
+                msg.reply(
+                    ctx,
+                    "Error: Invalid time period, valid options are `overall`, `7day`, `1month`, `3month`, `6month`, `12month`",
+                )
+                .await?;
 
                 return Ok(());
             }
         }
     };
 
-    let lastfm_username = match UserData::from_id(ctx, target_id)
+    let period_str = period.to_string();
+
+    let lastfm_username = match UserData::from_id(ctx, msg.author.id)
         .await?
         .and_then(|d| d.lastfm_username)
     {
@@ -44,6 +55,7 @@ async fn recent(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     };
 
+    let typing = msg.channel_id.start_typing(&ctx.http)?;
     let reqwest_client = ctx
         .data
         .read()
@@ -57,43 +69,42 @@ async fn recent(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let mut fm_client =
         lastfm_rs::Client::from_reqwest_client(reqwest_client.clone(), &sushii_conf.lastfm_key);
 
-    let typing = msg.channel_id.start_typing(&ctx.http)?;
-    let mut recent_tracks = fm_client
-        .recent_tracks(&lastfm_username)
+    let mut top_artists = fm_client
+        .top_artists(&lastfm_username)
         .await
+        .within_period(period)
         .with_page(1)
         .with_limit(10)
         .send()
         .await
         .map(Arc::new)?;
 
-    if recent_tracks.tracks.is_empty() {
-        msg.reply(ctx, "Error: No recent tracks were found").await?;
+    if top_artists.artists.is_empty() {
+        msg.reply(ctx, "Error: No top artists were found").await?;
 
         return Ok(());
     };
 
-    let mut recent_tracks_cache = Vec::new();
-    recent_tracks_cache.push(Arc::clone(&recent_tracks));
+    let mut top_artists_cache = Vec::new();
+    top_artists_cache.push(Arc::clone(&top_artists));
 
     let mut page = 1;
     // API returns strings..
-    let total_pages = recent_tracks.attrs.total_pages.parse::<usize>()?;
+    let total_pages = top_artists.attrs.total_pages.parse::<usize>()?;
 
     let mut s = String::new();
-
-    for track in &recent_tracks.tracks {
+    for artist in &top_artists.artists {
         let _ = writeln!(
             s,
-            "{} - [{}]({})",
-            &track.artist.name, &track.name, &track.url
+            "{}) `{} plays` - [{}]({})",
+            artist.attrs.rank, artist.scrobbles, artist.name, artist.url,
         );
     }
 
-    let thumbnail_url = recent_tracks
-        .tracks
+    let thumbnail_url = top_artists
+        .artists
         .iter()
-        .find(|track| track.images.get(2).is_some())
+        .find(|artist| artist.images.get(2).is_some())
         .and_then(|t| t.images.get(2))
         .map_or_else(
             || "https://i.imgur.com/oYm77EU.jpg",
@@ -107,15 +118,16 @@ async fn recent(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 e.colour(0xb90000);
                 e.author(|a| {
                     a.icon_url("https://i.imgur.com/C7u8gqg.jpg");
-                    a.name(&recent_tracks.attrs.user);
+                    a.name(&top_artists.attrs.user);
 
                     a
                 });
-                e.title("Recent Tracks");
+                e.title("Top Artists");
                 e.description(s);
+
                 e.thumbnail(thumbnail_url);
                 e.footer(|f| {
-                    f.text(format!("Page {}/{}", page, total_pages));
+                    f.text(format!("Page {}/{} • {}", page, total_pages, period_str));
                     f
                 });
 
@@ -130,6 +142,7 @@ async fn recent(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             m
         })
         .await?;
+
     typing.stop();
 
     while let Some(reaction_action) = sent_msg
@@ -154,23 +167,22 @@ async fn recent(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
                 page += 1;
 
-                recent_tracks =
-                    if let Some(track) = recent_tracks_cache.get(page - 1).map(Arc::clone) {
-                        track
-                    } else {
-                        let new_recent_tracks = fm_client
-                            .recent_tracks(&lastfm_username)
-                            .await
-                            .with_page(page)
-                            .with_limit(10)
-                            .send()
-                            .await
-                            .map(Arc::new)?;
+                top_artists = if let Some(track) = top_artists_cache.get(page - 1).map(Arc::clone) {
+                    track
+                } else {
+                    let new_top_artists = fm_client
+                        .top_artists(&lastfm_username)
+                        .await
+                        .with_page(page)
+                        .with_limit(10)
+                        .send()
+                        .await
+                        .map(Arc::new)?;
 
-                        recent_tracks_cache.push(Arc::clone(&new_recent_tracks));
+                    top_artists_cache.push(Arc::clone(&new_top_artists));
 
-                        new_recent_tracks
-                    };
+                    new_top_artists
+                };
             } else if r.emoji.unicode_eq("⬅️") {
                 // Ignore on first page
                 if page == 1 {
@@ -181,16 +193,16 @@ async fn recent(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 page -= 1;
 
                 // Page is 1 indexed, Vec::get() is 0 indexed
-                recent_tracks = recent_tracks_cache
+                top_artists = top_artists_cache
                     .get(page - 1)
                     .map(Arc::clone)
                     .ok_or_else(|| Error::Sushii("Missing loved_tracks page in cache".into()))?;
             }
 
-            let thumbnail_url = recent_tracks
-                .tracks
+            let thumbnail_url = top_artists
+                .artists
                 .iter()
-                .find(|track| track.images.get(2).is_some())
+                .find(|artist| artist.images.get(2).is_some())
                 .and_then(|t| t.images.get(2))
                 .map_or_else(
                     || "https://i.imgur.com/oYm77EU.jpg",
@@ -198,11 +210,11 @@ async fn recent(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 );
 
             let mut s = String::new();
-            for track in &recent_tracks.tracks {
+            for artist in &top_artists.artists {
                 let _ = writeln!(
                     s,
-                    "{} - [{}]({})",
-                    &track.artist.name, &track.name, &track.url
+                    "{}) `{} plays` - [{}]({})",
+                    artist.attrs.rank, artist.scrobbles, artist.name, artist.url,
                 );
             }
 
@@ -212,15 +224,16 @@ async fn recent(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                         e.colour(0xb90000);
                         e.author(|a| {
                             a.icon_url("https://i.imgur.com/C7u8gqg.jpg");
-                            a.name(&recent_tracks.attrs.user);
+                            a.name(&top_artists.attrs.user);
 
                             a
                         });
-                        e.title("Recent Tracks");
+                        e.title("Top Artists");
                         e.description(s);
+
                         e.thumbnail(thumbnail_url);
                         e.footer(|f| {
-                            f.text(format!("Page {}/{}", page, total_pages));
+                            f.text(format!("Page {}/{} • {}", page, total_pages, period_str));
                             f
                         });
 

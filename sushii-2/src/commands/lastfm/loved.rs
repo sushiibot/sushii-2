@@ -1,11 +1,11 @@
+use futures::StreamExt;
+use serenity::collector::reaction_collector::ReactionAction;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use serenity::collector::reaction_collector::ReactionAction;
-use std::time::Duration;
 use std::fmt::Write;
 use std::sync::Arc;
-use futures::StreamExt;
+use std::time::Duration;
 
 use crate::error::Error;
 use crate::keys::*;
@@ -103,6 +103,7 @@ async fn loved(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .channel_id
         .send_message(ctx, |m| {
             m.embed(|e| {
+                e.colour(0xb90000);
                 e.author(|a| {
                     a.icon_url("https://i.imgur.com/C7u8gqg.jpg");
                     a.name(&loved_tracks.attrs.user);
@@ -154,7 +155,8 @@ async fn loved(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
                 page += 1;
 
-                loved_tracks = if let Some(track) = loved_tracks_cache.get(page - 1).map(Arc::clone) {
+                loved_tracks = if let Some(track) = loved_tracks_cache.get(page - 1).map(Arc::clone)
+                {
                     track
                 } else {
                     let new_loved_tracks = fm_client
@@ -208,6 +210,7 @@ async fn loved(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             sent_msg
                 .edit(ctx, |m| {
                     m.embed(|e| {
+                        e.colour(0xb90000);
                         e.author(|a| {
                             a.icon_url("https://i.imgur.com/C7u8gqg.jpg");
                             a.name(&loved_tracks.attrs.user);

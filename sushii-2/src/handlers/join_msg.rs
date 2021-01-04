@@ -42,7 +42,10 @@ async fn _guild_member_addition(ctx: &Context, guild_id: &GuildId, member: &Memb
     let join_msg_replaced = join_msg
         .replace("<mention>", &member.user.mention())
         .replace("<username>", &member.user.name)
-        .replace("<member_number>", &member_number.to_formatted_string(&Locale::en))
+        .replace(
+            "<member_number>",
+            &member_number.to_formatted_string(&Locale::en),
+        )
         .replace(
             "<server>",
             &guild_id.name(&ctx).await.unwrap_or_else(|| "".into()),
