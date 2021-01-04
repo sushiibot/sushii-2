@@ -13,6 +13,7 @@ use crate::keys::*;
 use crate::model::sql::*;
 
 #[command]
+#[aliases("ta", "topartist")]
 #[only_in("guild")]
 async fn topartists(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let period = if args.is_empty() {
