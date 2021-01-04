@@ -29,7 +29,7 @@ async fn topartists(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             _ => {
                 msg.reply(
                     ctx,
-                    "Error: Invalid time period, valid options are `overall`, `7day`, `1month`, `3month`, `6month`, `12month`",
+                    "Error: Invalid time period, valid options are `overall`, `week`, `month`, `3month`, `6month`, `year`",
                 )
                 .await?;
 
