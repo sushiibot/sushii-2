@@ -44,6 +44,7 @@ async fn loved(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     };
 
+    let typing = msg.channel_id.start_typing(&ctx.http)?;
     let reqwest_client = ctx
         .data
         .read()
@@ -57,7 +58,6 @@ async fn loved(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let mut fm_client =
         lastfm_rs::Client::from_reqwest_client(reqwest_client.clone(), &sushii_conf.lastfm_key);
 
-    let mut loved_tracks_cache = Vec::new();
     let mut loved_tracks = fm_client
         .loved_tracks(&lastfm_username)
         .await
@@ -67,13 +67,14 @@ async fn loved(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .await
         .map(Arc::new)?;
 
-    loved_tracks_cache.push(Arc::clone(&loved_tracks));
-
     if loved_tracks.tracks.is_empty() {
         msg.reply(ctx, "Error: No loved tracks were found").await?;
 
         return Ok(());
     };
+
+    let mut loved_tracks_cache = Vec::new();
+    loved_tracks_cache.push(Arc::clone(&loved_tracks));
 
     let mut page = 1;
     // API returns strings..
@@ -128,6 +129,8 @@ async fn loved(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             m
         })
         .await?;
+
+    typing.stop();
 
     while let Some(reaction_action) = sent_msg
         .await_reactions(ctx)
