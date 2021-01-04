@@ -55,17 +55,20 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
 
                 // If this fails, then the other iterations will fail too
                 return Ok(());
-            },
+            }
         };
 
         // Returns Err if user isn't in guild
-        match channel.permissions_for_user(&ctx.cache, noti.user_id as u64).await {
+        match channel
+            .permissions_for_user(&ctx.cache, noti.user_id as u64)
+            .await
+        {
             Ok(permissions) => {
                 // User in guild but no permissions to read messages
                 if !permissions.read_messages() {
                     continue;
                 }
-            },
+            }
             Err(_) => continue,
         }
 

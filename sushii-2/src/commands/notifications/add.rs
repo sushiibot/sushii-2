@@ -32,7 +32,7 @@ async fn add(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         return Ok(());
     }
 
-    // Already has keyword in single guild 
+    // Already has keyword in single guild
     if Notification::user_notification(ctx, msg.author.id, guild_id, keyword)
         .await?
         .is_some()
@@ -60,8 +60,7 @@ async fn add(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     // Keyword is converted to lowercase
     let s = format!(
         "Added a notification keyword `{}` in {}",
-        new_noti.keyword,
-        guild_name,
+        new_noti.keyword, guild_name,
     );
 
     if let Err(_) = msg.author.dm(ctx, |m| m.content(s)).await {

@@ -28,7 +28,10 @@ async fn delete(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         Some(noti) => noti,
         None => {
             msg.channel_id
-                .say(&ctx, "Error: You don't have that keyword set in this server")
+                .say(
+                    &ctx,
+                    "Error: You don't have that keyword set in this server",
+                )
                 .await?;
 
             return Ok(());

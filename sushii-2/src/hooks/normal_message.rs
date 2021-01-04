@@ -1,6 +1,6 @@
+use serenity::framework::standard::macros::hook;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use serenity::framework::standard::macros::hook;
 
 use crate::error::Result;
 use crate::model::sql::*;
@@ -21,7 +21,8 @@ async fn _normal_message(ctx: &Context, msg: &Message) -> Result<()> {
 
     let sushii_conf = SushiiConfig::get(&ctx).await;
 
-    let prefix = GuildConfig::from_msg(&ctx, &msg).await?
+    let prefix = GuildConfig::from_msg(&ctx, &msg)
+        .await?
         .and_then(|c| c.prefix)
         .unwrap_or_else(|| sushii_conf.default_prefix.clone());
 
