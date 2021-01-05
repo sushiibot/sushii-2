@@ -1231,6 +1231,39 @@
       ]
     }
   },
+  "8f79dd63e193efce8e386498e5742fa727fff4956fa5cc0d5ef1c6c4c89a0e88": {
+    "query": "\n            WITH words(word) AS (\n                SELECT s\n                  FROM regexp_split_to_table(LOWER($2), '[^[:alnum:]]+') s\n                 WHERE s <> ''\n            )\n            SELECT notifications.*\n              FROM notifications, words\n             WHERE guild_id = $1\n               AND keyword = word\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "keyword",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "8f92c532801f6ffe5aec0cfa52d19a9342bfc152b5a51e9d6166a9fd8393eb02": {
     "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"guild_id: BigInt\",\n                   msg_all_time as \"msg_all_time: BigInt\",\n                   msg_month as \"msg_month: BigInt\",\n                   msg_week as \"msg_week: BigInt\",\n                   msg_day as \"msg_day: BigInt\",\n                   last_msg\n              FROM user_levels\n             WHERE user_id = $1\n               AND guild_id = $2\n        ",
     "describe": {
@@ -1592,39 +1625,6 @@
         false,
         false,
         false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "b114969946078959fc78728443ef1128a35c4e05832f581ec0ebdaf1a1a6593e": {
-    "query": "\n            WITH words(word) AS (\n                SELECT s\n                  FROM regexp_split_to_table(LOWER($2), '[^[:alnum:]]+') s\n                 WHERE s <> ''\n            )\n            SELECT DISTINCT notifications.*\n              FROM notifications, words\n             WHERE guild_id = $1\n               AND keyword = word\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "keyword",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
         false,
         false,
         false

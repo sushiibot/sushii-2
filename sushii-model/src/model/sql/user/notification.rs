@@ -112,7 +112,7 @@ async fn get_matching_query(
                   FROM regexp_split_to_table(LOWER($2), '[^[:alnum:]]+') s
                  WHERE s <> ''
             )
-            SELECT DISTINCT notifications.*
+            SELECT notifications.*
               FROM notifications, words
              WHERE guild_id = $1
                AND keyword = word
