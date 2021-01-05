@@ -21,7 +21,7 @@ pub struct CachedGuild {
     pub id: BigInt,
     pub name: String,
     pub member_count: BigInt,
-    pub icon_url: String,
+    pub icon_url: Option<String>,
     pub features: String,
     pub splash_url: Option<String>,
     pub banner_url: Option<String>,
