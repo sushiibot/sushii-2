@@ -46,7 +46,17 @@ async fn _normal_message(ctx: &Context, msg: &Message) -> Result<()> {
         None => return Ok(()),
     };
 
-    msg.channel_id.say(ctx, tag.content).await?;
+    msg.channel_id
+        .send_message(&ctx.http, |m| {
+            m.content(&tag.content);
+            m.allowed_mentions(|am| {
+                am.empty_parse();
+                am
+            });
+
+            m
+        })
+        .await?;
 
     Ok(())
 }
