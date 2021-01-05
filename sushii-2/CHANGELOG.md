@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [unreleased]
+
+## [0.1.18] - 2021-01-05
+
+### Fixed
+
+-  Prevent mentions when using short `[prefix][tag]`
+-  Allow missing guild icon for guild cache
+-  Fetch member when checking if user can see notification message
+
 ## [0.1.17] - 2021-01-04
 
 ### Added
@@ -239,7 +249,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Prevent role handler from running outside of role channels
 -   Fix mod log entry saving
 
-[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.17...HEAD
+[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.18...HEAD
+[0.1.18]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.17...sushii-2-v0.1.18
 [0.1.17]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.16...sushii-2-v0.1.17
 [0.1.16]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.15...sushii-2-v0.1.16
 [0.1.15]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.14...sushii-2-v0.1.15
