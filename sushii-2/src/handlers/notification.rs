@@ -12,8 +12,8 @@ pub async fn message(ctx: &Context, msg: &Message) {
 
 async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
     // Notifications only in guilds
-    let guild_id = match msg.guild_id {
-        Some(id) => id,
+    let guild = match msg.guild(ctx).await {
+        Some(g) => g,
         None => return Ok(()),
     };
 
@@ -32,7 +32,7 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
 
     // Get notifications from db with start/end times
     let start = Instant::now();
-    let mut triggered_notis = Notification::get_matching(ctx, guild_id, &msg.content).await?;
+    let mut triggered_notis = Notification::get_matching(ctx, guild.id, &msg.content).await?;
     let delta = Instant::now() - start;
 
     metrics::histogram!("pg_notification_query_time", delta);
@@ -58,11 +58,14 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
             }
         };
 
+        // Won't request same member multiple times since it's deduped
+        let member = match guild.member(ctx, noti.user_id as u64).await {
+            Ok(member) => member,
+            Err(_) => continue,
+        };
+
         // Returns Err if user isn't in guild
-        match channel
-            .permissions_for_user(&ctx.cache, noti.user_id as u64)
-            .await
-        {
+        match guild.user_permissions_in(&channel, &member) {
             Ok(permissions) => {
                 // User in guild but no permissions to read messages
                 if !permissions.read_messages() {
