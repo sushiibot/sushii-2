@@ -5,6 +5,7 @@ use serenity::prelude::*;
 #[command]
 #[usage("[num messages]")]
 #[aliases("p")]
+#[required_permissions("MANAGE_GUILD")]
 async fn prune(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let num_messages = match args.single::<u64>() {
         Ok(n) => n,
