@@ -67,7 +67,11 @@ async fn profile(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
     let mut s = String::new();
 
     writeln!(s, "**Total Scrobbles:** {}", user_info.scrobbles)?;
-    writeln!(s, "**Registered:** {}", user_info.registered.date.format("%Y-%m-%dT%H:%M:%S"))?;
+    writeln!(
+        s,
+        "**Registered:** {}",
+        user_info.registered.date.format("%Y-%m-%dT%H:%M:%S")
+    )?;
 
     if !user_info.country.is_empty() {
         writeln!(s, "**Country:** {}", user_info.country)?;

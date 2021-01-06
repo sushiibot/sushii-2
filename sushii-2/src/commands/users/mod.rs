@@ -1,12 +1,13 @@
 use serenity::framework::standard::macros::group;
 
-pub mod fishy;
-pub mod rank;
-pub mod rep;
+mod fishy;
+mod rank;
+mod rep;
+mod userinfo;
 
-use self::{fishy::*, rank::*, rep::*};
+use self::{fishy::*, rank::*, rep::*, userinfo::*};
 
 #[group]
-#[commands(rank, rep, fishy)]
+#[commands(rank, rep, fishy, userinfo)]
 #[only_in("guild")]
 pub struct Users;
