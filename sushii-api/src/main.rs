@@ -27,6 +27,7 @@ fn schema() -> Schema {
 async fn graphiql_handler() -> Result<HttpResponse, Error> {
     gqli_handler("/", None).await
 }
+
 async fn playground_handler() -> Result<HttpResponse, Error> {
     play_handler("/", None).await
 }
@@ -50,12 +51,11 @@ async fn main() -> std::io::Result<()> {
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
-    let interface_port = env::var("INTERFACE_PORT")
-        .unwrap_or_else(|_| {
-            tracing::warn!("INTERFACE_PORT not in environment, falling back to 127.0.0.1:8080");
-            
-            "127.0.0.1:8080".into()
-        });
+    let interface_port = env::var("INTERFACE_PORT").unwrap_or_else(|_| {
+        tracing::warn!("INTERFACE_PORT not in environment, falling back to 127.0.0.1:8080");
+
+        "127.0.0.1:8080".into()
+    });
 
     let db_url = env::var("DATABASE_URL").expect("Missing DATABASE_URL in environment");
 
