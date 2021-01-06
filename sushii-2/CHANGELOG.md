@@ -7,10 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.1.19] - 2021-01-06
+
 ### Added
 
 -  `fm profile` command
 -  `userinfo` command
+-  `slowmode` command
+
+### Fixed
+
+-  Require `MANAGE_GUILD` permission for `prune`
 
 ## [0.1.18] - 2021-01-05
 
@@ -254,7 +261,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Prevent role handler from running outside of role channels
 -   Fix mod log entry saving
 
-[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.18...HEAD
+[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.19...HEAD
+[0.1.19]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.18...sushii-2-v0.1.19
 [0.1.18]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.17...sushii-2-v0.1.18
 [0.1.17]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.16...sushii-2-v0.1.17
 [0.1.16]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.15...sushii-2-v0.1.16
