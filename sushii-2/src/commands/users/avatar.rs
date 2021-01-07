@@ -5,6 +5,7 @@ use serenity::prelude::*;
 use crate::utils::user::parse_id;
 
 #[command]
+#[aliases("av")]
 #[only_in("guild")]
 async fn avatar(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let target_str = args.rest();
