@@ -56,6 +56,9 @@ impl Metrics {
         register_gauge!("guilds", "number of total guilds");
         register_gauge!("members", "number of total members");
 
+        // API requests
+        register_counter!("lastfm_api_queries", "number of Last.fm API requests");
+
         // Db queries
         register_histogram!(
             "pg_notification_query_time",

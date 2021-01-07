@@ -80,6 +80,8 @@ async fn topartists(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         .await
         .map(Arc::new)?;
 
+    metrics::increment_counter!("lastfm_api_queries", "endpoint" => "user.getTopArtists");
+
     if top_artists.artists.is_empty() {
         msg.reply(ctx, "Error: No top artists were found").await?;
 
@@ -179,6 +181,8 @@ async fn topartists(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                         .send()
                         .await
                         .map(Arc::new)?;
+
+                    metrics::increment_counter!("lastfm_api_queries", "endpoint" => "user.getTopArtists");
 
                     top_artists_cache.push(Arc::clone(&new_top_artists));
 

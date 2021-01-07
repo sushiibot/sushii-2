@@ -60,6 +60,8 @@ async fn np(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .send()
         .await?;
 
+    metrics::increment_counter!("lastfm_api_queries", "endpoint" => "user.getRecentTracks");
+
     let track = match recent_tracks.tracks.first() {
         Some(t) => t,
         None => {

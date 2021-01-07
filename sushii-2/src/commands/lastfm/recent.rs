@@ -67,6 +67,8 @@ async fn recent(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .await
         .map(Arc::new)?;
 
+    metrics::increment_counter!("lastfm_api_queries", "endpoint" => "user.getRecentTracks");
+
     if recent_tracks.tracks.is_empty() {
         msg.reply(ctx, "Error: No recent tracks were found").await?;
 
@@ -166,6 +168,8 @@ async fn recent(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                             .send()
                             .await
                             .map(Arc::new)?;
+
+                        metrics::increment_counter!("lastfm_api_queries", "endpoint" => "user.getRecentTracks");
 
                         recent_tracks_cache.push(Arc::clone(&new_recent_tracks));
 

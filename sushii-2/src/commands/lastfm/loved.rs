@@ -67,6 +67,8 @@ async fn loved(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .await
         .map(Arc::new)?;
 
+    metrics::increment_counter!("lastfm_api_queries", "endpoint" => "user.getLovedTracks");
+
     if loved_tracks.tracks.is_empty() {
         msg.reply(ctx, "Error: No loved tracks were found").await?;
 
@@ -167,6 +169,8 @@ async fn loved(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                         .send()
                         .await
                         .map(Arc::new)?;
+
+                    metrics::increment_counter!("lastfm_api_queries", "endpoint" => "user.getLovedTracks");
 
                     loved_tracks_cache.push(Arc::clone(&new_loved_tracks));
 

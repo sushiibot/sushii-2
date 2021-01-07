@@ -59,6 +59,8 @@ async fn profile(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
         .await
         .map(|u| u.user)?;
 
+    metrics::increment_counter!("lastfm_api_queries", "endpoint" => "user.getInfo");
+
     let thumbnail_url = user_info.images.get(2).map_or_else(
         || "https://i.imgur.com/6ATbUNw.jpg",
         |i| i.image_url.as_str(),

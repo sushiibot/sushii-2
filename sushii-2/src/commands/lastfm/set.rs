@@ -35,6 +35,8 @@ async fn set(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     let lastfm_user = fm_client.user_info(&username).await.send().await?.user;
 
+    metrics::increment_counter!("lastfm_api_queries", "endpoint" => "user.getInfo");
+
     user_data
         .lastfm_username
         .replace(lastfm_user.username.clone());
