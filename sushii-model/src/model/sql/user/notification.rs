@@ -22,7 +22,12 @@ impl Notification {
     }
 
     /// Gets a single user's notification
-    pub async fn user_notification(ctx: &Context, user_id: UserId, guild_id: GuildId, keyword: &str) -> Result<Option<Self>> {
+    pub async fn user_notification(
+        ctx: &Context,
+        user_id: UserId,
+        guild_id: GuildId,
+        keyword: &str,
+    ) -> Result<Option<Self>> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         user_notification_query(&pool, user_id, guild_id, keyword).await
@@ -36,7 +41,11 @@ impl Notification {
     }
 
     /// Get all notifications that are triggered by a given message
-    pub async fn get_matching(ctx: &Context, guild_id: GuildId, text: &str) -> Result<Vec<Notification>> {
+    pub async fn get_matching(
+        ctx: &Context,
+        guild_id: GuildId,
+        text: &str,
+    ) -> Result<Vec<Notification>> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         get_matching_query(&pool, guild_id, text).await
@@ -159,4 +168,3 @@ async fn delete_query(pool: &sqlx::PgPool, notification: &Notification) -> Resul
 
     Ok(())
 }
-

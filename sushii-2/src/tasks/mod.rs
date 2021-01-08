@@ -7,7 +7,8 @@ use tokio::{
 
 static START: Once = Once::new();
 
-pub mod mute;
+mod mute;
+mod reminders;
 
 pub async fn start(ctx: &Context) {
     let ctx = ctx.clone();
@@ -27,6 +28,10 @@ async fn ten_seconds(ctx: Context) {
 
         if let Err(e) = mute::check_pending_unmutes(&ctx).await {
             tracing::error!("Failed checking pending unmutes: {}", e);
+        }
+
+        if let Err(e) = reminders::check_expired_reminders(&ctx).await {
+            tracing::error!("Failed checking expired reminders: {}", e);
         }
     }
 }

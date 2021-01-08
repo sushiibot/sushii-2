@@ -104,6 +104,7 @@ async fn main() -> Result<()> {
         .group(&commands::tags::TAGS_GROUP)
         .group(&commands::guild::GUILD_GROUP)
         .group(&commands::notifications::NOTIFICATIONS_GROUP)
+        .group(&commands::reminders::REMINDERS_GROUP)
         .group(&commands::lastfm::LASTFM_GROUP)
         .group(&commands::users::USERS_GROUP)
         .group(&commands::moderation::MODERATION_GROUP)

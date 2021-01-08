@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 -  `avatar` command
+-  Reminders with `remind`, `remind list` commands
 
 ## [0.1.19] - 2021-01-06
 

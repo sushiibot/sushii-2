@@ -156,25 +156,26 @@ async fn recent(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
                 page += 1;
 
-                recent_tracks =
-                    if let Some(track) = recent_tracks_cache.get(page - 1).map(Arc::clone) {
-                        track
-                    } else {
-                        let new_recent_tracks = fm_client
-                            .recent_tracks(&lastfm_username)
-                            .await
-                            .with_page(page)
-                            .with_limit(10)
-                            .send()
-                            .await
-                            .map(Arc::new)?;
+                recent_tracks = if let Some(track) =
+                    recent_tracks_cache.get(page - 1).map(Arc::clone)
+                {
+                    track
+                } else {
+                    let new_recent_tracks = fm_client
+                        .recent_tracks(&lastfm_username)
+                        .await
+                        .with_page(page)
+                        .with_limit(10)
+                        .send()
+                        .await
+                        .map(Arc::new)?;
 
-                        metrics::increment_counter!("lastfm_api_queries", "endpoint" => "user.getRecentTracks");
+                    metrics::increment_counter!("lastfm_api_queries", "endpoint" => "user.getRecentTracks");
 
-                        recent_tracks_cache.push(Arc::clone(&new_recent_tracks));
+                    recent_tracks_cache.push(Arc::clone(&new_recent_tracks));
 
-                        new_recent_tracks
-                    };
+                    new_recent_tracks
+                };
             } else if r.emoji.unicode_eq("⬅️") {
                 // Ignore on first page
                 if page == 1 {

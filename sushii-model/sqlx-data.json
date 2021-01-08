@@ -587,6 +587,50 @@
       ]
     }
   },
+  "405133283b713937f080ee233872fedcbb34be61a7f78f4e93c133843ce2bbf3": {
+    "query": "\n            SELECT *\n              FROM reminders\n             WHERE user_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "channel_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "set_at",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "expire_at",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "41aa40fa135264fec551a341b52f05a347030ea7ec7caad73e71556b5de45133": {
     "query": "\n        INSERT INTO user_levels (user_id, guild_id, msg_all_time, msg_month, msg_week, msg_day, last_msg)\n             VALUES ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (user_id, guild_id)\n          DO UPDATE\n                SET msg_all_time = $3,\n                    msg_month = $4,\n                    msg_week = $5,\n                    msg_day = $6,\n                    last_msg = $7\n          RETURNING user_id as \"user_id: BigInt\",\n                    guild_id as \"guild_id: BigInt\",\n                    msg_all_time as \"msg_all_time: BigInt\",\n                    msg_month as \"msg_month: BigInt\",\n                    msg_week as \"msg_week: BigInt\",\n                    msg_day as \"msg_day: BigInt\",\n                    last_msg\n        ",
     "describe": {
@@ -657,6 +701,19 @@
         "Left": [
           "Int8",
           "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "4a1efab186f47060b81bf1dac97e4faa04ee73743194f398f82346b569dcb9bf": {
+    "query": "\n        DELETE FROM reminders\n              WHERE user_id = $1\n                AND set_at = $2\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamp"
         ]
       },
       "nullable": []
@@ -1668,6 +1725,54 @@
       "nullable": []
     }
   },
+  "cda0f7d9db834e7ba23b229ca46802b0aef7939cb54a654975a9b492c5c198f7": {
+    "query": "\n        INSERT INTO reminders\n             VALUES ($1, $2, $3, $4, $5)\n          RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "channel_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "set_at",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "expire_at",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Text",
+          "Timestamp",
+          "Timestamp"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "cf21bd565ae6274c44718984217076091fe7d163feb99065c55535c5b45c87dd": {
     "query": "\n            SELECT *\n              FROM mutes\n             WHERE end_time < timezone('UTC', now())\n        ",
     "describe": {
@@ -1763,6 +1868,48 @@
         true,
         false,
         true
+      ]
+    }
+  },
+  "da5e019b3391b9ea4f76c268c79868f34d55a317c4cc667d11e273b501c01bc2": {
+    "query": "\n            SELECT *\n              FROM reminders\n             WHERE NOW() > expire_at\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "channel_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "set_at",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "expire_at",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
       ]
     }
   },

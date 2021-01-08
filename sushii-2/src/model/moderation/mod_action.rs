@@ -16,7 +16,7 @@ use crate::error::{Error as SushiiError, Result};
 use crate::keys::CacheAndHttpContainer;
 use crate::model::moderation::ModLogReporter;
 use crate::model::sql::{GuildConfig, ModLogEntry, Mute};
-use crate::utils::duration::parse_duration;
+use sushii_model::utils::duration::{find_duration, parse_duration};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ModActionType {
@@ -439,17 +439,6 @@ impl ModActionExecutor {
     }
 }
 
-/// Returns start and end byte range of the duration
-fn find_duration(s: &str) -> Option<regex::Match> {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(
-            r"(?:(?:\d+\s*(?:nanos|nsec|ns|usec|us|millis|msec|ms|seconds|second|secs|sec|s|minutes|minute|min|mins|m|hours|hour|hrs|hr|h|days|day|d|weeks|week|w|months|month|M|years|year|y))\s?)+"
-        ).unwrap();
-    }
-
-    RE.find(s)
-}
-
 fn parse_id_reason_duration(
     args: Args,
 ) -> (
@@ -466,7 +455,9 @@ fn parse_id_reason_duration(
     let reason_no_duration = duration_match.and_then(|d| {
         reason
             .clone()
+            // Remove duration string
             .map(|r| r.replace(d.as_str(), "").trim().to_string())
+            // If resulting reason without duration is empty, then None for reason
             .and_then(|r| if r.is_empty() { None } else { Some(r) })
     });
 
@@ -644,36 +635,6 @@ mod tests {
 
             assert_eq!(ids, IDS_EXP);
             assert_eq!(reason.unwrap(), expected_reason);
-        }
-    }
-
-    #[test]
-    fn finds_durations() {
-        let strs = vec![
-            "3000s",
-            "300sec",
-            "300 secs",
-            "50seconds",
-            "1 second",
-            "100m",
-            "12min",
-            "12mins",
-            "1minute",
-            "7minutes",
-            "2h",
-            "7hr",
-            "7hrs",
-            "1hour",
-            "24hours",
-            "1day",
-            "2days",
-            "365d",
-            "1week",
-            "7weeks",
-        ];
-
-        for s in strs {
-            assert!(find_duration(s).is_some());
         }
     }
 

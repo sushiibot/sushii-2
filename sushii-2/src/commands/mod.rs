@@ -8,6 +8,7 @@ pub mod moderation;
 pub mod notifications;
 pub mod owner;
 pub mod prefix;
+pub mod reminders;
 pub mod roles;
 pub mod settings;
 pub mod tags;

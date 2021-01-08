@@ -48,7 +48,11 @@ async fn slowmode(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
     };
 
     if !guild.channels.contains_key(&target_channel) {
-        msg.reply(ctx, "Error: Channel is not in this guild or could not be found").await?;
+        msg.reply(
+            ctx,
+            "Error: Channel is not in this guild or could not be found",
+        )
+        .await?;
 
         return Ok(());
     }
