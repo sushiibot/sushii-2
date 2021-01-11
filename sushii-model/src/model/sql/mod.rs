@@ -2,6 +2,7 @@ pub mod guild;
 pub mod mod_log;
 pub mod mute;
 pub mod user;
+pub mod feed;
 
 pub use self::{
     guild::{
@@ -20,4 +21,7 @@ pub use self::{
         user_level_ranked::UserLevelRanked, user_xp::UserXP,
         reminder::Reminder,
     },
+    feed::{
+        Feed, FeedMetadata, FeedItem, FeedSubscription
+    }
 };

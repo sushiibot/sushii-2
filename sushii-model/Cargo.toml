@@ -6,6 +6,7 @@ edition = "2018"
 
 [features]
 graphql = ["juniper", "dataloader"]
+feed_process = []
 
 [dependencies]
 chrono = "0.4"
