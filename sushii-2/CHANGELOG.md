@@ -7,18 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
-### Added
-
--  `avatar` command
--  Reminders with `remind`, `remind list` commands
-
-## [0.1.19] - 2021-01-06
+## [0.1.19] - 2021-01-11
 
 ### Added
 
 -  `fm profile` command
 -  `userinfo` command
 -  `slowmode` command
+-  `avatar` command
+-  Reminders with `remind`, `remind list` commands
+-  Add Last.fm metrics
 
 ### Fixed
 
