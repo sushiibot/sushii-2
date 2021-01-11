@@ -2318,28 +2318,8 @@
       ]
     }
   },
-  "3b9f28a574b9c7d9be7f7336220745c361b1763593d55f8888cc65b10b0bf07a": {
-    "query": "\n                SELECT COUNT(*) as \"total!: BigInt\"\n                  FROM user_levels\n                 WHERE guild_id = $1\n                   AND EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())\n                   AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "total!: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
-  "3ba47d6423f2cd4b8cc9491b7a7c3da5a4cde0c142c851a4b7973d8cc7af4044": {
-    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           NULL as \"guild_id?: BigInt\",\n                           CAST(SUM(msg_all_time) AS BIGINT) AS \"xp!: BigInt\",\n                           CAST(SUM(msg_week) AS BIGINT) AS \"xp_diff?: BigInt\"\n                      FROM user_levels\n                     WHERE EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())\n                       AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                  GROUP BY user_id\n                        -- after\n                    HAVING ((SUM(msg_week), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)\n                  ORDER BY \"xp!: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                    LIMIT $3\n                ",
+  "2a5628f38bcff72f8d4d6d95edb0e5c81a885959ff744a4bd22538133e65974e": {
+    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           NULL as \"guild_id?: BigInt\",\n                           CAST(SUM(msg_all_time) AS BIGINT) AS \"xp!: BigInt\",\n                           CAST(SUM(msg_week) AS BIGINT) AS \"xp_diff?: BigInt\"\n                      FROM user_levels\n                     WHERE EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())\n                       AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                  GROUP BY user_id\n                        -- after\n                    HAVING ((SUM(msg_week), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)\n                  ORDER BY \"xp_diff?: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                    LIMIT $3\n                ",
     "describe": {
       "columns": [
         {
@@ -2378,6 +2358,26 @@
       ]
     }
   },
+  "3b9f28a574b9c7d9be7f7336220745c361b1763593d55f8888cc65b10b0bf07a": {
+    "query": "\n                SELECT COUNT(*) as \"total!: BigInt\"\n                  FROM user_levels\n                 WHERE guild_id = $1\n                   AND EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())\n                   AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "total!: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "40ec3cc5dd1c94cc9c5f8fcfc449f78b4a85045da961bcd9677008676fbd55aa": {
     "query": "\n                SELECT COUNT(*) as \"total!: BigInt\"\n                  FROM user_levels\n                 WHERE guild_id = $1\n                   AND EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())\n                   AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())\n                ",
     "describe": {
@@ -2394,6 +2394,46 @@
         ]
       },
       "nullable": [
+        null
+      ]
+    }
+  },
+  "55e11501f85070f4dc40ed99c6fd1ed5aaaa8c0d2c47cabc1eba634be367767d": {
+    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           NULL as \"guild_id?: BigInt\",\n                           CAST(SUM(msg_all_time) AS BIGINT) AS \"xp!: BigInt\",\n                           CAST(SUM(msg_month) AS BIGINT) AS \"xp_diff?: BigInt\"\n                      FROM user_levels\n                     WHERE EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())\n                       AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())\n                  GROUP BY user_id\n                        -- after\n                    HAVING ((SUM(msg_month), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)\n                  ORDER BY \"xp_diff?: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                    LIMIT $3\n                ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id?: BigInt",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "xp!: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "xp_diff?: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Numeric",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        null,
+        null,
         null
       ]
     }
@@ -2518,46 +2558,6 @@
       ]
     }
   },
-  "8925458500f083ea071a34252ad8da3703c9b4fbec1b54d6743c60bb1ea5d356": {
-    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           NULL as \"guild_id?: BigInt\",\n                           CAST(SUM(msg_all_time) AS BIGINT) AS \"xp!: BigInt\",\n                           CAST(SUM(msg_day) AS BIGINT) AS \"xp_diff?: BigInt\"\n                      FROM user_levels\n                     WHERE EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())\n                       AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                  GROUP BY user_id\n                        -- after\n                    HAVING ((SUM(msg_day), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)\n                  ORDER BY \"xp!: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                    LIMIT $3\n                ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id?: BigInt",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "xp!: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "xp_diff?: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Numeric",
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        null,
-        null,
-        null
-      ]
-    }
-  },
   "a6eafc7c03971c8b673ff2af4f4ef661766f2914edf1248cd82c70484a393184": {
     "query": "\n            SELECT id as \"id: BigInt\",\n                   avatar_url,\n                   name,\n                   discriminator,\n                   last_checked\n              FROM cached_users\n             WHERE id = ANY($1)\n        ",
     "describe": {
@@ -2599,46 +2599,6 @@
         false,
         false,
         false
-      ]
-    }
-  },
-  "b23fe5b939443c8f6106b3751f592f0b0234055b3786f7bef44939859d2d913e": {
-    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           NULL as \"guild_id?: BigInt\",\n                           CAST(SUM(msg_all_time) AS BIGINT) AS \"xp!: BigInt\",\n                           CAST(SUM(msg_month) AS BIGINT) AS \"xp_diff?: BigInt\"\n                      FROM user_levels\n                     WHERE EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())\n                       AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())\n                  GROUP BY user_id\n                        -- after\n                    HAVING ((SUM(msg_month), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)\n                  ORDER BY \"xp!: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                    LIMIT $3\n                ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id?: BigInt",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "xp!: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "xp_diff?: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Numeric",
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        null,
-        null,
-        null
       ]
     }
   },
@@ -2814,6 +2774,46 @@
         false,
         false,
         false,
+        null
+      ]
+    }
+  },
+  "fad4dec15facac9b30638d008616edd3bb61a20ed564a99c3b4de4e99f678066": {
+    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           NULL as \"guild_id?: BigInt\",\n                           CAST(SUM(msg_all_time) AS BIGINT) AS \"xp!: BigInt\",\n                           CAST(SUM(msg_day) AS BIGINT) AS \"xp_diff?: BigInt\"\n                      FROM user_levels\n                     WHERE EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())\n                       AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                  GROUP BY user_id\n                        -- after\n                    HAVING ((SUM(msg_day), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)\n                  ORDER BY \"xp_diff?: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                    LIMIT $3\n                ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id?: BigInt",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "xp!: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "xp_diff?: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Numeric",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        null,
+        null,
         null
       ]
     }

@@ -400,7 +400,7 @@ async fn global_timeframe_users(
                   GROUP BY user_id
                         -- after
                     HAVING ((SUM(msg_day), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)
-                  ORDER BY "xp!: BigInt" DESC,
+                  ORDER BY "xp_diff?: BigInt" DESC,
                            "user_id: BigInt" DESC
                     LIMIT $3
                 "#,
@@ -425,7 +425,7 @@ async fn global_timeframe_users(
                   GROUP BY user_id
                         -- after
                     HAVING ((SUM(msg_week), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)
-                  ORDER BY "xp!: BigInt" DESC,
+                  ORDER BY "xp_diff?: BigInt" DESC,
                            "user_id: BigInt" DESC
                     LIMIT $3
                 "#,
@@ -450,7 +450,7 @@ async fn global_timeframe_users(
                   GROUP BY user_id
                         -- after
                     HAVING ((SUM(msg_month), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)
-                  ORDER BY "xp!: BigInt" DESC,
+                  ORDER BY "xp_diff?: BigInt" DESC,
                            "user_id: BigInt" DESC
                     LIMIT $3
                 "#,
