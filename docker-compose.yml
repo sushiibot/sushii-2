@@ -176,6 +176,28 @@ services:
             - sushii_net
         labels:
             - "traefik.enable=false"
+    redis:
+        image: redis
+        container_name: redis:6
+        restart: unless-stopped
+        expose:
+            - "6379"
+        networks:
+            - sushii_net
+        labels:
+            - "traefik.enable=false"
+    rss-bridge:
+        image: rssbridge/rss-bridge:latest
+        container_name: rss-bridge
+        restart: unless-stopped
+        expose:
+            - "80"
+        volumes:
+            - ~/docker/rss-bridge/whitelist.txt:/app/whitelist.txt
+        networks:
+            - sushii_net
+        labels:
+            - "traefik.enable=false"
 networks:
     web:
         internal: false

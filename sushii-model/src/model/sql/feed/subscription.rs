@@ -4,9 +4,9 @@ use crate::error::Result;
 
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug)]
 pub struct FeedSubscription {
-    feed_id:      String,
-    guild_id:     i64,
-    channel_id:   i64,
+    feed_id: String,
+    guild_id: i64,
+    channel_id: i64,
     mention_role: Option<i64>,
 }
 

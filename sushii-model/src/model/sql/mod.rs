@@ -1,10 +1,11 @@
+pub mod feed;
 pub mod guild;
 pub mod mod_log;
 pub mod mute;
 pub mod user;
-pub mod feed;
 
 pub use self::{
+    feed::{Feed, FeedItem, FeedMetadata, FeedSubscription},
     guild::{
         cached_guild::CachedGuild,
         guild_config::GuildConfig,
@@ -16,12 +17,8 @@ pub use self::{
     mod_log::ModLogEntry,
     mute::{delete_mute, Mute},
     user::{
-        cached_user::CachedUser, notification::Notification, user_data::UserData,
-        user_level::UserLevel, user_level_global::UserLevelGlobal,
+        cached_user::CachedUser, notification::Notification, reminder::Reminder,
+        user_data::UserData, user_level::UserLevel, user_level_global::UserLevelGlobal,
         user_level_ranked::UserLevelRanked, user_xp::UserXP,
-        reminder::Reminder,
     },
-    feed::{
-        Feed, FeedMetadata, FeedItem, FeedSubscription
-    }
 };

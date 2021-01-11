@@ -1,9 +1,9 @@
-use sqlx::types::Json;
 use chrono::naive::NaiveDateTime;
 use chrono::offset::Utc;
 use serde::{Deserialize, Serialize};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use sqlx::types::Json;
 
 use crate::error::Result;
 use crate::keys::DbPool;
