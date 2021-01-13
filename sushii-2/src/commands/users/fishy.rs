@@ -37,7 +37,15 @@ async fn fishy(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         }
     };
 
-    let target_user = target_id.to_user(&ctx).await?;
+    let target_user = match target_id.to_user(&ctx).await {
+        Ok(u) => u,
+        Err(_) => {
+            msg.reply(&ctx, "Error: Failed to fetch user, are you using a correct user ID?")
+                .await?;
+
+            return Ok(());
+        }
+    };
 
     if target_user.bot {
         msg.channel_id

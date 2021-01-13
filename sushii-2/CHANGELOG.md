@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Fixed
+
+-  Respond with error if commands use with invalid user ID
+
 ## [0.1.19] - 2021-01-11
 
 ### Added

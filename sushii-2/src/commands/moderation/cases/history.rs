@@ -108,21 +108,25 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
         .collect::<Vec<String>>()
         .join("\n");
 
-    let target_user = UserId(user_id).to_user(&ctx).await;
+    let target_user = match UserId(user_id).to_user(&ctx).await {
+        Ok(u) => u,
+        Err(_) => {
+            msg.reply(&ctx, "Error: Failed to fetch user, are you using a correct user ID?")
+                .await?;
+
+            return Ok(());
+        }
+    };
 
     msg.channel_id
         .send_message(&ctx.http, |m| {
             m.embed(|e| {
                 e.author(|a| {
-                    if let Ok(ref user) = target_user {
-                        a.icon_url(user.face());
-                    }
+                    a.icon_url(target_user.face());
 
                     a.name(format!(
                         "Case history for {} (ID: {})",
-                        target_user
-                            .map(|u| u.tag())
-                            .unwrap_or_else(|_| "user".to_string()),
+                        target_user.tag(),
                         user_id
                     ));
 
