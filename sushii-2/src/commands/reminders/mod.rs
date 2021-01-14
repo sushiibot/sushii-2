@@ -8,5 +8,5 @@ use self::{add::*, list::*};
 #[group]
 #[commands(add, list)]
 #[default_command(add)]
-#[prefixes("reminder", "remind", "remi")]
+#[prefixes("reminder", "remindme", "remind", "remi")]
 pub struct Reminders;
