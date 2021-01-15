@@ -479,7 +479,9 @@ fn parse_id_reason_duration(
 fn parse_id_reason(args: Args) -> (Vec<u64>, Option<String>) {
     lazy_static! {
         // Can overflow, so need to handle later
-        static ref RE: Regex = Regex::new(r"(?:<@)?(\d{17,19})>?").unwrap();
+        // Excludes if ID haas # or & before the digits to exclude channel and role mentions
+        // Allows ^ start of string for raw ID or <@ for user mention
+        static ref RE: Regex = Regex::new(r"(?:<@|[^#&\d]|^)(\d{17,19})>?").unwrap();
     }
 
     let ids_and_reason = args.rest();
@@ -705,6 +707,33 @@ mod tests {
             assert_eq!(ids, IDS_EXP);
             assert!(duration.is_none());
             assert_eq!(reason.unwrap(), REASON_EXP);
+        }
+    }
+
+    #[test]
+    fn parses_ids_reason_excludes_non_user() {
+        let input_strs = vec![
+            "145764790046818304,193163974471188480,151018674793349121 <#151018674793349121> test",
+            "<@145764790046818304> <@193163974471188480> <@151018674793349121> <@&151018674793349121> a",
+            "145764790046818304 193163974471188480 151018674793349121 <#151018674793349121> reason",
+            "145764790046818304   193163974471188480    151018674793349121 <@&151018674793349121> bunbunbunbun",
+        ];
+
+        let reason_exp = vec![
+            "<#151018674793349121> test",
+            "<@&151018674793349121> a",
+            "<#151018674793349121> reason",
+            "<@&151018674793349121> bunbunbunbun",
+        ];
+
+        for (s, reason_exp) in input_strs.iter().zip(reason_exp.iter()) {
+            let args = Args::new(s, &[Delimiter::Single(' ')]);
+
+            let (ids, reason, duration) = parse_id_reason_duration(args);
+
+            assert_eq!(ids, IDS_EXP);
+            assert!(duration.is_none());
+            assert_eq!(reason.unwrap(), *reason_exp);
         }
     }
 }
