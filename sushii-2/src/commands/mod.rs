@@ -1,5 +1,6 @@
 use serenity::framework::standard::macros::group;
 
+pub mod feeds;
 pub mod guild;
 pub mod help;
 pub mod lastfm;

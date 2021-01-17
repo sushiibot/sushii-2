@@ -1,0 +1,26 @@
+{
+    "feeds": [
+        {
+            "kind": "twitter",
+            "attributes": {
+                "feed_path": "/?action=display&bridge=Twitter&context=By+username&u={username}&norep={norep}&noretweet={noretweet}&format=Json",
+                "name": "Twitter @{username}",
+                "source_url": "https://twitter.com/{username}",
+                "params": {
+                    "username": {
+                        "kind": "string",
+                        "param": "username"
+                    },
+                    "retweets": {
+                        "kind": "bool",
+                        "param": "noretweet"
+                    },
+                    "replies": {
+                        "kind": "bool",
+                        "param": "norep"
+                    }
+                }
+            }
+        }
+    ]
+}

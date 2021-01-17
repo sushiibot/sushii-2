@@ -111,8 +111,11 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
     let target_user = match UserId(user_id).to_user(&ctx).await {
         Ok(u) => u,
         Err(_) => {
-            msg.reply(&ctx, "Error: Failed to fetch user, are you using a correct user ID?")
-                .await?;
+            msg.reply(
+                &ctx,
+                "Error: Failed to fetch user, are you using a correct user ID?",
+            )
+            .await?;
 
             return Ok(());
         }

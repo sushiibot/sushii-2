@@ -8,7 +8,6 @@ use tokio::{
 };
 use tracing_subscriber::filter::EnvFilter;
 
-mod feeds;
 mod model;
 use model::context::Context;
 

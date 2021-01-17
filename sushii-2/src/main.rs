@@ -102,6 +102,7 @@ async fn main() -> Result<()> {
         .on_dispatch_error(hooks::dispatch_error)
         .group(&commands::META_GROUP)
         .group(&commands::tags::TAGS_GROUP)
+        .group(&commands::feeds::FEEDS_GROUP)
         .group(&commands::guild::GUILD_GROUP)
         .group(&commands::notifications::NOTIFICATIONS_GROUP)
         .group(&commands::reminders::REMINDERS_GROUP)

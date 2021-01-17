@@ -20,8 +20,8 @@ impl FeedSubscription {
         }
     }
 
-    pub fn mention_role(mut self, mention_role: i64) -> Self {
-        self.mention_role.replace(mention_role);
+    pub fn mention_role(mut self, mention_role: Option<i64>) -> Self {
+        self.mention_role = mention_role;
         self
     }
 }

@@ -15,6 +15,10 @@ dotenv = "0.15.0"
 rss = "1.10.0"
 num_cpus = "1.13.0"
 async-trait = "0.1.42"
+lazy_static = "1.4.0"
+serde = "1.0.119"
+serde_json = "1.0.61"
+strfmt = "0.1.6"
 
 [dependencies.tokio]
 version = "0.2"

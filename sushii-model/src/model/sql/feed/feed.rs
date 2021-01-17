@@ -8,6 +8,10 @@ use sqlx::types::Json;
 use crate::error::Result;
 use crate::keys::DbPool;
 
+pub trait Id {
+    fn id(&self) -> String;
+}
+
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct RssFeedMetadata {
     /// Feed title, e.g. Twitter @username
@@ -18,17 +22,45 @@ pub struct RssFeedMetadata {
     pub source_url: String,
 }
 
+impl Id for RssFeedMetadata {
+    fn id(&self) -> String {
+        format!("rss:{}", self.feed_url)
+    }
+}
+
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct VliveChannelMeta {
-    pub channel_seq: i64,
+    pub channel_seq: Option<i64>,
     pub channel_code: String,
     pub channel_name: String,
     pub channel_icon_url: String,
 }
 
+impl VliveChannelMeta {
+    pub fn new(
+        channel_seq: Option<i64>,
+        channel_code: String,
+        channel_name: String,
+        channel_icon_url: String,
+    ) -> Self {
+        Self {
+            channel_seq,
+            channel_code,
+            channel_name,
+            channel_icon_url,
+        }
+    }
+}
+
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct VliveVideosMetadata {
     pub channel: VliveChannelMeta,
+}
+
+impl Id for VliveVideosMetadata {
+    fn id(&self) -> String {
+        format!("vlive:videos:{}", self.channel.channel_code)
+    }
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
@@ -37,11 +69,71 @@ pub struct VliveBoardMetadata {
     pub board_id: i64,
 }
 
+impl Id for VliveBoardMetadata {
+    fn id(&self) -> String {
+        format!("vlive:board:{}:{}", self.channel.channel_code, self.board_id)
+    }
+}
+
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub enum FeedMetadata {
     Rss(RssFeedMetadata),
     VliveBoard(VliveBoardMetadata),
     VliveVideos(VliveVideosMetadata),
+}
+
+impl FeedMetadata {
+    pub fn rss(title: String, feed_url: String, source_url: String) -> Self {
+        Self::Rss(RssFeedMetadata {
+            title,
+            feed_url,
+            source_url,
+        })
+    }
+
+    pub fn vlive_videos(
+        channel_seq: Option<i64>,
+        channel_code: String,
+        channel_name: String,
+        channel_icon_url: String,
+    ) -> Self {
+        Self::VliveVideos(VliveVideosMetadata {
+            channel: VliveChannelMeta::new(
+                channel_seq,
+                channel_code,
+                channel_name,
+                channel_icon_url,
+            ),
+        })
+    }
+
+    pub fn vlive_board(
+        channel_seq: Option<i64>,
+        channel_code: String,
+        channel_name: String,
+        channel_icon_url: String,
+        board_id: i64,
+    ) -> Self {
+        Self::VliveBoard(VliveBoardMetadata {
+            channel: VliveChannelMeta::new(
+                channel_seq,
+                channel_code,
+                channel_name,
+                channel_icon_url,
+            ),
+            board_id,
+        })
+    }
+}
+
+impl Id for FeedMetadata {
+    fn id(&self) -> String {
+        match self {
+            Self::Rss(m) => m.id(),
+            Self::VliveBoard(m) => m.id(),
+            Self::VliveVideos(m) => m.id(),
+        }
+    }
 }
 
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug)]
@@ -52,9 +144,9 @@ pub struct Feed {
 }
 
 impl Feed {
-    pub fn new(feed_id: impl Into<String>, metadata: FeedMetadata) -> Self {
+    pub fn new(metadata: FeedMetadata) -> Self {
         Self {
-            feed_id: feed_id.into(),
+            feed_id: metadata.id(),
             metadata: Json(metadata),
         }
     }

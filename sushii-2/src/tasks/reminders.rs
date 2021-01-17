@@ -18,16 +18,21 @@ pub async fn check_expired_reminders(ctx: &Context) -> Result<()> {
 }
 
 pub async fn remind_user(ctx: &Context, reminder: &Reminder) -> Result<()> {
-    ChannelId(reminder.channel_id as u64).send_message(ctx, |m| {
-        m.content(format!("<@{}>", reminder.user_id as u64));
+    ChannelId(reminder.channel_id as u64)
+        .send_message(ctx, |m| {
+            m.content(format!("<@{}>", reminder.user_id as u64));
 
-        m.embed(|e| {
-            e.title(format!("Reminder expired from {} ago", reminder.get_human_duration()));
-            e.description(&reminder.description);
+            m.embed(|e| {
+                e.title(format!(
+                    "Reminder expired from {} ago",
+                    reminder.get_human_duration()
+                ));
+                e.description(&reminder.description);
 
-            e
+                e
+            })
         })
-    }).await?;
+        .await?;
 
     reminder.delete(ctx).await?;
 
