@@ -35,6 +35,8 @@ path = "../sushii-model"
 
 [dependencies.sushii-feeds]
 path = "../sushii-feeds"
+default-features = false
+features = []
 
 [dependencies.vlive]
 git = "https://github.com/drklee3/vlive-rs"

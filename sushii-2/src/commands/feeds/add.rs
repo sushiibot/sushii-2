@@ -1,40 +1,210 @@
 use futures::stream::StreamExt;
+use serenity::async_trait;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::utils::{parse_channel, parse_role};
+use std::result::Result as StdResult;
 use vlive::VLiveRequester;
 
 use crate::error::Result;
 use crate::keys::*;
-use sushii_model::model::sql::{FeedMetadata, FeedSubscription};
 use sushii_model::model::sql::feed::feed::Id;
+use sushii_model::model::sql::{Feed, FeedMetadata, FeedSubscription};
 
-enum BasicState {
-    FeedType,
-    DiscordChannel,
-    DiscordRole,
+#[derive(Default, Debug, Clone)]
+struct FeedOptions {
+    pub kind: Option<String>,
+    pub discord_channel: Option<u64>,
+    pub mention_role: Option<u64>,
 }
 
-impl BasicState {
-    pub fn start() -> Self {
-        Self::FeedType
+impl FeedOptions {
+    pub fn new() -> Self {
+        Self::default()
     }
+}
 
-    pub fn prompt(&self) -> &'static str {
-        match self {
-            Self::FeedType => "What kind of feed do you want to add? Currently available feeds are: `vlive`, `twitter`",
-            Self::DiscordChannel => "Which channel do you want updates to be sent to?",
-            Self::DiscordRole => "What role do you want to mention for new updates? Say `none` for no role mention.",
+#[async_trait]
+pub trait UserOption<T> {
+    fn prompt(&self) -> &'static str;
+    async fn validate(
+        &self,
+        ctx: &Context,
+        msg: &Message,
+        state: &mut T,
+    ) -> StdResult<String, String>;
+}
+
+pub struct OptionsCollector<T> {
+    pub options: Vec<Box<dyn UserOption<T> + Send + Sync>>,
+    /// Item to modify when an option is valid, where to store responses
+    /// e.g a struct or hashmap
+    pub state: T,
+}
+
+impl<T> OptionsCollector<T> {
+    pub fn new(state: T) -> Self {
+        Self {
+            options: vec![],
+            state,
         }
     }
 
-    pub fn next(self) -> Option<Self> {
-        match self {
-            Self::FeedType => Some(Self::DiscordChannel),
-            Self::DiscordChannel => Some(Self::DiscordRole),
-            Self::DiscordRole => None,
+    pub fn add_option(mut self, opt: impl UserOption<T> + 'static + Send + Sync) -> Self {
+        self.options.push(Box::new(opt));
+        self
+    }
+
+    pub fn get_state(&self) -> &T {
+        &self.state
+    }
+
+    async fn collect(&mut self, ctx: &Context, msg: &Message) -> Result<()> {
+        for option in &self.options {
+            msg.channel_id.say(ctx, option.prompt()).await?;
+
+            let mut replies = msg
+                .channel_id
+                .await_replies(ctx)
+                .author_id(msg.author.id)
+                .channel_id(msg.channel_id)
+                .await;
+
+            while let Some(reply) = replies.next().await {
+                match option.validate(ctx, &reply, &mut self.state).await {
+                    Ok(response) => {
+                        msg.channel_id.say(ctx, response).await?;
+
+                        // If success, break from waiting for response and go to
+                        // next option
+                        break;
+                    }
+                    Err(response) => {
+                        // If option isn't valid, respond with error and wait for another try
+                        msg.channel_id
+                            .say(ctx, format!("Error: {}", response))
+                            .await?;
+                    }
+                }
+            }
         }
+
+        Ok(())
+    }
+}
+
+struct FeedType;
+
+#[async_trait]
+impl UserOption<FeedOptions> for FeedType {
+    fn prompt(&self) -> &'static str {
+        "What kind of feed do you want to add? Currently available feeds are: `vlive`, `twitter`"
+    }
+
+    async fn validate(
+        &self,
+        _ctx: &Context,
+        msg: &Message,
+        state: &mut FeedOptions,
+    ) -> StdResult<String, String> {
+        match msg.content.as_str() {
+            "vlive" => {
+                state.kind.replace("vlive".into());
+                return Ok(format!("Selected feed type {}", msg.content));
+            }
+            // RSS feeds later
+            // "twitter" | "youtube" => "rss",
+            _ => {
+                return Err(format!(
+                    "{} is not a valid feed type. Currently available feeds are: `vlive`",
+                    msg.content
+                ));
+            }
+        }
+    }
+}
+
+struct DiscordChannel;
+
+#[async_trait]
+impl UserOption<FeedOptions> for DiscordChannel {
+    fn prompt(&self) -> &'static str {
+        "Which channel do you want updates to be sent to?"
+    }
+
+    async fn validate(
+        &self,
+        ctx: &Context,
+        msg: &Message,
+        state: &mut FeedOptions,
+    ) -> StdResult<String, String> {
+        let channel_id = msg
+            .content
+            .parse::<u64>()
+            .ok()
+            .or_else(|| parse_channel(&msg.content))
+            .ok_or("Invalid channel. Give a channel.".to_string())?;
+
+        let guild_channels = msg
+            .guild_field(ctx, |g| g.channels.clone())
+            .await
+            .ok_or("Couldn't find channel. Give a channel.".to_string())?;
+
+        match guild_channels.get(&ChannelId(channel_id)) {
+            Some(c) => {
+                if c.kind != ChannelType::Text {
+                    return Err("Channel is not a text channel. Try a different one.".into());
+                }
+
+                state.discord_channel.replace(c.id.0);
+
+                return Ok(format!("Updates will be sent to <#{}>", c.id.0));
+            }
+            None => {
+                return Err("Channel is not found in this guild. Try again?".into());
+            }
+        }
+    }
+}
+
+struct DiscordRole;
+
+#[async_trait]
+impl UserOption<FeedOptions> for DiscordRole {
+    fn prompt(&self) -> &'static str {
+        "What role do you want to mention for new updates? Say `none` for no role mention."
+    }
+
+    async fn validate(
+        &self,
+        ctx: &Context,
+        msg: &Message,
+        state: &mut FeedOptions,
+    ) -> StdResult<String, String> {
+        if msg.content.trim() == "none" {
+            return Ok("This feed won't mention any roles.".into());
+        }
+
+        // TODO: actually handle this, not an accurate error
+        let guild_roles = msg
+            .guild_field(ctx, |g| g.roles.clone())
+            .await
+            .ok_or("Couldn't find role. Give a role.".to_string())?;
+
+        let mention_role = parse_role(&msg.content)
+            .or_else(|| msg.content.parse::<u64>().ok())
+            .or_else(|| {
+                guild_roles
+                    .values()
+                    .find(|&x| x.name.to_lowercase() == msg.content.to_lowercase())
+                    .map(|x| x.id.0)
+            })
+            .ok_or("Invalid role, give a role name, role mention, or role ID. `none` for no mention role.".to_string())?;
+
+        state.mention_role.replace(mention_role);
+
+        Ok(format!("The role will be mentioned <@&{}>", mention_role))
     }
 }
 
@@ -59,8 +229,6 @@ async fn add(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .cloned()
         .unwrap();
 
-    let mut state = BasicState::start();
-
     let mut messages = msg
         .channel_id
         .await_replies(ctx)
@@ -68,136 +236,16 @@ async fn add(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .channel_id(msg.channel_id)
         .await;
 
-    msg.channel_id.say(&ctx, state.prompt()).await?;
+    let mut options_collector = OptionsCollector::new(FeedOptions::new())
+        .add_option(FeedType)
+        .add_option(DiscordChannel)
+        .add_option(DiscordRole);
 
-    let mut feed_type = "";
-    let mut target_channel = 0;
-    let mut mention_role = None;
+    options_collector.collect(ctx, msg).await?;
 
-    while let Some(reply) = messages.next().await {
-        let mut reply_str = String::new();
+    let opts = options_collector.get_state();
 
-        match state {
-            BasicState::FeedType => {
-                match reply.content.as_str() {
-                    "vlive" => {
-                        reply_str = format!("Selected feed type {}", reply.content);
-                        feed_type = "vlive";
-                    }
-                    // RSS feeds later
-                    // "twitter" | "youtube" => "rss",
-                    _ => {
-                        msg.channel_id
-                            .say(
-                            &ctx,
-                            format!("{} is not a valid feed type. Currently available feeds are: `vlive`", msg.content),
-                        )
-                        .await?;
-
-                        // Continue if error
-                        continue;
-                    }
-                }
-            }
-            BasicState::DiscordChannel => {
-                let channel_id = match reply
-                    .content
-                    .parse::<u64>()
-                    .ok()
-                    .or_else(|| parse_channel(&reply.content))
-                {
-                    Some(c) => c,
-                    None => {
-                        msg.channel_id
-                            .say(&ctx, "Error: Invalid channel. Give a channel.")
-                            .await?;
-
-                        continue;
-                    }
-                };
-
-                target_channel = match guild.channels.get(&ChannelId(channel_id)) {
-                    Some(c) => {
-                        if c.kind != ChannelType::Text {
-                            msg.channel_id
-                                .say(
-                                    &ctx,
-                                    "Error: Channel is not a text channel. Try a different one.",
-                                )
-                                .await?;
-
-                            continue;
-                        }
-
-                        reply_str = format!("Updates will be sent to <#{}>", c.id.0);
-
-                        c.id.0
-                    }
-                    None => {
-                        msg.channel_id
-                            .say(
-                                &ctx,
-                                "Error: Channel is not found in this guild. Try again?",
-                            )
-                            .await?;
-
-                        // Continue if error
-                        continue;
-                    }
-                };
-            }
-            BasicState::DiscordRole => {
-                if reply.content.trim() == "none" {
-                    reply_str = "This feed won't mention any roles.".into();
-                } else {
-                    mention_role = match parse_role(&reply.content)
-                        .or_else(|| reply.content.parse::<u64>().ok())
-                        .or_else(|| {
-                            guild
-                                .roles
-                                .values()
-                                .find(|&x| x.name.to_lowercase() == reply.content.to_lowercase())
-                                .map(|x| x.id.0)
-                        }) {
-                        Some(r) => {
-                            reply_str = format!("The role will be mentioned <@&{}>", r);
-
-                            Some(r)
-                        }
-                        None => {
-                            msg.channel_id
-                                    .say(
-                                    &ctx,
-                                    "Error: Invalid role, give a role name, role mention, or role ID. `none` for no mention role.",
-                                )
-                                .await?;
-
-                            continue;
-                        }
-                    };
-                }
-            }
-        }
-
-        state = match state.next() {
-            Some(s) => {
-                // Respond with reply and prompt for next question
-                msg.channel_id
-                    .say(ctx, format!("{}\n{}", reply_str, s.prompt()))
-                    .await?;
-
-                s
-            }
-            None => {
-                // Respond with reply without next prompt
-                msg.channel_id.say(ctx, reply_str).await?;
-
-                break;
-            }
-        };
-    }
-
-    let feed_metadata = match feed_type.to_lowercase().as_str() {
+    let feed_metadata = match opts.kind.as_ref().unwrap().to_lowercase().as_str() {
         "vlive" => match add_vlive(reqwest, ctx, msg).await? {
             Some(m) => m,
             None => return Ok(()),
@@ -215,9 +263,15 @@ async fn add(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     };
 
-    let subscription =
-        FeedSubscription::new(feed_metadata.id(), guild.id.0 as i64, target_channel as i64)
-            .mention_role(mention_role.map(|r| r as i64));
+    // Need to save the Feed data, or ensure it already exists before saving subscription
+    let feed = Feed::from_meta(feed_metadata).save(ctx).await?;
+
+    let subscription = FeedSubscription::new(
+        feed.feed_id,
+        guild.id.0 as i64,
+        opts.discord_channel.unwrap() as i64,
+    )
+    .mention_role(opts.mention_role.map(|r| r as i64));
 
     dbg!(subscription);
 
@@ -270,12 +324,15 @@ async fn add_vlive(
     let mut feed_metadata = None;
 
     while let Some(reply) = messages.next().await {
-        if reply.content == "quit" {
-            msg.channel_id
-                .say(&ctx, "Quitting. No feeds were added.")
-                .await?;
+        match reply.content.as_str() {
+            "quit" | "stop" | "exit" => {
+                msg.channel_id
+                    .say(&ctx, "Quitting. No feeds were added.")
+                    .await?;
 
-            return Ok(None);
+                return Ok(None);
+            }
+            _ => {}
         }
 
         match step {

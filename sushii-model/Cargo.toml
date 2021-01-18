@@ -5,6 +5,7 @@ authors = ["drklee3 <derrick@dlee.dev>"]
 edition = "2018"
 
 [features]
+default = []
 graphql = ["juniper", "dataloader"]
 feed_process = []
 
@@ -43,7 +44,6 @@ features = ["default", "collector"]
 [dependencies.juniper]
 version = "0.15.1"
 optional = true
-
 
 [dependencies.dataloader]
 version = "0.13"

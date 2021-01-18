@@ -144,14 +144,13 @@ pub struct Feed {
 }
 
 impl Feed {
-    pub fn new(metadata: FeedMetadata) -> Self {
+    pub fn from_meta(metadata: FeedMetadata) -> Self {
         Self {
             feed_id: metadata.id(),
             metadata: Json(metadata),
         }
     }
 
-    #[cfg(not(feature = "feed_process"))]
     pub async fn save(self, ctx: &Context) -> Result<Self> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 

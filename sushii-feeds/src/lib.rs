@@ -51,7 +51,7 @@ pub fn build_feed(feed_kind_attrs: FeedKindAttrs, params: HashMap<String, String
 
             let metadata = FeedMetadata::rss(name, feed_url, source_url);
 
-            Ok(Feed::new(metadata))
+            Ok(Feed::from_meta(metadata))
         }
     }
 }
