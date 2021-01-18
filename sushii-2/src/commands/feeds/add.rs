@@ -6,6 +6,7 @@ use serenity::prelude::*;
 use serenity::utils::{parse_channel, parse_role};
 use std::result::Result as StdResult;
 use vlive::VLiveRequester;
+use std::time::Duration;
 
 use crate::error::Result;
 use crate::keys::*;
@@ -69,6 +70,7 @@ impl<T> OptionsCollector<T> {
                 .await_replies(ctx)
                 .author_id(msg.author.id)
                 .channel_id(msg.channel_id)
+                .timeout(Duration::from_secs(120))
                 .await;
 
             while let Some(reply) = replies.next().await {
@@ -88,6 +90,8 @@ impl<T> OptionsCollector<T> {
                     }
                 }
             }
+
+            // TODO: Delete messages
         }
 
         Ok(())
