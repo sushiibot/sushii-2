@@ -1,0 +1,37 @@
+syntax = "proto3";
+package feedrequest;
+
+service FeedService {
+    rpc UpdateFeeds (Empty) returns (FeedUpdateReply);
+}
+
+message Empty {
+}
+
+message FeedUpdateReply {
+    message Subscription {
+        uint64 channel = 1;
+        uint64 role = 2;
+    }
+
+    message Author {
+        string name = 1;
+        string icon = 2;
+        string url = 3;
+    }
+
+    message Post {
+        string title = 1;
+        Author author = 2;
+        string description = 3;
+        string thumbnail = 4;
+        string url = 5;
+    }
+
+    message FeedItem {
+        Post post = 1;
+        Subscription subscription = 2;
+    }
+
+    repeated FeedItem items = 1;
+}

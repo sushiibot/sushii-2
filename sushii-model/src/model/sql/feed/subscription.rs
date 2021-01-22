@@ -6,10 +6,10 @@ use crate::keys::DbPool;
 
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug)]
 pub struct FeedSubscription {
-    feed_id: String,
-    guild_id: i64,
-    channel_id: i64,
-    mention_role: Option<i64>,
+    pub feed_id: String,
+    pub guild_id: i64,
+    pub channel_id: i64,
+    pub mention_role: Option<i64>,
 }
 
 impl FeedSubscription {

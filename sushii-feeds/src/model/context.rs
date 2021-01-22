@@ -1,20 +1,17 @@
 use anyhow::Result;
-use darkredis::ConnectionPool;
 use reqwest::{Client, ClientBuilder};
 use sqlx::PgPool;
 
 #[derive(Clone, Debug)]
 pub struct Context {
     pub db_pool: PgPool,
-    pub redis_pool: ConnectionPool,
     pub client: Client,
 }
 
 impl Context {
-    pub fn new(db_pool: PgPool, redis_pool: ConnectionPool) -> Result<Self> {
+    pub fn new(db_pool: PgPool) -> Result<Self> {
         let ctx = Self {
             db_pool,
-            redis_pool,
             client: ClientBuilder::new()
                 .user_agent(concat!(
                     env!("CARGO_PKG_NAME"),
