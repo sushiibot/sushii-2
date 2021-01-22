@@ -5,9 +5,9 @@ use sqlx::PgPool;
 
 #[derive(Clone, Debug)]
 pub struct Context {
-    db_pool: PgPool,
-    redis_pool: ConnectionPool,
-    client: Client,
+    pub db_pool: PgPool,
+    pub redis_pool: ConnectionPool,
+    pub client: Client,
 }
 
 impl Context {

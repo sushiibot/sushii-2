@@ -38,10 +38,10 @@ pub trait UserOption<T> {
 }
 
 pub struct OptionsCollector<T> {
-    pub options: Vec<Box<dyn UserOption<T> + Send + Sync>>,
+    options: Vec<Box<dyn UserOption<T> + Send + Sync>>,
     /// Item to modify when an option is valid, where to store responses
     /// e.g a struct or hashmap
-    pub state: T,
+    state: T,
 }
 
 impl<T> OptionsCollector<T> {
@@ -275,7 +275,9 @@ async fn add(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         guild.id.0 as i64,
         opts.discord_channel.unwrap() as i64,
     )
-    .mention_role(opts.mention_role.map(|r| r as i64));
+    .mention_role(opts.mention_role.map(|r| r as i64))
+    .save(ctx)
+    .await?;
 
     dbg!(subscription);
 

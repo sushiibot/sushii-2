@@ -1,7 +1,4 @@
-use chrono::naive::NaiveDateTime;
-use chrono::offset::Utc;
 use serde::{Deserialize, Serialize};
-use serenity::model::prelude::*;
 use serenity::prelude::*;
 use sqlx::types::Json;
 
@@ -151,6 +148,38 @@ impl Feed {
         }
     }
 
+    #[cfg(feature = "feed_process")]
+    pub async fn get_all_rss(pool: &sqlx::PgPool) -> Result<Vec<Self>> {
+        sqlx::query_as!(
+            Feed,
+            r#"
+            SELECT feed_id,
+                   metadata as "metadata!: Json<FeedMetadata>"
+              FROM feeds
+             WHERE feed_id NOT LIKE 'vlive:%'
+            "#,
+        )
+        .fetch_all(pool)
+        .await
+        .map_err(Into::into)
+    }
+
+    #[cfg(feature = "feed_process")]
+    pub async fn get_all_vlive(pool: &sqlx::PgPool) -> Result<Vec<Self>> {
+        sqlx::query_as!(
+            Feed,
+            r#"
+            SELECT feed_id,
+                   metadata as "metadata!: Json<FeedMetadata>"
+              FROM feeds
+             WHERE feed_id LIKE 'vlive:%'
+            "#,
+        )
+        .fetch_all(pool)
+        .await
+        .map_err(Into::into)
+    }
+
     pub async fn save(self, ctx: &Context) -> Result<Self> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
@@ -171,5 +200,20 @@ impl Feed {
 
         // Instead of RETURNING * just return self
         Ok(self)
+    }
+
+    #[cfg(feature = "feed_process")]
+    pub async fn delete(&self, pool: &sqlx::PgPool) -> Result<()> {
+        sqlx::query!(
+            r#"
+            DELETE FROM feeds
+                  WHERE feed_id = $1
+            "#,
+            self.feed_id,
+        )
+        .execute(pool)
+        .await?;
+
+        Ok(())
     }
 }

@@ -2,9 +2,9 @@ use anyhow::anyhow;
 use anyhow::Result;
 use reqwest::Client;
 use rss::Channel;
-use sushii_model::model::sql::feed::{Feed, FeedKind, FeedMetadata};
 use std::collections::HashMap;
 use strfmt::strfmt;
+use sushii_model::model::sql::feed::{Feed, FeedKind, FeedMetadata};
 
 pub mod model;
 
