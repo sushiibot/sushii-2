@@ -36,7 +36,7 @@ async fn update_rss(ctx: Context) -> Result<()> {
     Ok(())
 }
 
-async fn update_vlive(ctx: Context) -> Result<Vec<GrpcFeedItem>> {
+pub async fn update_vlive(ctx: Context) -> Result<Vec<GrpcFeedItem>> {
     let feeds = Feed::get_all_vlive(&ctx.db_pool).await?;
 
     // channel_code key

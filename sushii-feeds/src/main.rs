@@ -1,9 +1,9 @@
 use anyhow::Result;
+use chrono::{NaiveDateTime, Utc};
 use sqlx::postgres::PgPoolOptions;
 use std::collections::HashMap;
 use std::env;
 use std::net::SocketAddr;
-use sushii_model::model::sql::{Feed, FeedItem, FeedMetadata, FeedSubscription};
 use tokio::{
     task,
     time::{self, Duration},
@@ -21,16 +21,28 @@ pub mod feed_request {
 }
 
 use feed_request::feed_service_server::{FeedService, FeedServiceServer};
-use feed_request::{Empty, FeedUpdateReply};
+use feed_request::{feed_update_reply::FeedItem, Empty, FeedUpdateReply};
 
 #[derive(Debug)]
 pub struct GrpcService {
     ctx: Context,
+    last_update: Option<NaiveDateTime>,
+    cache: Vec<FeedItem>,
 }
 
 impl GrpcService {
     pub fn new(ctx: Context) -> Self {
-        Self { ctx }
+        Self {
+            ctx,
+            last_update: None,
+            cache: Vec::new(),
+        }
+    }
+
+    pub fn update(&mut self, items: Vec<FeedItem>) {
+        let now = Utc::now().naive_utc();
+        self.last_update.replace(now);
+        self.cache = items;
     }
 }
 
@@ -42,7 +54,12 @@ impl FeedService for GrpcService {
     ) -> Result<Response<FeedUpdateReply>, Status> {
         println!("Got a request from {:?}", request.remote_addr());
 
-        let reply = FeedUpdateReply { items: Vec::new() };
+        let reply = FeedUpdateReply {
+            items: update::update_vlive(self.ctx.clone())
+                .await
+                .map_err(|e| Status::internal(e.to_string()))?,
+        };
+
         Ok(Response::new(reply))
     }
 }
