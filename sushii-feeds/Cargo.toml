@@ -21,6 +21,7 @@ tonic = "0.4.0"
 prost = "0.7.0"
 chrono = "0.4.19"
 cached = "0.23.0"
+dashmap = "4.0.2"
 
 [dependencies.tokio]
 version = "0.2"

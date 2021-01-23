@@ -1,13 +1,11 @@
 use anyhow::Result;
-use chrono::{NaiveDateTime, Utc};
+use dashmap::DashMap;
 use sqlx::postgres::PgPoolOptions;
-use std::collections::HashMap;
 use std::env;
 use std::net::SocketAddr;
-use tokio::{
-    task,
-    time::{self, Duration},
-};
+use std::sync::Arc;
+use std::time::{Duration, Instant};
+use tokio::sync::Mutex;
 use tonic::{transport::Server, Request, Response, Status};
 use tracing_subscriber::filter::EnvFilter;
 use vlive::VLiveRequester;
@@ -22,11 +20,39 @@ use sushii_feeds::feed_request::{feed_update_reply::FeedItem, Empty, FeedUpdateR
 #[derive(Debug)]
 pub struct GrpcService {
     ctx: Context,
+    cache: DashMap<String, (Instant, Vec<FeedItem>)>,
+    /// Default cache ttl is 1 minute
+    ttl: Duration,
 }
 
 impl GrpcService {
     pub fn new(ctx: Context) -> Self {
-        Self { ctx }
+        Self {
+            ctx,
+            cache: DashMap::new(),
+            ttl: Duration::from_secs(60),
+        }
+    }
+
+    pub fn update(&self, key: impl Into<String>, items: Vec<FeedItem>) {
+        self.cache.insert(key.into(), (Instant::now(), items));
+    }
+
+    pub fn get(&self, key: &str) -> Option<Vec<FeedItem>> {
+        let entry = self.cache.get(key)?;
+        let (last_update, items) = entry.value();
+
+        let now = Instant::now();
+        let age = now.duration_since(*last_update);
+
+        // Older than ttl, return None to get new items
+        if age > self.ttl {
+            tracing::debug!("Cache item stale");
+            return None;
+        }
+
+        // Younger than ttl, cache still fresh so return cache content
+        Some(items.clone())
     }
 }
 
@@ -38,11 +64,20 @@ impl FeedService for GrpcService {
     ) -> Result<Response<FeedUpdateReply>, Status> {
         tracing::info!("Got a request from {:?}", request.remote_addr());
 
-        let reply = FeedUpdateReply {
-            items: update::update_vlive(self.ctx.clone())
+        // Check cache
+        let items = if let Some(items) = self.get("vlive") {
+            items
+        } else {
+            let items = update::update_vlive(self.ctx.clone())
                 .await
-                .map_err(|e| Status::internal(e.to_string()))?,
+                .map_err(|e| Status::internal(e.to_string()))?;
+            // Update cache
+            self.update("vlive", items.clone());
+
+            items
         };
+
+        let reply = FeedUpdateReply { items };
 
         Ok(Response::new(reply))
     }
