@@ -10,11 +10,22 @@ pub mod feed_request {
     tonic::include_proto!("feedrequest");
 }
 
+pub use tonic;
 pub use feed_request::feed_service_client::FeedServiceClient;
-pub use feed_request::Empty;
+pub use feed_request::{feed_update_reply::FeedItem, Empty, FeedUpdateReply};
 
 pub mod model;
 use crate::model::feeds::{FeedKindAttrs, FeedList};
+
+pub async fn get_new(
+    mut client: FeedServiceClient<tonic::transport::channel::Channel>,
+) -> Result<FeedUpdateReply> {
+    let request = tonic::Request::new(Empty {});
+
+    let res = client.update_feeds(request).await?;
+
+    Ok(res.into_inner())
+}
 
 pub async fn get_feed(client: Client, kind: FeedKind, feed: Feed) -> Result<Channel> {
     match kind {

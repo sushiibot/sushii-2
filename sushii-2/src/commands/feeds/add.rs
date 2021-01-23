@@ -8,9 +8,9 @@ use std::result::Result as StdResult;
 use std::time::Duration;
 use vlive::VLiveRequester;
 
-use sushii_model::model::sql::{Feed, FeedMetadata, FeedSubscription};
 use crate::error::Result;
 use crate::keys::*;
+use sushii_model::model::sql::{Feed, FeedMetadata, FeedSubscription};
 
 #[derive(Default, Debug, Clone)]
 struct FeedOptions {
