@@ -8,10 +8,9 @@ use std::result::Result as StdResult;
 use std::time::Duration;
 use vlive::VLiveRequester;
 
+use sushii_model::model::sql::{Feed, FeedMetadata, FeedSubscription};
 use crate::error::Result;
 use crate::keys::*;
-use sushii_model::model::sql::feed::feed::Id;
-use sushii_model::model::sql::{Feed, FeedMetadata, FeedSubscription};
 
 #[derive(Default, Debug, Clone)]
 struct FeedOptions {
@@ -219,7 +218,7 @@ impl UserOption<FeedOptions> for DiscordRole {
 #[command]
 #[only_in("guild")]
 #[required_permissions("MANAGE_GUILD")]
-async fn add(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+async fn add(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     let guild = match msg.guild(ctx).await {
         Some(g) => g,
         None => {
@@ -339,11 +338,11 @@ impl UserOption<VliveOptions> for VliveChannelStep {
 
 // vlive feeds are hardcoded since needs to search channels, handle more stuff etc
 async fn add_vlive(
-    reqwest: reqwest::Client,
+    _reqwest: reqwest::Client,
     ctx: &Context,
     msg: &Message,
 ) -> Result<Option<FeedMetadata>> {
-    let mut messages = msg
+    let _messages = msg
         .channel_id
         .await_replies(ctx)
         .author_id(msg.author.id)
