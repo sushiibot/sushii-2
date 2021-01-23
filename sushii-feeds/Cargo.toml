@@ -28,9 +28,9 @@ version = "0.2"
 features = ["macros", "rt-core", "time", "signal"]
 
 [dependencies.vlive]
-path = "../../vlive-rs"
-# git = "https://github.com/drklee3/vlive-rs"
-# branch = "main"
+# path = "../../vlive-rs"
+git = "https://github.com/drklee3/vlive-rs"
+branch = "main"
 
 [dependencies.sushii-model]
 path = "../sushii-model"

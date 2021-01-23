@@ -3749,7 +3749,7 @@ dependencies = [
  "tokio 0.2.24",
  "tracing",
  "tracing-subscriber",
- "vlive 0.2.0 (git+https://github.com/drklee3/vlive-rs?branch=main)",
+ "vlive",
 ]
 
 [[package]]
@@ -3794,7 +3794,7 @@ dependencies = [
  "tonic-build",
  "tracing",
  "tracing-subscriber",
- "vlive 0.2.0",
+ "vlive",
 ]
 
 [[package]]
@@ -4497,21 +4497,6 @@ name = "version_check"
 version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b5a972e5669d67ba988ce3dc826706fb0a8b01471c088cb0b6110b805cc36aed"
-
-[[package]]
-name = "vlive"
-version = "0.2.0"
-dependencies = [
- "async-trait",
- "chrono",
- "lazy_static",
- "regex 0.2.11",
- "reqwest",
- "scraper",
- "serde",
- "serde_derive",
- "serde_json",
-]
 
 [[package]]
 name = "vlive"
