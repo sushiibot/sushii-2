@@ -11,16 +11,8 @@ pub async fn check_new_vlives(
     tonic_client: FeedServiceClient<tonic::transport::channel::Channel>,
 ) -> Result<()> {
     let feeds = Feed::get_all_vlive(&ctx).await?;
-    let feed_id_map: HashMap<String, &Feed> = feeds
-        .iter()
-        .filter_map(|feed| {
-            if let FeedMetadata::VliveVideos(ref meta) = feed.metadata.0 {
-                Some((format!("vlive:videos:{}", meta.channel.channel_code), feed))
-            } else {
-                None
-            }
-        })
-        .collect();
+    let feed_id_map: HashMap<&str, &Feed> =
+        feeds.iter().map(|feed| (feed.feed_id.as_str(), feed)).collect();
 
     let new_entries = sushii_feeds::get_new(tonic_client)
         .await
@@ -31,7 +23,7 @@ pub async fn check_new_vlives(
     for item in new_entries.items {
         let post = item.post.unwrap();
 
-        if let Some(feed) = feed_id_map.get(&item.feed_id) {
+        if let Some(feed) = feed_id_map.get(&item.feed_id.as_str()) {
             if FeedItem::from_id(&ctx, &item.feed_id, &post.url)
                 .await?
                 .is_some()
@@ -55,7 +47,7 @@ pub async fn check_new_vlives(
                     .send_message(ctx, |m| m.embed(|e| e.title(&post.title)))
                     .await
                 {
-                    tracing::warn!("Failed to send feed message");
+                    tracing::warn!("Failed to send feed message: {}", e);
                     // TODO: Delete this subscription if fails too many times
                 }
             }

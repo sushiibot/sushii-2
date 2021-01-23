@@ -58,9 +58,7 @@ pub async fn list_available_feeds() -> Result<FeedList> {
 /// Builds a saved Feed from a feed description (feeds.json) and required parameters
 pub fn build_feed(feed_kind_attrs: FeedKindAttrs, params: HashMap<String, String>) -> Result<Feed> {
     match feed_kind_attrs.kind.as_str() {
-        "vlive video" | "vlive board" => {
-            return Err(anyhow!("Unsupported feed kind, only for RSS"));
-        }
+        "vlive video" | "vlive board" => Err(anyhow!("Unsupported feed kind, only for RSS")),
         _ => {
             let name = strfmt(&feed_kind_attrs.attributes.name, &params)?;
             let feed_url = strfmt(&feed_kind_attrs.attributes.feed_path, &params)?;

@@ -1,31 +1,17 @@
 use anyhow::Result;
-use cached::proc_macro::cached;
-use sqlx::postgres::PgPoolOptions;
-use std::collections::HashMap;
-use std::env;
-use std::net::SocketAddr;
-use sushii_model::model::sql::{Feed, FeedItem, FeedMetadata, FeedSubscription};
-use tokio::{
-    task,
-    time::{self, Duration},
-};
-use tonic::{transport::Server, Request, Response, Status};
-use tracing_subscriber::filter::EnvFilter;
+use sushii_model::model::sql::{Feed, FeedMetadata};
 use vlive::VLiveRequester;
 
-use sushii_feeds::feed_request::{
-    feed_update_reply::{Author, FeedItem as GrpcFeedItem, Post},
-    FeedUpdateReply,
-};
+use sushii_feeds::feed_request::feed_update_reply::{Author, FeedItem as GrpcFeedItem, Post};
 
 use crate::model::context::Context;
 
-async fn update_rss(ctx: Context) -> Result<()> {
+async fn _update_rss(ctx: Context) -> Result<()> {
     let feeds = Feed::get_all_rss(&ctx.db_pool).await?;
 
     for feed in feeds {
         match feed.metadata.0 {
-            FeedMetadata::Rss(meta) => {
+            FeedMetadata::Rss(_meta) => {
 
             }
             _ => {}
@@ -55,7 +41,7 @@ pub async fn update_vlive(ctx: Context) -> Result<Vec<GrpcFeedItem>> {
                 url: video.channel_url(),
                 icon: "".into(),
             }),
-            description: format!("New video"),
+            description: "New video".to_string(),
             thumbnail: video.thumbnail_url.clone().unwrap_or_else(|| "".into()),
             url: video.video_url(),
         };

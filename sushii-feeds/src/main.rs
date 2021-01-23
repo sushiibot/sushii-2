@@ -3,12 +3,9 @@ use dashmap::DashMap;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::net::SocketAddr;
-use std::sync::Arc;
 use std::time::{Duration, Instant};
-use tokio::sync::Mutex;
 use tonic::{transport::Server, Request, Response, Status};
 use tracing_subscriber::filter::EnvFilter;
-use vlive::VLiveRequester;
 
 mod model;
 mod update;

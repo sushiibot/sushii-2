@@ -24,7 +24,7 @@ impl Reminder {
         desc_and_dur: &str,
     ) -> StdResult<Self, String> {
         // Look for position of duration string
-        let duration_match = find_duration(desc_and_dur).ok_or_else(|| "No duration given")?;
+        let duration_match = find_duration(desc_and_dur).ok_or("No duration given")?;
 
         // Description without the duration string
         let description = desc_and_dur
