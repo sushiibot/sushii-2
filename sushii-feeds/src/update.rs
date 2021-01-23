@@ -12,7 +12,7 @@ use tonic::{transport::Server, Request, Response, Status};
 use tracing_subscriber::filter::EnvFilter;
 use vlive::VLiveRequester;
 
-use crate::feed_request::{
+use sushii_feeds::feed_request::{
     feed_update_reply::{Author, FeedItem as GrpcFeedItem, Post, Subscription},
     FeedUpdateReply,
 };
@@ -69,14 +69,15 @@ pub async fn update_vlive(ctx: Context) -> Result<Vec<GrpcFeedItem>> {
         {
             // Skip if item already saved
             continue;
-        } else {
-            FeedItem::new(
-                format!("vlive:videos:{}", video.channel_code),
-                video.video_url(),
-            )
-            .save(&ctx.db_pool)
-            .await?;
-        };
+        }
+
+        // Save the video to db to not fetch again
+        FeedItem::new(
+            format!("vlive:videos:{}", video.channel_code),
+            video.video_url(),
+        )
+        .save(&ctx.db_pool)
+        .await?;
 
         if let Some(feed) = feeds_map.get(&video.channel_code.as_str()) {
             let subscriptions = FeedSubscription::from_feed_id(&ctx.db_pool, &feed.feed_id).await?;

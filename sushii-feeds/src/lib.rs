@@ -6,8 +6,14 @@ use std::collections::HashMap;
 use strfmt::strfmt;
 use sushii_model::model::sql::feed::{Feed, FeedKind, FeedMetadata};
 
-pub mod model;
+pub mod feed_request {
+    tonic::include_proto!("feedrequest");
+}
 
+pub use feed_request::feed_service_client::FeedServiceClient;
+pub use feed_request::Empty;
+
+pub mod model;
 use crate::model::feeds::{FeedKindAttrs, FeedList};
 
 pub async fn get_feed(client: Client, kind: FeedKind, feed: Feed) -> Result<Channel> {

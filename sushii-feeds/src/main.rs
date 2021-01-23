@@ -16,33 +16,18 @@ mod model;
 mod update;
 use model::context::Context;
 
-pub mod feed_request {
-    tonic::include_proto!("feedrequest");
-}
-
-use feed_request::feed_service_server::{FeedService, FeedServiceServer};
-use feed_request::{feed_update_reply::FeedItem, Empty, FeedUpdateReply};
+use sushii_feeds::feed_request::feed_service_server::{FeedService, FeedServiceServer};
+use sushii_feeds::feed_request::{feed_update_reply::FeedItem, Empty, FeedUpdateReply};
 
 #[derive(Debug)]
 pub struct GrpcService {
     ctx: Context,
     last_update: Option<NaiveDateTime>,
-    cache: Vec<FeedItem>,
 }
 
 impl GrpcService {
     pub fn new(ctx: Context) -> Self {
-        Self {
-            ctx,
-            last_update: None,
-            cache: Vec::new(),
-        }
-    }
-
-    pub fn update(&mut self, items: Vec<FeedItem>) {
-        let now = Utc::now().naive_utc();
-        self.last_update.replace(now);
-        self.cache = items;
+        Self { ctx }
     }
 }
 
@@ -52,7 +37,7 @@ impl FeedService for GrpcService {
         &self,
         request: Request<Empty>,
     ) -> Result<Response<FeedUpdateReply>, Status> {
-        println!("Got a request from {:?}", request.remote_addr());
+        tracing::info!("Got a request from {:?}", request.remote_addr());
 
         let reply = FeedUpdateReply {
             items: update::update_vlive(self.ctx.clone())

@@ -5,8 +5,8 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::utils::{parse_channel, parse_role};
 use std::result::Result as StdResult;
-use vlive::VLiveRequester;
 use std::time::Duration;
+use vlive::VLiveRequester;
 
 use crate::error::Result;
 use crate::keys::*;
@@ -59,6 +59,10 @@ impl<T> OptionsCollector<T> {
 
     pub fn get_state(&self) -> &T {
         &self.state
+    }
+
+    pub fn get_state_owned(self) -> T {
+        self.state
     }
 
     async fn collect(&mut self, ctx: &Context, msg: &Message) -> Result<()> {
@@ -233,13 +237,6 @@ async fn add(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .cloned()
         .unwrap();
 
-    let mut messages = msg
-        .channel_id
-        .await_replies(ctx)
-        .author_id(msg.author.id)
-        .channel_id(msg.channel_id)
-        .await;
-
     let mut options_collector = OptionsCollector::new(FeedOptions::new())
         .add_option(FeedType)
         .add_option(DiscordChannel)
@@ -284,22 +281,59 @@ async fn add(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     Ok(())
 }
 
-enum VliveStep {
-    Channel,
-    Board,
+#[derive(Default, Debug, Clone)]
+struct VliveOptions {
+    pub feed_metadata: Option<FeedMetadata>,
 }
 
-impl VliveStep {
-    pub fn start() -> Self {
-        Self::Channel
+impl VliveOptions {
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
+struct VliveChannelStep;
+
+#[async_trait]
+impl UserOption<VliveOptions> for VliveChannelStep {
+    fn prompt(&self) -> &'static str {
+        "What vlive channel? Give a vlive channel code. You can find this \
+        in the channel URL, for example `F001E5` is the code for \
+        `https://www.vlive.tv/channel/F001E5`"
     }
 
-    pub fn next(self, is_videos: bool) -> Option<Self> {
-        match self {
-            Self::Channel if is_videos => None,
-            Self::Channel => Some(Self::Board),
-            Self::Board => None,
-        }
+    async fn validate(
+        &self,
+        ctx: &Context,
+        msg: &Message,
+        state: &mut VliveOptions,
+    ) -> StdResult<String, String> {
+        let reqwest = ctx
+            .data
+            .read()
+            .await
+            .get::<ReqwestContainer>()
+            .cloned()
+            .unwrap();
+
+        let channel = reqwest.get_channel_info(&msg.content).await.map_err(|_| {
+            format!(
+                "Error: No channel was found with code `{}`. \
+                Give a vlive channel code. You can find this \
+                in the channel URL, for example `F001E5` is the code for \
+                `https://www.vlive.tv/channel/F001E5`. Type `quit` any time to stop.",
+                &msg.content
+            )
+        })?;
+
+        state.feed_metadata.replace(FeedMetadata::vlive_videos(
+            None,
+            channel.channel_code,
+            channel.name.clone(),
+            channel.profile_img,
+        ));
+
+        Ok(format!("Found channel {}", &channel.name))
     }
 }
 
@@ -316,72 +350,12 @@ async fn add_vlive(
         .channel_id(msg.channel_id)
         .await;
 
-    let mut step = VliveStep::start();
+    let mut options_collector =
+        OptionsCollector::new(VliveOptions::new()).add_option(VliveChannelStep);
 
-    msg.channel_id
-        .say(
-            &ctx,
-            "What vlive channel? Give a vlive channel code. You can find this \
-            in the channel URL, for example `F001E5` is the code for \
-            `https://www.vlive.tv/channel/F001E5` Type `quit` any time to stop.",
-        )
-        .await?;
+    options_collector.collect(ctx, msg).await?;
 
-    let mut feed_metadata = None;
+    let opts = options_collector.get_state_owned();
 
-    while let Some(reply) = messages.next().await {
-        match reply.content.as_str() {
-            "quit" | "stop" | "exit" => {
-                msg.channel_id
-                    .say(&ctx, "Quitting. No feeds were added.")
-                    .await?;
-
-                return Ok(None);
-            }
-            _ => {}
-        }
-
-        match step {
-            VliveStep::Channel => {
-                let channel = match reqwest.get_channel_info(&reply.content).await {
-                    Ok(c) => c,
-                    Err(_) => {
-                        msg.reply(
-                            &ctx,
-                            format!(
-                                "Error: No channel was found with code `{}`. \
-                                Give a vlive channel code. You can find this \
-                                in the channel URL, for example `F001E5` is the code for \
-                                `https://www.vlive.tv/channel/F001E5`. Type `quit` any time to stop.",
-                                &reply.content
-                            ),
-                        )
-                        .await?;
-
-                        continue;
-                    }
-                };
-
-                msg.reply(&ctx, format!("Found channel {}", &channel.name))
-                    .await?;
-
-                feed_metadata = Some(FeedMetadata::vlive_videos(
-                    None,
-                    channel.channel_code,
-                    channel.name,
-                    channel.profile_img,
-                ));
-            }
-            VliveStep::Board => {
-                break;
-            }
-        }
-
-        step = match step.next(true) {
-            Some(s) => s,
-            None => break,
-        };
-    }
-
-    Ok(feed_metadata)
+    Ok(opts.feed_metadata)
 }
