@@ -22,7 +22,6 @@ use sushii_feeds::feed_request::{feed_update_reply::FeedItem, Empty, FeedUpdateR
 #[derive(Debug)]
 pub struct GrpcService {
     ctx: Context,
-    last_update: Option<NaiveDateTime>,
 }
 
 impl GrpcService {

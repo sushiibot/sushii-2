@@ -10,9 +10,9 @@ pub mod feed_request {
     tonic::include_proto!("feedrequest");
 }
 
-pub use tonic;
 pub use feed_request::feed_service_client::FeedServiceClient;
 pub use feed_request::{feed_update_reply::FeedItem, Empty, FeedUpdateReply};
+pub use tonic;
 
 pub mod model;
 use crate::model::feeds::{FeedKindAttrs, FeedList};

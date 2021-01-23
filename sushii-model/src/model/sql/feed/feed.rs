@@ -164,20 +164,10 @@ impl Feed {
         .map_err(Into::into)
     }
 
-    #[cfg(feature = "feed_process")]
-    pub async fn get_all_vlive(pool: &sqlx::PgPool) -> Result<Vec<Self>> {
-        sqlx::query_as!(
-            Feed,
-            r#"
-            SELECT feed_id,
-                   metadata as "metadata!: Json<FeedMetadata>"
-              FROM feeds
-             WHERE feed_id LIKE 'vlive:%'
-            "#,
-        )
-        .fetch_all(pool)
-        .await
-        .map_err(Into::into)
+    pub async fn get_all_vlive(ctx: &Context) -> Result<Vec<Self>> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
+        get_all_vlive(&pool).await
     }
 
     pub async fn save(self, ctx: &Context) -> Result<Self> {
@@ -202,8 +192,9 @@ impl Feed {
         Ok(self)
     }
 
-    #[cfg(feature = "feed_process")]
-    pub async fn delete(&self, pool: &sqlx::PgPool) -> Result<()> {
+    pub async fn delete(&self, ctx: &Context) -> Result<()> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
         sqlx::query!(
             r#"
             DELETE FROM feeds
@@ -211,9 +202,25 @@ impl Feed {
             "#,
             self.feed_id,
         )
-        .execute(pool)
+        .execute(&pool)
         .await?;
 
         Ok(())
     }
+}
+
+async fn get_all_vlive(pool: &sqlx::PgPool) -> Result<Vec<Feed>> {
+        sqlx::query_as!(
+            Feed,
+            r#"
+            SELECT feed_id,
+                   metadata as "metadata!: Json<FeedMetadata>"
+              FROM feeds
+             WHERE feed_id LIKE 'vlive:%'
+            "#,
+        )
+        .fetch_all(pool)
+        .await
+        .map_err(Into::into)
+
 }

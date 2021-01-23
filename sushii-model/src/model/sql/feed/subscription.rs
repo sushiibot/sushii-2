@@ -27,8 +27,9 @@ impl FeedSubscription {
         self
     }
 
-    #[cfg(feature = "feed_process")]
-    pub async fn from_feed_id(pool: &sqlx::PgPool, feed_id: &str) -> Result<Vec<Self>> {
+    pub async fn from_feed_id(ctx: &Context, feed_id: &str) -> Result<Vec<Self>> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
         sqlx::query_as!(
             FeedSubscription,
             r#"
@@ -38,7 +39,7 @@ impl FeedSubscription {
             "#,
             feed_id,
         )
-        .fetch_all(pool)
+        .fetch_all(&pool)
         .await
         .map_err(Into::into)
     }

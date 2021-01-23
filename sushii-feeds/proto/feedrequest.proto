@@ -9,11 +9,6 @@ message Empty {
 }
 
 message FeedUpdateReply {
-    message Subscription {
-        uint64 channel = 1;
-        uint64 role = 2;
-    }
-
     message Author {
         string name = 1;
         string icon = 2;
@@ -21,16 +16,17 @@ message FeedUpdateReply {
     }
 
     message Post {
-        string title = 1;
-        Author author = 2;
-        string description = 3;
-        string thumbnail = 4;
-        string url = 5;
+        string id = 1;
+        string title = 2;
+        Author author = 3;
+        string description = 4;
+        string thumbnail = 5;
+        string url = 6;
     }
 
     message FeedItem {
-        Post post = 1;
-        Subscription subscription = 2;
+        string feed_id = 1;
+        Post post = 2;
     }
 
     repeated FeedItem items = 1;
