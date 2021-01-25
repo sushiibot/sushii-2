@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+-  **BREAKING:** Feeds fetching, Requires `FEED_SERVER_URL` in environment variable config
+
 ### Fixed
 
 -  Respond with error if commands use with invalid user ID

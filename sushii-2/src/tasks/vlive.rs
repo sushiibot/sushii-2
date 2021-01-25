@@ -11,8 +11,10 @@ pub async fn check_new_vlives(
     tonic_client: FeedServiceClient<tonic::transport::channel::Channel>,
 ) -> Result<()> {
     let feeds = Feed::get_all_vlive(&ctx).await?;
-    let feed_id_map: HashMap<&str, &Feed> =
-        feeds.iter().map(|feed| (feed.feed_id.as_str(), feed)).collect();
+    let feed_id_map: HashMap<&str, &Feed> = feeds
+        .iter()
+        .map(|feed| (feed.feed_id.as_str(), feed))
+        .collect();
 
     let new_entries = sushii_feeds::get_new(tonic_client)
         .await

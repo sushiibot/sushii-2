@@ -68,7 +68,10 @@ pub struct VliveBoardMetadata {
 
 impl Id for VliveBoardMetadata {
     fn id(&self) -> String {
-        format!("vlive:board:{}:{}", self.channel.channel_code, self.board_id)
+        format!(
+            "vlive:board:{}:{}",
+            self.channel.channel_code, self.board_id
+        )
     }
 }
 
@@ -148,6 +151,35 @@ impl Feed {
         }
     }
 
+    pub fn name(&self) -> &str {
+        match &self.metadata.0 {
+            FeedMetadata::Rss(m) => &m.title,
+            FeedMetadata::VliveBoard(m) => &m.channel.channel_name,
+            FeedMetadata::VliveVideos(m) => &m.channel.channel_name,
+        }
+    }
+
+    pub fn icon_url(&self) -> Option<&str> {
+        match &self.metadata.0 {
+            FeedMetadata::Rss(_) => None,
+            FeedMetadata::VliveBoard(m) => Some(&m.channel.channel_icon_url),
+            FeedMetadata::VliveVideos(m) => Some(&m.channel.channel_icon_url),
+        }
+    }
+
+    pub fn source_url(&self) -> String {
+        match &self.metadata.0 {
+            FeedMetadata::Rss(m) => m.source_url.clone(),
+            FeedMetadata::VliveBoard(m) => format!(
+                "https://www.vlive.tv/channel/{}/board/{}",
+                m.channel.channel_code, m.board_id
+            ),
+            FeedMetadata::VliveVideos(m) => {
+                format!("https://www.vlive.tv/channel/{}", m.channel.channel_code)
+            }
+        }
+    }
+
     #[cfg(feature = "feed_process")]
     pub async fn get_all_rss(pool: &sqlx::PgPool) -> Result<Vec<Self>> {
         sqlx::query_as!(
@@ -210,17 +242,16 @@ impl Feed {
 }
 
 async fn get_all_vlive(pool: &sqlx::PgPool) -> Result<Vec<Feed>> {
-        sqlx::query_as!(
-            Feed,
-            r#"
+    sqlx::query_as!(
+        Feed,
+        r#"
             SELECT feed_id,
                    metadata as "metadata!: Json<FeedMetadata>"
               FROM feeds
              WHERE feed_id LIKE 'vlive:%'
             "#,
-        )
-        .fetch_all(pool)
-        .await
-        .map_err(Into::into)
-
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(Into::into)
 }

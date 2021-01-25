@@ -267,7 +267,7 @@ async fn add(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     let feed = Feed::from_meta(feed_metadata).save(ctx).await?;
 
     let subscription = FeedSubscription::new(
-        feed.feed_id,
+        feed.feed_id.clone(),
         guild.id.0 as i64,
         opts.discord_channel.unwrap() as i64,
     )
@@ -275,7 +275,37 @@ async fn add(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     .save(ctx)
     .await?;
 
-    dbg!(subscription);
+    msg.channel_id
+        .send_message(ctx, |m| {
+            m.embed(|e| {
+                e.title("Added new feed");
+                e.author(|a| {
+                    if let Some(url) = feed.icon_url() {
+                        a.icon_url(url);
+                    }
+                    a.name(feed.name());
+                    a.url(feed.source_url());
+
+                    a
+                });
+                e.field(
+                    "Discord Channel",
+                    format!("<#{}>", subscription.channel_id as u64),
+                    true,
+                );
+
+                if let Some(id) = subscription.mention_role {
+                    e.field("Mention Role", format!("<@&{}>", id as u64), true);
+                } else {
+                    e.field("Mention Role", "No role", true);
+                }
+
+                e
+            });
+
+            m
+        })
+        .await?;
 
     Ok(())
 }

@@ -1,5 +1,5 @@
-use serenity::prelude::*;
 use serde::{Deserialize, Serialize};
+use serenity::prelude::*;
 
 use crate::error::Result;
 use crate::keys::DbPool;
