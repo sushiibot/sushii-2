@@ -5,23 +5,22 @@ authors = ["drklee3 <derrick@dlee.dev>"]
 edition = "2018"
 
 [dependencies]
-reqwest = "0.10.0"
 anyhow = "1.0.37"
-tracing = "0.1.22"
-tracing-subscriber = "0.2.15"
-dotenv = "0.15.0"
-rss = "1.10.0"
-num_cpus = "1.13.0"
 async-trait = "0.1.42"
+chrono = "0.4.19"
+dashmap = "4.0.2"
+dotenv = "0.15.0"
 lazy_static = "1.4.0"
+num_cpus = "1.13.0"
+prost = "0.7.0"
+reqwest = "0.10.0"
+rss = "1.10.0"
 serde = "1.0.119"
 serde_json = "1.0.61"
 strfmt = "0.1.6"
 tonic = "0.4.0"
-prost = "0.7.0"
-chrono = "0.4.19"
-cached = "0.23.0"
-dashmap = "4.0.2"
+tracing = "0.1.22"
+tracing-subscriber = "0.2.15"
 
 [dependencies.tokio]
 version = "0.2"
@@ -30,7 +29,7 @@ features = ["macros", "rt-core", "time", "signal"]
 [dependencies.vlive]
 # path = "../../vlive-rs"
 git = "https://github.com/drklee3/vlive-rs"
-branch = "main"
+rev = "c06443c105ababad93670b32faaba2d29a0b6725"
 
 [dependencies.sushii-model]
 path = "../sushii-model"
