@@ -12,13 +12,13 @@ dashmap = "4.0.2"
 dotenv = "0.15.0"
 lazy_static = "1.4.0"
 num_cpus = "1.13.0"
-prost = "0.7.0"
+prost = "0.6.1"
 reqwest = "0.10.0"
 rss = "1.10.0"
 serde = "1.0.119"
 serde_json = "1.0.61"
 strfmt = "0.1.6"
-tonic = "0.4.0"
+tonic = "0.3.0" # 0.4.0 uses tokio 1.0
 tracing = "0.1.22"
 tracing-subscriber = "0.2.15"
 
@@ -41,4 +41,4 @@ default-features = false
 features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "offline", "migrate", "decimal" ]
 
 [build-dependencies]
-tonic-build = "0.4"
+tonic-build = "0.3"
