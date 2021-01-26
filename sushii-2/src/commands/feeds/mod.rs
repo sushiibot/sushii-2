@@ -1,10 +1,11 @@
 use serenity::framework::standard::macros::group;
 
 mod add;
+mod list;
 
-use self::add::*;
+use self::{add::*, list::*};
 
 #[group]
-#[commands(add)]
+#[commands(add, list)]
 #[prefixes("feed", "feeds")]
 pub struct Feeds;

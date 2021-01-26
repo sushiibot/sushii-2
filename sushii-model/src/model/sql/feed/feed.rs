@@ -180,6 +180,24 @@ impl Feed {
         }
     }
 
+    pub async fn from_id(ctx: &Context, feed_id: &str) -> Result<Option<Self>> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
+        sqlx::query_as!(
+            Feed,
+            r#"
+            SELECT feed_id,
+                   metadata as "metadata!: Json<FeedMetadata>"
+              FROM feeds
+             WHERE feed_id = $1
+            "#,
+            feed_id
+        )
+        .fetch_optional(&pool)
+        .await
+        .map_err(Into::into)
+    }
+
     #[cfg(feature = "feed_process")]
     pub async fn get_all_rss(pool: &sqlx::PgPool) -> Result<Vec<Self>> {
         sqlx::query_as!(

@@ -266,6 +266,8 @@ async fn add(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     // Need to save the Feed data, or ensure it already exists before saving subscription
     let feed = Feed::from_meta(feed_metadata).save(ctx).await?;
 
+    // TODO: Check if subscription already exists
+
     let subscription = FeedSubscription::new(
         feed.feed_id.clone(),
         guild.id.0 as i64,

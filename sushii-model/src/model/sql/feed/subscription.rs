@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 use crate::error::Result;
@@ -25,6 +26,23 @@ impl FeedSubscription {
     pub fn mention_role(mut self, mention_role: Option<i64>) -> Self {
         self.mention_role = mention_role;
         self
+    }
+
+    pub async fn from_guild_id(ctx: &Context, guild_id: GuildId) -> Result<Vec<Self>> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
+        sqlx::query_as!(
+            FeedSubscription,
+            r#"
+            SELECT *
+              FROM feed_subscriptions
+             WHERE guild_id = $1
+            "#,
+            i64::from(guild_id),
+        )
+        .fetch_all(&pool)
+        .await
+        .map_err(Into::into)
     }
 
     pub async fn from_feed_id(ctx: &Context, feed_id: &str) -> Result<Vec<Self>> {
