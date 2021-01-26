@@ -44,11 +44,21 @@ async fn thirty_seconds(ctx: Context) {
 
     let cfg = SushiiConfig::get(&ctx).await;
 
-    let tonic_client = match FeedServiceClient::connect(cfg.feed_server_url.clone()).await {
-        Ok(c) => c,
-        Err(e) => {
-            tracing::error!("Failed to connect to feed server: {}", e);
-            return;
+    let mut sleep_secs = 5;
+    let tonic_client = loop {
+        match FeedServiceClient::connect(cfg.feed_server_url.clone()).await {
+            Ok(c) => break c,
+            Err(e) => {
+                tracing::error!(
+                    "Failed to connect to feed server, reconnecting in {} secs: {}",
+                    sleep_secs,
+                    e
+                );
+
+                // Sleep and increase sleep time for next failure
+                tokio::time::delay_for(Duration::from_secs(sleep_secs)).await;
+                sleep_secs += 5;
+            }
         }
     };
 
