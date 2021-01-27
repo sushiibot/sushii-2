@@ -42,13 +42,26 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
         .unwrap_or_else(|| sushii_conf.default_prefix.clone());
 
     let s = format!(
-        "Hewwo my prefix in this guild is `{}`. \
-        You can also mention me ({}) as a prefix.",
+        "Hi! My prefix in this guild is `{}`. \
+        You can also mention me ({}) as a prefix. \n\
+        [The commands list can be found here](https://2.sushii.xyz/commands).\n\
+        Still need help or have questions? \
+        [Join the sushii support server](https://discord.gg/tQkb3GKVhP)",
         prefix,
         bot_id.mention()
     );
 
-    msg.reply(ctx, s).await?;
+    msg
+        .channel_id
+        .send_message(&ctx.http, |m| {
+            m.embed(|e| {
+                e.description(&s);
+                e.color(0xe67e22);
+
+                e
+            })
+        })
+        .await?;
 
     Ok(())
 }
