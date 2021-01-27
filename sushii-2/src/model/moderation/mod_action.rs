@@ -4,16 +4,13 @@ use regex::Regex;
 use serenity::framework::standard::Args;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use serenity::CacheAndHttp;
 use serenity::Error;
 use std::collections::HashSet;
 use std::fmt;
 use std::fmt::Write;
 use std::result::Result as StdResult;
-use std::sync::Arc;
 
 use crate::error::{Error as SushiiError, Result};
-use crate::keys::CacheAndHttpContainer;
 use crate::model::moderation::ModLogReporter;
 use crate::model::sql::{GuildConfig, ModLogEntry, Mute};
 use sushii_model::utils::duration::{find_duration, parse_duration};
@@ -113,7 +110,6 @@ impl ModActionExecutor {
         &self,
         ctx: &Context,
         msg: &Message,
-        cache_http: &Arc<CacheAndHttp>,
         user: &User,
         guild: &Option<Guild>,
         guild_id: &GuildId,
@@ -185,7 +181,7 @@ impl ModActionExecutor {
             ModActionType::Mute => {
                 // Mute commands should check if mute role exists before running ::execute()
                 if let Some(role_id) = guild_conf.mute_role {
-                    let mut member = guild_id.member(&cache_http, user).await?;
+                    let mut member = guild_id.member(ctx, user).await?;
 
                     // Handle if already muted, respond with error
                     if member.roles.contains(&RoleId(role_id as u64)) {
@@ -203,7 +199,7 @@ impl ModActionExecutor {
             }
             ModActionType::Unmute => {
                 if let Some(role_id) = guild_conf.mute_role {
-                    let mut member = guild_id.member(&cache_http, user).await?;
+                    let mut member = guild_id.member(ctx, user).await?;
 
                     member.remove_role(&ctx.http, role_id as u64).await?;
                 }
@@ -252,9 +248,6 @@ impl ModActionExecutor {
     }
 
     pub async fn execute(mut self, ctx: &Context, msg: &Message, guild_id: &GuildId) -> Result<()> {
-        let data = &ctx.data.read().await;
-        let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
-
         let guild_conf = GuildConfig::from_id(&ctx, guild_id)
             .await?
             .ok_or_else(|| SushiiError::Sushii("No guild found".into()))?;
@@ -311,7 +304,7 @@ impl ModActionExecutor {
         let mut s = String::new();
 
         for &id in &self.target_users {
-            let user = match UserId(id).to_user(cache_http).await {
+            let user = match UserId(id).to_user(ctx).await {
                 Ok(u) => u,
                 Err(e) => {
                     let _ = writeln!(s, ":x: {} - Error: Failed to fetch user: {}", id, &e);
@@ -354,7 +347,6 @@ impl ModActionExecutor {
                 .execute_user(
                     &ctx,
                     &msg,
-                    &cache_http,
                     &user,
                     &guild,
                     &guild_id,
@@ -404,7 +396,7 @@ impl ModActionExecutor {
 
         // Respond to user -- edit previously sent message
         let _ = sent_msg
-            .edit(&ctx, |m| {
+            .edit(ctx, |m| {
                 m.embed(|e| {
                     e.title(format!(
                         "Attempted to {} {} users",
