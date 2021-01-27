@@ -13,8 +13,7 @@ pub struct UserLevelGlobal {
 
 impl UserLevelGlobal {
     pub async fn from_id(ctx: &Context, user_id: UserId) -> Result<Option<UserLevelGlobal>> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         from_id_query(&pool, user_id).await
     }

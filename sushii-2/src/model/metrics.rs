@@ -26,6 +26,7 @@ impl UserType {
     }
 }
 
+#[derive(Clone)]
 pub struct Metrics;
 
 impl Metrics {

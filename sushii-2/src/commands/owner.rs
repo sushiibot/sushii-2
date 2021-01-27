@@ -9,9 +9,7 @@ use crate::keys::ShardManagerContainer;
 #[command]
 #[owners_only]
 async fn quit(ctx: &Context, msg: &Message) -> CommandResult {
-    let data = ctx.data.read().await;
-
-    let manager = data.get::<ShardManagerContainer>().unwrap();
+    let manager = ctx.data.read().await.get::<ShardManagerContainer>().cloned().unwrap();
     msg.channel_id.say(ctx, "bye").await?;
 
     manager.lock().await.shutdown_all().await;

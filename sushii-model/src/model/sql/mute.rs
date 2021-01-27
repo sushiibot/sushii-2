@@ -96,8 +96,7 @@ impl Mute {
 
     /// Gets a NON-pending mute from guild and user ID
     pub async fn from_id(ctx: &Context, guild_id: u64, user_id: u64) -> Result<Option<Mute>> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         get_from_id_query(&pool, guild_id, user_id).await
     }
@@ -108,40 +107,35 @@ impl Mute {
         guild_id: u64,
         user_id: u64,
     ) -> Result<Option<Mute>> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         get_from_id_any_pending_query(&pool, guild_id, user_id).await
     }
 
     /// Gets all currently expired mutes
     pub async fn get_expired(ctx: &Context) -> Result<Vec<Mute>> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         get_expired_query(&pool).await
     }
 
     /// Gets all ongoing mutes in a guild
     pub async fn get_ongoing(ctx: &Context, guild_id: u64) -> Result<Vec<Mute>> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         get_ongoing_query(&pool, guild_id).await
     }
 
     /// Saves a mute to the database
     pub async fn save(&self, ctx: &Context) -> Result<Self> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         upsert_query(&pool, &self).await
     }
 
     /// Deletes a mute from the database
     pub async fn delete(&self, ctx: &Context) -> Result<()> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         delete_mute_query(&pool, self.guild_id, self.user_id).await
     }

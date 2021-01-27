@@ -73,10 +73,9 @@ impl ModLogEntry {
     }
 
     pub async fn from_case_id(ctx: &Context, guild_id: u64, case_id: u64) -> Result<ModLogEntry> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
-        from_case_id_query(pool, guild_id, case_id).await
+        from_case_id_query(&pool, guild_id, case_id).await
     }
 
     /// Fetches a pending ModLogEntry. Returns Err if something failed, None if
@@ -89,10 +88,9 @@ impl ModLogEntry {
         guild_id: u64,
         target_id: u64,
     ) -> Result<Option<Self>> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
-        get_pending_entry_query(pool, mod_action, guild_id, target_id)
+        get_pending_entry_query(&pool, mod_action, guild_id, target_id)
             .await
             .map_err(|err| {
                 // Do not need to handle row not found error since using fetch_optional
@@ -113,10 +111,9 @@ impl ModLogEntry {
         guild_id: u64,
         user_id: u64,
     ) -> Result<Vec<ModLogEntry>> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
-        get_user_entries_query(pool, guild_id, user_id).await
+        get_user_entries_query(&pool, guild_id, user_id).await
     }
 
     pub async fn get_range_entries(
@@ -125,28 +122,25 @@ impl ModLogEntry {
         start: u64,
         end: u64,
     ) -> Result<Vec<Self>> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         // Enforce start / end ordering
         let start = std::cmp::min(start, end);
         let end = std::cmp::max(start, end);
 
-        get_range_entries_query(pool, guild_id, start, end).await
+        get_range_entries_query(&pool, guild_id, start, end).await
     }
 
     pub async fn get_latest(ctx: &Context, guild_id: u64, count: u64) -> Result<Vec<ModLogEntry>> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
-        get_latest_query(pool, guild_id, count).await
+        get_latest_query(&pool, guild_id, count).await
     }
 
     /// Saves a ModLogEntry to the database. Returns a new one from the database
     /// with a valid case_id if is new entry. Otherwise just returns the same self
     pub async fn save(&self, ctx: &Context) -> Result<Self> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         // New cases via ::new() will have a -1 ID, cases that return from DB
         // will have a >=0 ID
@@ -158,8 +152,7 @@ impl ModLogEntry {
     }
 
     pub async fn delete(&self, ctx: &Context) -> Result<()> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         delete_mod_action_query(&pool, self).await
     }

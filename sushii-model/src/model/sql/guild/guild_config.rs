@@ -370,11 +370,10 @@ impl GuildConfig {
 
     /// Saves config to database
     pub async fn save_db(&self, ctx: &Context) -> Result<()> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         // Update db and cache
-        upsert_config_query(self, pool).await?;
+        upsert_config_query(self, &pool).await?;
         Ok(())
     }
 

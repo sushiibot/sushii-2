@@ -9,7 +9,6 @@ use std::vec::Vec;
 use tokio::time::delay_for;
 
 use crate::error::Result;
-use crate::keys::CacheAndHttpContainer;
 use crate::model::sql::*;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -87,15 +86,12 @@ pub async fn message(ctx: &Context, msg: &Message) {
             // Delete messages after 10 seconds
             delay_for(Duration::from_secs(10)).await;
 
-            let data = &ctx.data.read().await;
-            let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
-
             if let Ok(sent_msg) = sent_msg {
                 // Run both delete futures concurrently instead of in series
                 // try_join! better for Results but still want to try deleting both as
                 // try_join! short circuits and returns immediately on any Error
                 let (recv_res, sent_res) =
-                    join!(msg.delete(&cache_http), sent_msg.delete(&cache_http));
+                    join!(msg.delete(&ctx), sent_msg.delete(&ctx));
 
                 if let Err(e) = recv_res {
                     tracing::warn!(?msg, "Failed to delete received message: {}", e);
@@ -106,7 +102,7 @@ pub async fn message(ctx: &Context, msg: &Message) {
                 }
             } else {
                 // Role message failed sooo just delete user's message
-                let _ = msg.delete(&cache_http).await;
+                let _ = msg.delete(&ctx).await;
             }
         }
         Err(e) => {
@@ -121,14 +117,11 @@ pub async fn message(ctx: &Context, msg: &Message) {
 
             delay_for(Duration::from_secs(5)).await;
 
-            let data = &ctx.data.read().await;
-            let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
-
             if let Ok(sent_msg) = sent_msg {
                 // Ignore errors whatever
                 let _ = join!(msg.delete(&ctx), sent_msg.delete(&ctx));
             } else {
-                let _ = msg.delete(&cache_http).await;
+                let _ = msg.delete(&ctx).await;
             }
         }
     }
@@ -502,9 +495,6 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
         return Ok(None);
     }
 
-    let data = &ctx.data.read().await;
-    let cache_http = data.get::<CacheAndHttpContainer>().unwrap();
-
     if !RE.is_match(&msg.content) && msg.content != "clear" && msg.content != "reset" {
         return Ok(Some("You can add a role with `+role name` or remove a role with `-role name`.  Use `clear` or `reset` to remove all roles".into()));
     }
@@ -519,7 +509,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
     let is_reset = msg.content == "clear" || msg.content == "reset";
 
     let member = guild
-        .member(&cache_http, msg.author.id)
+        .member(&ctx, msg.author.id)
         .await
         .map_err(|e| {
             tracing::error!("Failed to fetch guild member: {}", e);

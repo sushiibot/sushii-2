@@ -106,15 +106,13 @@ impl UserLevel {
         user_id: UserId,
         guild_id: GuildId,
     ) -> Result<Option<UserLevel>> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         from_id_query(&pool, i64::from(user_id), i64::from(guild_id)).await
     }
 
     pub async fn save(&self, ctx: &Context) -> Result<UserLevel> {
-        let data = ctx.data.read().await;
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         upsert_query(&pool, &self).await
     }
