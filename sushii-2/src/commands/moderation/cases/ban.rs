@@ -17,17 +17,7 @@ async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         }
     };
 
-    let bans = match guild_id.bans(&ctx.http).await {
-        Ok(val) => val.iter().map(|x| x.user.id.0).collect::<Vec<u64>>(),
-        Err(e) => {
-            tracing::warn!("Failed to get guild bans: {}", e);
-
-            Vec::new()
-        }
-    };
-
     ModActionExecutor::from_args(args, ModActionType::Ban)
-        .exclude_users(bans)
         .execute(&ctx, &msg, &guild_id)
         .await?;
 
