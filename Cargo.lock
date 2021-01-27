@@ -1834,7 +1834,7 @@ checksum = "a91d884b6667cd606bb5a69aa0c99ba811a115fc68915e7056ec08a46e93199a"
 [[package]]
 name = "lastfm-rs"
 version = "0.4.2"
-source = "git+https://github.com/KamranMackey/lastfm-rs?branch=main#212d0729aba71d35242c89275b2ff54380f8b572"
+source = "git+https://github.com/sushiibot/lastfm-rs?rev=a5d58142c3172febd3e83d5ad9824ce00cf9834f#a5d58142c3172febd3e83d5ad9824ce00cf9834f"
 dependencies = [
  "chrono",
  "futures",
