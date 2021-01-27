@@ -1,0 +1,44 @@
+[package]
+name = "sushii-feeds"
+version = "0.1.0"
+authors = ["drklee3 <derrick@dlee.dev>"]
+edition = "2018"
+
+[dependencies]
+anyhow = "1.0.37"
+async-trait = "0.1.42"
+chrono = "0.4.19"
+dashmap = "4.0.2"
+dotenv = "0.15.0"
+lazy_static = "1.4.0"
+num_cpus = "1.13.0"
+prost = "0.6.1"
+reqwest = "0.10.0"
+rss = "1.10.0"
+serde = "1.0.119"
+serde_json = "1.0.61"
+strfmt = "0.1.6"
+tonic = "0.3.0" # 0.4.0 uses tokio 1.0
+tracing = "0.1.22"
+tracing-subscriber = "0.2.15"
+
+[dependencies.tokio]
+version = "0.2"
+features = ["macros", "rt-core", "time", "signal"]
+
+[dependencies.vlive]
+# path = "../../vlive-rs"
+git = "https://github.com/drklee3/vlive-rs"
+rev = "c06443c105ababad93670b32faaba2d29a0b6725"
+
+[dependencies.sushii-model]
+path = "../sushii-model"
+features = ["feed_process"]
+
+[dependencies.sqlx]
+version = "0.4.1"
+default-features = false
+features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "offline", "migrate", "decimal" ]
+
+[build-dependencies]
+tonic-build = "0.3"

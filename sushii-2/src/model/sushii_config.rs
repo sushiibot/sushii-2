@@ -17,6 +17,8 @@ pub struct SushiiConfig {
     pub metrics_port: u16,
     pub sentry_dsn: Option<String>,
     pub image_server_url: String,
+    /// gRPC feed service
+    pub feed_server_url: String,
 }
 
 fn parse_id_array(s: &str) -> Vec<u64> {
@@ -54,6 +56,7 @@ impl SushiiConfig {
                 .unwrap_or(9888),
             sentry_dsn: env::var("SENTRY_DSN").ok(),
             image_server_url: env::var("IMAGE_SERVER_URL")?,
+            feed_server_url: env::var("FEED_SERVER_URL")?,
         })
     }
 

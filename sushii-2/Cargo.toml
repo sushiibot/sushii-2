@@ -13,6 +13,9 @@ futures = "0.3"
 humantime = "2.0"
 hyper = "0.13"
 lazy_static = "1.4"
+metrics = "=0.13.0-alpha.13"
+metrics-exporter-prometheus = "=0.1.0-alpha.12"
+metrics-util = "=0.4.0-alpha.10"
 num_cpus = "1.13"
 num-format = "0.4"
 num-traits = "0.2.14"
@@ -30,23 +33,18 @@ tracing-subscriber = "0.2"
 [dependencies.sushii-model]
 path = "../sushii-model"
 
-[dependencies.metrics]
-# version = "0.13.0-alpha.11"
-git = "https://github.com/metrics-rs/metrics.git"
-branch = "main"
+[dependencies.sushii-feeds]
+path = "../sushii-feeds"
+default-features = false
+features = []
 
-[dependencies.metrics-exporter-prometheus]
-# version = "0.1.0-alpha.10"
-git = "https://github.com/metrics-rs/metrics.git"
-branch = "main"
-
-[dependencies.metrics-util]
-git = "https://github.com/metrics-rs/metrics.git"
-branch = "main"
+[dependencies.vlive]
+git = "https://github.com/drklee3/vlive-rs"
+rev = "c06443c105ababad93670b32faaba2d29a0b6725"
 
 [dependencies.lastfm-rs]
-git = "https://github.com/KamranMackey/lastfm-rs"
-branch = "main"
+git = "https://github.com/sushiibot/lastfm-rs"
+rev = "a5d58142c3172febd3e83d5ad9824ce00cf9834f"
 # path = "../lastfm-rs"
 
 [dependencies.tokio]
@@ -60,5 +58,5 @@ features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "of
 
 [dependencies.serenity]
 git = "https://github.com/serenity-rs/serenity"
-branch = "current"
+rev = "0b1fc2737efebde01f6f3b781bcdfc83a30e908e"
 features = ["default", "collector"]

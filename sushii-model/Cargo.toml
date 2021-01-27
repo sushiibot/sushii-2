@@ -5,7 +5,9 @@ authors = ["drklee3 <derrick@dlee.dev>"]
 edition = "2018"
 
 [features]
+default = []
 graphql = ["juniper", "dataloader"]
+feed_process = []
 
 [dependencies]
 chrono = "0.4"
@@ -36,14 +38,12 @@ features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "of
 
 [dependencies.serenity]
 git = "https://github.com/serenity-rs/serenity"
-branch = "current"
-# path = "../serenity"
-# version = "0.9.2"
+rev = "0b1fc2737efebde01f6f3b781bcdfc83a30e908e"
+features = ["default", "collector"]
 
 [dependencies.juniper]
 version = "0.15.1"
 optional = true
-
 
 [dependencies.dataloader]
 version = "0.13"

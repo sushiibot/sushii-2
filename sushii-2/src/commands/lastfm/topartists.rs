@@ -176,6 +176,7 @@ async fn topartists(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                     let new_top_artists = fm_client
                         .top_artists(&lastfm_username)
                         .await
+                        .within_period(period)
                         .with_page(page)
                         .with_limit(10)
                         .send()

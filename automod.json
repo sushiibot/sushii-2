@@ -1,0 +1,70 @@
+{
+    "defaults": {
+        "channel_message_if_dms_disabled": true
+    },
+    "rules": [
+        {
+            "name": "auto ban",
+            "scopes": [
+                {
+                    "type": "member"
+                },
+                {
+                    "type": "channel"
+                }
+            ],
+            "conditions": [
+                {
+                    "type": "member age",
+                    "attributes": {
+                        "age": "30m"
+                    }
+                }
+            ],
+            "triggers": [
+                {
+                    "type": "word list match",
+                    "attributes": {
+                        "words": ["ass", "kpop sucks"],
+                        "required": false
+                    }
+                },
+                {
+                    "type": "message content regex match",
+                    "attributes": {
+                        "regex": "(kpop|bp|blackpink) (sucks|is shit)",
+                        "case_sensitive": false,
+                        "required": false
+                    }
+                },
+                {
+                    "type": "message lines",
+                    "attributes": {
+                        "line_count": 40
+                    }
+                },
+                {
+                    "type": "message mentions",
+                    "attributes": {
+                        "mention_count": 10
+                    }
+                }
+            ],
+            "actions": [
+                {
+                    "type": "ban",
+                    "log_message": "Auto ban"
+                },
+                {
+                    "type": "delete message"
+                },
+                {
+                    "type": "send message",
+                    "attributes": {
+                        "target": "user (or channel)"
+                    }
+                }
+            ]
+        }
+    ]
+}

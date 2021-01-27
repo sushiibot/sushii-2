@@ -13,3 +13,6 @@ services:
             context: .
         ports:
             - "8080:8080"
+    redis:
+        port:
+            - "6379:6379"
