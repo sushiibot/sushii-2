@@ -40,6 +40,44 @@
       ]
     }
   },
+  "060ae2331a6a96409195af0b75c7cc7e417240cd5384ae4ad8d557eb4060297e": {
+    "query": "\n            SELECT *\n              FROM feed_subscriptions\n             WHERE guild_id = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "feed_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "channel_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "mention_role",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
   "06ceaf2895890f4228d2f782e33498fc047e60421ee875e4a780b24a59de0623": {
     "query": "\n            DELETE FROM mod_logs\n                  WHERE guild_id = $1\n                    AND case_id = $2\n        ",
     "describe": {
@@ -457,6 +495,32 @@
         false,
         false,
         true,
+        false,
+        true
+      ]
+    }
+  },
+  "274ecb175c2c3134cda5e259b4662d9be8b7555e9b06eff64d00737698000c2c": {
+    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata!: Json<FeedMetadata>\"\n              FROM feeds\n             WHERE feed_id = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "feed_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "metadata!: Json<FeedMetadata>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
         false,
         true
       ]
