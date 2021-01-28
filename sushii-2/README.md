@@ -45,4 +45,9 @@ POSTGRES_DB=
 
 DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}
 SENTRY_DSN=
+
+# sushii-image-server url
+IMAGE_SERVER_URL=
+# sushii-feeds url
+FEED_SERVER_URL=
 ```
