@@ -1,6 +1,8 @@
 ## Compile sushii
 FROM rust:1.48 as build
 
+RUN rustup component add rustfmt
+
 # create a new empty shell project
 WORKDIR /usr/src/sushii
 RUN USER=root cargo new sushii-2 --bin
@@ -11,6 +13,7 @@ COPY ./sushii-2/Cargo.toml ./sushii-2/Cargo.toml
 
 # copy local dependencies
 COPY ./sushii-model ./sushii-model
+COPY ./sushii-feeds ./sushii-feeds
 
 # switch to sushii-2 workspace project to run following commands in sushii-2 dir
 WORKDIR /usr/src/sushii/sushii-2
