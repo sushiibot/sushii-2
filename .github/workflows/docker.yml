@@ -5,10 +5,12 @@ on:
         tags:
             - "sushii-2-v*"
             - "sushii-api-v*"
+            - "sushii-feeds-v*"
 
 env:
     SUSHII_2_IMAGE_NAME: ghcr.io/sushiibot/sushii-2
     SUSHII_API_IMAGE_NAME: ghcr.io/sushiibot/sushii-api
+    SUSHII_FEEDS_IMAGE_NAME: ghcr.io/sushiibot/sushii-feeds
 
 jobs:
     push:
@@ -38,6 +40,15 @@ jobs:
                       echo ::set-output name=docker_file::"./sushii-api/Dockerfile"
                       echo ::set-output name=title::"sushii-api"
                       echo ::set-output name=description::"GraphQL API server for sushii2"
+                      exit 0
+                  fi
+
+                  if [[ ${GITHUB_REF#refs/*/} == sushii-feeds* ]]
+                  then
+                      echo ::set-output name=image::${{ env.SUSHII_FEEDS_IMAGE_NAME}}
+                      echo ::set-output name=docker_file::"./sushii-feeds/Dockerfile"
+                      echo ::set-output name=title::"sushii-feeds"
+                      echo ::set-output name=description::"gRPC feed fetching service for sushii2"
                       exit 0
                   fi
 
