@@ -1,6 +1,8 @@
 ## Compile sushii
 FROM rust:1.48 as build
 
+RUN rustup component add rustfmt
+
 # create a new empty shell project
 WORKDIR /usr/src/sushii
 RUN USER=root cargo new sushii-feeds --bin
