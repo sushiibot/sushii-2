@@ -90,8 +90,7 @@ pub async fn message(ctx: &Context, msg: &Message) {
                 // Run both delete futures concurrently instead of in series
                 // try_join! better for Results but still want to try deleting both as
                 // try_join! short circuits and returns immediately on any Error
-                let (recv_res, sent_res) =
-                    join!(msg.delete(&ctx), sent_msg.delete(&ctx));
+                let (recv_res, sent_res) = join!(msg.delete(&ctx), sent_msg.delete(&ctx));
 
                 if let Err(e) = recv_res {
                     tracing::warn!(?msg, "Failed to delete received message: {}", e);
@@ -508,13 +507,10 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
     // Should remove all roles
     let is_reset = msg.content == "clear" || msg.content == "reset";
 
-    let member = guild
-        .member(&ctx, msg.author.id)
-        .await
-        .map_err(|e| {
-            tracing::error!("Failed to fetch guild member: {}", e);
-            e
-        })?;
+    let member = guild.member(&ctx, msg.author.id).await.map_err(|e| {
+        tracing::error!("Failed to fetch guild member: {}", e);
+        e
+    })?;
 
     let (member_all_roles, member_config_roles) =
         categorize_member_roles(&role_config, member.roles.clone(), is_reset);

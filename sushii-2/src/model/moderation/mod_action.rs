@@ -344,15 +344,7 @@ impl ModActionExecutor {
             };
 
             let res = self
-                .execute_user(
-                    &ctx,
-                    &msg,
-                    &user,
-                    &guild,
-                    &guild_id,
-                    &guild_conf,
-                    &duration,
-                )
+                .execute_user(&ctx, &msg, &user, &guild, &guild_id, &guild_conf, &duration)
                 .await;
 
             match res {

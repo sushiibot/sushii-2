@@ -10,7 +10,7 @@ use std::time::Duration;
 use crate::error::Error;
 use crate::keys::*;
 use crate::model::sql::*;
-use crate::utils::user::parse_id;
+use crate::utils::{text::escape_markdown, user::parse_id};
 
 #[command]
 #[only_in("guild")]
@@ -87,7 +87,10 @@ async fn loved(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         let _ = writeln!(
             s,
             "[{}]({}) - [{}]({})",
-            &track.artist.name, &track.artist.url, &track.name, &track.url
+            escape_markdown(&track.artist.name),
+            &track.artist.url,
+            escape_markdown(&track.name),
+            &track.url
         );
     }
 
@@ -207,7 +210,10 @@ async fn loved(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 let _ = writeln!(
                     s,
                     "[{}]({}) - [{}]({})",
-                    &track.artist.name, &track.artist.url, &track.name, &track.url
+                    escape_markdown(&track.artist.name),
+                    &track.artist.url,
+                    escape_markdown(&track.name),
+                    &track.url
                 );
             }
 

@@ -6,7 +6,7 @@ use std::fmt::Write;
 
 use crate::keys::*;
 use crate::model::sql::*;
-use crate::utils::user::parse_id;
+use crate::utils::{text::escape_markdown, user::parse_id};
 
 #[command]
 #[only_in("guild")]
@@ -133,7 +133,9 @@ fn format_track(track: &Track) -> String {
     let _ = write!(
         s,
         "{} - [{}]({})",
-        &track.artist.name, &track.name, &track.url,
+        escape_markdown(&track.artist.name),
+        escape_markdown(&track.name),
+        &track.url,
     );
 
     if !track.album.name.is_empty() {

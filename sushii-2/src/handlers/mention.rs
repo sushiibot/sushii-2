@@ -51,8 +51,7 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
         bot_id.mention()
     );
 
-    msg
-        .channel_id
+    msg.channel_id
         .send_message(&ctx.http, |m| {
             m.embed(|e| {
                 e.description(&s);

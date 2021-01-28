@@ -11,6 +11,7 @@ use std::time::Duration;
 use crate::error::Error;
 use crate::keys::*;
 use crate::model::sql::*;
+use crate::utils::text::escape_markdown;
 
 #[command]
 #[aliases("ta", "topartist")]
@@ -100,7 +101,10 @@ async fn topartists(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         let _ = writeln!(
             s,
             "{}) `{} plays` - [{}]({})",
-            artist.attrs.rank, artist.scrobbles, artist.name, artist.url,
+            artist.attrs.rank,
+            artist.scrobbles,
+            escape_markdown(&artist.name),
+            artist.url,
         );
     }
 
@@ -220,7 +224,10 @@ async fn topartists(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                 let _ = writeln!(
                     s,
                     "{}) `{} plays` - [{}]({})",
-                    artist.attrs.rank, artist.scrobbles, artist.name, artist.url,
+                    artist.attrs.rank,
+                    artist.scrobbles,
+                    escape_markdown(&artist.name),
+                    artist.url,
                 );
             }
 
