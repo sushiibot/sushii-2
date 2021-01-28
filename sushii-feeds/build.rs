@@ -1,4 +1,9 @@
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    tonic_build::compile_protos("proto/feedrequest.proto")?;
+    tonic_build::configure()
+        .format(false)
+        .compile(
+            &["proto/feedrequest.proto"],
+            &["proto"],
+        )?;
     Ok(())
 }

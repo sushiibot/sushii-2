@@ -13,6 +13,12 @@ services:
             context: .
         ports:
             - "8080:8080"
+    sushii-api:
+        build:
+            dockerfile: ./sushii-feeds/Dockerfile
+            context: .
+        ports:
+            - "50051:50051"
     redis:
         port:
             - "6379:6379"
