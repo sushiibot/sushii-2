@@ -63,7 +63,7 @@ async fn add(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         new_noti.keyword, guild_name,
     );
 
-    if let Err(_) = msg.author.dm(ctx, |m| m.content(s)).await {
+    if msg.author.dm(ctx, |m| m.content(s)).await.is_err() {
         // Not discord reply since original message is deleted
         msg.reply_mention(
             ctx,

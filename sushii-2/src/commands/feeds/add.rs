@@ -151,12 +151,12 @@ impl UserOption<FeedOptions> for DiscordChannel {
             .parse::<u64>()
             .ok()
             .or_else(|| parse_channel(&msg.content))
-            .ok_or("Invalid channel. Give a channel.".to_string())?;
+            .ok_or_else(|| "Invalid channel. Give a channel.".to_string())?;
 
         let guild_channels = msg
             .guild_field(ctx, |g| g.channels.clone())
             .await
-            .ok_or("Couldn't find channel. Give a channel.".to_string())?;
+            .ok_or_else(|| "Couldn't find channel. Give a channel.".to_string())?;
 
         match guild_channels.get(&ChannelId(channel_id)) {
             Some(c) => {
@@ -197,7 +197,7 @@ impl UserOption<FeedOptions> for DiscordRole {
         let guild_roles = msg
             .guild_field(ctx, |g| g.roles.clone())
             .await
-            .ok_or("Couldn't find role. Give a role.".to_string())?;
+            .ok_or_else(|| "Couldn't find role. Give a role.".to_string())?;
 
         let mention_role = parse_role(&msg.content)
             .or_else(|| msg.content.parse::<u64>().ok())
@@ -207,7 +207,7 @@ impl UserOption<FeedOptions> for DiscordRole {
                     .find(|&x| x.name.to_lowercase() == msg.content.to_lowercase())
                     .map(|x| x.id.0)
             })
-            .ok_or("Invalid role, give a role name, role mention, or role ID. `none` for no mention role.".to_string())?;
+            .ok_or_else(|| "Invalid role, give a role name, role mention, or role ID. `none` for no mention role.".to_string())?;
 
         state.mention_role.replace(mention_role);
 
