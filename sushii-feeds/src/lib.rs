@@ -4,7 +4,7 @@ use reqwest::Client;
 use rss::Channel;
 use std::collections::HashMap;
 use strfmt::strfmt;
-use sushii_model::model::sql::feed::{Feed, FeedKind, FeedMetadata};
+use sushii_model::model::sql::feeds::{Feed, FeedKind, FeedMetadata};
 
 pub mod feed_request {
     tonic::include_proto!("feedrequest");

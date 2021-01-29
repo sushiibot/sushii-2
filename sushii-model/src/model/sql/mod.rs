@@ -1,11 +1,11 @@
-pub mod feed;
+pub mod feeds;
 pub mod guild;
 pub mod mod_log;
 pub mod mute;
 pub mod user;
 
 pub use self::{
-    feed::{Feed, FeedItem, FeedMetadata, FeedSubscription},
+    feeds::{Feed, FeedItem, FeedMetadata, FeedSubscription},
     guild::{
         cached_guild::CachedGuild,
         guild_config::GuildConfig,
