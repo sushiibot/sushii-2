@@ -63,6 +63,13 @@ pub async fn check_new_vlives(
                             e.description(&post.description);
                             e.image(&post.thumbnail);
 
+                            e.footer(|f| {
+                                f.text("Powered by vlive.tv");
+                                f.icon_url("https://i.imgur.com/NzGrmho.jpg");
+
+                                f
+                            });
+
                             e
                         })
                     })
