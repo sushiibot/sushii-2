@@ -1,9 +1,9 @@
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use std::collections::HashMap;
 
 use crate::error::{Error, Result};
 use crate::model::sql::*;
-use std::collections::HashMap;
 use sushii_feeds::{tonic, FeedServiceClient};
 
 pub async fn check_new_vlives(
@@ -76,7 +76,10 @@ pub async fn check_new_vlives(
                     .await
                 {
                     tracing::warn!("Failed to send feed message: {}", e);
-                    // TODO: Delete this subscription if fails too many times
+                    // TODO: Delete this subscription if fails too many times,
+                    // need to account for Discord going down, so a simple retry
+                    // n times then delete could cause some to be deleted when
+                    // it shouldn't
                 }
             }
         }
