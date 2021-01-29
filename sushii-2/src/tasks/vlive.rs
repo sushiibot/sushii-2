@@ -46,7 +46,26 @@ pub async fn check_new_vlives(
 
             for sub in subscriptions {
                 if let Err(e) = ChannelId(sub.channel_id as u64)
-                    .send_message(ctx, |m| m.embed(|e| e.title(&post.title)))
+                    .send_message(ctx, |m| {
+                        m.embed(|e| {
+                            if let Some(ref author) = post.author {
+                                e.author(|a| {
+                                    a.name(&author.name);
+                                    a.icon_url(&author.icon);
+                                    a.url(&author.url);
+
+                                    a
+                                });
+                            }
+
+                            e.title(&post.title);
+                            e.url(&post.url);
+                            e.description(&post.description);
+                            e.image(&post.thumbnail);
+
+                            e
+                        })
+                    })
                     .await
                 {
                     tracing::warn!("Failed to send feed message: {}", e);
