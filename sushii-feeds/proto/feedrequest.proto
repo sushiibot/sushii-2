@@ -22,6 +22,7 @@ message FeedUpdateReply {
         string description = 4;
         string thumbnail = 5;
         string url = 6;
+        uint32 color = 7;
     }
 
     message FeedItem {
