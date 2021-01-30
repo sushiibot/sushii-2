@@ -1,6 +1,6 @@
 [package]
 name = "sushii-feeds"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["drklee3 <derrick@dlee.dev>"]
 edition = "2018"
 
@@ -30,7 +30,7 @@ features = ["macros", "rt-core", "time", "signal"]
 [dependencies.vlive]
 # path = "../../vlive-rs"
 git = "https://github.com/drklee3/vlive-rs"
-rev = "c06443c105ababad93670b32faaba2d29a0b6725"
+rev = "967ce86d72fec4493124beaeeff9275c21ec7b3b"
 
 [dependencies.sushii-model]
 path = "../sushii-model"

@@ -4026,7 +4026,7 @@ checksum = "1e81da0851ada1f3e9d4312c704aa4f8806f0f9d69faaf8df2f3464b4a9437c2"
 
 [[package]]
 name = "sushii-2"
-version = "0.2.0-rc.1"
+version = "0.2.0-rc.2"
 dependencies = [
  "async-trait",
  "chrono",
@@ -4081,7 +4081,7 @@ dependencies = [
 
 [[package]]
 name = "sushii-feeds"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -4923,7 +4923,7 @@ checksum = "b5a972e5669d67ba988ce3dc826706fb0a8b01471c088cb0b6110b805cc36aed"
 [[package]]
 name = "vlive"
 version = "0.2.0"
-source = "git+https://github.com/drklee3/vlive-rs?rev=c06443c105ababad93670b32faaba2d29a0b6725#c06443c105ababad93670b32faaba2d29a0b6725"
+source = "git+https://github.com/drklee3/vlive-rs?rev=967ce86d72fec4493124beaeeff9275c21ec7b3b#967ce86d72fec4493124beaeeff9275c21ec7b3b"
 dependencies = [
  "async-trait",
  "chrono",

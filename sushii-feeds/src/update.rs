@@ -64,7 +64,7 @@ pub async fn update_vlive(ctx: Context) -> Result<Vec<GrpcFeedItem>> {
             .ok()
             .map(|d| d.channel.channel.representative_color)
             .and_then(|c| u32::from_str_radix(&c[1..], 16).ok())
-            .unwrap_or(0x1ecfff);
+            .unwrap_or(0x1ecfff); // Default bright teal vlive color
 
         let grpc_post = Post {
             id: video.video_url(),
