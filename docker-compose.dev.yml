@@ -20,5 +20,5 @@ services:
         ports:
             - "50051:50051"
     redis:
-        port:
+        ports:
             - "6379:6379"
