@@ -62,6 +62,7 @@ pub async fn check_new_vlives(
                             e.url(&post.url);
                             e.description(&post.description);
                             e.image(&post.thumbnail);
+                            e.colour(post.color);
 
                             e.footer(|f| {
                                 f.text("Powered by vlive.tv");

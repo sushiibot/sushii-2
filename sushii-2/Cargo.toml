@@ -1,6 +1,6 @@
 [package]
 name = "sushii-2"
-version = "0.2.0-rc.1"
+version = "0.2.0-rc.2"
 authors = ["drklee3 <derrick@dlee.dev>"]
 edition = "2018"
 
@@ -41,7 +41,7 @@ features = []
 
 [dependencies.vlive]
 git = "https://github.com/drklee3/vlive-rs"
-rev = "c06443c105ababad93670b32faaba2d29a0b6725"
+rev = "967ce86d72fec4493124beaeeff9275c21ec7b3b"
 
 [dependencies.lastfm-rs]
 git = "https://github.com/sushiibot/lastfm-rs"
