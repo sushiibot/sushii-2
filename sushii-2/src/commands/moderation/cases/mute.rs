@@ -309,9 +309,10 @@ async fn listmutes(ctx: &Context, msg: &Message) -> CommandResult {
         .filter(|x| x.end_time.is_some())
         .collect();
 
-    // Sort based on mute duration
-    definite_mutes
-        .sort_by_cached_key(|m| m.end_time.map(|t| t.signed_duration_since(m.start_time)));
+    // Sort by time remaining
+    definite_mutes.sort_by_cached_key(|m| m.get_duration_remaining());
+    // Sort based on total mute duration (after remaining time)
+    definite_mutes.sort_by_cached_key(|m| m.get_duration());
 
     let indefinite_mutes: Vec<&Mute> = ongoing_mutes
         .iter()
