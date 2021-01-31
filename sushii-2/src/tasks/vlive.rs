@@ -25,18 +25,19 @@ pub async fn check_new_vlives(
     for item in new_entries.items {
         let post = item.post.unwrap();
 
+        if FeedItem::from_id(&ctx, &item.feed_id, &post.url)
+            .await?
+            .is_some()
+        {
+            // Skip if item already saved
+            continue;
+        }
+
+        // Save the video to db to not fetch again
+        FeedItem::new(&item.feed_id, &post.id).save(ctx).await?;
+
+        // If active feed found for this channel
         if let Some(feed) = feed_id_map.get(&item.feed_id.as_str()) {
-            if FeedItem::from_id(&ctx, &item.feed_id, &post.url)
-                .await?
-                .is_some()
-            {
-                // Skip if item already saved
-                continue;
-            }
-
-            // Save the video to db to not fetch again
-            FeedItem::new(&item.feed_id, &post.id).save(ctx).await?;
-
             let subscriptions = FeedSubscription::from_feed_id(&ctx, &item.feed_id).await?;
 
             if subscriptions.is_empty() {
