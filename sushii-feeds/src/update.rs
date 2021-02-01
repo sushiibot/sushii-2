@@ -40,11 +40,11 @@ pub async fn update_vlive(ctx: Context) -> Result<Vec<GrpcFeedItem>> {
         let feed_id = format!("vlive:videos:{}", video.channel_code);
 
         // Author icon
-        let icon = if let Ok(ref data) = video_data {
-            data.channel.channel.channel_profile_image.clone()
-        } else {
-            "https://i.imgur.com/NzGrmho.jpg".to_string()
-        };
+        let icon = video_data
+            .as_ref()
+            .ok()
+            .and_then(|d| d.channel.channel.channel_profile_image.clone())
+            .unwrap_or_else(|| "https://i.imgur.com/NzGrmho.jpg".to_string());
 
         // If live or vod
         let title = if video.duration_secs.is_some() {
@@ -60,11 +60,14 @@ pub async fn update_vlive(ctx: Context) -> Result<Vec<GrpcFeedItem>> {
             "".to_string()
         };
 
+        // Colour usually kinda dark and ugly
+        /*
         let color = video_data
             .ok()
-            .map(|d| d.channel.channel.representative_color)
+            .and_then(|d| d.channel.channel.representative_color)
             .and_then(|c| u32::from_str_radix(&c[1..], 16).ok())
             .unwrap_or(0x1ecfff); // Default bright teal vlive color
+        */
 
         let grpc_post = Post {
             id: video.video_url(),
@@ -77,7 +80,7 @@ pub async fn update_vlive(ctx: Context) -> Result<Vec<GrpcFeedItem>> {
             description,
             thumbnail: video.thumbnail_url.clone().unwrap_or_else(|| "".into()),
             url: video.video_url(),
-            color,
+            color: 0x1ecfff,
         };
 
         let grpc_item = GrpcFeedItem {
