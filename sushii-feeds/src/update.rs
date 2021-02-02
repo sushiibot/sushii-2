@@ -47,7 +47,7 @@ pub async fn update_vlive(ctx: Context) -> Result<Vec<GrpcFeedItem>> {
             .unwrap_or_else(|| "https://i.imgur.com/NzGrmho.jpg".to_string());
 
         // If live or vod
-        let title = if video.duration_secs.is_some() {
+        let title = if video.duration_secs.is_none() {
             format!("[LIVE] {}", video.title)
         } else {
             format!("[VOD] {}", video.title)
