@@ -19,7 +19,7 @@
   [providers.docker]
     endpoint = "unix:///var/run/docker.sock"
     watch = true
-    network = "web"
+    network = "sushii-2_web"
 
   [providers.file]
     filename = "/etc/traefik/dynamic_conf.toml"

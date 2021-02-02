@@ -48,6 +48,7 @@ services:
             - sushii_net
             - web
         labels:
+            - "traefik.docker.network=sushii-2_web"
             - "traefik.http.routers.prometheus.rule=Host(`prometheus.2.sushii.xyz`)"
             - "traefik.http.routers.prometheus.entrypoints=secure"
             - "traefik.http.routers.prometheus.tls.certresolver=acme"
