@@ -78,7 +78,7 @@ pub async fn update_vlive(ctx: Context) -> Result<Vec<GrpcFeedItem>> {
                 icon,
             }),
             description,
-            thumbnail: video.thumbnail_url.clone().unwrap_or_else(|| "".into()),
+            thumbnail: video.thumbnail_url(),
             url: video.video_url(),
             color: 0x1ecfff,
         };

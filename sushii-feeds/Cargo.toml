@@ -30,7 +30,7 @@ features = ["macros", "rt-core", "time", "signal"]
 [dependencies.vlive]
 # path = "../../vlive-rs"
 git = "https://github.com/drklee3/vlive-rs"
-rev = "89288e015adf02bc48a493cfbe56905c6254e1fd"
+rev = "0e0781624782c1070886cf1914855b0a09b7ce4c"
 
 [dependencies.sushii-model]
 path = "../sushii-model"
