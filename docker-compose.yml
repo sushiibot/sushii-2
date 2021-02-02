@@ -90,6 +90,7 @@ services:
         image: postgres:12
         container_name: postgres
         restart: unless-stopped
+        command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
         env_file:
             - .env
         volumes:
