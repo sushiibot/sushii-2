@@ -24,4 +24,4 @@ scrape_configs:
 
     - job_name: "PostgreSQL"
       static_configs:
-          - targets: ["postgres_exporter:9100"]
+          - targets: ["postgres_exporter:9187"]
