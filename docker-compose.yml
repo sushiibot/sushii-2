@@ -93,7 +93,7 @@ services:
         expose:
             - "9187"
         environment:
-            - DATA_SOURCE_NAME=${DATABASE_URL}
+            - DATA_SOURCE_NAME=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
         networks:
             - sushii_net
             - web
