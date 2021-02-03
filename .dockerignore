@@ -6,7 +6,7 @@
 **/.git
 **/.github
 **/.gitignore
-**/.env*
+**/*.env*
 **/*.md
 
 **/sqlx-data.*.json
