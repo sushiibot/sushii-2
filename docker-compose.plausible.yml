@@ -55,9 +55,9 @@ services:
             - web
         labels:
             - "traefik.docker.network=sushii-2_web"
-            - "traefik.http.routers.api.rule=Host(`analytics.sushii.xyz`)"
-            - "traefik.http.routers.api.entrypoints=secure"
-            - "traefik.http.routers.api.tls.certresolver=acme"
+            - "traefik.http.routers.plausible.rule=Host(`analytics.sushii.xyz`)"
+            - "traefik.http.routers.plausible.entrypoints=secure"
+            - "traefik.http.routers.plausible.tls.certresolver=acme"
     geoip:
         image: maxmindinc/geoipupdate
         container_name: plausible_geoip
