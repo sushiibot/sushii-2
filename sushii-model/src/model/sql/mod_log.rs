@@ -72,7 +72,7 @@ impl ModLogEntry {
         }
     }
 
-    pub async fn from_case_id(ctx: &Context, guild_id: u64, case_id: u64) -> Result<ModLogEntry> {
+    pub async fn from_case_id(ctx: &Context, guild_id: u64, case_id: u64) -> Result<Option<ModLogEntry>> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         from_case_id_query(&pool, guild_id, case_id).await
@@ -162,7 +162,7 @@ async fn from_case_id_query(
     pool: &sqlx::PgPool,
     guild_id: u64,
     case_id: u64,
-) -> Result<ModLogEntry> {
+) -> Result<Option<ModLogEntry>> {
     sqlx::query_as!(
         ModLogEntry,
         r#"
@@ -174,7 +174,7 @@ async fn from_case_id_query(
         guild_id as i64,
         case_id as i64,
     )
-    .fetch_one(pool)
+    .fetch_optional(pool)
     .await
     .map_err(Into::into)
 }

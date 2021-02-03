@@ -126,7 +126,7 @@ async fn _guild_member_update(
     // unmutes can be done by anyone. This is only useful when it is an
     // automated unmute by sushii
     let initial_entry = if let Some(case_id) = mute_entry.as_ref().and_then(|e| e.case_id) {
-        Some(ModLogEntry::from_case_id(&ctx, new_member.guild_id.0, case_id as u64).await?)
+        ModLogEntry::from_case_id(&ctx, new_member.guild_id.0, case_id as u64).await?
     } else {
         None
     };
