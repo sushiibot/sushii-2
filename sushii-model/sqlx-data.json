@@ -1209,6 +1209,11 @@
           "ordinal": 25,
           "name": "warn_dm_enabled",
           "type_info": "Bool"
+        },
+        {
+          "ordinal": 26,
+          "name": "disabled_channels",
+          "type_info": "Int8Array"
         }
       ],
       "parameters": {
@@ -1242,7 +1247,8 @@
         true,
         false,
         true,
-        false
+        false,
+        true
       ]
     }
   },
@@ -1879,43 +1885,6 @@
       "nullable": []
     }
   },
-  "c0526535107d188f318ecc723f2d8629eef92266e9802414606a3f4fba3afbeb": {
-    "query": "INSERT INTO guild_configs (\n                id                ,\n                name              ,\n                prefix            ,\n                join_msg          ,\n                join_msg_enabled  ,\n                join_react        ,\n                leave_msg         ,\n                leave_msg_enabled ,\n                msg_channel       ,\n                role_channel      ,\n                role_config       ,\n                role_enabled      ,\n                invite_guard      ,\n                log_msg           ,\n                log_msg_enabled   ,\n                log_mod           ,\n                log_mod_enabled   ,\n                log_member        ,\n                log_member_enabled,\n                mute_role         ,\n                mute_duration     ,\n                warn_dm_text      ,\n                warn_dm_enabled   ,\n                mute_dm_text      ,\n                mute_dm_enabled   ,\n                max_mention\n            )\n     VALUES ($1,  $2,  $3,  $4,  $5,  $6,  $7,  $8,  $9,  $10,\n             $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,\n             $21, $22, $23, $24, $25, $26)\nON CONFLICT (id)\n  DO UPDATE\n        SET -- id = $1, Don't need to update ID \n            name               = $2,\n            prefix             = $3,\n            join_msg           = $4,\n            join_msg_enabled   = $5,\n            join_react         = $6,\n            leave_msg          = $7,\n            leave_msg_enabled  = $8,\n            msg_channel        = $9,\n            role_channel       = $10,\n            role_config        = $11,\n            role_enabled       = $12,\n            invite_guard       = $13,\n            log_msg            = $14,\n            log_msg_enabled    = $15,\n            log_mod            = $16,\n            log_mod_enabled    = $17,\n            log_member         = $18,\n            log_member_enabled = $19,\n            mute_role          = $20,\n            mute_duration      = $21,\n            warn_dm_text       = $22,\n            warn_dm_enabled    = $23,\n            mute_dm_text       = $24,\n            mute_dm_enabled    = $25,\n            max_mention        = $26\n",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Text",
-          "Text",
-          "Bool",
-          "Text",
-          "Text",
-          "Bool",
-          "Int8",
-          "Int8",
-          "Jsonb",
-          "Bool",
-          "Bool",
-          "Int8",
-          "Bool",
-          "Int8",
-          "Bool",
-          "Int8",
-          "Bool",
-          "Int8",
-          "Int8",
-          "Text",
-          "Bool",
-          "Text",
-          "Bool",
-          "Int4"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "c7aede8c8980a1550756654ab9ea8c955c11975ddef1eb9098be63792d74b174": {
     "query": "\n            INSERT INTO feed_subscriptions\n                 VALUES ($1, $2, $3, $4)\n            ",
     "describe": {
@@ -2075,6 +2044,44 @@
         false,
         true
       ]
+    }
+  },
+  "da200cec72cfd5089652aa0df7819747783dbb217bf1b933e5387ef71c61875e": {
+    "query": "INSERT INTO guild_configs (\n    id,\n    name,\n    prefix,\n    join_msg,\n    join_msg_enabled,\n    join_react,\n    leave_msg,\n    leave_msg_enabled,\n    msg_channel,\n    role_channel,\n    role_config,\n    role_enabled,\n    invite_guard,\n    log_msg,\n    log_msg_enabled,\n    log_mod,\n    log_mod_enabled,\n    log_member,\n    log_member_enabled,\n    mute_role,\n    mute_duration,\n    warn_dm_text,\n    warn_dm_enabled,\n    mute_dm_text,\n    mute_dm_enabled,\n    max_mention,\n    disabled_channels\n  )\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10,\n    $11,\n    $12,\n    $13,\n    $14,\n    $15,\n    $16,\n    $17,\n    $18,\n    $19,\n    $20,\n    $21,\n    $22,\n    $23,\n    $24,\n    $25,\n    $26,\n    $27\n  ) ON CONFLICT (id) DO\nUPDATE\nSET -- id = $1, Don't need to update ID \n  name = $2,\n  prefix = $3,\n  join_msg = $4,\n  join_msg_enabled = $5,\n  join_react = $6,\n  leave_msg = $7,\n  leave_msg_enabled = $8,\n  msg_channel = $9,\n  role_channel = $10,\n  role_config = $11,\n  role_enabled = $12,\n  invite_guard = $13,\n  log_msg = $14,\n  log_msg_enabled = $15,\n  log_mod = $16,\n  log_mod_enabled = $17,\n  log_member = $18,\n  log_member_enabled = $19,\n  mute_role = $20,\n  mute_duration = $21,\n  warn_dm_text = $22,\n  warn_dm_enabled = $23,\n  mute_dm_text = $24,\n  mute_dm_enabled = $25,\n  max_mention = $26,\n  disabled_channels = $27",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
+          "Bool",
+          "Int8",
+          "Int8",
+          "Jsonb",
+          "Bool",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Int8",
+          "Text",
+          "Bool",
+          "Text",
+          "Bool",
+          "Int4",
+          "Int8Array"
+        ]
+      },
+      "nullable": []
     }
   },
   "da5e019b3391b9ea4f76c268c79868f34d55a317c4cc667d11e273b501c01bc2": {

@@ -32,7 +32,25 @@ pub async fn before(ctx: &Context, msg: &Message, cmd_name: &str) -> bool {
 
     if let Some(disabled_channels) = guild_conf.disabled_channels {
         if disabled_channels.contains(&(msg.channel_id.0 as i64)) {
-            return false;
+            let member = match msg.member(ctx).await {
+                Ok(m) => m,
+                Err(e) => {
+                    tracing::warn!("Failed to fetch member: {}", e);
+                    return false;
+                }
+            };
+
+            let permissions = match member.permissions(ctx).await {
+                Ok(m) => m,
+                Err(e) => {
+                    tracing::warn!("Failed to get member permissions: {}", e);
+                    return false;
+                }
+            };
+
+            // Is mod: true,
+            // No perms: false,
+            return permissions.manage_guild();
         }
     }
 

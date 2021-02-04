@@ -31,7 +31,26 @@ async fn _normal_message(ctx: &Context, msg: &Message) -> Result<()> {
 
     if let Some(disabled_channels) = guild_conf.disabled_channels {
         if disabled_channels.contains(&(msg.channel_id.0 as i64)) {
-            return Ok(());
+            let member = match msg.member(ctx).await {
+                Ok(m) => m,
+                Err(e) => {
+                    tracing::warn!("Failed to fetch member: {}", e);
+                    return Ok(());
+                }
+            };
+
+            let permissions = match member.permissions(ctx).await {
+                Ok(m) => m,
+                Err(e) => {
+                    tracing::warn!("Failed to get member permissions: {}", e);
+                    return Ok(());
+                }
+            };
+
+            // Not mod, cant use tag
+            if !permissions.manage_guild() {
+                return Ok(());
+            }
         }
     }
 
