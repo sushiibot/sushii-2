@@ -32,7 +32,7 @@ pub async fn update_vlive(ctx: Context) -> Result<Vec<GrpcFeedItem>> {
         let video_data = ctx.client.get_video(video.video_seq).await;
 
         if let Err(ref e) = video_data {
-            tracing::warn!("Failed to fetch video data: {}", e);
+            tracing::warn!("Failed to fetch video {} data: {}", video.video_url(), e);
         }
 
         tracing::info!("video: {:?}", &video);

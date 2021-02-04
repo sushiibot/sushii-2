@@ -64,6 +64,9 @@ pub struct GuildConfig {
 
     /// Max number of unique mentions in a single message to auto mute
     pub max_mention: Option<i32>,
+
+    /// Channels where commands are ignored
+    pub disabled_channels: Option<Vec<i64>>,
 }
 
 impl GuildConfig {
@@ -384,18 +387,6 @@ impl GuildConfig {
 
         Ok(())
     }
-
-    /// Saves config in the background, does NOT respond with an error but does log errors
-    /// Mainly used because this isn't an async fn, can be used in or_else
-    pub fn save_bg(&self, ctx: &Context) {
-        let conf = self.clone();
-        let ctx = ctx.clone();
-        tokio::spawn(async move {
-            if let Err(e) = conf.save(&ctx).await {
-                tracing::error!("Failed to save config in background: {}", e);
-            }
-        });
-    }
 }
 
 fn fmt_channel(id: Option<i64>) -> Option<String> {
@@ -547,6 +538,7 @@ async fn upsert_config_query(conf: &GuildConfig, pool: &sqlx::PgPool) -> Result<
         conf.mute_dm_text,
         conf.mute_dm_enabled,
         conf.max_mention,
+        conf.disabled_channels.as_deref(),
     )
     .execute(pool)
     .await

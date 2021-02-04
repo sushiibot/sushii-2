@@ -11,15 +11,27 @@ use crate::model::sql::GuildConfig;
 
 #[hook]
 pub async fn before(ctx: &Context, msg: &Message, cmd_name: &str) -> bool {
-    let role_channel = GuildConfig::from_msg(&ctx, &msg)
+    let guild_conf = match GuildConfig::from_msg(&ctx, &msg)
         .await
+        .map_err(|e| {
+            tracing::warn!("Failed to get guild config: {}", e);
+        })
         .ok()
-        .unwrap_or(None)
-        .and_then(|c| c.role_channel);
+        .flatten()
+    {
+        Some(c) => c,
+        None => return false,
+    };
 
-    if let Some(channel) = role_channel {
+    if let Some(channel) = guild_conf.role_channel {
         if msg.channel_id == channel as u64 {
             tracing::debug!(?msg, "Skipped command in role channel");
+            return false;
+        }
+    }
+
+    if let Some(disabled_channels) = guild_conf.disabled_channels {
+        if disabled_channels.contains(&(msg.channel_id.0 as i64)) {
             return false;
         }
     }

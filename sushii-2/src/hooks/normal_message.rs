@@ -21,9 +21,22 @@ async fn _normal_message(ctx: &Context, msg: &Message) -> Result<()> {
 
     let sushii_conf = SushiiConfig::get(&ctx).await;
 
-    let prefix = GuildConfig::from_msg(&ctx, &msg)
-        .await?
-        .and_then(|c| c.prefix)
+    let guild_conf = match GuildConfig::from_msg(&ctx, &msg).await? {
+        Some(c) => c,
+        None => {
+            tracing::error!("Missing guild config");
+            return Ok(());
+        }
+    };
+
+    if let Some(disabled_channels) = guild_conf.disabled_channels {
+        if disabled_channels.contains(&(msg.channel_id.0 as i64)) {
+            return Ok(());
+        }
+    }
+
+    let prefix = guild_conf
+        .prefix
         .unwrap_or_else(|| sushii_conf.default_prefix.clone());
 
     if !msg.content.starts_with(&prefix) {
