@@ -1,5 +1,6 @@
 use chrono::{offset::Utc, Duration};
 use serenity::{model::prelude::*, prelude::*};
+use std::collections::HashSet;
 use std::fmt::Write;
 
 use crate::error::Result;
@@ -66,7 +67,7 @@ pub async fn guild_member_update(ctx: &Context, old_member: &Option<Member>, new
 
 async fn _guild_member_update(
     ctx: &Context,
-    _old_member: &Option<Member>,
+    old_member: &Option<Member>,
     new_member: &Member,
 ) -> Result<()> {
     let guild_conf = match GuildConfig::from_id(&ctx, &new_member.guild_id).await? {
@@ -84,6 +85,15 @@ async fn _guild_member_update(
 
     let mute_entry =
         Mute::from_id_any_pending(ctx, new_member.guild_id.0, new_member.user.id.0).await?;
+
+    if let Some(old_member) = old_member {
+        let old: HashSet<_> = old_member.roles.iter().collect();
+        let new: HashSet<_> = new_member.roles.iter().collect();
+
+        if old == new {
+            return Ok(());
+        }
+    }
 
     let new_has_mute = new_member.roles.contains(&mute_role);
 
