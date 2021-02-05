@@ -95,7 +95,10 @@ pub async fn after(ctx: &Context, msg: &Message, cmd_name: &str, error: Result<(
 
         let _ = msg
             .channel_id
-            .say(&ctx, "Something went wrong while running this command :(")
+            .say(
+                &ctx,
+                format!("Something went wrong while running this command :(\n{}", e),
+            )
             .await;
     }
 
