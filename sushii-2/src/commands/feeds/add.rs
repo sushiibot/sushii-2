@@ -1,9 +1,11 @@
 use futures::stream::StreamExt;
 use serenity::async_trait;
+use serenity::builder::CreateEmbed;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::utils::{parse_channel, parse_role};
+use std::fmt::Write;
 use std::result::Result as StdResult;
 use std::time::Duration;
 use vlive::VLiveRequester;
@@ -27,6 +29,7 @@ impl FeedOptions {
 
 #[async_trait]
 pub trait UserOption<T> {
+    fn display(&self, state: &T) -> String;
     fn prompt(&self) -> &'static str;
     async fn validate(
         &self,
@@ -65,8 +68,60 @@ impl<T> OptionsCollector<T> {
     }
 
     async fn collect(&mut self, ctx: &Context, msg: &Message) -> Result<()> {
+        let mut sent_msg: Option<Message> = None;
+        let mut summary_str = String::new();
+
         for option in &self.options {
-            msg.channel_id.say(ctx, option.prompt()).await?;
+            let content = format!("{}~~-------------~~\n{}", summary_str, option.prompt());
+
+            // Not first message, edit previous
+            if let Some(ref mut sent_msg) = sent_msg {
+                let embed = if let Some(e) = sent_msg.embeds.first() {
+                    CreateEmbed::from(e.clone())
+                } else {
+                    let mut e = CreateEmbed::default();
+                    e.title("Adding New Feed");
+                    e.description(&content);
+                    e.footer(|f| {
+                        f.text("Type quit any time to exit");
+
+                        f
+                    });
+
+                    e
+                };
+
+                sent_msg
+                    .edit(ctx, |m| {
+                        m.embed(|e| {
+                            *e = CreateEmbed::from(embed);
+                            e.description(&content);
+
+                            e
+                        });
+                        m
+                    })
+                    .await?;
+            } else {
+                // First message
+                sent_msg.replace(
+                    msg.channel_id
+                        .send_message(ctx, |m| {
+                            m.embed(|e| {
+                                e.title("Adding New Feed");
+                                e.description(&content);
+                                e.footer(|f| {
+                                    f.text("Type quit any time to exit");
+
+                                    f
+                                });
+
+                                e
+                            })
+                        })
+                        .await?,
+                );
+            }
 
             let mut replies = msg
                 .channel_id
@@ -79,7 +134,10 @@ impl<T> OptionsCollector<T> {
             while let Some(reply) = replies.next().await {
                 match option.validate(ctx, &reply, &mut self.state).await {
                     Ok(response) => {
-                        msg.channel_id.say(ctx, response).await?;
+                        // Add option description to summary
+                        writeln!(summary_str, "{}", option.display(&self.state))?;
+                        reply.delete(ctx).await?;
+                        // msg.channel_id.say(ctx, response).await?;
 
                         // If success, break from waiting for response and go to
                         // next option
@@ -105,6 +163,14 @@ struct FeedType;
 
 #[async_trait]
 impl UserOption<FeedOptions> for FeedType {
+    fn display(&self, state: &FeedOptions) -> String {
+        if let Some(kind) = &state.kind {
+            format!("Feed Type: {}", kind)
+        } else {
+            "Feed Type: ".into()
+        }
+    }
+
     fn prompt(&self) -> &'static str {
         "What kind of feed do you want to add? Currently available feeds are: `vlive`, `twitter`"
     }
@@ -136,6 +202,14 @@ struct DiscordChannel;
 
 #[async_trait]
 impl UserOption<FeedOptions> for DiscordChannel {
+    fn display(&self, state: &FeedOptions) -> String {
+        if let Some(channel) = state.discord_channel {
+            format!("Discord Channel: <#{}>", channel)
+        } else {
+            "Discord Channel: ".into()
+        }
+    }
+
     fn prompt(&self) -> &'static str {
         "Which channel do you want updates to be sent to?"
     }
@@ -179,6 +253,14 @@ struct DiscordRole;
 
 #[async_trait]
 impl UserOption<FeedOptions> for DiscordRole {
+    fn display(&self, state: &FeedOptions) -> String {
+        if let Some(mention_role) = state.mention_role {
+            format!("Mention Role: <@&{}>", mention_role)
+        } else {
+            "Mention Role: ".into()
+        }
+    }
+
     fn prompt(&self) -> &'static str {
         "What role do you want to mention for new updates? Say `none` for no role mention."
     }
@@ -327,6 +409,14 @@ struct VliveChannelStep;
 
 #[async_trait]
 impl UserOption<VliveOptions> for VliveChannelStep {
+    fn display(&self, state: &VliveOptions) -> String {
+        if let Some(feed_metadata) = &state.feed_metadata {
+            format!("Vlive Channel: {}", feed_metadata.name())
+        } else {
+            "Vlive Channel: ".into()
+        }
+    }
+
     fn prompt(&self) -> &'static str {
         "What vlive channel? Give a vlive channel code. You can find this \
         in the channel URL, for example `F001E5` is the code for \
@@ -349,10 +439,10 @@ impl UserOption<VliveOptions> for VliveChannelStep {
 
         let channel = reqwest.get_channel_info(&msg.content).await.map_err(|_| {
             format!(
-                "Error: No channel was found with code `{}`. \
+                "No channel was found with code `{}`. \
                 Give a vlive channel code. You can find this \
                 in the channel URL, for example `F001E5` is the code for \
-                `https://www.vlive.tv/channel/F001E5`. Type `quit` any time to stop.",
+                `https://www.vlive.tv/channel/F001E5`.",
                 &msg.content
             )
         })?;
@@ -360,11 +450,11 @@ impl UserOption<VliveOptions> for VliveChannelStep {
         state.feed_metadata.replace(FeedMetadata::vlive_videos(
             None,
             channel.channel_code,
-            channel.name.clone(),
-            channel.profile_img,
+            channel.channel_name.clone(),
+            channel.channel_profile_image,
         ));
 
-        Ok(format!("Found channel {}", &channel.name))
+        Ok(format!("Found channel {}", &channel.channel_name))
     }
 }
 

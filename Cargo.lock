@@ -4923,7 +4923,7 @@ checksum = "b5a972e5669d67ba988ce3dc826706fb0a8b01471c088cb0b6110b805cc36aed"
 [[package]]
 name = "vlive"
 version = "0.2.0"
-source = "git+https://github.com/drklee3/vlive-rs?rev=0e0781624782c1070886cf1914855b0a09b7ce4c#0e0781624782c1070886cf1914855b0a09b7ce4c"
+source = "git+https://github.com/drklee3/vlive-rs?rev=04e13d0ca81bc420709f283604465491ed8671e4#04e13d0ca81bc420709f283604465491ed8671e4"
 dependencies = [
  "async-trait",
  "chrono",

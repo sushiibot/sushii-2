@@ -30,7 +30,7 @@ pub struct VliveChannelMeta {
     pub channel_seq: Option<i64>,
     pub channel_code: String,
     pub channel_name: String,
-    pub channel_icon_url: String,
+    pub channel_icon_url: Option<String>,
 }
 
 impl VliveChannelMeta {
@@ -38,7 +38,7 @@ impl VliveChannelMeta {
         channel_seq: Option<i64>,
         channel_code: String,
         channel_name: String,
-        channel_icon_url: String,
+        channel_icon_url: Option<String>,
     ) -> Self {
         Self {
             channel_seq,
@@ -95,7 +95,7 @@ impl FeedMetadata {
         channel_seq: Option<i64>,
         channel_code: String,
         channel_name: String,
-        channel_icon_url: String,
+        channel_icon_url: Option<String>,
     ) -> Self {
         Self::VliveVideos(VliveVideosMetadata {
             channel: VliveChannelMeta::new(
@@ -111,7 +111,7 @@ impl FeedMetadata {
         channel_seq: Option<i64>,
         channel_code: String,
         channel_name: String,
-        channel_icon_url: String,
+        channel_icon_url: Option<String>,
         board_id: i64,
     ) -> Self {
         Self::VliveBoard(VliveBoardMetadata {
@@ -123,6 +123,14 @@ impl FeedMetadata {
             ),
             board_id,
         })
+    }
+
+    pub fn name(&self) -> &str {
+        match &self {
+            FeedMetadata::Rss(m) => &m.title,
+            FeedMetadata::VliveBoard(m) => &m.channel.channel_name,
+            FeedMetadata::VliveVideos(m) => &m.channel.channel_name,
+        }
     }
 }
 
@@ -152,18 +160,14 @@ impl Feed {
     }
 
     pub fn name(&self) -> &str {
-        match &self.metadata.0 {
-            FeedMetadata::Rss(m) => &m.title,
-            FeedMetadata::VliveBoard(m) => &m.channel.channel_name,
-            FeedMetadata::VliveVideos(m) => &m.channel.channel_name,
-        }
+        &self.metadata.0.name()
     }
 
     pub fn icon_url(&self) -> Option<&str> {
         match &self.metadata.0 {
             FeedMetadata::Rss(_) => None,
-            FeedMetadata::VliveBoard(m) => Some(&m.channel.channel_icon_url),
-            FeedMetadata::VliveVideos(m) => Some(&m.channel.channel_icon_url),
+            FeedMetadata::VliveBoard(m) => m.channel.channel_icon_url.as_deref(),
+            FeedMetadata::VliveVideos(m) => m.channel.channel_icon_url.as_deref(),
         }
     }
 
