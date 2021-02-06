@@ -67,9 +67,15 @@ impl<T> OptionsCollector<T> {
         self.state
     }
 
-    async fn collect(&mut self, ctx: &Context, msg: &Message) -> Result<()> {
-        let mut sent_msg: Option<Message> = None;
-        let mut summary_str = String::new();
+    async fn collect(
+        &mut self,
+        ctx: &Context,
+        msg: &Message,
+        sent_msg: Option<Message>,
+        summary_str: Option<String>,
+    ) -> Result<(Option<Message>, String)> {
+        let mut sent_msg: Option<Message> = sent_msg;
+        let mut summary_str = summary_str.unwrap_or_else(String::new);
 
         for option in &self.options {
             let content = format!("{}~~-------------~~\n{}", summary_str, option.prompt());
@@ -133,7 +139,7 @@ impl<T> OptionsCollector<T> {
 
             while let Some(reply) = replies.next().await {
                 match option.validate(ctx, &reply, &mut self.state).await {
-                    Ok(response) => {
+                    Ok(_response) => {
                         // Add option description to summary
                         writeln!(summary_str, "{}", option.display(&self.state))?;
                         reply.delete(ctx).await?;
@@ -155,7 +161,7 @@ impl<T> OptionsCollector<T> {
             // TODO: Delete messages
         }
 
-        Ok(())
+        Ok((sent_msg, summary_str))
     }
 }
 
@@ -257,7 +263,7 @@ impl UserOption<FeedOptions> for DiscordRole {
         if let Some(mention_role) = state.mention_role {
             format!("Mention Role: <@&{}>", mention_role)
         } else {
-            "Mention Role: ".into()
+            "Mention Role: None".into()
         }
     }
 
@@ -323,12 +329,12 @@ async fn add(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
         .add_option(DiscordChannel)
         .add_option(DiscordRole);
 
-    options_collector.collect(ctx, msg).await?;
+    let (sent_msg, summary_str) = options_collector.collect(ctx, msg, None, None).await?;
 
     let opts = options_collector.get_state();
 
     let feed_metadata = match opts.kind.as_ref().unwrap().to_lowercase().as_str() {
-        "vlive" => match add_vlive(reqwest, ctx, msg).await? {
+        "vlive" => match add_vlive(reqwest, ctx, msg, sent_msg, summary_str).await? {
             Some(m) => m,
             None => return Ok(()),
         },
@@ -463,6 +469,8 @@ async fn add_vlive(
     _reqwest: reqwest::Client,
     ctx: &Context,
     msg: &Message,
+    sent_msg: Option<Message>,
+    summary_str: String,
 ) -> Result<Option<FeedMetadata>> {
     let _messages = msg
         .channel_id
@@ -474,7 +482,13 @@ async fn add_vlive(
     let mut options_collector =
         OptionsCollector::new(VliveOptions::new()).add_option(VliveChannelStep);
 
-    options_collector.collect(ctx, msg).await?;
+    let (sent_msg, _) = options_collector
+        .collect(ctx, msg, sent_msg, Some(summary_str))
+        .await?;
+
+    if let Some(sent_msg) = sent_msg {
+        sent_msg.delete(ctx).await?;
+    }
 
     let opts = options_collector.get_state_owned();
 
