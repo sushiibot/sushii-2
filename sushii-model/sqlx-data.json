@@ -737,21 +737,16 @@
         },
         {
           "ordinal": 1,
-          "name": "channel_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
           "name": "description",
           "type_info": "Text"
         },
         {
-          "ordinal": 3,
+          "ordinal": 2,
           "name": "set_at",
           "type_info": "Timestamp"
         },
         {
-          "ordinal": 4,
+          "ordinal": 3,
           "name": "expire_at",
           "type_info": "Timestamp"
         }
@@ -762,7 +757,6 @@
         ]
       },
       "nullable": [
-        false,
         false,
         false,
         false,
@@ -1900,54 +1894,6 @@
       "nullable": []
     }
   },
-  "cda0f7d9db834e7ba23b229ca46802b0aef7939cb54a654975a9b492c5c198f7": {
-    "query": "\n        INSERT INTO reminders\n             VALUES ($1, $2, $3, $4, $5)\n          RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "channel_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "set_at",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "expire_at",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Text",
-          "Timestamp",
-          "Timestamp"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "cf21bd565ae6274c44718984217076091fe7d163feb99065c55535c5b45c87dd": {
     "query": "\n            SELECT *\n              FROM mutes\n             WHERE end_time < timezone('UTC', now())\n        ",
     "describe": {
@@ -2095,21 +2041,16 @@
         },
         {
           "ordinal": 1,
-          "name": "channel_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
           "name": "description",
           "type_info": "Text"
         },
         {
-          "ordinal": 3,
+          "ordinal": 2,
           "name": "set_at",
           "type_info": "Timestamp"
         },
         {
-          "ordinal": 4,
+          "ordinal": 3,
           "name": "expire_at",
           "type_info": "Timestamp"
         }
@@ -2118,7 +2059,6 @@
         "Left": []
       },
       "nullable": [
-        false,
         false,
         false,
         false,
@@ -2453,6 +2393,47 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "fc88d1cc535c4e6fcc9cc84ee631637fd358645db7c986b1f54b48d143bf480e": {
+    "query": "\n        INSERT INTO reminders\n             VALUES ($1, $2, $3, $4)\n          RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "set_at",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 3,
+          "name": "expire_at",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Timestamp",
+          "Timestamp"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ]
     }
   },
   "017954ed890e81d74b2912b7afb90cb5b744e51156f4f3872f5efc86cba27f33": {

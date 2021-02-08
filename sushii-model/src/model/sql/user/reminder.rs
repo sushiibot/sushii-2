@@ -11,7 +11,6 @@ use crate::utils::duration::{find_duration, parse_duration};
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug)]
 pub struct Reminder {
     pub user_id: i64,
-    pub channel_id: i64,
     pub description: String,
     pub set_at: NaiveDateTime,
     pub expire_at: NaiveDateTime,
@@ -20,7 +19,6 @@ pub struct Reminder {
 impl Reminder {
     pub fn new(
         user_id: UserId,
-        channel_id: ChannelId,
         desc_and_dur: &str,
     ) -> StdResult<Self, String> {
         // Look for position of duration string
@@ -40,7 +38,6 @@ impl Reminder {
 
         Ok(Self {
             user_id: user_id.into(),
-            channel_id: channel_id.into(),
             description,
             set_at,
             expire_at,
@@ -137,11 +134,10 @@ async fn insert_query(pool: &sqlx::PgPool, reminder: &Reminder) -> Result<Remind
         Reminder,
         r#"
         INSERT INTO reminders
-             VALUES ($1, $2, $3, $4, $5)
+             VALUES ($1, $2, $3, $4)
           RETURNING *
         "#,
         reminder.user_id,
-        reminder.channel_id,
         reminder.description,
         reminder.set_at,
         reminder.expire_at,
