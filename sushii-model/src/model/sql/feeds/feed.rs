@@ -148,40 +148,43 @@ impl Id for FeedMetadata {
 pub struct Feed {
     /// Feed unique identifier, can be feed URL or a vlive channel
     pub feed_id: String,
-    pub metadata: Json<FeedMetadata>,
+    pub metadata: Option<Json<FeedMetadata>>,
 }
 
 impl Feed {
     pub fn from_meta(metadata: FeedMetadata) -> Self {
         Self {
             feed_id: metadata.id(),
-            metadata: Json(metadata),
+            metadata: Some(Json(metadata)),
         }
     }
 
-    pub fn name(&self) -> &str {
-        &self.metadata.0.name()
+    pub fn name(&self) -> Option<&str> {
+        self.metadata.as_ref().map(|m| m.0.name())
     }
 
     pub fn icon_url(&self) -> Option<&str> {
-        match &self.metadata.0 {
-            FeedMetadata::Rss(_) => None,
-            FeedMetadata::VliveBoard(m) => m.channel.channel_icon_url.as_deref(),
-            FeedMetadata::VliveVideos(m) => m.channel.channel_icon_url.as_deref(),
-        }
+        self.metadata
+            .as_ref()
+            .map(|m| match m.0 {
+                FeedMetadata::Rss(_) => None,
+                FeedMetadata::VliveBoard(ref m) => m.channel.channel_icon_url.as_deref(),
+                FeedMetadata::VliveVideos(ref m) => m.channel.channel_icon_url.as_deref(),
+            })
+            .flatten()
     }
 
-    pub fn source_url(&self) -> String {
-        match &self.metadata.0 {
-            FeedMetadata::Rss(m) => m.source_url.clone(),
-            FeedMetadata::VliveBoard(m) => format!(
+    pub fn source_url(&self) -> Option<String> {
+        self.metadata.as_ref().map(|m| match m.0 {
+            FeedMetadata::Rss(ref m) => m.source_url.clone(),
+            FeedMetadata::VliveBoard(ref m) => format!(
                 "https://www.vlive.tv/channel/{}/board/{}",
                 m.channel.channel_code, m.board_id
             ),
-            FeedMetadata::VliveVideos(m) => {
+            FeedMetadata::VliveVideos(ref m) => {
                 format!("https://www.vlive.tv/channel/{}", m.channel.channel_code)
             }
-        }
+        })
     }
 
     pub async fn from_id(ctx: &Context, feed_id: &str) -> Result<Option<Self>> {
@@ -191,7 +194,7 @@ impl Feed {
             Feed,
             r#"
             SELECT feed_id,
-                   metadata as "metadata!: Json<FeedMetadata>"
+                   metadata as "metadata: Json<FeedMetadata>"
               FROM feeds
              WHERE feed_id = $1
             "#,
@@ -208,7 +211,7 @@ impl Feed {
             Feed,
             r#"
             SELECT feed_id,
-                   metadata as "metadata!: Json<FeedMetadata>"
+                   metadata as "metadata: Json<FeedMetadata>"
               FROM feeds
              WHERE feed_id NOT LIKE 'vlive:%'
             "#,
@@ -268,7 +271,7 @@ async fn get_all_vlive(pool: &sqlx::PgPool) -> Result<Vec<Feed>> {
         Feed,
         r#"
             SELECT feed_id,
-                   metadata as "metadata!: Json<FeedMetadata>"
+                   metadata as "metadata: Json<FeedMetadata>"
               FROM feeds
              WHERE feed_id LIKE 'vlive:%'
             "#,

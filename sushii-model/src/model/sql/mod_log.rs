@@ -72,7 +72,11 @@ impl ModLogEntry {
         }
     }
 
-    pub async fn from_case_id(ctx: &Context, guild_id: u64, case_id: u64) -> Result<Option<ModLogEntry>> {
+    pub async fn from_case_id(
+        ctx: &Context,
+        guild_id: u64,
+        case_id: u64,
+    ) -> Result<Option<ModLogEntry>> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         from_case_id_query(&pool, guild_id, case_id).await

@@ -1,6 +1,6 @@
 use anyhow::Result;
-use sushii_model::model::sql::{Feed, FeedMetadata};
 use std::time::Duration;
+use sushii_model::model::sql::{Feed, FeedMetadata};
 use vlive::VLiveRequester;
 
 use sushii_feeds::feed_request::feed_update_reply::{Author, FeedItem as GrpcFeedItem, Post};

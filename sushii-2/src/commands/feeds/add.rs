@@ -373,8 +373,10 @@ async fn add(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
                     if let Some(url) = feed.icon_url() {
                         a.icon_url(url);
                     }
-                    a.name(feed.name());
-                    a.url(feed.source_url());
+                    a.name(feed.name().unwrap_or_else(|| "Unknown Feed".into()));
+                    if let Some(url) = feed.source_url() {
+                        a.url(url);
+                    }
 
                     a
                 });

@@ -43,7 +43,11 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
         if let Some(id) = sub.mention_role {
             write!(s, "<@&{}> ", id)?;
         }
-        writeln!(s, "{}", feed.name())?;
+        writeln!(
+            s,
+            "{}",
+            feed.name().unwrap_or_else(|| "Unknown Feed".into())
+        )?;
     }
 
     msg.channel_id

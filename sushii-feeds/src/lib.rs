@@ -35,11 +35,16 @@ pub async fn get_feed(client: Client, kind: FeedKind, feed: Feed) -> Result<Chan
         _ => {}
     }
 
-    let data = match feed.metadata.0 {
+    let data = match feed
+        .metadata
+        .as_ref()
+        .ok_or(anyhow!("Missing feed metadata"))?
+        .0
+    {
         FeedMetadata::VliveBoard(_) | FeedMetadata::VliveVideos(_) => {
             return Err(anyhow!("Invalid feed metadata: {:?}", feed.metadata))
         }
-        FeedMetadata::Rss(d) => d,
+        FeedMetadata::Rss(ref d) => d,
     };
 
     let content = client.get(&data.feed_url).send().await?.bytes().await?;
