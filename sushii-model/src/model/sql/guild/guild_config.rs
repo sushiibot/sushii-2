@@ -12,7 +12,6 @@ use crate::prelude::*;
 #[derive(Deserialize, Default, Serialize, sqlx::FromRow, Clone, Debug)]
 pub struct GuildConfig {
     pub id: i64,
-    pub name: Option<String>,
     pub prefix: Option<String>,
 
     /// Join message text
@@ -513,7 +512,6 @@ async fn upsert_config_query(conf: &GuildConfig, pool: &sqlx::PgPool) -> Result<
     sqlx::query_file!(
         "sql/guild/upsert_guild_config.sql",
         conf.id,
-        conf.name,
         conf.prefix,
         conf.join_msg,
         conf.join_msg_enabled,
