@@ -11,6 +11,7 @@ async fn _update_rss(ctx: Context) -> Result<()> {
     let feeds = Feed::get_all_rss(&ctx.db_pool).await?;
 
     for feed in feeds {
+        /*
         match feed.metadata.0 {
             FeedMetadata::Rss(_meta) => {
 
@@ -19,6 +20,7 @@ async fn _update_rss(ctx: Context) -> Result<()> {
             // VliveVideos(_)
             // VliveBoard(VliveBoardMetadata),
         }
+        */
     }
 
     Ok(())
