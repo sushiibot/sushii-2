@@ -11,7 +11,7 @@ async fn get(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     let format = args
         .single::<String>()
-        .unwrap_or_else(|_| "json".to_string());
+        .unwrap_or_else(|_| "yaml".to_string());
 
     if conf.role_config.is_none() {
         msg.channel_id
