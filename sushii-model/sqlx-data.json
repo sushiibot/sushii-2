@@ -16,30 +16,6 @@
       "nullable": []
     }
   },
-  "03dbb3238c3aefc1bd3d7e3c78b56ba97c1479ef7353cd916bb5f5b81a0f4e98": {
-    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata!: Json<FeedMetadata>\"\n              FROM feeds\n             WHERE feed_id LIKE 'vlive:%'\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "feed_id",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "metadata!: Json<FeedMetadata>",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        true
-      ]
-    }
-  },
   "060ae2331a6a96409195af0b75c7cc7e417240cd5384ae4ad8d557eb4060297e": {
     "query": "\n            SELECT *\n              FROM feed_subscriptions\n             WHERE guild_id = $1\n            ",
     "describe": {
@@ -495,32 +471,6 @@
         false,
         false,
         true,
-        false,
-        true
-      ]
-    }
-  },
-  "274ecb175c2c3134cda5e259b4662d9be8b7555e9b06eff64d00737698000c2c": {
-    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata!: Json<FeedMetadata>\"\n              FROM feeds\n             WHERE feed_id = $1\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "feed_id",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "metadata!: Json<FeedMetadata>",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": [
         false,
         true
       ]
@@ -1081,131 +1031,126 @@
         },
         {
           "ordinal": 1,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
           "name": "prefix",
           "type_info": "Text"
         },
         {
-          "ordinal": 3,
+          "ordinal": 2,
           "name": "join_msg",
           "type_info": "Text"
         },
         {
-          "ordinal": 4,
+          "ordinal": 3,
           "name": "join_msg_enabled",
           "type_info": "Bool"
         },
         {
-          "ordinal": 5,
+          "ordinal": 4,
           "name": "join_react",
           "type_info": "Text"
         },
         {
-          "ordinal": 6,
+          "ordinal": 5,
           "name": "leave_msg",
           "type_info": "Text"
         },
         {
-          "ordinal": 7,
+          "ordinal": 6,
           "name": "leave_msg_enabled",
           "type_info": "Bool"
         },
         {
-          "ordinal": 8,
+          "ordinal": 7,
           "name": "msg_channel",
           "type_info": "Int8"
         },
         {
-          "ordinal": 9,
+          "ordinal": 8,
           "name": "role_channel",
           "type_info": "Int8"
         },
         {
-          "ordinal": 10,
+          "ordinal": 9,
           "name": "role_config",
           "type_info": "Jsonb"
         },
         {
-          "ordinal": 11,
+          "ordinal": 10,
           "name": "role_enabled",
           "type_info": "Bool"
         },
         {
-          "ordinal": 12,
+          "ordinal": 11,
           "name": "invite_guard",
           "type_info": "Bool"
         },
         {
-          "ordinal": 13,
+          "ordinal": 12,
           "name": "log_msg",
           "type_info": "Int8"
         },
         {
-          "ordinal": 14,
+          "ordinal": 13,
           "name": "log_msg_enabled",
           "type_info": "Bool"
         },
         {
-          "ordinal": 15,
+          "ordinal": 14,
           "name": "log_mod",
           "type_info": "Int8"
         },
         {
-          "ordinal": 16,
+          "ordinal": 15,
           "name": "log_mod_enabled",
           "type_info": "Bool"
         },
         {
-          "ordinal": 17,
+          "ordinal": 16,
           "name": "log_member",
           "type_info": "Int8"
         },
         {
-          "ordinal": 18,
+          "ordinal": 17,
           "name": "mute_role",
           "type_info": "Int8"
         },
         {
-          "ordinal": 19,
+          "ordinal": 18,
           "name": "mute_duration",
           "type_info": "Int8"
         },
         {
-          "ordinal": 20,
+          "ordinal": 19,
           "name": "mute_dm_text",
           "type_info": "Text"
         },
         {
-          "ordinal": 21,
+          "ordinal": 20,
           "name": "mute_dm_enabled",
           "type_info": "Bool"
         },
         {
-          "ordinal": 22,
+          "ordinal": 21,
           "name": "max_mention",
           "type_info": "Int4"
         },
         {
-          "ordinal": 23,
+          "ordinal": 22,
           "name": "log_member_enabled",
           "type_info": "Bool"
         },
         {
-          "ordinal": 24,
+          "ordinal": 23,
           "name": "warn_dm_text",
           "type_info": "Text"
         },
         {
-          "ordinal": 25,
+          "ordinal": 24,
           "name": "warn_dm_enabled",
           "type_info": "Bool"
         },
         {
-          "ordinal": 26,
+          "ordinal": 25,
           "name": "disabled_channels",
           "type_info": "Int8Array"
         }
@@ -1217,7 +1162,6 @@
       },
       "nullable": [
         false,
-        true,
         true,
         true,
         false,
@@ -1675,6 +1619,32 @@
       "nullable": []
     }
   },
+  "a1b50a542cfd36302345fa2e9c39420d0d98b6ce8f7e5b433c76464037de8c2b": {
+    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM feeds\n             WHERE feed_id = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "feed_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "metadata: Json<FeedMetadata>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        true
+      ]
+    }
+  },
   "a37c84eaf91b8f8e6f7d3ce92f3d783625673a7dec3540eb3c7f2a24b283158a": {
     "query": "\n        INSERT INTO notifications (user_id, guild_id, keyword)\n             VALUES ($1, $2, LOWER($3))\n          RETURNING *\n        ",
     "describe": {
@@ -1894,6 +1864,43 @@
       "nullable": []
     }
   },
+  "cc2b603229943ddc66c9cc3e11ad657270a0365f505ad44e8478544c92316d98": {
+    "query": "INSERT INTO guild_configs (\n    id,\n    prefix,\n    join_msg,\n    join_msg_enabled,\n    join_react,\n    leave_msg,\n    leave_msg_enabled,\n    msg_channel,\n    role_channel,\n    role_config,\n    role_enabled,\n    invite_guard,\n    log_msg,\n    log_msg_enabled,\n    log_mod,\n    log_mod_enabled,\n    log_member,\n    log_member_enabled,\n    mute_role,\n    mute_duration,\n    warn_dm_text,\n    warn_dm_enabled,\n    mute_dm_text,\n    mute_dm_enabled,\n    max_mention,\n    disabled_channels\n  )\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10,\n    $11,\n    $12,\n    $13,\n    $14,\n    $15,\n    $16,\n    $17,\n    $18,\n    $19,\n    $20,\n    $21,\n    $22,\n    $23,\n    $24,\n    $25,\n    $26\n  ) ON CONFLICT (id) DO\nUPDATE\nSET -- id = $1, Don't need to update ID \n  prefix = $2,\n  join_msg = $3,\n  join_msg_enabled = $4,\n  join_react = $5,\n  leave_msg = $6,\n  leave_msg_enabled = $7,\n  msg_channel = $8,\n  role_channel = $9,\n  role_config = $10,\n  role_enabled = $11,\n  invite_guard = $12,\n  log_msg = $13,\n  log_msg_enabled = $14,\n  log_mod = $15,\n  log_mod_enabled = $16,\n  log_member = $17,\n  log_member_enabled = $18,\n  mute_role = $19,\n  mute_duration = $20,\n  warn_dm_text = $21,\n  warn_dm_enabled = $22,\n  mute_dm_text = $23,\n  mute_dm_enabled = $24,\n  max_mention = $25,\n  disabled_channels = $26\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
+          "Bool",
+          "Int8",
+          "Int8",
+          "Jsonb",
+          "Bool",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Int8",
+          "Text",
+          "Bool",
+          "Text",
+          "Bool",
+          "Int4",
+          "Int8Array"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "cf21bd565ae6274c44718984217076091fe7d163feb99065c55535c5b45c87dd": {
     "query": "\n            SELECT *\n              FROM mutes\n             WHERE end_time < timezone('UTC', now())\n        ",
     "describe": {
@@ -1990,44 +1997,6 @@
         false,
         true
       ]
-    }
-  },
-  "da200cec72cfd5089652aa0df7819747783dbb217bf1b933e5387ef71c61875e": {
-    "query": "INSERT INTO guild_configs (\n    id,\n    name,\n    prefix,\n    join_msg,\n    join_msg_enabled,\n    join_react,\n    leave_msg,\n    leave_msg_enabled,\n    msg_channel,\n    role_channel,\n    role_config,\n    role_enabled,\n    invite_guard,\n    log_msg,\n    log_msg_enabled,\n    log_mod,\n    log_mod_enabled,\n    log_member,\n    log_member_enabled,\n    mute_role,\n    mute_duration,\n    warn_dm_text,\n    warn_dm_enabled,\n    mute_dm_text,\n    mute_dm_enabled,\n    max_mention,\n    disabled_channels\n  )\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10,\n    $11,\n    $12,\n    $13,\n    $14,\n    $15,\n    $16,\n    $17,\n    $18,\n    $19,\n    $20,\n    $21,\n    $22,\n    $23,\n    $24,\n    $25,\n    $26,\n    $27\n  ) ON CONFLICT (id) DO\nUPDATE\nSET -- id = $1, Don't need to update ID \n  name = $2,\n  prefix = $3,\n  join_msg = $4,\n  join_msg_enabled = $5,\n  join_react = $6,\n  leave_msg = $7,\n  leave_msg_enabled = $8,\n  msg_channel = $9,\n  role_channel = $10,\n  role_config = $11,\n  role_enabled = $12,\n  invite_guard = $13,\n  log_msg = $14,\n  log_msg_enabled = $15,\n  log_mod = $16,\n  log_mod_enabled = $17,\n  log_member = $18,\n  log_member_enabled = $19,\n  mute_role = $20,\n  mute_duration = $21,\n  warn_dm_text = $22,\n  warn_dm_enabled = $23,\n  mute_dm_text = $24,\n  mute_dm_enabled = $25,\n  max_mention = $26,\n  disabled_channels = $27",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Text",
-          "Text",
-          "Bool",
-          "Text",
-          "Text",
-          "Bool",
-          "Int8",
-          "Int8",
-          "Jsonb",
-          "Bool",
-          "Bool",
-          "Int8",
-          "Bool",
-          "Int8",
-          "Bool",
-          "Int8",
-          "Bool",
-          "Int8",
-          "Int8",
-          "Text",
-          "Bool",
-          "Text",
-          "Bool",
-          "Int4",
-          "Int8Array"
-        ]
-      },
-      "nullable": []
     }
   },
   "da5e019b3391b9ea4f76c268c79868f34d55a317c4cc667d11e273b501c01bc2": {
@@ -2383,6 +2352,30 @@
       ]
     }
   },
+  "faf4b1715d71e4c5cf45131e4aac298c70390a39231e7d216d64e0a89819bc67": {
+    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM feeds\n             WHERE feed_id LIKE 'vlive:%'\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "feed_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "metadata: Json<FeedMetadata>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        true
+      ]
+    }
+  },
   "fba2cd2792841d120620c19eb8ad4f2f68e546e83a3b5eb567b6a4ffd14a5fe7": {
     "query": "\n                DELETE FROM messages\n                      WHERE channel_id = $1\n                            AND ctid NOT IN (\n                                  SELECT ctid\n                                    FROM messages\n                                ORDER BY created DESC\n                                   LIMIT 100\n                            )\n            ",
     "describe": {
@@ -2711,30 +2704,6 @@
       ]
     }
   },
-  "63222babb5f85c6627fb4297ff4e34454912c14bde0580f851bbfb09438d3f45": {
-    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata!: Json<FeedMetadata>\"\n              FROM feeds\n             WHERE feed_id NOT LIKE 'vlive:%'\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "feed_id",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "metadata!: Json<FeedMetadata>",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        true
-      ]
-    }
-  },
   "87bcb8c83e18db400e36d03c9c3206b09d7cea8474160032aaf0f5f4f20db722": {
     "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           guild_id as \"guild_id?: BigInt\",\n                           msg_all_time as \"xp: BigInt\",\n                           msg_week as \"xp_diff?: BigInt\"\n                      FROM user_levels\n                     WHERE guild_id = $1\n                       AND ((msg_week, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)\n                       AND EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())\n                       AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                  ORDER BY \"xp_diff?: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                     LIMIT $4\n                ",
     "describe": {
@@ -2773,6 +2742,30 @@
         false,
         false,
         false
+      ]
+    }
+  },
+  "9a867e31c148ca140b94a3297a82929699c7f7b5c7edb4ff4ec43f8f8106c8e1": {
+    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM feeds\n             WHERE feed_id NOT LIKE 'vlive:%'\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "feed_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "metadata: Json<FeedMetadata>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        true
       ]
     }
   },

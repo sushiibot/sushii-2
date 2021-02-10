@@ -81,4 +81,3 @@ SET -- id = $1, Don't need to update ID
   mute_dm_enabled = $24,
   max_mention = $25,
   disabled_channels = $26
-  
