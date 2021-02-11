@@ -5,12 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [0.2.0-rc.4] - 2021-02-11
 
 ### Added
 
 -  `deletecase` command to delete a mod log case
 -  `settings disablechannel` `settings enablechannel` `settings disabledchannels` commands
+
+### Changed
+
+-  `roles get` returns yaml default instead of json
+-  DM users for reminders instead of pinging in channel
+-  Ignore member updates for mutes when old/new member has same roles if available
 
 ## [0.2.0-rc.3] - 2021-02-02
 
