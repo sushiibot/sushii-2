@@ -242,8 +242,7 @@ async fn upsert_query(pool: &sqlx::PgPool, mute: &Mute) -> Result<Mute> {
 
 // This is exported as to not have to make a new Mute instance or fetch from db to delete a mute
 pub async fn delete_mute(ctx: &Context, guild_id: u64, user_id: u64) -> Result<()> {
-    let data = ctx.data.read().await;
-    let pool = data.get::<DbPool>().unwrap();
+    let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
     delete_mute_query(&pool, guild_id as i64, user_id as i64).await
 }

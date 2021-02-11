@@ -316,8 +316,7 @@ impl GuildConfig {
             None => return Ok(None),
         };
 
-        let data = ctx.data.read().await;
-        let sushii_cache = data.get::<SushiiCache>().unwrap();
+        let sushii_cache = ctx.data.read().await.get::<SushiiCache>().cloned().unwrap();
 
         // Check if exists in cache
         if sushii_cache.guilds.contains_key(&guild_id) {
@@ -328,7 +327,7 @@ impl GuildConfig {
         }
 
         // Not in cache, fetch from database
-        let pool = data.get::<DbPool>().unwrap();
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
         let conf = match get_guild_config_query(&pool, guild_id.0)
             .await
             .map_err(|e| {
@@ -360,8 +359,7 @@ impl GuildConfig {
 
     /// Updates config in the cache
     pub async fn cache(&self, ctx: &Context) {
-        let data = ctx.data.read().await;
-        let sushii_cache = data.get::<SushiiCache>().unwrap();
+        let sushii_cache = ctx.data.read().await.get::<SushiiCache>().cloned().unwrap();
 
         sushii_cache
             .guilds
