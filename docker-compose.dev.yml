@@ -19,9 +19,6 @@ services:
             context: .
         ports:
             - "50051:50051"
-    redis:
-        ports:
-            - "6379:6379"
     postgres_exporter:
         ports:
             - "9187:9187"

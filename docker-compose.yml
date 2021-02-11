@@ -109,6 +109,7 @@ services:
         volumes:
             - ~/docker/postgres:/var/lib/postgresql/data
             - ./postgres.conf:/etc/postgresql/postgresql.conf
+            - ~/docker/postgres_root:/root
         networks:
             - sushii_net
         labels:
@@ -201,16 +202,6 @@ services:
         volumes:
             - ~/sushii-image-server/static:/app/static:ro
             - ~/sushii-image-server/templates:/app/templates:ro
-        networks:
-            - sushii_net
-        labels:
-            - "traefik.enable=false"
-    redis:
-        image: redis
-        container_name: redis:6
-        restart: unless-stopped
-        expose:
-            - "6379"
         networks:
             - sushii_net
         labels:
