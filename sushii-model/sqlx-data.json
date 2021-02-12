@@ -776,19 +776,6 @@
       ]
     }
   },
-  "46a87d9fea4fa3636a2ef67c777073574544db2a80b437ddb892694867bb0b39": {
-    "query": "\n            INSERT INTO feed_items\n                 VALUES ($1, $2)\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "48283bd7092684e3b7b5649a4aa3984ce063a4c5b1b215aa3c3cdb0f02f2ca4e": {
     "query": "\n            DELETE FROM tags\n                  WHERE guild_id = $1\n                    AND tag_name = $2\n        ",
     "describe": {
@@ -915,6 +902,19 @@
       "nullable": [
         null
       ]
+    }
+  },
+  "4e60adc9e041861db4a7783a0ba676268f6591d1f8ff3218a8bcaef07ce20a66": {
+    "query": "\n            INSERT INTO feed_items\n                 VALUES ($1, $2)\n                        ON CONFLICT DO NOTHING\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
     }
   },
   "5e1184c3b9dd8e29c5340b2afae592afdb64386cab7633fe7d34847422f789f9": {

@@ -45,6 +45,7 @@ impl FeedItem {
             r#"
             INSERT INTO feed_items
                  VALUES ($1, $2)
+                        ON CONFLICT DO NOTHING
             "#,
             self.feed_id,
             self.item_id,
