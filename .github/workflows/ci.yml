@@ -12,10 +12,6 @@ jobs:
                     - sushii-2
                     - sushii-model
                     - sushii-feeds
-                include:
-                    - package: sushii-api
-                    - package: sushii-api
-                      args: --all-features
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2

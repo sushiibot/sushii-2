@@ -1,9 +1,9 @@
-use vergen::gen;
-use vergen::ConstantsFlags;
+use vergen::vergen;
+use vergen::Config;
 
 fn main() {
-    let flags = ConstantsFlags::all();
+    let config = Config::default();
 
     // Generate the 'cargo:' instruction output
-    gen(flags).expect("Unable to generate the cargo keys!");
+    vergen(config).expect("Unable to generate the cargo keys!");
 }

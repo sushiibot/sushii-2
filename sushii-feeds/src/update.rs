@@ -1,6 +1,6 @@
 use anyhow::Result;
 use std::time::Duration;
-use sushii_model::model::sql::{Feed, FeedMetadata};
+use sushii_model::model::sql::Feed;
 use vlive::VLiveRequester;
 
 use sushii_feeds::feed_request::feed_update_reply::{Author, FeedItem as GrpcFeedItem, Post};
@@ -10,7 +10,7 @@ use crate::model::context::Context;
 async fn _update_rss(ctx: Context) -> Result<()> {
     let feeds = Feed::get_all_rss(&ctx.db_pool).await?;
 
-    for feed in feeds {
+    for _feed in feeds {
         /*
         match feed.metadata.0 {
             FeedMetadata::Rss(_meta) => {

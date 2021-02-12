@@ -61,7 +61,7 @@ async fn about(ctx: &Context, msg: &Message) -> CommandResult {
                 e.title(format!(
                     "sushii v{} - {}",
                     version,
-                    env!("VERGEN_BUILD_DATE")
+                    env!("VERGEN_BUILD_TIMESTAMP")
                 ));
                 e.color(0xe67e22);
 

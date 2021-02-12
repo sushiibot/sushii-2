@@ -6,7 +6,7 @@ use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
 use std::time::Duration;
 use std::vec::Vec;
-use tokio::time::delay_for;
+use tokio::time::sleep;
 
 use crate::error::Result;
 use crate::model::sql::*;
@@ -83,8 +83,8 @@ pub async fn message(ctx: &Context, msg: &Message) {
                 tracing::warn!(message=%msg_string, "Failed to send role message: {}", e);
             };
 
-            // Delete messages after 5 seconds
-            delay_for(Duration::from_secs(5)).await;
+            // Delete messages after 10 seconds
+            sleep(Duration::from_secs(10)).await;
 
             if let Ok(sent_msg) = sent_msg {
                 // Run both delete futures concurrently instead of in series
@@ -106,7 +106,7 @@ pub async fn message(ctx: &Context, msg: &Message) {
                 .say(&ctx.http, "Failed to update your roles :(")
                 .await;
 
-            delay_for(Duration::from_secs(5)).await;
+            sleep(Duration::from_secs(5)).await;
 
             if let Ok(sent_msg) = sent_msg {
                 // Ignore errors whatever

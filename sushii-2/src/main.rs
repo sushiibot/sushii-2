@@ -65,6 +65,8 @@ async fn main() -> Result<()> {
         let mut client = reqwest::Client::builder().use_rustls_tls();
 
         if let Ok(api_proxy_url) = std::env::var("TWILIGHT_API_PROXY_URL") {
+            tracing::info!("Proxying Discord API requests to {}", &api_proxy_url);
+
             let proxy = reqwest::Proxy::all(&api_proxy_url).expect("Failed to build reqwest proxy");
             client = client.proxy(proxy);
         } else {
