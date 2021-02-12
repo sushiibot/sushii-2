@@ -25,7 +25,7 @@ pub async fn check_new_vlives(
     for item in new_entries.items {
         let post = item.post.unwrap();
 
-        if FeedItem::from_id(&ctx, &item.feed_id, &post.url)
+        if FeedItem::from_id(&ctx, &item.feed_id, &post.id)
             .await?
             .is_some()
         {
