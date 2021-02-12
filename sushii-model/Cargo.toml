@@ -21,14 +21,18 @@ serde_json = "1.0.57"
 tracing = "0.1"
 regex = "1.4.2"
 lazy_static = "1.4.0"
-metrics = "0.14.1"
+
+[dependencies.metrics]
+# version = "0.13.0-alpha.11"
+git = "https://github.com/metrics-rs/metrics.git"
+branch = "main"
 
 [dependencies.tokio]
-version = "1.0"
-features = ["macros", "rt-multi-thread", "time", "signal"]
+version = "0.2"
+features = ["macros", "rt-core", "time", "signal"]
 
 [dependencies.sqlx]
-version = "0.5"
+version = "0.4.1"
 default-features = false
 features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "offline", "migrate", "decimal" ]
 
@@ -36,14 +40,15 @@ features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "of
 # git = "https://github.com/serenity-rs/serenity"
 # rev = "0b1fc2737efebde01f6f3b781bcdfc83a30e908e"
 version = "0.10.2"
-features = ["collector"]
+default-features = false
+features = ["default_tokio_0_2", "collector"]
 
 [dependencies.juniper]
 version = "0.15.1"
 optional = true
 
 [dependencies.dataloader]
-version = "0.14"
+version = "0.13"
 optional = true
 default-features = false
 features = ["runtime-tokio"]
