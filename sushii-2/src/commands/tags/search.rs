@@ -4,7 +4,7 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 use std::fmt::Write;
 use std::time::Duration;
-use tokio::stream::StreamExt;
+use tokio_stream::StreamExt;
 
 use crate::model::sql::*;
 use crate::model::Paginator;

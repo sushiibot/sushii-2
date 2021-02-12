@@ -7,29 +7,30 @@ edition = "2018"
 [dependencies]
 async-trait = "0.1"
 chrono = "0.4"
-dashmap = "4.0.0-rc6"
+dashmap = "4.0"
 dotenv = "0.15"
 futures = "0.3"
 humantime = "2.0"
 hyper = "0.13"
 lazy_static = "1.4"
-metrics = "=0.13.0-alpha.13"
-metrics-exporter-prometheus = "=0.1.0-alpha.12"
-metrics-util = "=0.4.0-alpha.10"
+metrics = "0.14.1"
+metrics-exporter-prometheus = "0.3.0"
+metrics-util = "0.6.0"
 num_cpus = "1.13"
 num-format = "0.4"
 num-traits = "0.2.14"
 rand = "0.7.3"
 rand_distr = "0.3.0"
 regex = "1.3"
-reqwest = { version = "0.10", features = [ "json" ] }
-sentry = {version = "0.21", default-features= false, features = ["backtrace", "contexts", "panic", "reqwest", "rustls"]}
+reqwest = { version = "0.11", features = [ "json" ] }
+sentry = {version = "0.22", default-features= false, features = ["backtrace", "contexts", "panic", "reqwest", "rustls"]}
 serde = "1.0.114"
 serde_json = "1.0.57"
 serde_yaml = "0.8.14"
 tracing = "0.1"
 tracing-subscriber = "0.2"
 heim = { version = "0.1.0-rc.1", features = ["cpu", "process", "memory"]}
+tokio-stream = "0.1.3"
 
 [dependencies.sushii-model]
 path = "../sushii-model"
@@ -41,19 +42,19 @@ features = []
 
 [dependencies.vlive]
 git = "https://github.com/drklee3/vlive-rs"
-rev = "04e13d0ca81bc420709f283604465491ed8671e4"
+rev = "8bde495e3a883b01abb32a44c59dce62224d4a51"
 
 [dependencies.lastfm-rs]
-git = "https://github.com/sushiibot/lastfm-rs"
-rev = "a5d58142c3172febd3e83d5ad9824ce00cf9834f"
+git = "https://github.com/KamranMackey/lastfm-rs"
+rev = "cc935558551282a609d7824fdaf71613185855dc"
 # path = "../lastfm-rs"
 
 [dependencies.tokio]
-version = "0.2"
-features = ["macros", "rt-core", "time", "signal"]
+version = "1.0"
+features = ["macros", "rt-multi-thread", "time", "signal"]
 
 [dependencies.sqlx]
-version = "0.4.1"
+version = "0.5"
 default-features = false
 features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "offline", "migrate", "decimal" ]
 
@@ -61,5 +62,4 @@ features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "of
 # git = "https://github.com/serenity-rs/serenity"
 # rev = "0b1fc2737efebde01f6f3b781bcdfc83a30e908e"
 version = "0.10.2"
-default-features = false
-features = ["default_tokio_0_2", "collector"]
+features = ["collector"]
