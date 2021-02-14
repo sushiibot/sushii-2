@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
         .connect(&sushii_conf.database_url)
         .await?;
 
-    sqlx::migrate!("./migrations").run(&pool).await?;
+    // sqlx::migrate!("./migrations").run(&pool).await?;
 
     let metrics = Arc::new(Metrics::new(&sushii_conf).await);
 
