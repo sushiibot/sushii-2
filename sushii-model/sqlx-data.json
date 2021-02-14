@@ -1,1027 +1,7 @@
 {
   "db": "PostgreSQL",
-  "014c0466bc5b56c3d78b3b83778d333c0885e131c5be7686339f01bab6a7a8d5": {
-    "query": "\n        INSERT INTO cached_users\n             VALUES ($1, $2, $3, $4, $5)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET avatar_url = $2,\n                    name = $3,\n                    discriminator = $4,\n                    last_checked = $5\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Text",
-          "Int4",
-          "Timestamp"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "060ae2331a6a96409195af0b75c7cc7e417240cd5384ae4ad8d557eb4060297e": {
-    "query": "\n            SELECT *\n              FROM feed_subscriptions\n             WHERE guild_id = $1\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "feed_id",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "channel_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "mention_role",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true
-      ]
-    }
-  },
-  "06ceaf2895890f4228d2f782e33498fc047e60421ee875e4a780b24a59de0623": {
-    "query": "\n            DELETE FROM mod_logs\n                  WHERE guild_id = $1\n                    AND case_id = $2\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "12b1796467b2b3fb0c6086f9fdddd42aa7ef4514ef92688e6cb69666426b8dd7": {
-    "query": "\n            INSERT INTO feeds\n                 VALUES ($1, $2)\n            ON CONFLICT (feed_id)\n              DO UPDATE\n                    SET metadata = $2\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Jsonb"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "1814c42239dc3aa3bc31b81778b434d1196e1f2d75c79d83c2e7efea7dbd68af": {
-    "query": "\n              SELECT *\n                FROM tags\n               WHERE guild_id = $1\n                 AND (tag_name > $2 OR $2 IS NULL)\n            ORDER BY tag_name ASC\n               LIMIT $3\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "owner_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "tag_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "use_count",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "created",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "18b7a9321c6062ed302dc482df0f75a9110abf7b0c7c7a40cac32fb53443cde8": {
-    "query": "\n            SELECT *\n              FROM feed_subscriptions\n             WHERE feed_id = $1\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "feed_id",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "channel_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "mention_role",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true
-      ]
-    }
-  },
-  "1caf7004072f6b710d2a8f81c059a5b2ff02ec9f67d4f56740f4085e32e304c7": {
-    "query": "\n        INSERT INTO cached_guilds\n             VALUES ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET name = $2,\n                    member_count = $3,\n                    icon_url = $4,\n                    features = $5,\n                    splash_url = $6,\n                    banner_url = $7\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Int8",
-          "Text",
-          "Text",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "1ff5fca2c6ae1d6d51fb54b0a5572b7bc5b8bf6bc0e43c2e39c6d45b342f186b": {
-    "query": "\n            SELECT *\n              FROM mod_logs\n             WHERE guild_id = $1\n               AND user_id = $2\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "case_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "action",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "action_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "pending",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "user_tag",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "executor_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "reason",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 9,
-          "name": "msg_id",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true
-      ]
-    }
-  },
-  "20c0e6abdc83add4d32635cea7a0ec4f8d4a33d318c4294bcd05be46a0d7b682": {
-    "query": "\n            SELECT *\n              FROM mutes\n             WHERE guild_id = $1\n               AND user_id = $2\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "start_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 3,
-          "name": "end_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "pending",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "case_id",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
-        false,
-        true
-      ]
-    }
-  },
-  "22cd5aecad6746a4d57c555558c94046643a7f9e5025bb28abf7bce020c0c1fd": {
-    "query": "\n        INSERT INTO mutes (guild_id, user_id, start_time, end_time, pending, case_id)\n             VALUES ($1, $2, $3, $4, $5, $6)\n        ON CONFLICT (guild_id, user_id)\n          DO UPDATE\n                SET start_time = $3,\n                    end_time = $4,\n                    pending = $5\n            RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "start_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 3,
-          "name": "end_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "pending",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "case_id",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Timestamp",
-          "Timestamp",
-          "Bool",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
-        false,
-        true
-      ]
-    }
-  },
-  "24477581b3d590010512fc21cd06a9f2a6d52fe9977a17d1f5807dfaa1ec3f4f": {
-    "query": "\n                SELECT message_id,\n                       author_id,\n                       channel_id,\n                       guild_id,\n                       created,\n                       content,\n                       msg as \"msg: Json<Message>\"\n                  FROM messages\n                 WHERE message_id = $1\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "message_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "author_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "channel_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "created",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 5,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "msg: Json<Message>",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "24ba7cf2334db7b78b175992f61b6752febaac226fb67ef1fd1b59f08d9b472c": {
-    "query": "\n            SELECT *\n              FROM mutes\n             WHERE guild_id = $1\n               AND user_id = $2\n               AND pending = false\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "start_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 3,
-          "name": "end_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "pending",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "case_id",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
-        false,
-        true
-      ]
-    }
-  },
-  "285ed52fb83685ecf4b6b9980cec9d16ae0cacfb67973f92a865f51b0c78dfe9": {
-    "query": "\n              SELECT COUNT(*) as \"count!\"\n                FROM tags\n               WHERE guild_id = $1\n                 AND tag_name ILIKE '%' || $2 || '%'\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
-  "295f0e0d0ad26955c10feca52999e878fabbfa0a30fec8d5816ef97501d027f7": {
-    "query": "\n            SELECT *\n              FROM mod_logs\n             WHERE guild_id = $1\n               AND case_id >= $2\n               AND case_id <= $3\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "case_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "action",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "action_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "pending",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "user_tag",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "executor_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "reason",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 9,
-          "name": "msg_id",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true
-      ]
-    }
-  },
-  "2d2a043e86f3e5c49bd1f739f08b70f4dbef18306c917fc9fbe16dbda427c96c": {
-    "query": "\n            SELECT *\n              FROM tags\n             WHERE tag_name = $1\n               AND guild_id = $2\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "owner_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "tag_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "use_count",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "created",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "3c84a34473a5e720b2ae6c2512b3d898c5a12ed45ff7047cb61380735b7e5dd8": {
-    "query": "\n            SELECT SUM(msg_all_time) AS xp\n              FROM user_levels\n             WHERE user_id = $1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "xp",
-          "type_info": "Numeric"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
-  "3c976a15b7537a11c192b2d8308134c7c0e000081e3668b644138338f8bf9e43": {
-    "query": "\n            SELECT *\n              FROM notifications\n             WHERE user_id = $1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "keyword",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "405133283b713937f080ee233872fedcbb34be61a7f78f4e93c133843ce2bbf3": {
-    "query": "\n            SELECT *\n              FROM reminders\n             WHERE user_id = $1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "set_at",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 3,
-          "name": "expire_at",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "41aa40fa135264fec551a341b52f05a347030ea7ec7caad73e71556b5de45133": {
-    "query": "\n        INSERT INTO user_levels (user_id, guild_id, msg_all_time, msg_month, msg_week, msg_day, last_msg)\n             VALUES ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (user_id, guild_id)\n          DO UPDATE\n                SET msg_all_time = $3,\n                    msg_month = $4,\n                    msg_week = $5,\n                    msg_day = $6,\n                    last_msg = $7\n          RETURNING user_id as \"user_id: BigInt\",\n                    guild_id as \"guild_id: BigInt\",\n                    msg_all_time as \"msg_all_time: BigInt\",\n                    msg_month as \"msg_month: BigInt\",\n                    msg_week as \"msg_week: BigInt\",\n                    msg_day as \"msg_day: BigInt\",\n                    last_msg\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "msg_all_time: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "msg_month: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "msg_week: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "msg_day: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "last_msg",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Timestamp"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "48283bd7092684e3b7b5649a4aa3984ce063a4c5b1b215aa3c3cdb0f02f2ca4e": {
-    "query": "\n            DELETE FROM tags\n                  WHERE guild_id = $1\n                    AND tag_name = $2\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "4a1efab186f47060b81bf1dac97e4faa04ee73743194f398f82346b569dcb9bf": {
-    "query": "\n        DELETE FROM reminders\n              WHERE user_id = $1\n                AND set_at = $2\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Timestamp"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "4a51a275caf4f152fe7426976b6b003d43d341674d81d4206b4b042377f37b8f": {
-    "query": "\n            INSERT INTO mod_logs\n                 VALUES ($1, (\n                            SELECT COALESCE(MAX(case_id) + 1, 1)\n                              FROM mod_logs\n                             WHERE guild_id = $1\n                        ), $2, $3, $4, $5, $6, $7, $8, $9)\n              RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "case_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "action",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "action_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "pending",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "user_tag",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "executor_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "reason",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 9,
-          "name": "msg_id",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Timestamp",
-          "Bool",
-          "Int8",
-          "Text",
-          "Int8",
-          "Text",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true
-      ]
-    }
-  },
-  "4ded0d9f469101a8a3c0b49ef6dc14fd31dc8217e6a7f1ed11bbc04ec1e82c1a": {
-    "query": "\n              SELECT COUNT(*) as \"count!\"\n                FROM tags\n               WHERE guild_id = $1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
-  "4e60adc9e041861db4a7783a0ba676268f6591d1f8ff3218a8bcaef07ce20a66": {
-    "query": "\n            INSERT INTO feed_items\n                 VALUES ($1, $2)\n                        ON CONFLICT DO NOTHING\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "5e1184c3b9dd8e29c5340b2afae592afdb64386cab7633fe7d34847422f789f9": {
-    "query": "\n        INSERT INTO users (id, is_patron, patron_emoji, rep, fishies, last_rep, last_fishies, profile_data, lastfm_username)\n             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET is_patron = $2,\n                    patron_emoji = $3,\n                    rep = $4,\n                    fishies = $5,\n                    last_rep = $6,\n                    last_fishies = $7,\n                    profile_data = $8,\n                    lastfm_username = $9\n          RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "is_patron",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 2,
-          "name": "patron_emoji",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "rep",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "fishies",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "last_rep",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 6,
-          "name": "last_fishies",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 7,
-          "name": "profile_data",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 8,
-          "name": "lastfm_username",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Bool",
-          "Text",
-          "Int8",
-          "Int8",
-          "Timestamp",
-          "Timestamp",
-          "Jsonb",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        true,
-        false,
-        false,
-        true,
-        true,
-        true,
-        true
-      ]
-    }
-  },
-  "684e2558b68a959890f5e9b4cab8459c77526c3fb3566eab29174b9afd03543e": {
-    "query": "\n            SELECT *\n              FROM feed_items\n             WHERE feed_id = $1\n               AND item_id = $2\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "feed_id",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "item_id",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false
-      ]
-    }
-  },
-  "6f06b01e8606a8e5b958100f3cbaae946bdfe70e35aaf6b5e5e5900ce13a03f4": {
-    "query": "\n            SELECT *\n              FROM guild_configs\n             WHERE id = $1\n        ",
+  "08f4a3bcc615eaaaf9fd0fc3448848000bf920e2379e5dd643066d24f4660f98": {
+    "query": "\n            SELECT *\n              FROM app_public.guild_configs\n             WHERE id = $1\n        ",
     "describe": {
       "columns": [
         {
@@ -1111,43 +91,43 @@
         },
         {
           "ordinal": 17,
-          "name": "mute_role",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 18,
-          "name": "mute_duration",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 19,
-          "name": "mute_dm_text",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 20,
-          "name": "mute_dm_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 21,
-          "name": "max_mention",
-          "type_info": "Int4"
-        },
-        {
-          "ordinal": 22,
           "name": "log_member_enabled",
           "type_info": "Bool"
         },
         {
-          "ordinal": 23,
+          "ordinal": 18,
+          "name": "mute_role",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 19,
+          "name": "mute_duration",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 20,
+          "name": "mute_dm_text",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 21,
+          "name": "mute_dm_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 22,
           "name": "warn_dm_text",
           "type_info": "Text"
         },
         {
-          "ordinal": 24,
+          "ordinal": 23,
           "name": "warn_dm_enabled",
           "type_info": "Bool"
+        },
+        {
+          "ordinal": 24,
+          "name": "max_mention",
+          "type_info": "Int4"
         },
         {
           "ordinal": 25,
@@ -1178,11 +158,103 @@
         true,
         false,
         true,
+        false,
         true,
         true,
         true,
         false,
         true,
+        false,
+        true,
+        true
+      ]
+    }
+  },
+  "09168b8918c9a7011280bb2951e6b3030ace225a64386ab81d898dc5eb820cba": {
+    "query": "\n        INSERT INTO app_public.reminders\n             VALUES ($1, $2, $3, $4)\n          RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "set_at",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 3,
+          "name": "expire_at",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Timestamp",
+          "Timestamp"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "0ea7d0e05012add2116321168131a4a73a08012fa96059d008419f097b30fd77": {
+    "query": "\n            SELECT *\n              FROM app_public.mutes\n             WHERE guild_id = $1\n               AND user_id = $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "start_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 3,
+          "name": "end_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "case_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
         false,
         true,
         false,
@@ -1190,8 +262,455 @@
       ]
     }
   },
-  "7704eb4d3dbcc181acc793e60a2e454a0117c4cdf431d197eaab0ca5b9e30999": {
-    "query": "\n            SELECT *\n              FROM users\n             WHERE id = $1\n        ",
+  "0eeb05364e90fd6d13cfe015df7ce6ae11e8fca623598d7878ee6cfafbadd601": {
+    "query": "\n            UPDATE app_public.mod_logs\n               SET guild_id = $1,\n                   case_id = $2,\n                   action = $3,\n                   action_time = $4,\n                   pending = $5,\n                   user_id = $6,\n                   user_tag = $7,\n                   executor_id = $8,\n                   reason = $9,\n                   msg_id = $10\n             WHERE guild_id = $1\n               AND case_id = $2\n            RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "case_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "action",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "action_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "user_tag",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "executor_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "reason",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "msg_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Text",
+          "Timestamp",
+          "Bool",
+          "Int8",
+          "Text",
+          "Int8",
+          "Text",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  "107ae4183cc201bb20d1fbafd9ce75f81f2f09b10115412000c0c35b07d9efe3": {
+    "query": "\n            INSERT INTO app_public.feeds\n                 VALUES ($1, $2)\n            ON CONFLICT (feed_id)\n              DO UPDATE\n                    SET metadata = $2\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Jsonb"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "13fc6cafdab3fe2ac2b30b0e0653d619ac79eac33e1cf515e9a617eae835e983": {
+    "query": "\n            INSERT INTO app_public.mod_logs\n                 VALUES ($1, (\n                            SELECT COALESCE(MAX(case_id) + 1, 1)\n                              FROM app_public.mod_logs\n                             WHERE guild_id = $1\n                        ), $2, $3, $4, $5, $6, $7, $8, $9)\n              RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "case_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "action",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "action_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "user_tag",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "executor_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "reason",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "msg_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Timestamp",
+          "Bool",
+          "Int8",
+          "Text",
+          "Int8",
+          "Text",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  "17bcdd2bfcea675c29e0904ff0d4cda55303d5462f24d22610ef0be59ed8f4ff": {
+    "query": "\n        INSERT INTO app_public.notifications (user_id, guild_id, keyword)\n             VALUES ($1, $2, LOWER($3))\n          RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "keyword",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "1ab2f112f384beb0e7b7b73ad71e9adc918410b66ea9eb192bc7128bf0cdc445": {
+    "query": "\n            SELECT *\n              FROM app_public.mutes\n             WHERE guild_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "start_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 3,
+          "name": "end_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "case_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
+      ]
+    }
+  },
+  "2a29555e14f688e84a378799520795dd4f5a4aa0d0fed743cc9e37d37cc89505": {
+    "query": "\n            SELECT *\n              FROM app_public.mod_logs\n             WHERE guild_id = $1\n               AND case_id >= $2\n               AND case_id <= $3\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "case_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "action",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "action_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "user_tag",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "executor_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "reason",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "msg_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  "2bd0b770d019ae2eb0d8609b226e122154bcd85e49d23729060816988a86994e": {
+    "query": "\n              SELECT *\n                FROM app_public.tags\n               WHERE guild_id = $1\n                 AND tag_name ILIKE '%' || $2 || '%'\n                 AND (tag_name > $3 OR $3 IS NULL)\n            ORDER BY tag_name ASC\n               LIMIT $4\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "owner_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "tag_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "use_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "created",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Text",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "39c00d9e72944bb1604d4d901e16d2cdab6965a13dcc3f8d9fee0142a41c077c": {
+    "query": "\n                SELECT message_id,\n                       author_id,\n                       channel_id,\n                       guild_id,\n                       created,\n                       content,\n                       msg as \"msg: Json<Message>\"\n                  FROM app_public.messages\n                 WHERE message_id = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "message_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "author_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "channel_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "created",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 5,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "msg: Json<Message>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "3af931158150ccf473dbaa1bda53c78ac51b1fa21ac91bb72e327eb9f7435dc8": {
+    "query": "\n        INSERT INTO app_public.users (id, is_patron, patron_emoji, rep, fishies, last_rep, last_fishies, profile_data, lastfm_username)\n             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET is_patron = $2,\n                    patron_emoji = $3,\n                    rep = $4,\n                    fishies = $5,\n                    last_rep = $6,\n                    last_fishies = $7,\n                    profile_data = $8,\n                    lastfm_username = $9\n          RETURNING *\n        ",
     "describe": {
       "columns": [
         {
@@ -1231,18 +750,26 @@
         },
         {
           "ordinal": 7,
-          "name": "profile_data",
-          "type_info": "Jsonb"
+          "name": "lastfm_username",
+          "type_info": "Text"
         },
         {
           "ordinal": 8,
-          "name": "lastfm_username",
-          "type_info": "Text"
+          "name": "profile_data",
+          "type_info": "Jsonb"
         }
       ],
       "parameters": {
         "Left": [
-          "Int8"
+          "Int8",
+          "Bool",
+          "Text",
+          "Int8",
+          "Int8",
+          "Timestamp",
+          "Timestamp",
+          "Jsonb",
+          "Text"
         ]
       },
       "nullable": [
@@ -1258,33 +785,38 @@
       ]
     }
   },
-  "7e6d6205d28f5217fd5d9c15d6c09dd8008043209b0081d5ea00c477ecaecc00": {
-    "query": "\n            SELECT id as \"id: BigInt\",\n                   avatar_url,\n                   name,\n                   discriminator,\n                   last_checked\n              FROM cached_users\n             WHERE id = $1\n        ",
+  "3b9c4540f2a5648c3a3a06027dba5004530f0e923e0b357d7a0efa35bac58560": {
+    "query": "\n            SELECT *\n              FROM app_public.tags\n             WHERE guild_id = $1\n            OFFSET floor(random() * (\n                       SELECT COUNT(*)\n                         FROM app_public.tags))\n             LIMIT 1\n        ",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "id: BigInt",
+          "name": "owner_id",
           "type_info": "Int8"
         },
         {
           "ordinal": 1,
-          "name": "avatar_url",
-          "type_info": "Text"
+          "name": "guild_id",
+          "type_info": "Int8"
         },
         {
           "ordinal": 2,
-          "name": "name",
+          "name": "tag_name",
           "type_info": "Text"
         },
         {
           "ordinal": 3,
-          "name": "discriminator",
-          "type_info": "Int4"
+          "name": "content",
+          "type_info": "Text"
         },
         {
           "ordinal": 4,
-          "name": "last_checked",
+          "name": "use_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "created",
           "type_info": "Timestamp"
         }
       ],
@@ -1298,12 +830,135 @@
         false,
         false,
         false,
+        false,
         false
       ]
     }
   },
-  "7f3f73abf9611a449d744022b08fbd0fec2f3ade0b82792b99acd5e28009356a": {
-    "query": "\n              SELECT *\n                FROM mod_logs\n               WHERE guild_id = $1\n            ORDER BY case_id DESC\n               LIMIT $2\n        ",
+  "3e16c3c12001dbe1a3b1704e0b491bc94835a808e3f56d65c92f3acc903fd687": {
+    "query": "\n            SELECT *\n              FROM app_public.feed_subscriptions\n             WHERE feed_id = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "feed_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "channel_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "mention_role",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
+  "3fb0157906c12d5373a8d83f1d2ab54a976a7fe2ae2c94ebd7c13a8974941736": {
+    "query": "\n            DELETE FROM app_public.tags\n                  WHERE guild_id = $1\n                    AND tag_name = $2\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "4bdace98e85cd7de4b635cba23df42db23a4e661a6c8a22d536ca5903f8be671": {
+    "query": "\n            SELECT *\n              FROM app_public.tags\n             WHERE tag_name = $1\n               AND guild_id = $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "owner_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "tag_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "use_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "created",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "4f61b596ea03154ff0f7fcec42724c26b25509cea9fdf7561f2adf1e30bdb8d8": {
+    "query": "\n              SELECT COUNT(*) as \"count!\"\n                FROM app_public.tags\n               WHERE guild_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "649e6be8a90d8555db221d365b51468516f4d7d87f12730128d9ab721c2f67ac": {
+    "query": "\n            SELECT *\n              FROM app_public.mod_logs\n             WHERE guild_id = $1\n               AND user_id = $2\n        ",
     "describe": {
       "columns": [
         {
@@ -1377,13 +1032,39 @@
       ]
     }
   },
-  "844e11e5647b66022f53cfc4a0ae2ad14fcaf50d4c81e781a6ca6fbb137f8655": {
-    "query": "\n            SELECT *\n              FROM notifications\n             WHERE user_id = $1\n               AND guild_id = $2\n               AND keyword = $3\n        ",
+  "6a0d2d04a3d415ed526fb6b64b6821caa88194b7e7a4ed3bcc5c1f168a96f7c0": {
+    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM app_public.feeds\n             WHERE feed_id = $1\n            ",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "user_id",
+          "name": "feed_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "metadata: Json<FeedMetadata>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        true
+      ]
+    }
+  },
+  "6b78f6681464bea5d88dadaace3c7ccb04f836e57792c7ba88630b8880f2dcd1": {
+    "query": "\n        INSERT INTO app_public.tags (owner_id, guild_id, tag_name, content, use_count, created)\n             VALUES ($1, $2, $3, $4, $5, $6)\n        ON CONFLICT (guild_id, tag_name)\n          DO UPDATE\n                SET tag_name = $3,\n                    content = $4,\n                    use_count = $5\n          RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "owner_id",
           "type_info": "Int8"
         },
         {
@@ -1393,59 +1074,146 @@
         },
         {
           "ordinal": 2,
-          "name": "keyword",
+          "name": "tag_name",
           "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "use_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "created",
+          "type_info": "Timestamp"
         }
       ],
       "parameters": {
         "Left": [
           "Int8",
           "Int8",
-          "Text"
+          "Text",
+          "Text",
+          "Int8",
+          "Timestamp"
         ]
       },
       "nullable": [
+        false,
+        false,
+        false,
         false,
         false,
         false
       ]
     }
   },
-  "8f79dd63e193efce8e386498e5742fa727fff4956fa5cc0d5ef1c6c4c89a0e88": {
-    "query": "\n            WITH words(word) AS (\n                SELECT s\n                  FROM regexp_split_to_table(LOWER($2), '[^[:alnum:]]+') s\n                 WHERE s <> ''\n            )\n            SELECT notifications.*\n              FROM notifications, words\n             WHERE guild_id = $1\n               AND keyword = word\n        ",
+  "6bc7a22744517a0a519b3867d415f7592c1577e56c526197f131b06d3fad4486": {
+    "query": "\n            SELECT *\n              FROM app_public.mutes\n             WHERE end_time < timezone('UTC', now())\n        ",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
           "name": "guild_id",
           "type_info": "Int8"
         },
         {
+          "ordinal": 1,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
           "ordinal": 2,
-          "name": "keyword",
-          "type_info": "Text"
+          "name": "start_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 3,
+          "name": "end_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "case_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
+      ]
+    }
+  },
+  "7421df600ace6c8de0ec4d4e6ec2e4d96a090de0d4699992a9c132efec2299fc": {
+    "query": "\n            SELECT *\n              FROM app_public.mutes\n             WHERE guild_id = $1\n               AND user_id = $2\n               AND pending = false\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "start_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 3,
+          "name": "end_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "case_id",
+          "type_info": "Int8"
         }
       ],
       "parameters": {
         "Left": [
           "Int8",
-          "Text"
+          "Int8"
         ]
       },
       "nullable": [
         false,
         false,
-        false
+        false,
+        true,
+        false,
+        true
       ]
     }
   },
-  "8f92c532801f6ffe5aec0cfa52d19a9342bfc152b5a51e9d6166a9fd8393eb02": {
-    "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"guild_id: BigInt\",\n                   msg_all_time as \"msg_all_time: BigInt\",\n                   msg_month as \"msg_month: BigInt\",\n                   msg_week as \"msg_week: BigInt\",\n                   msg_day as \"msg_day: BigInt\",\n                   last_msg\n              FROM user_levels\n             WHERE user_id = $1\n               AND guild_id = $2\n        ",
+  "820bbaf983fc85fb11ebe5e202e9fde02b5585617d1cbe88dc5cb805c1a77031": {
+    "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"guild_id: BigInt\",\n                   msg_all_time as \"msg_all_time: BigInt\",\n                   msg_month as \"msg_month: BigInt\",\n                   msg_week as \"msg_week: BigInt\",\n                   msg_day as \"msg_day: BigInt\",\n                   last_msg\n              FROM app_public.user_levels\n             WHERE user_id = $1\n               AND guild_id = $2\n        ",
     "describe": {
       "columns": [
         {
@@ -1501,8 +1269,816 @@
       ]
     }
   },
-  "92e5b48dc18d5db2c1fc28474989b9e4ce36f7e631e26b2d02078e7fb49c29d8": {
-    "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"guild_id: BigInt\",\n                   msg_all_time as \"msg_all_time: BigInt\",\n                   msg_month as \"msg_month: BigInt\",\n                   msg_week as \"msg_week: BigInt\",\n                   msg_day as \"msg_day: BigInt\",\n                   last_msg,\n                   msg_all_time_rank as \"msg_all_time_rank: BigInt\",\n                   msg_all_time_total as \"msg_all_time_total: BigInt\",\n                   msg_month_rank as \"msg_month_rank: BigInt\",\n                   msg_month_total as \"msg_month_total: BigInt\",\n                   msg_week_rank as \"msg_week_rank: BigInt\",\n                   msg_week_total as \"msg_week_total: BigInt\",\n                   msg_day_rank as \"msg_day_rank: BigInt\",\n                   msg_day_total as \"msg_day_total: BigInt\"\n                FROM (\n                    SELECT *,\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(DOY FROM last_msg) ORDER BY msg_day DESC) AS msg_day_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(DOY FROM last_msg)) AS msg_day_total,\n\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(WEEK FROM last_msg) ORDER BY msg_week DESC) AS msg_week_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(WEEK FROM last_msg)) AS msg_week_total,\n\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(MONTH FROM last_msg) ORDER BY msg_month DESC) AS msg_month_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(MONTH FROM last_msg)) AS msg_month_total,\n\n                        ROW_NUMBER() OVER(ORDER BY msg_all_time DESC) AS msg_all_time_rank,\n                        COUNT(*) OVER() AS msg_all_time_total\n                    FROM user_levels WHERE guild_id = $1\n                ) t\n            WHERE t.user_id = $2\n        ",
+  "84658ec5e7352b911b6aa288db18eae64c815dff9b2325ea6171707d8687ba84": {
+    "query": "\n        INSERT INTO app_public.cached_guilds\n             VALUES ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET name = $2,\n                    member_count = $3,\n                    icon_url = $4,\n                    features = $5,\n                    splash_url = $6,\n                    banner_url = $7\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Int8",
+          "Text",
+          "Text",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "8aa5fe177433b6603262f42c3ee769383012dabe524b56c4b6cb72dbe2780951": {
+    "query": "\n        INSERT INTO app_public.user_levels (user_id, guild_id, msg_all_time, msg_month, msg_week, msg_day, last_msg)\n             VALUES ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (user_id, guild_id)\n          DO UPDATE\n                SET msg_all_time = $3,\n                    msg_month = $4,\n                    msg_week = $5,\n                    msg_day = $6,\n                    last_msg = $7\n          RETURNING user_id as \"user_id: BigInt\",\n                    guild_id as \"guild_id: BigInt\",\n                    msg_all_time as \"msg_all_time: BigInt\",\n                    msg_month as \"msg_month: BigInt\",\n                    msg_week as \"msg_week: BigInt\",\n                    msg_day as \"msg_day: BigInt\",\n                    last_msg\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "msg_all_time: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "msg_month: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "msg_week: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "msg_day: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "last_msg",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8",
+          "Timestamp"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "8aa8c8ff8827a381d36267aa149dff228d76fe80a2e66356f71ba8ec69c24109": {
+    "query": "\n            SELECT *\n              FROM app_public.feed_subscriptions\n             WHERE guild_id = $1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "feed_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "channel_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "mention_role",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
+  "8e8e15f5bca34125102bd18fecb4310ec8654f0844f96a15e13e3a9cca2e4dbd": {
+    "query": "\n              SELECT *\n                FROM app_public.tags\n               WHERE guild_id = $1\n            ORDER BY use_count DESC\n               LIMIT $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "owner_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "tag_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "use_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "created",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "9186f262d2510b59ca40c68a3d0a4db441752c2d78e3de2628a50b1f1c0e27d2": {
+    "query": "INSERT INTO app_public.guild_configs (\n    id,\n    prefix,\n    join_msg,\n    join_msg_enabled,\n    join_react,\n    leave_msg,\n    leave_msg_enabled,\n    msg_channel,\n    role_channel,\n    role_config,\n    role_enabled,\n    invite_guard,\n    log_msg,\n    log_msg_enabled,\n    log_mod,\n    log_mod_enabled,\n    log_member,\n    log_member_enabled,\n    mute_role,\n    mute_duration,\n    warn_dm_text,\n    warn_dm_enabled,\n    mute_dm_text,\n    mute_dm_enabled,\n    max_mention,\n    disabled_channels\n  )\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10,\n    $11,\n    $12,\n    $13,\n    $14,\n    $15,\n    $16,\n    $17,\n    $18,\n    $19,\n    $20,\n    $21,\n    $22,\n    $23,\n    $24,\n    $25,\n    $26\n  ) ON CONFLICT (id) DO\nUPDATE\nSET -- id = $1, Don't need to update ID \n  prefix = $2,\n  join_msg = $3,\n  join_msg_enabled = $4,\n  join_react = $5,\n  leave_msg = $6,\n  leave_msg_enabled = $7,\n  msg_channel = $8,\n  role_channel = $9,\n  role_config = $10,\n  role_enabled = $11,\n  invite_guard = $12,\n  log_msg = $13,\n  log_msg_enabled = $14,\n  log_mod = $15,\n  log_mod_enabled = $16,\n  log_member = $17,\n  log_member_enabled = $18,\n  mute_role = $19,\n  mute_duration = $20,\n  warn_dm_text = $21,\n  warn_dm_enabled = $22,\n  mute_dm_text = $23,\n  mute_dm_enabled = $24,\n  max_mention = $25,\n  disabled_channels = $26\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
+          "Bool",
+          "Int8",
+          "Int8",
+          "Jsonb",
+          "Bool",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Int8",
+          "Text",
+          "Bool",
+          "Text",
+          "Bool",
+          "Int4",
+          "Int8Array"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "943c9aa58c4321df536f04f80ce94c686e0a2ba1bd3bfd1c533a8191048e729a": {
+    "query": "\n        DELETE FROM app_public.notifications\n              WHERE user_id = $1\n                AND guild_id = $2\n                AND keyword = $3\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "994732f174f005cad45732ba8b348e068f5505c9b1639b5b7b1c030429658dbd": {
+    "query": "\n              SELECT COUNT(*) as \"count!\"\n                FROM app_public.tags\n               WHERE guild_id = $1\n                 AND tag_name ILIKE '%' || $2 || '%'\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "9c30e526664b43af6c906c887c20054548f63c4af86028aa18d43f2dda61abda": {
+    "query": "\n            WITH words(word) AS (\n                SELECT s\n                  FROM regexp_split_to_table(LOWER($2), '[^[:alnum:]]+') s\n                 WHERE s <> ''\n            )\n            SELECT app_public.notifications.*\n              FROM app_public.notifications, words\n             WHERE guild_id = $1\n               AND keyword = word\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "keyword",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "a169d8b78e57b1114d8c4183b00ed6baca3ee1c0031bf8c53c2a1a39626e1a19": {
+    "query": "\n            SELECT SUM(msg_all_time) AS xp\n              FROM app_public.user_levels\n             WHERE user_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "xp",
+          "type_info": "Numeric"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "a491816e4af61cea137e68285cf22774913241d0edee044fd1085337f0129b90": {
+    "query": "\n            INSERT INTO app_public.messages (\n                            message_id,\n                            author_id,\n                            channel_id,\n                            guild_id,\n                            created,\n                            content,\n                            msg)\n                 VALUES ($1, $2, $3, $4, $5, $6, $7)\n            ON CONFLICT (message_id)\n              DO UPDATE\n                    SET author_id = $2,\n                        channel_id = $3,\n                        guild_id = $4,\n                        created = $5,\n                        content = $6,\n                        msg = $7\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8",
+          "Timestamp",
+          "Text",
+          "Jsonb"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "a67679cafb28151b2cb3b271323a2d18e316a995785c2de3574024cfc23a073c": {
+    "query": "\n                DELETE FROM app_public.messages\n                      WHERE channel_id = $1\n                            AND ctid NOT IN (\n                                  SELECT ctid\n                                    FROM app_public.messages\n                                ORDER BY created DESC\n                                   LIMIT 100\n                            )\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "abed0dcbbef58c6f3ce9e0377481b1f90565ea2fcefc8c164a124ce40954caad": {
+    "query": "\n            SELECT *\n              FROM app_public.feed_items\n             WHERE feed_id = $1\n               AND item_id = $2\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "feed_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "item_id",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
+  "ad0a3f0e50f5283e0cb14291a5a985e467727d6a0466cbdc86eed5bf4b4c122b": {
+    "query": "\n            SELECT *\n              FROM app_public.reminders\n             WHERE user_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "set_at",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 3,
+          "name": "expire_at",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "ae902731ccaf88af7f69adc295b7db8457c3a2305eaaaa5f4f8ba19db478156c": {
+    "query": "\n        INSERT INTO app_public.cached_users\n             VALUES ($1, $2, $3, $4, $5)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET avatar_url = $2,\n                    name = $3,\n                    discriminator = $4,\n                    last_checked = $5\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Text",
+          "Int4",
+          "Timestamp"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "b6394fc2af741908b8a0ffe6f91d776900686dc1566d06285097e3a4cd7f312e": {
+    "query": "\n        INSERT INTO app_public.mutes (guild_id, user_id, start_time, end_time, pending, case_id)\n             VALUES ($1, $2, $3, $4, $5, $6)\n        ON CONFLICT (guild_id, user_id)\n          DO UPDATE\n                SET start_time = $3,\n                    end_time = $4,\n                    pending = $5\n            RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "start_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 3,
+          "name": "end_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "case_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Timestamp",
+          "Timestamp",
+          "Bool",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
+      ]
+    }
+  },
+  "bc6ed9cbcfe74c30c2be1e90e875e72ab6c2f6b7556e5c361a69f45aeeb3090d": {
+    "query": "\n            INSERT INTO app_public.feed_subscriptions\n                 VALUES ($1, $2, $3, $4)\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "be14d0e74b744280636bb66a81d82d41e30317dcb3a7bdc584e7d385cf2e905d": {
+    "query": "\n        DELETE FROM app_public.reminders\n              WHERE user_id = $1\n                AND set_at = $2\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Timestamp"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "c5f7dd16daf1b94421ff2948ab58c24fcec0f5adc5b6e5f1c8f168b92cc5b562": {
+    "query": "\n            SELECT *\n              FROM app_public.notifications\n             WHERE user_id = $1\n               AND guild_id = $2\n               AND keyword = $3\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "keyword",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "cbcd859e9c2a7467e3acec8f20724f1b5c3fc1f8a8c9d18c4e7fb29d3e23c01c": {
+    "query": "\n            SELECT *\n              FROM app_public.reminders\n             WHERE NOW() > expire_at\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "description",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "set_at",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 3,
+          "name": "expire_at",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "cd823eaba751e26f3b2d54da256d7477e2fbcbb21b2ac45f697c86a85a291820": {
+    "query": "\n              SELECT *\n                FROM app_public.mod_logs\n               WHERE guild_id = $1\n            ORDER BY case_id DESC\n               LIMIT $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "case_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "action",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "action_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "user_tag",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "executor_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "reason",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "msg_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  "ce6fc227a12a2f2b5993006728228ee783b92d3eaaf00615b059e0e2dcca4e98": {
+    "query": "\n            SELECT *\n              FROM app_public.mod_logs\n             WHERE guild_id = $1\n               AND user_id = $2\n               AND action = $3\n               AND pending = true\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "case_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "action",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "action_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "user_tag",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "executor_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "reason",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "msg_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  "cfd867d71e861f1343af53f3e47c1984d3f15ce518882e2466d5b0e9e7e91821": {
+    "query": "\n            SELECT *\n              FROM app_public.mod_logs\n             WHERE guild_id = $1\n               AND case_id = $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "case_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "action",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "action_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "user_tag",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "executor_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "reason",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "msg_id",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  "d3640ad9ade7e2fc7f630463ea8e143497d9ef15d2284d4bac80911c82388ceb": {
+    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM app_public.feeds\n             WHERE feed_id LIKE 'vlive:%'\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "feed_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "metadata: Json<FeedMetadata>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        true
+      ]
+    }
+  },
+  "d9ce38754fb44720b478ccfd1936e2b2424fbfd2969c841b521d5153d8d074e9": {
+    "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"guild_id: BigInt\",\n                   msg_all_time as \"msg_all_time: BigInt\",\n                   msg_month as \"msg_month: BigInt\",\n                   msg_week as \"msg_week: BigInt\",\n                   msg_day as \"msg_day: BigInt\",\n                   last_msg,\n                   msg_all_time_rank as \"msg_all_time_rank: BigInt\",\n                   msg_all_time_total as \"msg_all_time_total: BigInt\",\n                   msg_month_rank as \"msg_month_rank: BigInt\",\n                   msg_month_total as \"msg_month_total: BigInt\",\n                   msg_week_rank as \"msg_week_rank: BigInt\",\n                   msg_week_total as \"msg_week_total: BigInt\",\n                   msg_day_rank as \"msg_day_rank: BigInt\",\n                   msg_day_total as \"msg_day_total: BigInt\"\n                FROM (\n                    SELECT *,\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(DOY FROM last_msg) ORDER BY msg_day DESC) AS msg_day_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(DOY FROM last_msg)) AS msg_day_total,\n\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(WEEK FROM last_msg) ORDER BY msg_week DESC) AS msg_week_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(WEEK FROM last_msg)) AS msg_week_total,\n\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(MONTH FROM last_msg) ORDER BY msg_month DESC) AS msg_month_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(MONTH FROM last_msg)) AS msg_month_total,\n\n                        ROW_NUMBER() OVER(ORDER BY msg_all_time DESC) AS msg_all_time_rank,\n                        COUNT(*) OVER() AS msg_all_time_total\n                    FROM app_public.user_levels WHERE guild_id = $1\n                ) t\n            WHERE t.user_id = $2\n        ",
     "describe": {
       "columns": [
         {
@@ -1606,1171 +2182,8 @@
       ]
     }
   },
-  "95d94662c09e3a73ada0b36d6770ad76db85a724edcc3240dff129de127c9e5b": {
-    "query": "\n            DELETE FROM mutes\n                  WHERE guild_id = $1\n                    AND user_id = $2\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "a1b50a542cfd36302345fa2e9c39420d0d98b6ce8f7e5b433c76464037de8c2b": {
-    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM feeds\n             WHERE feed_id = $1\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "feed_id",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "metadata: Json<FeedMetadata>",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        true
-      ]
-    }
-  },
-  "a37c84eaf91b8f8e6f7d3ce92f3d783625673a7dec3540eb3c7f2a24b283158a": {
-    "query": "\n        INSERT INTO notifications (user_id, guild_id, keyword)\n             VALUES ($1, $2, LOWER($3))\n          RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "keyword",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "a7eebd3e865de3e77676ec83975c87df51f988295290c8e084f8f984885d5b15": {
-    "query": "\n              SELECT *\n                FROM tags\n               WHERE guild_id = $1\n                 AND tag_name ILIKE '%' || $2 || '%'\n                 AND (tag_name > $3 OR $3 IS NULL)\n            ORDER BY tag_name ASC\n               LIMIT $4\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "owner_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "tag_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "use_count",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "created",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Text",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "add265dd79458efe15555d7bf9ba83142789f8e2f74543ea9d06821cc6549fb1": {
-    "query": "\n            SELECT *\n              FROM tags\n             WHERE guild_id = $1\n            OFFSET floor(random() * (\n                       SELECT COUNT(*)\n                         FROM tags))\n             LIMIT 1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "owner_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "tag_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "use_count",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "created",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "b10c97dde60793808f690f9fb36840b85fdbb37a7a79925d17eded73ca050dfe": {
-    "query": "\n        INSERT INTO tags (owner_id, guild_id, tag_name, content, use_count, created)\n             VALUES ($1, $2, $3, $4, $5, $6)\n        ON CONFLICT (guild_id, tag_name)\n          DO UPDATE\n                SET tag_name = $3,\n                    content = $4,\n                    use_count = $5\n          RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "owner_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "tag_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "use_count",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "created",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Text",
-          "Text",
-          "Int8",
-          "Timestamp"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "be5837a066bbf161ff23d7960e57545ba85a99877b6d5e269a04ead6a903bd92": {
-    "query": "\n            DELETE FROM feeds\n                  WHERE feed_id = $1\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "c7aede8c8980a1550756654ab9ea8c955c11975ddef1eb9098be63792d74b174": {
-    "query": "\n            INSERT INTO feed_subscriptions\n                 VALUES ($1, $2, $3, $4)\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Int8",
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "cc2b603229943ddc66c9cc3e11ad657270a0365f505ad44e8478544c92316d98": {
-    "query": "INSERT INTO guild_configs (\n    id,\n    prefix,\n    join_msg,\n    join_msg_enabled,\n    join_react,\n    leave_msg,\n    leave_msg_enabled,\n    msg_channel,\n    role_channel,\n    role_config,\n    role_enabled,\n    invite_guard,\n    log_msg,\n    log_msg_enabled,\n    log_mod,\n    log_mod_enabled,\n    log_member,\n    log_member_enabled,\n    mute_role,\n    mute_duration,\n    warn_dm_text,\n    warn_dm_enabled,\n    mute_dm_text,\n    mute_dm_enabled,\n    max_mention,\n    disabled_channels\n  )\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10,\n    $11,\n    $12,\n    $13,\n    $14,\n    $15,\n    $16,\n    $17,\n    $18,\n    $19,\n    $20,\n    $21,\n    $22,\n    $23,\n    $24,\n    $25,\n    $26\n  ) ON CONFLICT (id) DO\nUPDATE\nSET -- id = $1, Don't need to update ID \n  prefix = $2,\n  join_msg = $3,\n  join_msg_enabled = $4,\n  join_react = $5,\n  leave_msg = $6,\n  leave_msg_enabled = $7,\n  msg_channel = $8,\n  role_channel = $9,\n  role_config = $10,\n  role_enabled = $11,\n  invite_guard = $12,\n  log_msg = $13,\n  log_msg_enabled = $14,\n  log_mod = $15,\n  log_mod_enabled = $16,\n  log_member = $17,\n  log_member_enabled = $18,\n  mute_role = $19,\n  mute_duration = $20,\n  warn_dm_text = $21,\n  warn_dm_enabled = $22,\n  mute_dm_text = $23,\n  mute_dm_enabled = $24,\n  max_mention = $25,\n  disabled_channels = $26\n",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Text",
-          "Bool",
-          "Text",
-          "Text",
-          "Bool",
-          "Int8",
-          "Int8",
-          "Jsonb",
-          "Bool",
-          "Bool",
-          "Int8",
-          "Bool",
-          "Int8",
-          "Bool",
-          "Int8",
-          "Bool",
-          "Int8",
-          "Int8",
-          "Text",
-          "Bool",
-          "Text",
-          "Bool",
-          "Int4",
-          "Int8Array"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "cf21bd565ae6274c44718984217076091fe7d163feb99065c55535c5b45c87dd": {
-    "query": "\n            SELECT *\n              FROM mutes\n             WHERE end_time < timezone('UTC', now())\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "start_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 3,
-          "name": "end_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "pending",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "case_id",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
-        false,
-        true
-      ]
-    }
-  },
-  "d41bf5dabccd88c437746696b4739dc08bc9c652af751bee19785b771590c866": {
-    "query": "\n            SELECT *\n              FROM mutes\n             WHERE guild_id = $1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "start_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 3,
-          "name": "end_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "pending",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "case_id",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
-        false,
-        true
-      ]
-    }
-  },
-  "da5e019b3391b9ea4f76c268c79868f34d55a317c4cc667d11e273b501c01bc2": {
-    "query": "\n            SELECT *\n              FROM reminders\n             WHERE NOW() > expire_at\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "set_at",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 3,
-          "name": "expire_at",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "df8bc72513bca3b02a3012e5eb9ef7e0a82785d65ba3fdbdd75adc324eaf2327": {
-    "query": "\n            SELECT *\n              FROM mod_logs\n             WHERE guild_id = $1\n               AND user_id = $2\n               AND action = $3\n               AND pending = true\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "case_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "action",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "action_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "pending",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "user_tag",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "executor_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "reason",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 9,
-          "name": "msg_id",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true
-      ]
-    }
-  },
-  "e92e15c8d50b84f450b0b06583ccd1432b49a52386cfbba01bac2a9d8baeeaf7": {
-    "query": "\n            UPDATE mod_logs\n               SET guild_id = $1,\n                   case_id = $2,\n                   action = $3,\n                   action_time = $4,\n                   pending = $5,\n                   user_id = $6,\n                   user_tag = $7,\n                   executor_id = $8,\n                   reason = $9,\n                   msg_id = $10\n             WHERE guild_id = $1\n               AND case_id = $2\n            RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "case_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "action",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "action_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "pending",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "user_tag",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "executor_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "reason",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 9,
-          "name": "msg_id",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Text",
-          "Timestamp",
-          "Bool",
-          "Int8",
-          "Text",
-          "Int8",
-          "Text",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true
-      ]
-    }
-  },
-  "ea472c2ef302f4283cd62939d86a48327de461ae6f11ef431660be1f0690328e": {
-    "query": "\n            INSERT INTO messages (\n                            message_id,\n                            author_id,\n                            channel_id,\n                            guild_id,\n                            created,\n                            content,\n                            msg)\n                 VALUES ($1, $2, $3, $4, $5, $6, $7)\n            ON CONFLICT (message_id)\n              DO UPDATE\n                    SET author_id = $2,\n                        channel_id = $3,\n                        guild_id = $4,\n                        created = $5,\n                        content = $6,\n                        msg = $7\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8",
-          "Timestamp",
-          "Text",
-          "Jsonb"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "efe682472850d573455b77483e2d8d549fb55d104e8ca84747cc9c0bee56436a": {
-    "query": "\n              SELECT *\n                FROM tags\n               WHERE guild_id = $1\n            ORDER BY use_count DESC\n               LIMIT $2\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "owner_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "tag_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "use_count",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "created",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "f9e749cb77726c3970ed7c70cbd78c10935f2e7c1233c66d32eda89664393e2d": {
-    "query": "\n        DELETE FROM notifications\n              WHERE user_id = $1\n                AND guild_id = $2\n                AND keyword = $3\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "f9f5ab04b595a9260c56105c8977f30c3654420af22ebbc2359c28f4ff805292": {
-    "query": "\n            SELECT *\n              FROM mod_logs\n             WHERE guild_id = $1\n               AND case_id = $2\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "case_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "action",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "action_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "pending",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "user_tag",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "executor_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "reason",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 9,
-          "name": "msg_id",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true
-      ]
-    }
-  },
-  "faf4b1715d71e4c5cf45131e4aac298c70390a39231e7d216d64e0a89819bc67": {
-    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM feeds\n             WHERE feed_id LIKE 'vlive:%'\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "feed_id",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "metadata: Json<FeedMetadata>",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        true
-      ]
-    }
-  },
-  "fba2cd2792841d120620c19eb8ad4f2f68e546e83a3b5eb567b6a4ffd14a5fe7": {
-    "query": "\n                DELETE FROM messages\n                      WHERE channel_id = $1\n                            AND ctid NOT IN (\n                                  SELECT ctid\n                                    FROM messages\n                                ORDER BY created DESC\n                                   LIMIT 100\n                            )\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "fc88d1cc535c4e6fcc9cc84ee631637fd358645db7c986b1f54b48d143bf480e": {
-    "query": "\n        INSERT INTO reminders\n             VALUES ($1, $2, $3, $4)\n          RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "description",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "set_at",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 3,
-          "name": "expire_at",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Timestamp",
-          "Timestamp"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "017954ed890e81d74b2912b7afb90cb5b744e51156f4f3872f5efc86cba27f33": {
-    "query": "\n                  SELECT COUNT(DISTINCT user_id) as \"total!: BigInt\"\n                    FROM user_levels\n                   WHERE EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())\n                     AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "total!: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
-  "0a6bf988a6e88220c148fbb801e980f0d4f1daa38db500d9c191b2c3cda5543d": {
-    "query": "\n                  SELECT COUNT(DISTINCT user_id) as \"total!: BigInt\"\n                    FROM user_levels\n                ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "total!: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
-  "216c0149c4e0151232921de9ed77b5b4c416bbad49dce838e57578262eb10843": {
-    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           NULL as \"guild_id?: BigInt\",\n                           CAST(SUM(msg_all_time) AS BIGINT) AS \"xp!: BigInt\",\n                           NULL as \"xp_diff?: BigInt\"\n                      FROM user_levels\n                  GROUP BY user_id\n                    HAVING ((SUM(msg_all_time), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)\n                  ORDER BY \"xp!: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                    LIMIT $3\n                ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id?: BigInt",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "xp!: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "xp_diff?: BigInt",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Numeric",
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        null,
-        null,
-        null
-      ]
-    }
-  },
-  "2a5628f38bcff72f8d4d6d95edb0e5c81a885959ff744a4bd22538133e65974e": {
-    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           NULL as \"guild_id?: BigInt\",\n                           CAST(SUM(msg_all_time) AS BIGINT) AS \"xp!: BigInt\",\n                           CAST(SUM(msg_week) AS BIGINT) AS \"xp_diff?: BigInt\"\n                      FROM user_levels\n                     WHERE EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())\n                       AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                  GROUP BY user_id\n                        -- after\n                    HAVING ((SUM(msg_week), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)\n                  ORDER BY \"xp_diff?: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                    LIMIT $3\n                ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id?: BigInt",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "xp!: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "xp_diff?: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Numeric",
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        null,
-        null,
-        null
-      ]
-    }
-  },
-  "3b9f28a574b9c7d9be7f7336220745c361b1763593d55f8888cc65b10b0bf07a": {
-    "query": "\n                SELECT COUNT(*) as \"total!: BigInt\"\n                  FROM user_levels\n                 WHERE guild_id = $1\n                   AND EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())\n                   AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "total!: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
-  "40ec3cc5dd1c94cc9c5f8fcfc449f78b4a85045da961bcd9677008676fbd55aa": {
-    "query": "\n                SELECT COUNT(*) as \"total!: BigInt\"\n                  FROM user_levels\n                 WHERE guild_id = $1\n                   AND EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())\n                   AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())\n                ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "total!: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
-  "55e11501f85070f4dc40ed99c6fd1ed5aaaa8c0d2c47cabc1eba634be367767d": {
-    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           NULL as \"guild_id?: BigInt\",\n                           CAST(SUM(msg_all_time) AS BIGINT) AS \"xp!: BigInt\",\n                           CAST(SUM(msg_month) AS BIGINT) AS \"xp_diff?: BigInt\"\n                      FROM user_levels\n                     WHERE EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())\n                       AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())\n                  GROUP BY user_id\n                        -- after\n                    HAVING ((SUM(msg_month), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)\n                  ORDER BY \"xp_diff?: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                    LIMIT $3\n                ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id?: BigInt",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "xp!: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "xp_diff?: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Numeric",
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        null,
-        null,
-        null
-      ]
-    }
-  },
-  "5a1a32bfbb875c0a3f8b7ab5d1b0798b260f414f367e15e60241c7e6f1c3033f": {
-    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           guild_id as \"guild_id?: BigInt\",\n                           msg_all_time as \"xp: BigInt\",\n                           msg_month as \"xp_diff?: BigInt\"\n                      FROM user_levels\n                     WHERE guild_id = $1\n                       AND ((msg_month, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)\n                       AND EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())\n                       AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())\n                  ORDER BY \"xp_diff?: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                     LIMIT $4\n                ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id?: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "xp: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "xp_diff?: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "5a32dd40ada9760fd0b0e5e346c874fbf831fe002d716df28bf977e31820b79d": {
-    "query": "\n                  SELECT COUNT(DISTINCT user_id) as \"total!: BigInt\"\n                    FROM user_levels\n                   WHERE EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())\n                     AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "total!: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
-  "5b746af613effbd5245f19b2b352da32842b42b1c7d6486479c1951b4a4fdcb6": {
-    "query": "\n                SELECT COUNT(*) as \"total!: BigInt\"\n                    FROM user_levels\n                    WHERE guild_id = $1\n                ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "total!: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
-  "87bcb8c83e18db400e36d03c9c3206b09d7cea8474160032aaf0f5f4f20db722": {
-    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           guild_id as \"guild_id?: BigInt\",\n                           msg_all_time as \"xp: BigInt\",\n                           msg_week as \"xp_diff?: BigInt\"\n                      FROM user_levels\n                     WHERE guild_id = $1\n                       AND ((msg_week, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)\n                       AND EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())\n                       AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                  ORDER BY \"xp_diff?: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                     LIMIT $4\n                ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id?: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "xp: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "xp_diff?: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "9a867e31c148ca140b94a3297a82929699c7f7b5c7edb4ff4ec43f8f8106c8e1": {
-    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM feeds\n             WHERE feed_id NOT LIKE 'vlive:%'\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "feed_id",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "metadata: Json<FeedMetadata>",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        true
-      ]
-    }
-  },
-  "a6eafc7c03971c8b673ff2af4f4ef661766f2914edf1248cd82c70484a393184": {
-    "query": "\n            SELECT id as \"id: BigInt\",\n                   avatar_url,\n                   name,\n                   discriminator,\n                   last_checked\n              FROM cached_users\n             WHERE id = ANY($1)\n        ",
+  "e1b0fe1bd4d275cc30a835c1611781e01f74c3ee1a360b73fcd7553719455c43": {
+    "query": "\n            SELECT id as \"id: BigInt\",\n                   avatar_url,\n                   name,\n                   discriminator,\n                   last_checked\n              FROM app_public.cached_users\n             WHERE id = $1\n        ",
     "describe": {
       "columns": [
         {
@@ -2801,7 +2214,7 @@
       ],
       "parameters": {
         "Left": [
-          "Int8Array"
+          "Int8"
         ]
       },
       "nullable": [
@@ -2813,8 +2226,276 @@
       ]
     }
   },
-  "b5551f38968247013290a91e278b26f2951f78263b67e35456b8032bb1b505a0": {
-    "query": "\n                  SELECT COUNT(DISTINCT user_id) as \"total!: BigInt\"\n                    FROM user_levels\n                   WHERE EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())\n                     AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())\n                ",
+  "e2c24e0a0411cb49865569088e63d9c695e93dae045b9e5f2b66b25e6a59c005": {
+    "query": "\n            SELECT *\n              FROM app_public.notifications\n             WHERE user_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "keyword",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "ed6384c2cb5fd80b8f8f88875ce4431ba06152b5258f012f6d0a61bed8a8484b": {
+    "query": "\n            DELETE FROM app_public.mod_logs\n                  WHERE guild_id = $1\n                    AND case_id = $2\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "f038cf6a93289d3048c8ed0e974e37f0d429fc7acdd5db76a452a4ab1d0d12ce": {
+    "query": "\n              SELECT *\n                FROM app_public.tags\n               WHERE guild_id = $1\n                 AND (tag_name > $2 OR $2 IS NULL)\n            ORDER BY tag_name ASC\n               LIMIT $3\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "owner_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "tag_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "use_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "created",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "f154e3210dd06564b5d0b2b383ff52dd35248489e2d0b67a6e5139d27ac9825b": {
+    "query": "\n            INSERT INTO app_public.feed_items\n                 VALUES ($1, $2)\n                        ON CONFLICT DO NOTHING\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "f32b2d4b8cd4ae467e2d8a673fcc32c77c36307ae93d476a25f59c8ce3c630f2": {
+    "query": "\n            SELECT *\n              FROM app_public.users\n             WHERE id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "is_patron",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 2,
+          "name": "patron_emoji",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "rep",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "fishies",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "last_rep",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 6,
+          "name": "last_fishies",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 7,
+          "name": "lastfm_username",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "profile_data",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  "f49af8ed56f6842af1e4fda86ca43a15f41bb566d43323f97116d125ff542eb9": {
+    "query": "\n            DELETE FROM app_public.feeds\n                  WHERE feed_id = $1\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "f606705903bed51d84c012c99631b7b150e2495bc12db829ac212f60c9640608": {
+    "query": "\n            DELETE FROM app_public.mutes\n                  WHERE guild_id = $1\n                    AND user_id = $2\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "01e5568eb389a09c8e67e609499dc2ae6f4326f1ed85bb4113a89286e627ae71": {
+    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           guild_id as \"guild_id?: BigInt\",\n                           msg_all_time as \"xp: BigInt\",\n                           msg_day as \"xp_diff?: BigInt\"\n                      FROM app_public.user_levels\n                     WHERE guild_id = $1\n                       AND ((msg_day, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)\n                       AND EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())\n                       AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                  ORDER BY \"xp_diff?: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                     LIMIT $4\n                ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id?: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "xp: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "xp_diff?: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "0cb3bdc6ad59c788f3f8cc69698db83ceb46c0173bc236205b5b9ac64f469db8": {
+    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM app_public.feeds\n             WHERE feed_id NOT LIKE 'vlive:%'\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "feed_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "metadata: Json<FeedMetadata>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        true
+      ]
+    }
+  },
+  "103741d8f57a92385b468d1ba65518cf1143757e65ea1579b8e7e1f2a2972e3e": {
+    "query": "\n                  SELECT COUNT(DISTINCT user_id) as \"total!: BigInt\"\n                    FROM app_public.user_levels\n                   WHERE EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())\n                     AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())\n                ",
     "describe": {
       "columns": [
         {
@@ -2831,28 +2512,8 @@
       ]
     }
   },
-  "c7349d09fd87c96edd22880d177f6aa6bdde4a001a7cbd8311d23ee505d06b5a": {
-    "query": "\n                SELECT COUNT(*) as \"total!: BigInt\"\n                  FROM user_levels\n                 WHERE guild_id = $1\n                   AND EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())\n                   AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "total!: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
-  "cc144e2f1f5e317ec63a5670ffe26f70acc9dfff16105dadeeda43c65054bcb8": {
-    "query": "\n            SELECT id as \"id: BigInt\",\n                   name,\n                   member_count as \"member_count: BigInt\",\n                   icon_url,\n                   features,\n                   splash_url,\n                   banner_url\n              FROM cached_guilds\n             WHERE id = $1\n        ",
+  "134d58c7df76797002c176f1bf3d859f1e03695228a69069919482678f12f784": {
+    "query": "\n            SELECT id as \"id: BigInt\",\n                   name,\n                   member_count as \"member_count: BigInt\",\n                   icon_url,\n                   features,\n                   splash_url,\n                   banner_url\n              FROM app_public.cached_guilds\n             WHERE id = $1\n        ",
     "describe": {
       "columns": [
         {
@@ -2907,8 +2568,267 @@
       ]
     }
   },
-  "dd1ea1700d70a50da43631a034d539d0fc60dca873c0857f861c0800c20562b5": {
-    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           guild_id as \"guild_id?: BigInt\",\n                           msg_all_time as \"xp: BigInt\",\n                           msg_day as \"xp_diff?: BigInt\"\n                      FROM user_levels\n                     WHERE guild_id = $1\n                       AND ((msg_day, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)\n                       AND EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())\n                       AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                  ORDER BY \"xp_diff?: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                     LIMIT $4\n                ",
+  "1d8512b30390745507726ac0c20bdee1e5b6ef39b57af2162a009ba7e33475ff": {
+    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           guild_id as \"guild_id?: BigInt\",\n                           msg_all_time as \"xp: BigInt\",\n                           NULL as \"xp_diff?: BigInt\"\n                      FROM app_public.user_levels\n                     WHERE guild_id = $1\n                       AND ((msg_all_time, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)\n                  ORDER BY \"xp: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                     LIMIT $4\n                ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id?: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "xp: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "xp_diff?: BigInt",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        null
+      ]
+    }
+  },
+  "224939eb02c938a05ed42b5b768c89e2cd822e3c6bd2b95afe6256021547ebf7": {
+    "query": "\n                SELECT COUNT(*) as \"total!: BigInt\"\n                  FROM app_public.user_levels\n                 WHERE guild_id = $1\n                   AND EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())\n                   AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "total!: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "22fa14a72865768dad72983d0150ccf5eac3d1d60613f7f5a317fc39c2e11eeb": {
+    "query": "\n                  SELECT COUNT(DISTINCT user_id) as \"total!: BigInt\"\n                    FROM app_public.user_levels\n                   WHERE EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())\n                     AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "total!: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "2f433fc9f03c479b010cff78b86829adbefd4ea19ead1ac8714936da8e17eb60": {
+    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           NULL as \"guild_id?: BigInt\",\n                           CAST(SUM(msg_all_time) AS BIGINT) AS \"xp!: BigInt\",\n                           CAST(SUM(msg_month) AS BIGINT) AS \"xp_diff?: BigInt\"\n                      FROM app_public.user_levels\n                     WHERE EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())\n                       AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())\n                  GROUP BY user_id\n                        -- after\n                    HAVING ((SUM(msg_month), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)\n                  ORDER BY \"xp_diff?: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                    LIMIT $3\n                ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id?: BigInt",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "xp!: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "xp_diff?: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Numeric",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        null,
+        null,
+        null
+      ]
+    }
+  },
+  "3ea78343d3e03fcc378ed154d1ebe150b9232cbffb0401905b170a27e055e270": {
+    "query": "\n                  SELECT COUNT(DISTINCT user_id) as \"total!: BigInt\"\n                    FROM app_public.user_levels\n                ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "total!: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "5d196dde156e9c100bd8ecaf81c822d8f918b52e27727467a2c50ba1dd4c0e6a": {
+    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           NULL as \"guild_id?: BigInt\",\n                           CAST(SUM(msg_all_time) AS BIGINT) AS \"xp!: BigInt\",\n                           CAST(SUM(msg_week) AS BIGINT) AS \"xp_diff?: BigInt\"\n                      FROM app_public.user_levels\n                     WHERE EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())\n                       AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                  GROUP BY user_id\n                        -- after\n                    HAVING ((SUM(msg_week), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)\n                  ORDER BY \"xp_diff?: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                    LIMIT $3\n                ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id?: BigInt",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "xp!: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "xp_diff?: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Numeric",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        null,
+        null,
+        null
+      ]
+    }
+  },
+  "5d2e3ed68c3677a64fdf5867e400ef92ea97aca58200522076ba0f2a31da9ac4": {
+    "query": "\n            SELECT id as \"id: BigInt\",\n                   avatar_url,\n                   name,\n                   discriminator,\n                   last_checked\n              FROM app_public.cached_users\n             WHERE id = ANY($1)\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "avatar_url",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "discriminator",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 4,
+          "name": "last_checked",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8Array"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "773d67e639634ea08749798a3eb28e33b0382813a9168c4e1f6f192f0c5dfb74": {
+    "query": "\n                SELECT COUNT(*) as \"total!: BigInt\"\n                  FROM app_public.user_levels\n                 WHERE guild_id = $1\n                   AND EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())\n                   AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "total!: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "9997ed01bff31044f17b3f4fc1a804af9b40176720cd96128d0e6c62d7b5394b": {
+    "query": "\n                  SELECT COUNT(DISTINCT user_id) as \"total!: BigInt\"\n                    FROM app_public.user_levels\n                   WHERE EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())\n                     AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "total!: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "a2b8dc064f641037109ffff48ab3b3834eb347a5a86ee8385f71d5d976255619": {
+    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           guild_id as \"guild_id?: BigInt\",\n                           msg_all_time as \"xp: BigInt\",\n                           msg_week as \"xp_diff?: BigInt\"\n                      FROM app_public.user_levels\n                     WHERE guild_id = $1\n                       AND ((msg_week, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)\n                       AND EXTRACT(WEEK FROM last_msg) = EXTRACT(WEEK FROM NOW())\n                       AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                  ORDER BY \"xp_diff?: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                     LIMIT $4\n                ",
     "describe": {
       "columns": [
         {
@@ -2948,8 +2868,8 @@
       ]
     }
   },
-  "dd2902cb0ad829af611d1b06c1d13b81a67dee751dfdcee814388c26a8ce3eaa": {
-    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           guild_id as \"guild_id?: BigInt\",\n                           msg_all_time as \"xp: BigInt\",\n                           NULL as \"xp_diff?: BigInt\"\n                      FROM user_levels\n                     WHERE guild_id = $1\n                       AND ((msg_all_time, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)\n                  ORDER BY \"xp: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                     LIMIT $4\n                ",
+  "be689564f415321560287e5272098a9797ef0295a337c4acbd76e0497cfd66a2": {
+    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           NULL as \"guild_id?: BigInt\",\n                           CAST(SUM(msg_all_time) AS BIGINT) AS \"xp!: BigInt\",\n                           NULL as \"xp_diff?: BigInt\"\n                      FROM app_public.user_levels\n                  GROUP BY user_id\n                    HAVING ((SUM(msg_all_time), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)\n                  ORDER BY \"xp!: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                    LIMIT $3\n                ",
     "describe": {
       "columns": [
         {
@@ -2960,11 +2880,11 @@
         {
           "ordinal": 1,
           "name": "guild_id?: BigInt",
-          "type_info": "Int8"
+          "type_info": "Text"
         },
         {
           "ordinal": 2,
-          "name": "xp: BigInt",
+          "name": "xp!: BigInt",
           "type_info": "Int8"
         },
         {
@@ -2975,22 +2895,41 @@
       ],
       "parameters": {
         "Left": [
-          "Int8",
-          "Int8",
+          "Numeric",
           "Int8",
           "Int8"
         ]
       },
       "nullable": [
         false,
-        false,
-        false,
+        null,
+        null,
         null
       ]
     }
   },
-  "fad4dec15facac9b30638d008616edd3bb61a20ed564a99c3b4de4e99f678066": {
-    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           NULL as \"guild_id?: BigInt\",\n                           CAST(SUM(msg_all_time) AS BIGINT) AS \"xp!: BigInt\",\n                           CAST(SUM(msg_day) AS BIGINT) AS \"xp_diff?: BigInt\"\n                      FROM user_levels\n                     WHERE EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())\n                       AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                  GROUP BY user_id\n                        -- after\n                    HAVING ((SUM(msg_day), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)\n                  ORDER BY \"xp_diff?: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                    LIMIT $3\n                ",
+  "dde6dd3e19962a62123ab9e6c9c2bf1e3a51a32695eb1ea48a651ba19863753a": {
+    "query": "\n                SELECT COUNT(*) as \"total!: BigInt\"\n                  FROM app_public.user_levels\n                 WHERE guild_id = $1\n                   AND EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())\n                   AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())\n                ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "total!: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "e2c47bb881a2c34eaae62bc26a99fc641918d39f16a3ee087433c43184545e8e": {
+    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           NULL as \"guild_id?: BigInt\",\n                           CAST(SUM(msg_all_time) AS BIGINT) AS \"xp!: BigInt\",\n                           CAST(SUM(msg_day) AS BIGINT) AS \"xp_diff?: BigInt\"\n                      FROM app_public.user_levels\n                     WHERE EXTRACT(DOY  FROM last_msg) = EXTRACT(DOY  FROM NOW())\n                       AND EXTRACT(YEAR FROM last_msg) = EXTRACT(YEAR FROM NOW())\n                  GROUP BY user_id\n                        -- after\n                    HAVING ((SUM(msg_day), user_id) < ($1, $2) OR $1 IS NULL OR $2 IS NULL)\n                  ORDER BY \"xp_diff?: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                    LIMIT $3\n                ",
     "describe": {
       "columns": [
         {
@@ -3026,6 +2965,67 @@
         null,
         null,
         null
+      ]
+    }
+  },
+  "ea1f47b62949cece07a71b8bb528a62a6c4252bedd34d64db52bf2dd829e3271": {
+    "query": "\n                SELECT COUNT(*) as \"total!: BigInt\"\n                    FROM app_public.user_levels\n                    WHERE guild_id = $1\n                ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "total!: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
+  "edd4763b92b0dc03c35921f7ce95e2b615eb319e1f2f2af3a337d4f208a2e43f": {
+    "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           guild_id as \"guild_id?: BigInt\",\n                           msg_all_time as \"xp: BigInt\",\n                           msg_month as \"xp_diff?: BigInt\"\n                      FROM app_public.user_levels\n                     WHERE guild_id = $1\n                       AND ((msg_month, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)\n                       AND EXTRACT(MONTH FROM last_msg) = EXTRACT(MONTH FROM NOW())\n                       AND EXTRACT(YEAR  FROM last_msg) = EXTRACT(YEAR  FROM NOW())\n                  ORDER BY \"xp_diff?: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                     LIMIT $4\n                ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id?: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "xp: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "xp_diff?: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false
       ]
     }
   }
