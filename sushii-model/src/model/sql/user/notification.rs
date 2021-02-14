@@ -76,7 +76,7 @@ async fn user_notification_query(
         Notification,
         r#"
             SELECT *
-              FROM notifications
+              FROM app_public.notifications
              WHERE user_id = $1
                AND guild_id = $2
                AND keyword = $3
@@ -98,7 +98,7 @@ async fn user_notifications_query(
         Notification,
         r#"
             SELECT *
-              FROM notifications
+              FROM app_public.notifications
              WHERE user_id = $1
         "#,
         i64::from(user_id),
@@ -121,8 +121,8 @@ async fn get_matching_query(
                   FROM regexp_split_to_table(LOWER($2), '[^[:alnum:]]+') s
                  WHERE s <> ''
             )
-            SELECT notifications.*
-              FROM notifications, words
+            SELECT app_public.notifications.*
+              FROM app_public.notifications, words
              WHERE guild_id = $1
                AND keyword = word
         "#,
@@ -138,7 +138,7 @@ async fn insert_query(pool: &sqlx::PgPool, notification: &Notification) -> Resul
     sqlx::query_as!(
         Notification,
         r#"
-        INSERT INTO notifications (user_id, guild_id, keyword)
+        INSERT INTO app_public.notifications (user_id, guild_id, keyword)
              VALUES ($1, $2, LOWER($3))
           RETURNING *
         "#,
@@ -154,7 +154,7 @@ async fn insert_query(pool: &sqlx::PgPool, notification: &Notification) -> Resul
 async fn delete_query(pool: &sqlx::PgPool, notification: &Notification) -> Result<()> {
     sqlx::query!(
         r#"
-        DELETE FROM notifications
+        DELETE FROM app_public.notifications
               WHERE user_id = $1
                 AND guild_id = $2
                 AND keyword = $3

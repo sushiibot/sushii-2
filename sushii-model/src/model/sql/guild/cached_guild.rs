@@ -69,7 +69,7 @@ async fn from_id_query(pool: &sqlx::PgPool, user_id: i64) -> Result<Option<Cache
                    features,
                    splash_url,
                    banner_url
-              FROM cached_guilds
+              FROM app_public.cached_guilds
              WHERE id = $1
         "#,
         user_id
@@ -83,7 +83,7 @@ async fn from_id_query(pool: &sqlx::PgPool, user_id: i64) -> Result<Option<Cache
 async fn update_query(pool: &sqlx::PgPool, guild: &Guild) -> Result<()> {
     sqlx::query!(
         r#"
-        INSERT INTO cached_guilds
+        INSERT INTO app_public.cached_guilds
              VALUES ($1, $2, $3, $4, $5, $6, $7)
         ON CONFLICT (id)
           DO UPDATE

@@ -133,7 +133,7 @@ async fn from_id_query(
                    msg_week as "msg_week: BigInt",
                    msg_day as "msg_day: BigInt",
                    last_msg
-              FROM user_levels
+              FROM app_public.user_levels
              WHERE user_id = $1
                AND guild_id = $2
         "#,
@@ -149,7 +149,7 @@ async fn upsert_query(pool: &sqlx::PgPool, user_level: &UserLevel) -> Result<Use
     sqlx::query_as!(
         UserLevel,
         r#"
-        INSERT INTO user_levels (user_id, guild_id, msg_all_time, msg_month, msg_week, msg_day, last_msg)
+        INSERT INTO app_public.user_levels (user_id, guild_id, msg_all_time, msg_month, msg_week, msg_day, last_msg)
              VALUES ($1, $2, $3, $4, $5, $6, $7)
         ON CONFLICT (user_id, guild_id)
           DO UPDATE

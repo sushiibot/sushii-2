@@ -24,7 +24,7 @@ async fn from_id_query(pool: &sqlx::PgPool, user_id: UserId) -> Result<Option<Us
         UserLevelGlobal,
         r#"
             SELECT SUM(msg_all_time) AS xp
-              FROM user_levels
+              FROM app_public.user_levels
              WHERE user_id = $1
         "#,
         i64::from(user_id),

@@ -147,7 +147,7 @@ async fn from_name_query(
         Tag,
         r#"
             SELECT *
-              FROM tags
+              FROM app_public.tags
              WHERE tag_name = $1
                AND guild_id = $2
         "#,
@@ -164,11 +164,11 @@ async fn random_query(pool: &sqlx::PgPool, guild_id: GuildId) -> Result<Option<T
         Tag,
         r#"
             SELECT *
-              FROM tags
+              FROM app_public.tags
              WHERE guild_id = $1
             OFFSET floor(random() * (
                        SELECT COUNT(*)
-                         FROM tags))
+                         FROM app_public.tags))
              LIMIT 1
         "#,
         i64::from(guild_id),
@@ -186,7 +186,7 @@ async fn get_search_count_query(
     sqlx::query!(
         r#"
               SELECT COUNT(*) as "count!"
-                FROM tags
+                FROM app_public.tags
                WHERE guild_id = $1
                  AND tag_name ILIKE '%' || $2 || '%'
         "#,
@@ -212,7 +212,7 @@ async fn search_query(
         // search patterns that aren't left-anchored
         r#"
               SELECT *
-                FROM tags
+                FROM app_public.tags
                WHERE guild_id = $1
                  AND tag_name ILIKE '%' || $2 || '%'
                  AND (tag_name > $3 OR $3 IS NULL)
@@ -239,7 +239,7 @@ async fn get_page_query(
         Tag,
         r#"
               SELECT *
-                FROM tags
+                FROM app_public.tags
                WHERE guild_id = $1
                  AND (tag_name > $2 OR $2 IS NULL)
             ORDER BY tag_name ASC
@@ -258,7 +258,7 @@ async fn get_count_query(pool: &sqlx::PgPool, guild_id: GuildId) -> Result<i64> 
     sqlx::query!(
         r#"
               SELECT COUNT(*) as "count!"
-                FROM tags
+                FROM app_public.tags
                WHERE guild_id = $1
         "#,
         i64::from(guild_id),
@@ -278,7 +278,7 @@ async fn get_top_used_query(
         Tag,
         r#"
               SELECT *
-                FROM tags
+                FROM app_public.tags
                WHERE guild_id = $1
             ORDER BY use_count DESC
                LIMIT $2
@@ -295,7 +295,7 @@ async fn upsert_query(pool: &sqlx::PgPool, tag: &Tag) -> Result<Tag> {
     sqlx::query_as!(
         Tag,
         r#"
-        INSERT INTO tags (owner_id, guild_id, tag_name, content, use_count, created)
+        INSERT INTO app_public.tags (owner_id, guild_id, tag_name, content, use_count, created)
              VALUES ($1, $2, $3, $4, $5, $6)
         ON CONFLICT (guild_id, tag_name)
           DO UPDATE
@@ -319,7 +319,7 @@ async fn upsert_query(pool: &sqlx::PgPool, tag: &Tag) -> Result<Tag> {
 async fn delete_query(pool: &sqlx::PgPool, tag: &Tag) -> Result<()> {
     sqlx::query!(
         r#"
-            DELETE FROM tags
+            DELETE FROM app_public.tags
                   WHERE guild_id = $1
                     AND tag_name = $2
         "#,

@@ -1,4 +1,4 @@
-INSERT INTO guild_configs (
+INSERT INTO app_public.guild_configs (
     id,
     prefix,
     join_msg,

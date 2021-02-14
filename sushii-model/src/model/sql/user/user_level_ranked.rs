@@ -177,7 +177,7 @@ async fn ranked_from_id_query(
 
                         ROW_NUMBER() OVER(ORDER BY msg_all_time DESC) AS msg_all_time_rank,
                         COUNT(*) OVER() AS msg_all_time_total
-                    FROM user_levels WHERE guild_id = $1
+                    FROM app_public.user_levels WHERE guild_id = $1
                 ) t
             WHERE t.user_id = $2
         "#,

@@ -171,7 +171,7 @@ async fn from_case_id_query(
         ModLogEntry,
         r#"
             SELECT *
-              FROM mod_logs
+              FROM app_public.mod_logs
              WHERE guild_id = $1
                AND case_id = $2
         "#,
@@ -193,7 +193,7 @@ async fn get_pending_entry_query(
         ModLogEntry,
         r#"
             SELECT *
-              FROM mod_logs
+              FROM app_public.mod_logs
              WHERE guild_id = $1
                AND user_id = $2
                AND action = $3
@@ -217,7 +217,7 @@ async fn get_user_entries_query(
         ModLogEntry,
         r#"
             SELECT *
-              FROM mod_logs
+              FROM app_public.mod_logs
              WHERE guild_id = $1
                AND user_id = $2
         "#,
@@ -239,7 +239,7 @@ async fn get_range_entries_query(
         ModLogEntry,
         r#"
             SELECT *
-              FROM mod_logs
+              FROM app_public.mod_logs
              WHERE guild_id = $1
                AND case_id >= $2
                AND case_id <= $3
@@ -262,7 +262,7 @@ async fn get_latest_query(
         ModLogEntry,
         r#"
               SELECT *
-                FROM mod_logs
+                FROM app_public.mod_logs
                WHERE guild_id = $1
             ORDER BY case_id DESC
                LIMIT $2
@@ -279,10 +279,10 @@ async fn add_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Resul
     sqlx::query_as!(
         ModLogEntry,
         r#"
-            INSERT INTO mod_logs
+            INSERT INTO app_public.mod_logs
                  VALUES ($1, (
                             SELECT COALESCE(MAX(case_id) + 1, 1)
-                              FROM mod_logs
+                              FROM app_public.mod_logs
                              WHERE guild_id = $1
                         ), $2, $3, $4, $5, $6, $7, $8, $9)
               RETURNING *
@@ -308,7 +308,7 @@ async fn update_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Re
     sqlx::query_as!(
         ModLogEntry,
         r#"
-            UPDATE mod_logs
+            UPDATE app_public.mod_logs
                SET guild_id = $1,
                    case_id = $2,
                    action = $3,
@@ -342,7 +342,7 @@ async fn update_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Re
 async fn delete_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Result<()> {
     sqlx::query!(
         r#"
-            DELETE FROM mod_logs
+            DELETE FROM app_public.mod_logs
                   WHERE guild_id = $1
                     AND case_id = $2
         "#,

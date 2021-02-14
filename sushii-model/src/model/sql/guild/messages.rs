@@ -37,7 +37,7 @@ impl SavedMessage {
         sqlx::query_as!(
             SavedMessage,
             r#"
-            INSERT INTO messages (
+            INSERT INTO app_public.messages (
                             message_id,
                             author_id,
                             channel_id,
@@ -83,7 +83,7 @@ impl SavedMessage {
                        created,
                        content,
                        msg as "msg: Json<Message>"
-                  FROM messages
+                  FROM app_public.messages
                  WHERE message_id = $1
             "#,
             i64::from(message_id),
@@ -99,11 +99,11 @@ impl SavedMessage {
         // Only keep last 100 messages
         sqlx::query!(
             r#"
-                DELETE FROM messages
+                DELETE FROM app_public.messages
                       WHERE channel_id = $1
                             AND ctid NOT IN (
                                   SELECT ctid
-                                    FROM messages
+                                    FROM app_public.messages
                                 ORDER BY created DESC
                                    LIMIT 100
                             )

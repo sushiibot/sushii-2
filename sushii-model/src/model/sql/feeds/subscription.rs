@@ -35,7 +35,7 @@ impl FeedSubscription {
             FeedSubscription,
             r#"
             SELECT *
-              FROM feed_subscriptions
+              FROM app_public.feed_subscriptions
              WHERE guild_id = $1
             "#,
             i64::from(guild_id),
@@ -52,7 +52,7 @@ impl FeedSubscription {
             FeedSubscription,
             r#"
             SELECT *
-              FROM feed_subscriptions
+              FROM app_public.feed_subscriptions
              WHERE feed_id = $1
             "#,
             feed_id,
@@ -68,7 +68,7 @@ impl FeedSubscription {
         sqlx::query_as!(
             FeedSubscription,
             r#"
-            INSERT INTO feed_subscriptions
+            INSERT INTO app_public.feed_subscriptions
                  VALUES ($1, $2, $3, $4)
             "#,
             self.feed_id,

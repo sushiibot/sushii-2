@@ -64,7 +64,7 @@ async fn from_id_query(pool: &sqlx::PgPool, user_id: i64) -> Result<Option<Cache
                    name,
                    discriminator,
                    last_checked
-              FROM cached_users
+              FROM app_public.cached_users
              WHERE id = $1
         "#,
         user_id
@@ -84,7 +84,7 @@ async fn from_ids_query(pool: &sqlx::PgPool, user_ids: &[i64]) -> Result<Vec<Cac
                    name,
                    discriminator,
                    last_checked
-              FROM cached_users
+              FROM app_public.cached_users
              WHERE id = ANY($1)
         "#,
         user_ids
@@ -109,7 +109,7 @@ async fn update_query(pool: &sqlx::PgPool, user: &User) -> Result<()> {
 
     sqlx::query!(
         r#"
-        INSERT INTO cached_users
+        INSERT INTO app_public.cached_users
              VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT (id)
           DO UPDATE

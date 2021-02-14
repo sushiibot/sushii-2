@@ -150,7 +150,7 @@ async fn get_from_id_query(
         Mute,
         r#"
             SELECT *
-              FROM mutes
+              FROM app_public.mutes
              WHERE guild_id = $1
                AND user_id = $2
                AND pending = false
@@ -172,7 +172,7 @@ async fn get_from_id_any_pending_query(
         Mute,
         r#"
             SELECT *
-              FROM mutes
+              FROM app_public.mutes
              WHERE guild_id = $1
                AND user_id = $2
         "#,
@@ -189,7 +189,7 @@ async fn get_expired_query(pool: &sqlx::PgPool) -> Result<Vec<Mute>> {
         Mute,
         r#"
             SELECT *
-              FROM mutes
+              FROM app_public.mutes
              WHERE end_time < timezone('UTC', now())
         "#
     )
@@ -203,7 +203,7 @@ async fn get_ongoing_query(pool: &sqlx::PgPool, guild_id: u64) -> Result<Vec<Mut
         Mute,
         r#"
             SELECT *
-              FROM mutes
+              FROM app_public.mutes
              WHERE guild_id = $1
         "#,
         guild_id as i64
@@ -217,7 +217,7 @@ async fn upsert_query(pool: &sqlx::PgPool, mute: &Mute) -> Result<Mute> {
     sqlx::query_as!(
         Mute,
         r#"
-        INSERT INTO mutes (guild_id, user_id, start_time, end_time, pending, case_id)
+        INSERT INTO app_public.mutes (guild_id, user_id, start_time, end_time, pending, case_id)
              VALUES ($1, $2, $3, $4, $5, $6)
         ON CONFLICT (guild_id, user_id)
           DO UPDATE
@@ -250,7 +250,7 @@ pub async fn delete_mute(ctx: &Context, guild_id: u64, user_id: u64) -> Result<(
 async fn delete_mute_query(pool: &sqlx::PgPool, guild_id: i64, user_id: i64) -> Result<()> {
     sqlx::query!(
         r#"
-            DELETE FROM mutes
+            DELETE FROM app_public.mutes
                   WHERE guild_id = $1
                     AND user_id = $2
         "#,

@@ -25,7 +25,7 @@ impl FeedItem {
             FeedItem,
             r#"
             SELECT *
-              FROM feed_items
+              FROM app_public.feed_items
              WHERE feed_id = $1
                AND item_id = $2
             "#,
@@ -43,7 +43,7 @@ impl FeedItem {
         sqlx::query_as!(
             FeedItem,
             r#"
-            INSERT INTO feed_items
+            INSERT INTO app_public.feed_items
                  VALUES ($1, $2)
                         ON CONFLICT DO NOTHING
             "#,

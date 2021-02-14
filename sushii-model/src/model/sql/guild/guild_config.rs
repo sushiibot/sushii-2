@@ -495,7 +495,7 @@ async fn get_guild_config_query(pool: &sqlx::PgPool, guild_id: u64) -> Result<Op
         GuildConfig,
         r#"
             SELECT *
-              FROM guild_configs
+              FROM app_public.guild_configs
              WHERE id = $1
         "#,
         guild_id as i64

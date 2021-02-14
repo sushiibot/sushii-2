@@ -102,7 +102,7 @@ async fn user_reminders_query(pool: &sqlx::PgPool, user_id: UserId) -> Result<Ve
         Reminder,
         r#"
             SELECT *
-              FROM reminders
+              FROM app_public.reminders
              WHERE user_id = $1
         "#,
         i64::from(user_id),
@@ -117,7 +117,7 @@ async fn get_expired_query(pool: &sqlx::PgPool) -> Result<Vec<Reminder>> {
         Reminder,
         r#"
             SELECT *
-              FROM reminders
+              FROM app_public.reminders
              WHERE NOW() > expire_at
         "#,
     )
@@ -130,7 +130,7 @@ async fn insert_query(pool: &sqlx::PgPool, reminder: &Reminder) -> Result<Remind
     sqlx::query_as!(
         Reminder,
         r#"
-        INSERT INTO reminders
+        INSERT INTO app_public.reminders
              VALUES ($1, $2, $3, $4)
           RETURNING *
         "#,
@@ -147,7 +147,7 @@ async fn insert_query(pool: &sqlx::PgPool, reminder: &Reminder) -> Result<Remind
 async fn delete_query(pool: &sqlx::PgPool, reminder: &Reminder) -> Result<()> {
     sqlx::query!(
         r#"
-        DELETE FROM reminders
+        DELETE FROM app_public.reminders
               WHERE user_id = $1
                 AND set_at = $2
         "#,

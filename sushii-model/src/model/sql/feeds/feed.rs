@@ -195,7 +195,7 @@ impl Feed {
             r#"
             SELECT feed_id,
                    metadata as "metadata: Json<FeedMetadata>"
-              FROM feeds
+              FROM app_public.feeds
              WHERE feed_id = $1
             "#,
             feed_id
@@ -212,7 +212,7 @@ impl Feed {
             r#"
             SELECT feed_id,
                    metadata as "metadata: Json<FeedMetadata>"
-              FROM feeds
+              FROM app_public.feeds
              WHERE feed_id NOT LIKE 'vlive:%'
             "#,
         )
@@ -233,7 +233,7 @@ impl Feed {
         sqlx::query_as!(
             Feed,
             r#"
-            INSERT INTO feeds
+            INSERT INTO app_public.feeds
                  VALUES ($1, $2)
             ON CONFLICT (feed_id)
               DO UPDATE
@@ -254,7 +254,7 @@ impl Feed {
 
         sqlx::query!(
             r#"
-            DELETE FROM feeds
+            DELETE FROM app_public.feeds
                   WHERE feed_id = $1
             "#,
             self.feed_id,
@@ -272,7 +272,7 @@ async fn get_all_vlive(pool: &sqlx::PgPool) -> Result<Vec<Feed>> {
         r#"
             SELECT feed_id,
                    metadata as "metadata: Json<FeedMetadata>"
-              FROM feeds
+              FROM app_public.feeds
              WHERE feed_id LIKE 'vlive:%'
             "#,
     )

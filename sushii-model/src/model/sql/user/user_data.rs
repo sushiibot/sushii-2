@@ -151,7 +151,7 @@ async fn from_id_query(pool: &sqlx::PgPool, user_id: UserId) -> Result<Option<Us
         UserData,
         r#"
             SELECT *
-              FROM users
+              FROM app_public.users
              WHERE id = $1
         "#,
         i64::from(user_id),
@@ -165,7 +165,7 @@ async fn upsert_query(pool: &sqlx::PgPool, user_data: &UserData) -> Result<UserD
     sqlx::query_as!(
         UserData,
         r#"
-        INSERT INTO users (id, is_patron, patron_emoji, rep, fishies, last_rep, last_fishies, profile_data, lastfm_username)
+        INSERT INTO app_public.users (id, is_patron, patron_emoji, rep, fishies, last_rep, last_fishies, profile_data, lastfm_username)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         ON CONFLICT (id)
           DO UPDATE
