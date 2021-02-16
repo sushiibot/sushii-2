@@ -104,6 +104,7 @@ services:
         container_name: postgres
         restart: unless-stopped
         command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
+        shm_size: 512mb
         env_file:
             - .env
         volumes:
