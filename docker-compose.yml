@@ -107,9 +107,23 @@ services:
         env_file:
             - .env
         volumes:
-            - ~/docker/postgres:/var/lib/postgresql/data
+            - ~/docker/postgre:/var/lib/postgresql/data
             - ./postgres.conf:/etc/postgresql/postgresql.conf
             - ~/docker/postgres_root:/root
+        networks:
+            - sushii_net
+        labels:
+            - traefik.enable=false
+    # sushii2 old instance - delete after migration successful
+    postgres_old:
+        image: postgres:12
+        container_name: postgres_old
+        restart: unless-stopped
+        env_file:
+            - .env_old
+        volumes:
+            - ~/docker/postgres_old:/var/lib/postgresql/data
+            - ~/docker/postgres_old_root:/root
         networks:
             - sushii_net
         labels:
@@ -186,6 +200,29 @@ services:
                 max-buffer-size: 4m
         env_file:
             - .env
+        networks:
+            - sushii_net
+        labels:
+            - "traefik.enable=false"
+    # sushii2 instance which will be removed after migration complete, keep
+    # running in case of migration failure
+    sushii2_old:
+        image: ghcr.io/sushiibot/sushii-2:latest
+        container_name: sushii2_old
+        restart: unless-stopped
+        depends_on:
+            - postgres_old
+        expose:
+            - "9888"
+        logging:
+            driver: json-file
+            options:
+                max-size: "10m"
+                max-file: "3"
+                mode: non-blocking
+                max-buffer-size: 4m
+        env_file:
+            - .env_old
         networks:
             - sushii_net
         labels:
