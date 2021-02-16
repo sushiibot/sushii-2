@@ -29,7 +29,7 @@ branch = "main"
 
 [dependencies.tokio]
 version = "0.2"
-features = ["macros", "rt-core", "time", "signal"]
+features = ["macros", "rt-threaded", "time", "signal"]
 
 [dependencies.sqlx]
 version = "0.4.1"

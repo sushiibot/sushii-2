@@ -50,7 +50,7 @@ rev = "a5d58142c3172febd3e83d5ad9824ce00cf9834f"
 
 [dependencies.tokio]
 version = "0.2"
-features = ["macros", "rt-core", "time", "signal"]
+features = ["macros", "rt-threaded", "time", "signal"]
 
 [dependencies.sqlx]
 version = "0.4.1"

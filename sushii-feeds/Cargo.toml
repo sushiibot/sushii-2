@@ -25,7 +25,7 @@ humantime = "2.1.0"
 
 [dependencies.tokio]
 version = "0.2"
-features = ["macros", "rt-core", "time", "signal"]
+features = ["macros", "rt-threaded", "time", "signal"]
 
 [dependencies.vlive]
 # path = "../../vlive-rs"
