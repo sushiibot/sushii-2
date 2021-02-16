@@ -168,7 +168,8 @@ async fn random_query(pool: &sqlx::PgPool, guild_id: GuildId) -> Result<Option<T
              WHERE guild_id = $1
             OFFSET floor(random() * (
                        SELECT COUNT(*)
-                         FROM app_public.tags))
+                         FROM app_public.tags
+                        WHERE guild_id = $1))
              LIMIT 1
         "#,
         i64::from(guild_id),
