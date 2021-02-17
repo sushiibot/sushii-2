@@ -8,7 +8,7 @@ async fn default(ctx: &Context, msg: &Message) -> CommandResult {
     msg.channel_id
         .say(
             &ctx,
-            "Available roles commands can be found here: <https://2.sushii.xyz/commands#roles>",
+            "Available roles commands can be found here: <https://sushii.xyz/commands#roles>",
         )
         .await?;
 

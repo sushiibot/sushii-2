@@ -16,7 +16,7 @@ async fn default(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
         Err(_) => {
             msg
                 .channel_id
-                .say(&ctx.http, "Available settings commands can be found here: <https://2.sushii.xyz/commands#settings>")
+                .say(&ctx.http, "Available settings commands can be found here: <https://sushii.xyz/commands#settings>")
                 .await?;
 
             return Ok(());

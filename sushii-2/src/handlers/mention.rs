@@ -44,7 +44,7 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
     let s = format!(
         "Hi! My prefix in this guild is `{}`. \
         You can also mention me ({}) as a prefix. \n\
-        [The commands list can be found here](https://2.sushii.xyz/commands).\n\
+        [The commands list can be found here](https://sushii.xyz/commands).\n\
         Still need help or have questions? \
         [Join the sushii support server](https://discord.gg/tQkb3GKVhP)",
         prefix,

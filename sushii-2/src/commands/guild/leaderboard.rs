@@ -18,9 +18,9 @@ async fn leaderboard(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
     };
 
     let url = if is_global {
-        "https://2.sushii.xyz/leaderboard".into()
+        "https://sushii.xyz/leaderboard".into()
     } else {
-        format!("https://2.sushii.xyz/leaderboard/{}", guild_id)
+        format!("https://sushii.xyz/leaderboard/{}", guild_id)
     };
 
     msg.reply(ctx, url).await?;
