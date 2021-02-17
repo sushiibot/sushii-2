@@ -43,7 +43,7 @@ impl FeedItem {
         sqlx::query_as!(
             FeedItem,
             r#"
-            INSERT INTO app_public.feed_items
+            INSERT INTO app_public.feed_items (feed_id, item_id)
                  VALUES ($1, $2)
                         ON CONFLICT DO NOTHING
             "#,

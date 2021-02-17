@@ -48,6 +48,10 @@ pub async fn check_new_vlives(
             for sub in subscriptions {
                 if let Err(e) = ChannelId(sub.channel_id as u64)
                     .send_message(ctx, |m| {
+                        if let Some(mention_role) = sub.mention_role { 
+                            m.content(format!("<@&{}>", mention_role as u64));
+                        }
+
                         m.embed(|e| {
                             if let Some(ref author) = post.author {
                                 e.author(|a| {
