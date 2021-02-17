@@ -1757,6 +1757,19 @@
       "nullable": []
     }
   },
+  "c35900c1da36165774e8777b3b2a90993428bed300ea387fc6c85213957f6b76": {
+    "query": "\n            INSERT INTO app_public.feed_items (feed_id, item_id)\n                 VALUES ($1, $2)\n                        ON CONFLICT DO NOTHING\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "c5f7dd16daf1b94421ff2948ab58c24fcec0f5adc5b6e5f1c8f168b92cc5b562": {
     "query": "\n            SELECT *\n              FROM app_public.notifications\n             WHERE user_id = $1\n               AND guild_id = $2\n               AND keyword = $3\n        ",
     "describe": {
@@ -2321,19 +2334,6 @@
         false,
         false
       ]
-    }
-  },
-  "f154e3210dd06564b5d0b2b383ff52dd35248489e2d0b67a6e5139d27ac9825b": {
-    "query": "\n            INSERT INTO app_public.feed_items\n                 VALUES ($1, $2)\n                        ON CONFLICT DO NOTHING\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
     }
   },
   "f32b2d4b8cd4ae467e2d8a673fcc32c77c36307ae93d476a25f59c8ce3c630f2": {
