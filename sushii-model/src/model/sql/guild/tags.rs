@@ -163,13 +163,10 @@ async fn random_query(pool: &sqlx::PgPool, guild_id: GuildId) -> Result<Option<T
     sqlx::query_as!(
         Tag,
         r#"
-            SELECT *
-              FROM app_public.tags
-             WHERE guild_id = $1
-            OFFSET floor(random() * (
-                       SELECT COUNT(*)
-                         FROM app_public.tags
-                        WHERE guild_id = $1))
+              SELECT *
+                FROM app_public.tags
+               WHERE guild_id = $1
+            ORDER BY random()
              LIMIT 1
         "#,
         i64::from(guild_id),

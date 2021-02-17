@@ -524,6 +524,56 @@
       ]
     }
   },
+  "1c6e5bac318f204224b728644f3fd121e043fd1d7148405cd5cfe375b7d56b21": {
+    "query": "\n              SELECT *\n                FROM app_public.tags\n               WHERE guild_id = $1\n            ORDER BY random()\n             LIMIT 1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "owner_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "tag_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "use_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "created",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "2a29555e14f688e84a378799520795dd4f5a4aa0d0fed743cc9e37d37cc89505": {
     "query": "\n            SELECT *\n              FROM app_public.mod_logs\n             WHERE guild_id = $1\n               AND case_id >= $2\n               AND case_id <= $3\n        ",
     "describe": {
@@ -1622,56 +1672,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "b369553f0e34b57acf61c58131641e379211ea6c087eb6f2e8f2e73fd5160a1c": {
-    "query": "\n            SELECT *\n              FROM app_public.tags\n             WHERE guild_id = $1\n            OFFSET floor(random() * (\n                       SELECT COUNT(*)\n                         FROM app_public.tags\n                        WHERE guild_id = $1))\n             LIMIT 1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "owner_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "tag_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "use_count",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "created",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
     }
   },
   "b6394fc2af741908b8a0ffe6f91d776900686dc1566d06285097e3a4cd7f312e": {
