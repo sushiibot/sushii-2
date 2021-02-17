@@ -167,7 +167,7 @@ async fn main() -> Result<()> {
         });
     }
 
-    if let Err(why) = client.start().await {
+    if let Err(why) = client.start_autosharded().await {
         tracing::error!("Client error: {:?}", why);
     }
 
