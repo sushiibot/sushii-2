@@ -73,7 +73,7 @@ impl<T> OptionsCollector<T> {
         msg: &Message,
         sent_msg: Option<Message>,
         summary_str: Option<String>,
-    ) -> Result<(Option<Message>, String)> {
+    ) -> Result<(Option<Message>, String, bool)> {
         let mut sent_msg: Option<Message> = sent_msg;
         let mut summary_str = summary_str.unwrap_or_else(String::new);
 
@@ -138,6 +138,17 @@ impl<T> OptionsCollector<T> {
                 .await;
 
             while let Some(reply) = replies.next().await {
+                match reply.content.as_str() {
+                    "quit" | "exit" | "cancel" => {
+                        msg.channel_id
+                            .say(ctx, "Quitting, no feeds were added.")
+                            .await?;
+
+                        return Ok((None, "".into(), true));
+                    },
+                    _ => {}
+                }
+
                 match option.validate(ctx, &reply, &mut self.state).await {
                     Ok(_response) => {
                         // Add option description to summary
@@ -161,7 +172,7 @@ impl<T> OptionsCollector<T> {
             // TODO: Delete messages
         }
 
-        Ok((sent_msg, summary_str))
+        Ok((sent_msg, summary_str, false))
     }
 }
 
@@ -329,7 +340,10 @@ async fn add(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
         .add_option(DiscordChannel)
         .add_option(DiscordRole);
 
-    let (sent_msg, summary_str) = options_collector.collect(ctx, msg, None, None).await?;
+    let (sent_msg, summary_str, should_quit) = options_collector.collect(ctx, msg, None, None).await?;
+    if should_quit {
+        return Ok(());
+    }
 
     let opts = options_collector.get_state();
 
@@ -484,9 +498,13 @@ async fn add_vlive(
     let mut options_collector =
         OptionsCollector::new(VliveOptions::new()).add_option(VliveChannelStep);
 
-    let (sent_msg, _) = options_collector
+    let (sent_msg, _, should_quit) = options_collector
         .collect(ctx, msg, sent_msg, Some(summary_str))
         .await?;
+
+    if should_quit {
+        return Ok(None);
+    }
 
     if let Some(sent_msg) = sent_msg {
         sent_msg.delete(ctx).await?;
