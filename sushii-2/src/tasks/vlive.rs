@@ -34,7 +34,10 @@ pub async fn check_new_vlives(
         }
 
         // Save the video to db to not fetch again
-        FeedItem::new(&item.feed_id, &post.id).save(ctx).await?;
+        if let Err(e) = FeedItem::new(&item.feed_id, &post.id).save(ctx).await {
+            tracing::error!("Failed to save feed item: {}", e);
+            continue;
+        }
 
         // If active feed found for this channel
         if let Some(feed) = feed_id_map.get(&item.feed_id.as_str()) {
