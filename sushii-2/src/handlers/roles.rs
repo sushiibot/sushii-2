@@ -159,11 +159,11 @@ fn parse_role_actions(s: &str) -> Vec<RoleAction> {
         .collect()
 }
 
-fn categorize_member_roles<'a, I, R>(
-    role_config: &'a GuildRoles,
+fn categorize_member_roles<I, R>(
+    role_config: &GuildRoles,
     member_roles: I,
     is_reset: bool,
-) -> (HashSet<u64>, HashMap<&'a str, HashSet<u64>>)
+) -> (HashSet<u64>, HashMap<&str, HashSet<u64>>)
 where
     I: IntoIterator<Item = R>,
     R: Into<u64>,
@@ -228,7 +228,7 @@ fn build_role_name_map<'a>(
     role_name_map
 }
 
-fn dedupe_role_actions<'a>(role_actions: &'a [RoleAction]) -> Vec<&'a RoleAction> {
+fn dedupe_role_actions(role_actions: &[RoleAction]) -> Vec<&RoleAction> {
     tracing::debug!(?role_actions, "role_actions");
 
     // Not the actual "dedupe" but more to check if a user is adding/removing a

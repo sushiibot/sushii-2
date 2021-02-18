@@ -24,7 +24,7 @@ async fn prune(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     // Can delete 100, but we want to + 1 later so that the message invoking this
     // command isn't counted
     // also, needs to delete at least 2, but since we + 1, we can allow just 1
-    if num_messages < 1 || num_messages > 99 {
+    if !(1..=99).contains(&num_messages) {
         msg.channel_id
             .say(
                 &ctx.http,

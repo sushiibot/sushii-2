@@ -270,15 +270,13 @@ impl ModActionExecutor {
             return Ok(());
         }
 
-        if let Some(duration) = &self.duration {
+        if let Some(Err(e)) = &self.duration {
             // If there is a duration, check if the duration parsing failed
-            if let Err(e) = duration {
-                msg.channel_id
-                    .say(&ctx, format!("Invalid duration, {}", e))
-                    .await?;
+            msg.channel_id
+                .say(&ctx, format!("Invalid duration, {}", e))
+                .await?;
 
-                return Ok(());
-            }
+            return Ok(());
         }
 
         // Uh... clone then flatten the Option<Result<Duration>> to just

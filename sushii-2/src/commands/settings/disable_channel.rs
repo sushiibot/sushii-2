@@ -53,11 +53,7 @@ async fn disablechannel(ctx: &Context, msg: &Message, args: Args) -> CommandResu
     let mut guild_conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
     let guild_channels: HashSet<u64> = match msg
         .guild_field(ctx, |g| {
-            g.channels
-                .keys()
-                .map(|id| id.0)
-                .collect::<HashSet<u64>>()
-                .clone()
+            g.channels.keys().map(|id| id.0).collect::<HashSet<u64>>()
         })
         .await
     {
@@ -101,13 +97,13 @@ async fn disablechannel(ctx: &Context, msg: &Message, args: Args) -> CommandResu
             channel_ids
                 .into_iter()
                 .map(|id| id as i64)
-                .chain(disabled_channels.iter().map(|id| *id))
+                .chain(disabled_channels.iter().copied())
                 .collect()
         } else {
             channel_ids.into_iter().map(|id| id as i64).collect()
         };
 
-    new_disabled_channels.sort();
+    new_disabled_channels.sort_unstable();
     new_disabled_channels.dedup();
 
     guild_conf.disabled_channels.replace(new_disabled_channels);
@@ -136,11 +132,7 @@ async fn enablechannel(ctx: &Context, msg: &Message, args: Args) -> CommandResul
     let mut guild_conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
     let guild_channels: HashSet<u64> = match msg
         .guild_field(ctx, |g| {
-            g.channels
-                .keys()
-                .map(|id| id.0)
-                .collect::<HashSet<u64>>()
-                .clone()
+            g.channels.keys().map(|id| id.0).collect::<HashSet<u64>>()
         })
         .await
     {

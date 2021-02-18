@@ -58,7 +58,11 @@ async fn about(ctx: &Context, msg: &Message) -> CommandResult {
         .channel_id
         .send_message(&ctx.http, |m| {
             m.embed(|e| {
-                e.title(format!("sushii v{} - {}", version, env!("VERGEN_BUILD_DATE")));
+                e.title(format!(
+                    "sushii v{} - {}",
+                    version,
+                    env!("VERGEN_BUILD_DATE")
+                ));
                 e.color(0xe67e22);
 
                 e.field("Servers", guild_count.to_string(), true);
@@ -86,13 +90,18 @@ async fn about(ctx: &Context, msg: &Message) -> CommandResult {
                     true,
                 );
                 e.field("Uptime", humantime::format_duration(up_time), false);
-                e.field("Rust Version", format!("{} - {}",
-                    env!("VERGEN_RUSTC_SEMVER"),
-                    env!("VERGEN_RUSTC_COMMIT_DATE"),
-                ), true);
+                e.field(
+                    "Rust Version",
+                    format!(
+                        "{} - {}",
+                        env!("VERGEN_RUSTC_SEMVER"),
+                        env!("VERGEN_RUSTC_COMMIT_DATE"),
+                    ),
+                    true,
+                );
 
                 if let Some(shard_id) = shard_id {
-                    e.footer(|f| f.text(format!("Shard #{}",shard_id.to_string())));
+                    e.footer(|f| f.text(format!("Shard #{}", shard_id.to_string())));
                 }
 
                 e

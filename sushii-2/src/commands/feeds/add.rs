@@ -100,7 +100,7 @@ impl<T> OptionsCollector<T> {
                 sent_msg
                     .edit(ctx, |m| {
                         m.embed(|e| {
-                            *e = CreateEmbed::from(embed);
+                            *e = embed;
                             e.description(&content);
 
                             e
@@ -137,7 +137,7 @@ impl<T> OptionsCollector<T> {
                 .timeout(Duration::from_secs(120))
                 .await;
 
-            while let Some(reply) = replies.next().await {
+            'inner: while let Some(reply) = replies.next().await {
                 match reply.content.as_str() {
                     "quit" | "exit" | "cancel" => {
                         msg.channel_id
@@ -166,7 +166,8 @@ impl<T> OptionsCollector<T> {
                             .say(ctx, format!("Error: {}", response))
                             .await?;
 
-                        continue 'outer;
+                        // Get another reply
+                        continue 'inner;
                     }
                 }
             }
@@ -395,7 +396,7 @@ async fn add(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
                     if let Some(url) = feed.icon_url() {
                         a.icon_url(url);
                     }
-                    a.name(feed.name().unwrap_or_else(|| "Unknown Feed".into()));
+                    a.name(feed.name().unwrap_or("Unknown Feed"));
                     if let Some(url) = feed.source_url() {
                         a.url(url);
                     }

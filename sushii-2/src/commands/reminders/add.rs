@@ -26,7 +26,7 @@ async fn add(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         }
     };
 
-    if msg
+    let dm_msg = msg
         .author
         .dm(ctx, |m| {
             m.content(format!(
@@ -35,9 +35,9 @@ async fn add(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                 reminder.expire_at.format("%Y-%m-%d %H:%M:%S")
             ))
         })
-        .await
-        .is_err()
-    {
+        .await;
+
+    if dm_msg.is_err() {
         msg.reply_mention(
             ctx,
             "Failed to send you a DM, I can't remind you :( \

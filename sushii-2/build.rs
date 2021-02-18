@@ -1,5 +1,5 @@
-use vergen::ConstantsFlags;
 use vergen::gen;
+use vergen::ConstantsFlags;
 
 fn main() {
     let flags = ConstantsFlags::all();

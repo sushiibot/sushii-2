@@ -38,7 +38,7 @@ pub async fn get_feed(client: Client, kind: FeedKind, feed: Feed) -> Result<Chan
     let data = match feed
         .metadata
         .as_ref()
-        .ok_or(anyhow!("Missing feed metadata"))?
+        .ok_or_else(|| anyhow!("Missing feed metadata"))?
         .0
     {
         FeedMetadata::VliveBoard(_) | FeedMetadata::VliveVideos(_) => {

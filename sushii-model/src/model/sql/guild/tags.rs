@@ -112,9 +112,9 @@ impl Tag {
     /// Renames this tag, returns false if there is already a tag with the desired name
     pub async fn can_rename(&self, ctx: &Context, new_tag_name: &str) -> Result<bool> {
         // Check for existing tag
-        return Ok(!Self::from_name(&ctx, new_tag_name, GuildId(self.guild_id as u64))
+        return Ok(Self::from_name(&ctx, new_tag_name, GuildId(self.guild_id as u64))
             .await?
-            .is_some())
+            .is_none())
     }
 
     pub async fn rename(&mut self, ctx: &Context, new_tag_name: &str) -> Result<Self> {
