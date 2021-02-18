@@ -178,7 +178,7 @@ impl UserOption<FeedOptions> for FeedType {
     }
 
     fn prompt(&self) -> &'static str {
-        "What kind of feed do you want to add? Currently available feeds are: `vlive`, `twitter`"
+        "What kind of feed do you want to add? Currently available feeds are: `vlive`"
     }
 
     async fn validate(
@@ -333,8 +333,8 @@ async fn add(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
 
     let opts = options_collector.get_state();
 
-    let feed_metadata = match opts.kind.as_ref().unwrap().to_lowercase().as_str() {
-        "vlive" => match add_vlive(reqwest, ctx, msg, sent_msg, summary_str).await? {
+    let feed_metadata = match opts.kind.as_ref().map(|k| k.to_lowercase()).as_deref() {
+        Some("vlive") => match add_vlive(reqwest, ctx, msg, sent_msg, summary_str).await? {
             Some(m) => m,
             None => return Ok(()),
         },
