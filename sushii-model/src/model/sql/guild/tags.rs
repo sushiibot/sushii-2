@@ -110,19 +110,17 @@ impl Tag {
     }
 
     /// Renames this tag, returns false if there is already a tag with the desired name
-    pub async fn rename(&mut self, ctx: &Context, tag_name: &str) -> Result<bool> {
+    pub async fn can_rename(&self, ctx: &Context, new_tag_name: &str) -> Result<bool> {
         // Check for existing tag
-        if Self::from_name(&ctx, tag_name, GuildId(self.guild_id as u64))
+        return Ok(!Self::from_name(&ctx, new_tag_name, GuildId(self.guild_id as u64))
             .await?
-            .is_some()
-        {
-            return Ok(false);
-        }
+            .is_some())
+    }
 
-        // New name is unused, we can rename it now
-        self.tag_name = tag_name.to_string();
+    pub async fn rename(&mut self, ctx: &Context, new_tag_name: &str) -> Result<Self> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
-        Ok(true)
+        rename_query(&pool, &self, new_tag_name).await
     }
 
     pub async fn save(&self, ctx: &Context) -> Result<Tag> {
@@ -308,6 +306,25 @@ async fn upsert_query(pool: &sqlx::PgPool, tag: &Tag) -> Result<Tag> {
         tag.content,
         tag.use_count,
         tag.created,
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(Into::into)
+}
+
+async fn rename_query(pool: &sqlx::PgPool, tag: &Tag, new_tag_name: &str) -> Result<Tag> {
+    sqlx::query_as!(
+        Tag,
+        r#"
+        UPDATE app_public.tags
+           SET tag_name = $3
+         WHERE tag_name = $1
+           AND guild_id = $2
+          RETURNING *
+        "#,
+        tag.tag_name,
+        tag.guild_id,
+        new_tag_name,
     )
     .fetch_one(pool)
     .await

@@ -132,7 +132,7 @@ async fn rename(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         return Ok(());
     }
 
-    if !tag.rename(&ctx, &new_tag_name).await? {
+    if !tag.can_rename(&ctx, &new_tag_name).await? {
         msg.channel_id
             .say(
                 &ctx,
@@ -146,7 +146,7 @@ async fn rename(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         return Ok(());
     }
 
-    let tag = tag.save(&ctx).await?;
+    tag.rename(&ctx, &new_tag_name).await?;
 
     msg.channel_id
         .say(

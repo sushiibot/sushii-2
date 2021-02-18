@@ -1543,6 +1543,58 @@
       ]
     }
   },
+  "9d01da77faf8e6c40a76e97e2bca04159c2c85ac803b34cbae8de938d1d5a344": {
+    "query": "\n        UPDATE app_public.tags\n           SET tag_name = $3\n         WHERE tag_name = $1\n           AND guild_id = $2\n          RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "owner_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "tag_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "use_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "created",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "a169d8b78e57b1114d8c4183b00ed6baca3ee1c0031bf8c53c2a1a39626e1a19": {
     "query": "\n            SELECT SUM(msg_all_time) AS xp\n              FROM app_public.user_levels\n             WHERE user_id = $1\n        ",
     "describe": {
