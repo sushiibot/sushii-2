@@ -5,6 +5,7 @@ use heim::{memory, process};
 use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use serenity::utils::shard_id;
 use std::time::Duration;
 
 #[command]
@@ -45,12 +46,25 @@ async fn about(ctx: &Context, msg: &Message) -> CommandResult {
     // Host total memory
     let total_mem = memory::memory().await?.total();
 
+    // Discord stats
+    let guild_count = ctx.cache.guild_count().await;
+    let channel_count = ctx.cache.guild_channel_count().await;
+    let user_count = ctx.cache.user_count().await;
+
+    let shard_count = ctx.cache.shard_count().await;
+    let shard_id = msg.guild_id.map(|id| shard_id(id, shard_count));
+
     let _ = msg
         .channel_id
         .send_message(&ctx.http, |m| {
             m.embed(|e| {
-                e.title(format!("sushii v{}", version));
+                e.title(format!("sushii v{} - {}", version, env!("VERGEN_BUILD_DATE")));
                 e.color(0xe67e22);
+
+                e.field("Servers", guild_count.to_string(), true);
+                e.field("Shards", shard_count.to_string(), true);
+                e.field("Channels", channel_count.to_string(), true);
+                e.field("Cached Users", user_count.to_string(), true);
 
                 e.field(
                     "Load Avg",
@@ -72,6 +86,14 @@ async fn about(ctx: &Context, msg: &Message) -> CommandResult {
                     true,
                 );
                 e.field("Uptime", humantime::format_duration(up_time), false);
+                e.field("Rust Version", format!("{} - {}",
+                    env!("VERGEN_RUSTC_SEMVER"),
+                    env!("VERGEN_RUSTC_COMMIT_DATE"),
+                ), true);
+
+                if let Some(shard_id) = shard_id {
+                    e.footer(|f| f.text(format!("Shard #{}",shard_id.to_string())));
+                }
 
                 e
             })
