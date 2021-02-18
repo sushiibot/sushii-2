@@ -77,7 +77,7 @@ impl<T> OptionsCollector<T> {
         let mut sent_msg: Option<Message> = sent_msg;
         let mut summary_str = summary_str.unwrap_or_else(String::new);
 
-        for option in &self.options {
+        'outer: for option in &self.options {
             let content = format!("{}~~-------------~~\n{}", summary_str, option.prompt());
 
             // Not first message, edit previous
@@ -145,7 +145,7 @@ impl<T> OptionsCollector<T> {
                             .await?;
 
                         return Ok((None, "".into(), true));
-                    },
+                    }
                     _ => {}
                 }
 
@@ -158,17 +158,24 @@ impl<T> OptionsCollector<T> {
 
                         // If success, break from waiting for response and go to
                         // next option
-                        break;
+                        continue 'outer;
                     }
                     Err(response) => {
                         // If option isn't valid, respond with error and wait for another try
                         msg.channel_id
                             .say(ctx, format!("Error: {}", response))
                             .await?;
+
+                        continue 'outer;
                     }
                 }
             }
 
+            msg.channel_id
+                .say(ctx, "Timed out (2 min), no feeds were added.")
+                .await?;
+
+            return Ok((None, "".into(), true));
             // TODO: Delete messages
         }
 
@@ -340,7 +347,8 @@ async fn add(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
         .add_option(DiscordChannel)
         .add_option(DiscordRole);
 
-    let (sent_msg, summary_str, should_quit) = options_collector.collect(ctx, msg, None, None).await?;
+    let (sent_msg, summary_str, should_quit) =
+        options_collector.collect(ctx, msg, None, None).await?;
     if should_quit {
         return Ok(());
     }
