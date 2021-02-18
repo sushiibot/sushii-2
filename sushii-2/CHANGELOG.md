@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2021-02-18
+
+### Added
+
+-  Re-added old command aliases for `fishy` and `rank`
+### Fixed
+
+-  Correctly quit feed add
+-  Prevent tag duplication when renaming
+-  Added missing role mention for vlive feeds
+-  Updated sushii.xyz links from old 2.sushii.xyz
+-  Updated `invite` command link
+
 ## [0.2.0-rc.4] - 2021-02-11
 
 ### Added
@@ -299,7 +312,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Prevent role handler from running outside of role channels
 -   Fix mod log entry saving
 
-[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.0-rc.0...HEAD
+[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.0...HEAD
+[0.2.0]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.0-rc.7...sushii-2-v0.2.0
 [0.2.0-rc.0]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.19...sushii-2-v0.2.0-rc.0
 [0.1.19]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.18...sushii-2-v0.1.19
 [0.1.18]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.17...sushii-2-v0.1.18
