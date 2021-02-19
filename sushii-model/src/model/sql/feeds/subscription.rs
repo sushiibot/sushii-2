@@ -28,6 +28,25 @@ impl FeedSubscription {
         self
     }
 
+    pub async fn from_id(ctx: &Context, guild_id: GuildId, feed_id: &str) -> Result<Option<Self>> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
+        sqlx::query_as!(
+            FeedSubscription,
+            r#"
+            SELECT *
+              FROM app_public.feed_subscriptions
+             WHERE guild_id = $1
+               AND feed_id = $2
+            "#,
+            guild_id.0 as i64,
+            feed_id
+        )
+        .fetch_optional(&pool)
+        .await
+        .map_err(Into::into)
+    }
+
     pub async fn from_guild_id(ctx: &Context, guild_id: GuildId) -> Result<Vec<Self>> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
@@ -80,5 +99,25 @@ impl FeedSubscription {
         .await?;
 
         Ok(self)
+    }
+
+    pub async fn delete(self, ctx: &Context) -> Result<()> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
+        sqlx::query_as!(
+            FeedSubscription,
+            r#"
+            DELETE FROM app_public.feed_subscriptions
+                  WHERE feed_id = $1
+                    AND channel_id = $2
+            "#,
+            // composite primary key
+            self.feed_id,
+            self.channel_id,
+        )
+        .execute(&pool)
+        .await?;
+
+        Ok(())
     }
 }

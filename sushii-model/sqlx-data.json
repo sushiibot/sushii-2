@@ -1287,6 +1287,19 @@
       "nullable": []
     }
   },
+  "880bddc8f15bd2fdfdc800c883c1ffc29cefdab10324c0a09851ebba50ae2021": {
+    "query": "\n            DELETE FROM app_public.feed_subscriptions\n                  WHERE feed_id = $1\n                    AND channel_id = $2\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int8"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "8aa5fe177433b6603262f42c3ee769383012dabe524b56c4b6cb72dbe2780951": {
     "query": "\n        INSERT INTO app_public.user_levels (user_id, guild_id, msg_all_time, msg_month, msg_week, msg_day, last_msg)\n             VALUES ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (user_id, guild_id)\n          DO UPDATE\n                SET msg_all_time = $3,\n                    msg_month = $4,\n                    msg_week = $5,\n                    msg_day = $6,\n                    last_msg = $7\n          RETURNING user_id as \"user_id: BigInt\",\n                    guild_id as \"guild_id: BigInt\",\n                    msg_all_time as \"msg_all_time: BigInt\",\n                    msg_month as \"msg_month: BigInt\",\n                    msg_week as \"msg_week: BigInt\",\n                    msg_day as \"msg_day: BigInt\",\n                    last_msg\n        ",
     "describe": {
@@ -1776,6 +1789,45 @@
         false,
         false,
         true,
+        false,
+        true
+      ]
+    }
+  },
+  "b6c940fe7dca09a4ff37b1807dd5573fe5cb35b857d1545f4499d701458aac90": {
+    "query": "\n            SELECT *\n              FROM app_public.feed_subscriptions\n             WHERE guild_id = $1\n               AND feed_id = $2\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "feed_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "channel_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "mention_role",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
         false,
         true
       ]

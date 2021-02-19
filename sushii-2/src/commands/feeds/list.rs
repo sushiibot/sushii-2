@@ -6,6 +6,7 @@ use std::fmt::Write;
 use crate::model::sql::*;
 
 #[command]
+#[required_permissions("MANAGE_GUILD")]
 async fn list(ctx: &Context, msg: &Message) -> CommandResult {
     let guild_id = match msg.guild_id {
         Some(id) => id,
@@ -25,7 +26,7 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
             one with `feed add`",
             )
             .await?;
-        
+
         return Ok(());
     }
 
