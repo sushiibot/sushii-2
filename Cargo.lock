@@ -5007,8 +5007,9 @@ checksum = "eafc1b9b2dfc6f5529177b62cf806484db55b32dc7c9658a118e11bbeb33061d"
 
 [[package]]
 name = "vergen"
-version = "4.0.2"
-source = "git+https://github.com/drklee3/vergen?branch=drklee3/pin-rustc_version#3b11040ce91a2f5819589b459ed33e80e2e4beee"
+version = "4.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c18af83bebfa2abdf98eab5ea55017017ce25950de8891033f80d4a0520c26d7"
 dependencies = [
  "bitflags",
  "chrono",
