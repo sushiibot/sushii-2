@@ -25,9 +25,13 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
             one with `feed add`",
             )
             .await?;
+        
+        return Ok(());
     }
 
     let mut s = String::new();
+
+    writeln!(s, "Feed ID - Channel - Mention Role - Feed Name")?;
 
     for sub in subs {
         // TODO: Prevent N + 1 here, though shouldn't be too many queries
@@ -39,7 +43,7 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
             }
         };
 
-        write!(s, "<#{}> ", sub.channel_id as u64)?;
+        write!(s, "`{}` - <#{}> ", feed.feed_id, sub.channel_id as u64)?;
         if let Some(id) = sub.mention_role {
             write!(s, "<@&{}> ", id)?;
         }
