@@ -159,6 +159,7 @@ async fn rename(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 }
 
 #[command]
+#[aliases("remove")]
 async fn delete(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let guild_id = match msg.guild_id {
         Some(id) => id,
