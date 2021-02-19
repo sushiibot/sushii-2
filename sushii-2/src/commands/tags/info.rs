@@ -1,6 +1,7 @@
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use chrono::{DateTime, Utc};
 
 use crate::model::sql::*;
 
@@ -43,6 +44,8 @@ async fn info(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         tag.content, tag.use_count, tag.owner_id
     );
 
+    let dt = DateTime::<Utc>::from_utc(tag.created, Utc);
+
     msg.channel_id
         .send_message(&ctx.http, |m| {
             m.embed(|e| {
@@ -50,6 +53,9 @@ async fn info(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 e.color(0xe67e22);
 
                 e.description(d);
+
+                e.footer(|f| f.text("Created on"));
+                e.timestamp(dt.to_rfc3339());
 
                 e
             })
