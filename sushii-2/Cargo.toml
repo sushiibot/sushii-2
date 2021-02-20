@@ -67,3 +67,5 @@ features = ["default_tokio_0_2", "collector"]
 
 [build-dependencies.vergen]
 version = "4.0.3"
+default-features = false
+features = ["build", "rustc"]
