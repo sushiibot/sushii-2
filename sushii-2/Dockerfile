@@ -24,6 +24,7 @@ RUN rm src/*.rs
 
 # copy source tree, migrations, queries, sqlx data
 COPY ./sushii-2/src ./src
+COPY ./sushii-2/build.rs ./build.rs
 COPY ./sushii-2/migrations ./migrations
 COPY ./sushii-2/sqlx-data.json ./sqlx-data.json
 
