@@ -7,11 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.1] - 2021-02-19
+
 ### Added
 
 -  Add more bot information to `stats` / `about` command.
 -  Display created datetime on `tag info`
--  `feed delete` command
+-  Add `tag remove` command alias to `tag delete`
+-  Add `feed delete` command
+-  Show feed IDs in `feed list`
+
+### Fixed
+
+-  Exit `feed add` when timed out
 
 ## [0.2.0] - 2021-02-18
 
@@ -320,7 +328,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Prevent role handler from running outside of role channels
 -   Fix mod log entry saving
 
-[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.0...HEAD
+[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.1...HEAD
+[0.2.1]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.0...sushii-2-v0.2.1
 [0.2.0]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.0-rc.7...sushii-2-v0.2.0
 [0.2.0-rc.0]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.19...sushii-2-v0.2.0-rc.0
 [0.1.19]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.18...sushii-2-v0.1.19
