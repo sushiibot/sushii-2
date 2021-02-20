@@ -18,13 +18,15 @@ COPY ./sushii-feeds ./sushii-feeds
 # switch to sushii-2 workspace project to run following commands in sushii-2 dir
 WORKDIR /usr/src/sushii/sushii-2
 
+# build.rs required since in Cargo.toml
+COPY ./sushii-2/build.rs ./build.rs
+
 # cache dependencies
 RUN cargo build --release
 RUN rm src/*.rs
 
 # copy source tree, migrations, queries, sqlx data
 COPY ./sushii-2/src ./src
-COPY ./sushii-2/build.rs ./build.rs
 COPY ./sushii-2/migrations ./migrations
 COPY ./sushii-2/sqlx-data.json ./sqlx-data.json
 
