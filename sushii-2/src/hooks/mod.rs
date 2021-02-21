@@ -16,11 +16,10 @@ pub async fn before(ctx: &Context, msg: &Message, cmd_name: &str) -> bool {
         .map_err(|e| {
             tracing::warn!("Failed to get guild config: {}", e);
         })
-        .ok()
-        .flatten()
     {
-        Some(c) => c,
-        None => return false,
+        Ok(Some(c)) => c,
+        Ok(None) => return true, // in dms
+        _ => return false, // something failed
     };
 
     if let Some(channel) = guild_conf.role_channel {
