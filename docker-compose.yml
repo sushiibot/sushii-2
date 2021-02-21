@@ -92,8 +92,8 @@ services:
         container_name: postgres_exporter
         expose:
             - "9187"
-        environment:
-            - DATA_SOURCE_NAME=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+        env_file:
+            - .env_postgres
         networks:
             - sushii_net
             - web
@@ -138,9 +138,8 @@ services:
         depends_on:
             - postgres
         env_file:
-            - .env
+            - .env_postgres
         environment:
-            - POSTGRES_HOST=postgres
             - POSTGRES_EXTRA_OPTS=-Z9 --schema=app_public --blobs
             - SCHEDULE=@daily
             - BACKUP_KEEP_DAYS=7
