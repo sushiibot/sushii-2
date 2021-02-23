@@ -23,7 +23,7 @@ pub async fn check_new_vlives(
     tracing::debug!("New feed items: {:?}", new_entries);
 
     for item in new_entries.items {
-        let post = item.post.unwrap();
+        let post = item.post.clone().unwrap();
 
         if FeedItem::from_id(&ctx, &item.feed_id, &post.id)
             .await?
@@ -35,7 +35,7 @@ pub async fn check_new_vlives(
 
         // Save the video to db to not fetch again
         if let Err(e) = FeedItem::new(&item.feed_id, &post.id).save(ctx).await {
-            tracing::error!("Failed to save feed item: {}", e);
+            tracing::error!(?item, ?post, "Failed to save feed item: {}", e);
             continue;
         }
 
