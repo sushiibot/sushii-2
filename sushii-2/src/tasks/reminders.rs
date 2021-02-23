@@ -27,7 +27,10 @@ pub async fn remind_user(ctx: &Context, reminder: &Reminder) -> Result<()> {
         Some(f) => {
             // Too many attempts, delete and exit
             if f.exceeded_attempts() {
-                tracing::info!(?reminder, "Reminder fail count exceeded max attempts, deleting");
+                tracing::info!(
+                    ?reminder,
+                    "Reminder fail count exceeded max attempts, deleting"
+                );
                 reminder.delete(ctx).await?;
 
                 // Also delete failure since we don't need to keep track anymore
@@ -77,7 +80,13 @@ pub async fn remind_user(ctx: &Context, reminder: &Reminder) -> Result<()> {
         // create a new one if first time erroring
         let mut failure = failure.unwrap_or_else(|| Failure::new(failure_id));
         failure.inc();
-        failure.save(ctx).await?;
+        failure = failure.save(ctx).await?;
+
+        tracing::warn!(
+            "Reminder DM failed (attempt {}), trying again at {}",
+            failure.attempt_count,
+            failure.next_attempt
+        );
     }
 
     Ok(())
