@@ -1833,6 +1833,52 @@
       ]
     }
   },
+  "b82c28ee846a2ba132333ab0deb69bf819afdfd7036b24c038c5b60b58712d19": {
+    "query": "\n        INSERT INTO app_hidden.failures (\n                        failure_id, max_attempts, attempt_count, last_attempt\n                    )\n             VALUES ($1, $2, $3, NOW())\n        ON CONFLICT (failure_id)\n          DO UPDATE\n                SET attempt_count = $3,\n                    last_attempt = NOW()\n            RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "failure_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "max_attempts",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 2,
+          "name": "attempt_count",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 3,
+          "name": "last_attempt",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "next_attempt",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int4",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "bc6ed9cbcfe74c30c2be1e90e875e72ab6c2f6b7556e5c361a69f45aeeb3090d": {
     "query": "\n            INSERT INTO app_public.feed_subscriptions\n                 VALUES ($1, $2, $3, $4)\n            ",
     "describe": {
@@ -2528,6 +2574,62 @@
         "Left": [
           "Int8",
           "Int8"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "f96b1203d4753e85df27665a992515c953c504075b637d91fa7e73f5b589eebc": {
+    "query": "\n            SELECT *\n              FROM app_hidden.failures\n             WHERE failure_id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "failure_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "max_attempts",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 2,
+          "name": "attempt_count",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 3,
+          "name": "last_attempt",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "next_attempt",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "fdb72efaccf325dedf042e9698d485e3fc351e4f721ff22a16a9a6b312570aba": {
+    "query": "\n            DELETE FROM app_hidden.failures\n                  WHERE failure_id = $1\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text"
         ]
       },
       "nullable": []

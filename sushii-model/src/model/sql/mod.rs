@@ -1,3 +1,4 @@
+pub mod failure;
 pub mod feeds;
 pub mod guild;
 pub mod mod_log;
@@ -5,6 +6,7 @@ pub mod mute;
 pub mod user;
 
 pub use self::{
+    failure::Failure,
     feeds::{Feed, FeedItem, FeedMetadata, FeedSubscription},
     guild::{
         cached_guild::CachedGuild,

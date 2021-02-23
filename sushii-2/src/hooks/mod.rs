@@ -11,15 +11,12 @@ use crate::model::sql::GuildConfig;
 
 #[hook]
 pub async fn before(ctx: &Context, msg: &Message, cmd_name: &str) -> bool {
-    let guild_conf = match GuildConfig::from_msg(&ctx, &msg)
-        .await
-        .map_err(|e| {
-            tracing::warn!("Failed to get guild config: {}", e);
-        })
-    {
+    let guild_conf = match GuildConfig::from_msg(&ctx, &msg).await.map_err(|e| {
+        tracing::warn!("Failed to get guild config: {}", e);
+    }) {
         Ok(Some(c)) => c,
         Ok(None) => return true, // in dms
-        _ => return false, // something failed
+        _ => return false,       // something failed
     };
 
     if let Some(channel) = guild_conf.role_channel {
