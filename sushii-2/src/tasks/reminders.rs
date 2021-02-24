@@ -83,7 +83,9 @@ pub async fn remind_user(ctx: &Context, reminder: &Reminder) -> Result<()> {
         failure = failure.save(ctx).await?;
 
         tracing::warn!(
-            "Reminder DM failed (attempt {}), trying again at {}",
+            ?reminder,
+            "Reminder DM for {} failed (attempt {}), trying again at {}",
+            reminder.user_id as u64,
             failure.attempt_count,
             failure.next_attempt
         );
