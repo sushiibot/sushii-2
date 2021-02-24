@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.2] - 2021-02-23
+
+### Added
+
+-  Exponential back-off delays and max attempts for reminder DMs
+
+### Fixed
+
+-  Commands now correctly work in DMs
+
 ## [0.2.1] - 2021-02-19
 
 ### Added
@@ -328,7 +338,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Prevent role handler from running outside of role channels
 -   Fix mod log entry saving
 
-[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.1...HEAD
+[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.2...HEAD
+[0.2.2]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.1...sushii-2-v0.2.2
 [0.2.1]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.0...sushii-2-v0.2.1
 [0.2.0]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.0-rc.7...sushii-2-v0.2.0
 [0.2.0-rc.0]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.1.19...sushii-2-v0.2.0-rc.0
