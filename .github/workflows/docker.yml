@@ -75,7 +75,7 @@ jobs:
                   restore-keys: |
                       ${{ runner.os }}-buildx-
 
-            - name: Login to DockerHub
+            - name: Login to Github Container Registry
               uses: docker/login-action@v1
               with:
                   registry: ghcr.io
@@ -89,9 +89,17 @@ jobs:
                   file: ${{ steps.docker_image_select.outputs.docker_file }}
                   push: true
                   cache-from: type=local,src=/tmp/.buildx-cache
-                  cache-to: type=local,dest=/tmp/.buildx-cache
+                  cache-to: type=local,dest=/tmp/.buildx-cache-new
                   tags: ${{ steps.docker_meta.outputs.tags }}
                   labels: |
                       ${{ steps.docker_meta.outputs.labels }}
                       org.opencontainers.image.title=${{ steps.docker_image_select.outputs.title }}
                       org.opencontainers.image.description=${{ steps.docker_image_select.outputs.description }}
+            # https://github.com/docker/build-push-action/blob/master/docs/advanced/cache.md#github-cache
+            # Temp fix
+            # https://github.com/docker/build-push-action/issues/252
+            # https://github.com/moby/buildkit/issues/1896
+            - name: Move cache
+              run: |
+                  rm -rf /tmp/.buildx-cache
+                  mv /tmp/.buildx-cache-new /tmp/.buildx-cache
