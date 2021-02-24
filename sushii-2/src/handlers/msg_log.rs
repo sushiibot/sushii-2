@@ -1,6 +1,8 @@
 use chrono::Utc;
 use serenity::{model::prelude::*, prelude::*};
 use std::fmt::Write;
+use serenity::Error as SerenityError;
+use serenity::http::error::Error as HttpError;
 
 use crate::error::Result;
 use crate::model::sql::*;
@@ -74,7 +76,7 @@ async fn _message_delete(
         None => return Ok(()),
     };
 
-    let guild_conf = match GuildConfig::from_id(ctx, &guild_id).await? {
+    let mut guild_conf = match GuildConfig::from_id(ctx, &guild_id).await? {
         Some(conf) => conf,
         None => return Ok(()),
     };
@@ -126,7 +128,7 @@ async fn _message_delete(
 
     let now = Utc::now().naive_utc();
 
-    ChannelId(log_msg_channel as u64)
+    let res = ChannelId(log_msg_channel as u64)
         .send_message(ctx, |m| {
             m.embed(|e| {
                 e.description(format!(
@@ -150,7 +152,18 @@ async fn _message_delete(
 
             m
         })
-        .await?;
+        .await;
+
+    if let Err(SerenityError::Http(e)) = res {
+        // Box cant be matched
+        if let HttpError::UnsuccessfulRequest(e) = *e {
+            // Unknown channel -- deleted channel so just unset
+            if e.error.code == 10003 {
+                guild_conf.log_msg = None;
+                guild_conf.save(ctx).await?;
+            }
+        }
+    }
 
     Ok(())
 }

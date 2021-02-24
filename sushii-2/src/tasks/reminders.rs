@@ -29,7 +29,8 @@ pub async fn remind_user(ctx: &Context, reminder: &Reminder) -> Result<()> {
             if f.exceeded_attempts() {
                 tracing::info!(
                     ?reminder,
-                    "Reminder fail count exceeded max attempts, deleting"
+                    "Reminder fail count exceeded max attempts ({}), deleting",
+                    f.attempt_count
                 );
                 reminder.delete(ctx).await?;
 
