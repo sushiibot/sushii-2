@@ -46,6 +46,19 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
         }
     };
 
+    let target_user = match UserId(user_id).to_user(&ctx).await {
+        Ok(u) => u,
+        Err(_) => {
+            msg.reply(
+                &ctx,
+                "Error: Failed to fetch user, are you using a correct user ID? (Could be a message ID)",
+            )
+            .await?;
+
+            return Ok(());
+        }
+    };
+
     let entries = match ModLogEntry::get_user_entries(&ctx, guild_id, user_id).await {
         Ok(entries) => entries,
         Err(e) => {
@@ -107,19 +120,6 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
         .map(|case| format!("{} - {}", case.0, case.1))
         .collect::<Vec<String>>()
         .join("\n");
-
-    let target_user = match UserId(user_id).to_user(&ctx).await {
-        Ok(u) => u,
-        Err(_) => {
-            msg.reply(
-                &ctx,
-                "Error: Failed to fetch user, are you using a correct user ID?",
-            )
-            .await?;
-
-            return Ok(());
-        }
-    };
 
     msg.channel_id
         .send_message(&ctx.http, |m| {
