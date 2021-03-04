@@ -140,7 +140,7 @@ services:
         env_file:
             - .env_postgres
         environment:
-            - POSTGRES_EXTRA_OPTS=-Z9 --schema=app_public --blobs
+            - POSTGRES_EXTRA_OPTS=-Z9 --schema=app_public --schema=app_private --schema=app_hidden --blobs
             - SCHEDULE=@daily
             - BACKUP_KEEP_DAYS=7
             - BACKUP_KEEP_WEEKS=4
@@ -207,7 +207,7 @@ services:
     # sushii2 instance which will be removed after migration complete, keep
     # running in case of migration failure
     sushii2_old:
-        image: ghcr.io/sushiibot/sushii-2:latest
+        image: ghcr.io/sushiibot/sushii-2:0.2.0-rc.5
         container_name: sushii2_old
         restart: unless-stopped
         depends_on:
