@@ -1,5 +1,22 @@
 {
   "db": "PostgreSQL",
+  "06e8bf886ba37c24342ab8f651aeb37f5e285c1968200c2be21e1c2289ef8e61": {
+    "query": "\n        INSERT INTO app_public.cached_guilds (id, name, icon, splash, banner, features)\n             VALUES ($1, $2, $3, $4, $5, $6)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET name = $2,\n                    icon = $3,\n                    splash = $4,\n                    banner = $5,\n                    features = $6\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Text",
+          "Text",
+          "Text",
+          "TextArray"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "08f4a3bcc615eaaaf9fd0fc3448848000bf920e2379e5dd643066d24f4660f98": {
     "query": "\n            SELECT *\n              FROM app_public.guild_configs\n             WHERE id = $1\n        ",
     "describe": {
@@ -1267,24 +1284,6 @@
         false,
         false
       ]
-    }
-  },
-  "84658ec5e7352b911b6aa288db18eae64c815dff9b2325ea6171707d8687ba84": {
-    "query": "\n        INSERT INTO app_public.cached_guilds\n             VALUES ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET name = $2,\n                    member_count = $3,\n                    icon_url = $4,\n                    features = $5,\n                    splash_url = $6,\n                    banner_url = $7\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Int8",
-          "Text",
-          "Text",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
     }
   },
   "880bddc8f15bd2fdfdc800c883c1ffc29cefdab10324c0a09851ebba50ae2021": {
@@ -2718,62 +2717,6 @@
       ]
     }
   },
-  "134d58c7df76797002c176f1bf3d859f1e03695228a69069919482678f12f784": {
-    "query": "\n            SELECT id as \"id: BigInt\",\n                   name,\n                   member_count as \"member_count: BigInt\",\n                   icon_url,\n                   features,\n                   splash_url,\n                   banner_url\n              FROM app_public.cached_guilds\n             WHERE id = $1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "member_count: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "icon_url",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "features",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "splash_url",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "banner_url",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
-        false,
-        true,
-        true
-      ]
-    }
-  },
   "1d8512b30390745507726ac0c20bdee1e5b6ef39b57af2162a009ba7e33475ff": {
     "query": "\n                    SELECT user_id as \"user_id: BigInt\",\n                           guild_id as \"guild_id?: BigInt\",\n                           msg_all_time as \"xp: BigInt\",\n                           NULL as \"xp_diff?: BigInt\"\n                      FROM app_public.user_levels\n                     WHERE guild_id = $1\n                       AND ((msg_all_time, user_id) < ($2, $3) OR $2 IS NULL OR $3 IS NULL)\n                  ORDER BY \"xp: BigInt\" DESC,\n                           \"user_id: BigInt\" DESC\n                     LIMIT $4\n                ",
     "describe": {
@@ -3111,6 +3054,56 @@
         null,
         null,
         null
+      ]
+    }
+  },
+  "d45e4354789fe5c618724029ac2d56d69d96c250b73be19aa4505708ae521c08": {
+    "query": "\n            SELECT id as \"id: BigInt\",\n                   name,\n                   icon,\n                   splash,\n                   banner,\n                   features\n              FROM app_public.cached_guilds\n             WHERE id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "icon",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "splash",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "banner",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "features",
+          "type_info": "TextArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        false
       ]
     }
   },

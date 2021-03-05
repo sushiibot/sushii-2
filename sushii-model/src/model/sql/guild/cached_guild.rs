@@ -20,11 +20,10 @@ use crate::model::BigInt;
 pub struct CachedGuild {
     pub id: BigInt,
     pub name: String,
-    pub member_count: BigInt,
-    pub icon_url: Option<String>,
-    pub features: String,
-    pub splash_url: Option<String>,
-    pub banner_url: Option<String>,
+    pub icon: Option<String>,
+    pub splash: Option<String>,
+    pub banner: Option<String>,
+    pub features: Vec<String>,
 }
 
 impl CachedGuild {
@@ -64,11 +63,10 @@ async fn from_id_query(pool: &sqlx::PgPool, user_id: i64) -> Result<Option<Cache
         r#"
             SELECT id as "id: BigInt",
                    name,
-                   member_count as "member_count: BigInt",
-                   icon_url,
-                   features,
-                   splash_url,
-                   banner_url
+                   icon,
+                   splash,
+                   banner,
+                   features
               FROM app_public.cached_guilds
              WHERE id = $1
         "#,
@@ -83,24 +81,22 @@ async fn from_id_query(pool: &sqlx::PgPool, user_id: i64) -> Result<Option<Cache
 async fn update_query(pool: &sqlx::PgPool, guild: &Guild) -> Result<()> {
     sqlx::query!(
         r#"
-        INSERT INTO app_public.cached_guilds
-             VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO app_public.cached_guilds (id, name, icon, splash, banner, features)
+             VALUES ($1, $2, $3, $4, $5, $6)
         ON CONFLICT (id)
           DO UPDATE
                 SET name = $2,
-                    member_count = $3,
-                    icon_url = $4,
-                    features = $5,
-                    splash_url = $6,
-                    banner_url = $7
+                    icon = $3,
+                    splash = $4,
+                    banner = $5,
+                    features = $6
         "#,
         i64::from(guild.id),
         guild.name,
-        guild.member_count as i64,
-        guild.icon_url(),
-        guild.features.join(", "),
-        guild.splash_url(),
-        guild.banner_url(),
+        guild.icon,
+        guild.splash,
+        guild.banner,
+        &guild.features,
     )
     .execute(pool)
     .await?;
