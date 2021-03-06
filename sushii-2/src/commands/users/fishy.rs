@@ -8,7 +8,7 @@ use crate::utils::user::parse_id;
 #[command]
 #[aliases("fwishy", "foshy")]
 #[only_in("guild")]
-async fn fishy(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     // Check cooldown before checking args
     let mut author_user_data = UserData::from_id_or_new(&ctx, msg.author.id).await?;
 
@@ -20,9 +20,18 @@ async fn fishy(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         return Ok(());
     }
 
-    let target_str = args.rest();
+    let target_str = match args.single::<String>() {
+        Ok(s) => s,
+        Err(_) => {
+            msg.channel_id
+                .say(&ctx, "Error: Give me someone to fish for! Fishy for someone else to catch more fishies, or fish for yourself by passing `self` as an argument.")
+                .await?;
 
-    let target_id = match parse_id(target_str) {
+                return Ok(());
+        }
+    };
+
+    let target_id = match parse_id(&target_str) {
         Some(id) => UserId(id),
         None => {
             if target_str != "self" {
