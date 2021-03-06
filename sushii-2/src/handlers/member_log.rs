@@ -13,7 +13,7 @@ pub async fn guild_member_addition(ctx: &Context, guild_id: &GuildId, member: &M
 
 #[tracing::instrument(skip(ctx))]
 async fn _guild_member_addition(ctx: &Context, guild_id: &GuildId, member: &Member) -> Result<()> {
-    let guild_conf = match GuildConfig::from_id(&ctx, &member.guild_id).await? {
+    let mut guild_conf = match GuildConfig::from_id(&ctx, &member.guild_id).await? {
         Some(c) => c,
         None => {
             tracing::error!(?member.guild_id, ?member, "No guild config found while handling mute guild_member_addition");
@@ -58,7 +58,7 @@ async fn _guild_member_addition(ctx: &Context, guild_id: &GuildId, member: &Memb
         humantime::format_duration(age.to_std().unwrap())
     )?;
 
-    member_log_channel
+    let res = member_log_channel
         .send_message(ctx, |m| {
             m.embed(|e| {
                 e.author(|a| {
@@ -74,7 +74,24 @@ async fn _guild_member_addition(ctx: &Context, guild_id: &GuildId, member: &Memb
                 e
             })
         })
-        .await?;
+        .await;
+
+    if let Err(SerenityError::Http(e)) = res {
+        // Box cant be matched
+        if let HttpError::UnsuccessfulRequest(e) = *e {
+            // Unknown channel -- deleted channel so just unset
+            if e.error.code == 10003 {
+                guild_conf.log_member = None;
+                guild_conf.save(ctx).await?;
+            }
+
+            // Missing access -- no perms so might as well just disable
+            if e.error.code == 50001 {
+                guild_conf.log_member_enabled = false;
+                guild_conf.save(ctx).await?;
+            }
+        }
+    }
 
     Ok(())
 }
@@ -97,7 +114,7 @@ async fn _guild_member_removal(
     user: &User,
     member: &Option<Member>,
 ) -> Result<()> {
-    let guild_conf = match GuildConfig::from_id(&ctx, &guild_id).await? {
+    let mut guild_conf = match GuildConfig::from_id(&ctx, &guild_id).await? {
         Some(c) => c,
         None => {
             tracing::error!(
@@ -137,7 +154,7 @@ async fn _guild_member_removal(
         }
     }
 
-    member_log_channel
+    let res = member_log_channel
         .send_message(ctx, |m| {
             m.embed(|e| {
                 e.author(|a| {
@@ -153,7 +170,24 @@ async fn _guild_member_removal(
                 e
             })
         })
-        .await?;
+        .await;
+
+    if let Err(SerenityError::Http(e)) = res {
+        // Box cant be matched
+        if let HttpError::UnsuccessfulRequest(e) = *e {
+            // Unknown channel -- deleted channel so just unset
+            if e.error.code == 10003 {
+                guild_conf.log_member = None;
+                guild_conf.save(ctx).await?;
+            }
+
+            // Missing access -- no perms so might as well just disable
+            if e.error.code == 50001 {
+                guild_conf.log_member_enabled = false;
+                guild_conf.save(ctx).await?;
+            }
+        }
+    }
 
     Ok(())
 }

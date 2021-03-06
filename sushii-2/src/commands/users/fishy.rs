@@ -27,7 +27,7 @@ async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 .say(&ctx, "Error: Give me someone to fish for! Fishy for someone else to catch more fishies, or fish for yourself by passing `self` as an argument.")
                 .await?;
 
-                return Ok(());
+            return Ok(());
         }
     };
 

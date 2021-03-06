@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use crate::error::{Error, Result};
 use crate::model::sql::*;
-use sushii_feeds::{tonic, FeedServiceClient, feed_request::feed_update_reply::Post};
+use sushii_feeds::{feed_request::feed_update_reply::Post, tonic, FeedServiceClient};
 
 pub async fn check_new_vlives(
     ctx: &Context,
