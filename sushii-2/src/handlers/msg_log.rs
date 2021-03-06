@@ -165,6 +165,12 @@ async fn _message_delete(
                 guild_conf.log_msg = None;
                 guild_conf.save(ctx).await?;
             }
+
+            // Missing access -- no perms so might as well just disable
+            if e.error.code == 50001 {
+                guild_conf.log_msg_enabled = false;
+                guild_conf.save(ctx).await?;
+            }
         }
     }
 
@@ -199,7 +205,7 @@ async fn _message_update(
         None => return Ok(()), // Not found
     };
 
-    let guild_conf = match GuildConfig::from_id(ctx, &GuildId(saved_msg.guild_id as u64)).await? {
+    let mut guild_conf = match GuildConfig::from_id(ctx, &GuildId(saved_msg.guild_id as u64)).await? {
         Some(conf) => conf,
         None => return Ok(()),
     };
@@ -229,7 +235,7 @@ async fn _message_update(
 
     let now = Utc::now().naive_utc();
 
-    ChannelId(log_msg_channel as u64)
+    let res = ChannelId(log_msg_channel as u64)
         .send_message(ctx, |m| {
             m.embed(|e| {
                 e.description(format!(
@@ -252,12 +258,31 @@ async fn _message_update(
 
             m
         })
-        .await?;
+        .await;
 
     saved_msg.content = new_content.clone();
 
     // This doesn't update the actual serenity Message object in saved_msg.msg
     saved_msg.save(ctx).await?;
+
+    if let Err(SerenityError::Http(e)) = res {
+        // Box cant be matched
+        if let HttpError::UnsuccessfulRequest(e) = *e {
+            tracing::warn!(?e, "HttpError::UnsuccessfulRequest");
+
+            // Unknown channel -- deleted channel so just unset
+            if e.error.code == 10003 {
+                guild_conf.log_msg = None;
+                guild_conf.save(ctx).await?;
+            }
+
+            // Missing access -- no perms so might as well just disable
+            if e.error.code == 50001 {
+                guild_conf.log_msg_enabled = false;
+                guild_conf.save(ctx).await?;
+            }
+        }
+    }
 
     Ok(())
 }
