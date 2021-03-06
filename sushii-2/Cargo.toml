@@ -31,6 +31,7 @@ serde_yaml = "0.8.14"
 tracing = "0.1"
 tracing-subscriber = "0.2"
 heim = { version = "0.1.0-rc.1", features = ["cpu", "process", "memory"]}
+tracing-attributes = "0.1.13"
 
 [dependencies.sushii-model]
 path = "../sushii-model"

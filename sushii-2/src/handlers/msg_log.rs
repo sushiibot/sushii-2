@@ -65,6 +65,7 @@ pub async fn message_delete(
     }
 }
 
+#[tracing::instrument(skip(ctx))]
 async fn _message_delete(
     ctx: &Context,
     channel_id: ChannelId,
@@ -157,6 +158,8 @@ async fn _message_delete(
     if let Err(SerenityError::Http(e)) = res {
         // Box cant be matched
         if let HttpError::UnsuccessfulRequest(e) = *e {
+            tracing::warn!(?e, "HttpError::UnsuccessfulRequest");
+
             // Unknown channel -- deleted channel so just unset
             if e.error.code == 10003 {
                 guild_conf.log_msg = None;
@@ -179,6 +182,7 @@ pub async fn message_update(
     }
 }
 
+#[tracing::instrument(skip(ctx))]
 async fn _message_update(
     ctx: &Context,
     _old_msg: &Option<Message>,

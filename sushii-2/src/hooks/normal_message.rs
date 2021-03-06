@@ -13,6 +13,7 @@ pub async fn normal_message(ctx: &Context, msg: &Message) {
     }
 }
 
+#[tracing::instrument(skip(ctx))]
 async fn _normal_message(ctx: &Context, msg: &Message) -> Result<()> {
     let guild_id = match msg.guild_id {
         Some(id) => id,

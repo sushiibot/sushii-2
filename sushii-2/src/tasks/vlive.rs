@@ -84,7 +84,7 @@ pub async fn check_new_vlives(
                     })
                     .await
                 {
-                    tracing::warn!("Failed to send feed message: {}", e);
+                    tracing::warn!(?feed, ?sub, ?e, "Failed to send feed message");
                     // TODO: Delete this subscription if fails too many times,
                     // need to account for Discord going down, so a simple retry
                     // n times then delete could cause some to be deleted when

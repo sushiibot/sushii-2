@@ -10,6 +10,7 @@ pub async fn message(ctx: &Context, msg: &Message) {
     }
 }
 
+#[tracing::instrument(skip(ctx))]
 async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
     // Notifications only in guilds
     let guild = match msg.guild(ctx).await {
