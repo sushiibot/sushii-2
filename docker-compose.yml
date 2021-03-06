@@ -17,7 +17,7 @@ services:
             - web
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.api.rule=Host(`traefik.2.sushii.xyz`)"
+            - "traefik.http.routers.api.rule=Host(`traefik.sushii.xyz`)"
             - "traefik.http.routers.api.service=api@internal"
             - "traefik.http.routers.api.middlewares=auth@file"
             - "traefik.http.routers.api.entrypoints=secure"
@@ -34,7 +34,7 @@ services:
         env_file:
             - .env.grafana
         labels:
-            - "traefik.http.routers.grafana.rule=Host(`grafana.2.sushii.xyz`)"
+            - "traefik.http.routers.grafana.rule=Host(`grafana.sushii.xyz`)"
             - "traefik.http.routers.grafana.entrypoints=secure"
             - "traefik.http.routers.grafana.tls.certresolver=acme"
     prometheus:
@@ -49,7 +49,7 @@ services:
             - web
         labels:
             - "traefik.docker.network=sushii-2_web"
-            - "traefik.http.routers.prometheus.rule=Host(`prometheus.2.sushii.xyz`)"
+            - "traefik.http.routers.prometheus.rule=Host(`prometheus.sushii.xyz`)"
             - "traefik.http.routers.prometheus.entrypoints=secure"
             - "traefik.http.routers.prometheus.tls.certresolver=acme"
             - "traefik.http.routers.prometheus.middlewares=auth@file"
@@ -70,7 +70,7 @@ services:
         networks:
             - web
         labels:
-            - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.2.sushii.xyz`)"
+            - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.sushii.xyz`)"
             - "traefik.http.routers.cadvisor.entrypoints=secure"
             - "traefik.http.routers.cadvisor.tls.certresolver=acme"
             - "traefik.http.routers.cadvisor.middlewares=auth@file"
@@ -111,20 +111,6 @@ services:
             - ~/docker/postgres:/var/lib/postgresql/data
             - ./postgres.conf:/etc/postgresql/postgresql.conf
             - ~/docker/postgres_root:/root
-        networks:
-            - sushii_net
-        labels:
-            - traefik.enable=false
-    # sushii2 old instance - delete after migration successful
-    postgres_old:
-        image: postgres:12
-        container_name: postgres_old
-        restart: unless-stopped
-        env_file:
-            - .env_old
-        volumes:
-            - ~/docker/postgres_old:/var/lib/postgresql/data
-            - ~/docker/postgres_old_root:/root
         networks:
             - sushii_net
         labels:
@@ -200,29 +186,6 @@ services:
                 max-buffer-size: 4m
         env_file:
             - .env
-        networks:
-            - sushii_net
-        labels:
-            - "traefik.enable=false"
-    # sushii2 instance which will be removed after migration complete, keep
-    # running in case of migration failure
-    sushii2_old:
-        image: ghcr.io/sushiibot/sushii-2:0.2.0-rc.5
-        container_name: sushii2_old
-        restart: unless-stopped
-        depends_on:
-            - postgres_old
-        expose:
-            - "9888"
-        logging:
-            driver: json-file
-            options:
-                max-size: "10m"
-                max-file: "3"
-                mode: non-blocking
-                max-buffer-size: 4m
-        env_file:
-            - .env_old
         networks:
             - sushii_net
         labels:
