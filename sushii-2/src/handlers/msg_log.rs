@@ -1,8 +1,8 @@
 use chrono::Utc;
+use serenity::http::error::Error as HttpError;
+use serenity::Error as SerenityError;
 use serenity::{model::prelude::*, prelude::*};
 use std::fmt::Write;
-use serenity::Error as SerenityError;
-use serenity::http::error::Error as HttpError;
 
 use crate::error::Result;
 use crate::model::sql::*;
@@ -205,10 +205,11 @@ async fn _message_update(
         None => return Ok(()), // Not found
     };
 
-    let mut guild_conf = match GuildConfig::from_id(ctx, &GuildId(saved_msg.guild_id as u64)).await? {
-        Some(conf) => conf,
-        None => return Ok(()),
-    };
+    let mut guild_conf =
+        match GuildConfig::from_id(ctx, &GuildId(saved_msg.guild_id as u64)).await? {
+            Some(conf) => conf,
+            None => return Ok(()),
+        };
 
     // Don't log messages if message log isn't enabled or channel isn't set
     if !guild_conf.log_msg_enabled {

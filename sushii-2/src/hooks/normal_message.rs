@@ -35,7 +35,7 @@ async fn _normal_message(ctx: &Context, msg: &Message) -> Result<()> {
             let member = match msg.member(ctx).await {
                 Ok(m) => m,
                 Err(e) => {
-                    tracing::warn!("Failed to fetch member: {}", e);
+                    tracing::warn!(?e, "Failed to fetch member");
                     return Ok(());
                 }
             };
@@ -43,7 +43,7 @@ async fn _normal_message(ctx: &Context, msg: &Message) -> Result<()> {
             let permissions = match member.permissions(ctx).await {
                 Ok(m) => m,
                 Err(e) => {
-                    tracing::warn!("Failed to get member permissions: {}", e);
+                    tracing::warn!(?e, "Failed to get member permissions");
                     return Ok(());
                 }
             };

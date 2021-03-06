@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use crate::error::{Error, Result};
 use crate::model::sql::*;
-use sushii_feeds::{tonic, FeedServiceClient};
+use sushii_feeds::{tonic, FeedServiceClient, feed_request::feed_update_reply::Post};
 
 pub async fn check_new_vlives(
     ctx: &Context,
@@ -49,50 +49,65 @@ pub async fn check_new_vlives(
             }
 
             for sub in subscriptions {
-                if let Err(e) = ChannelId(sub.channel_id as u64)
-                    .send_message(ctx, |m| {
-                        if let Some(mention_role) = sub.mention_role {
-                            m.content(format!("<@&{}>", mention_role as u64));
-                        }
-
-                        m.embed(|e| {
-                            if let Some(ref author) = post.author {
-                                e.author(|a| {
-                                    a.name(&author.name);
-                                    a.icon_url(&author.icon);
-                                    a.url(&author.url);
-
-                                    a
-                                });
-                            }
-
-                            e.title(&post.title);
-                            e.url(&post.url);
-                            e.description(&post.description);
-                            e.image(&post.thumbnail);
-                            e.colour(post.color);
-
-                            e.footer(|f| {
-                                f.text("Powered by vlive.tv");
-                                f.icon_url("https://i.imgur.com/NzGrmho.jpg");
-
-                                f
-                            });
-
-                            e
-                        })
-                    })
-                    .await
-                {
-                    tracing::warn!(?feed, ?sub, ?e, "Failed to send feed message");
-                    // TODO: Delete this subscription if fails too many times,
-                    // need to account for Discord going down, so a simple retry
-                    // n times then delete could cause some to be deleted when
-                    // it shouldn't
+                if let Err(e) = send_msg(ctx, &post, sub).await {
+                    tracing::warn!(?e, "Failed to send feed message");
                 }
             }
         }
     }
 
     Ok(())
+}
+
+#[tracing::instrument(skip(ctx))]
+async fn send_msg(ctx: &Context, post: &Post, sub: FeedSubscription) -> Result<()> {
+    let res = ChannelId(sub.channel_id as u64)
+        .send_message(ctx, |m| {
+            if let Some(mention_role) = sub.mention_role {
+                m.content(format!("<@&{}>", mention_role as u64));
+            }
+
+            m.embed(|e| {
+                if let Some(ref author) = post.author {
+                    e.author(|a| {
+                        a.name(&author.name);
+                        a.icon_url(&author.icon);
+                        a.url(&author.url);
+
+                        a
+                    });
+                }
+
+                e.title(&post.title);
+                e.url(&post.url);
+                e.description(&post.description);
+                e.image(&post.thumbnail);
+                e.colour(post.color);
+
+                e.footer(|f| {
+                    f.text("Powered by vlive.tv");
+                    f.icon_url("https://i.imgur.com/NzGrmho.jpg");
+
+                    f
+                });
+
+                e
+            })
+        })
+        .await;
+
+    if let Err(SerenityError::Http(e)) = res {
+        // Box cant be matched
+        if let HttpError::UnsuccessfulRequest(e) = *e {
+            tracing::warn!(?e, "HttpError::UnsuccessfulRequest");
+
+            // Unknown channel -- deleted channel so delete feed subscription
+            // Or Missing permissions, delete it anyways whatever
+            if e.error.code == 10003 || e.error.code == 50001 {
+                sub.delete(ctx).await?;
+            }
+        }
+    }
+
+    return Ok(());
 }
