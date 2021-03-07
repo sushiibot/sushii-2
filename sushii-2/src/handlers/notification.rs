@@ -1,3 +1,5 @@
+use serenity::http::error::Error as HttpError;
+use serenity::Error as SerenityError;
 use serenity::{model::prelude::*, prelude::*};
 use std::time::Instant;
 
@@ -62,7 +64,24 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
         // Won't request same member multiple times since it's deduped
         let member = match guild.member(ctx, noti.user_id as u64).await {
             Ok(member) => member,
-            Err(_) => continue,
+            Err(SerenityError::Http(e)) => {
+                // Box cant be matched
+                if let HttpError::UnsuccessfulRequest(e) = *e {
+                    tracing::warn!(?e, "HttpError::UnsuccessfulRequest getting member");
+
+                    // Unknown member -- member left so delete
+                    if e.error.code == 10007 {
+                        if let Err(e) = noti.delete(ctx).await {
+                            tracing::warn!(?e, "Failed to delete notification");
+                        }
+                    }
+                }
+
+                continue;
+            }
+            _ => {
+                continue;
+            }
         };
 
         // Returns Err if user isn't in guild
