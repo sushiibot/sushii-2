@@ -143,7 +143,7 @@ impl<'a> ModLogReporter<'a> {
             s,
             "**User:** {} `{}` | `{}`",
             self.user.mention(),
-            self.user.tag(),
+            self.user.tag().replace("`", "\\`"),
             self.user.id.0
         );
         let _ = writeln!(s, "**Action:** {}", entry.action);
