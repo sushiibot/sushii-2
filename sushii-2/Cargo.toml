@@ -62,7 +62,7 @@ features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "of
 [dependencies.serenity]
 # git = "https://github.com/serenity-rs/serenity"
 # rev = "0b1fc2737efebde01f6f3b781bcdfc83a30e908e"
-version = "0.10.2"
+version = "0.10.4"
 default-features = false
 features = ["default_tokio_0_2", "collector"]
 

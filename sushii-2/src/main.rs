@@ -1,5 +1,6 @@
 use serenity::{
-    client::bridge::gateway::GatewayIntents, framework::StandardFramework, http::Http, prelude::*,
+    client::bridge::gateway::GatewayIntents, client::ClientBuilder, framework::StandardFramework,
+    http::Http,
 };
 use sqlx::postgres::PgPoolOptions;
 use std::collections::HashSet;
@@ -59,7 +60,31 @@ async fn main() -> Result<()> {
 
     let metrics = Arc::new(Metrics::new(&sushii_conf).await);
 
-    let http = Http::new_with_token(&sushii_conf.discord_token);
+    // Use own reqwest client to proxy API requests to twilight http-proxy
+    let http_client = {
+        let mut client = reqwest::Client::builder().use_rustls_tls();
+
+        if let Ok(api_proxy_url) = std::env::var("TWILIGHT_API_PROXY_URL") {
+            let proxy = reqwest::Proxy::all(&api_proxy_url).expect("Failed to build reqwest proxy");
+            client = client.proxy(proxy);
+        } else {
+            tracing::warn!(
+                "TWILIGHT_API_PROXY_URL not found in environment, not proxying requests"
+            );
+        }
+
+        client.build().expect("Failed to build reqwest client")
+    };
+
+    let http = {
+        let token = if sushii_conf.discord_token.trim().starts_with("Bot ") {
+            sushii_conf.discord_token.to_string()
+        } else {
+            format!("Bot {}", sushii_conf.discord_token)
+        };
+
+        Http::new(Arc::new(http_client), &token)
+    };
 
     let (owners, bot_id) = match http.get_current_application_info().await {
         Ok(info) => {
@@ -114,7 +139,7 @@ async fn main() -> Result<()> {
         .group(&commands::OWNER_GROUP)
         .normal_message(hooks::normal_message);
 
-    let mut client = Client::builder(&sushii_conf.discord_token)
+    let mut client = ClientBuilder::new_with_http(http)
         .intents(
             GatewayIntents::GUILDS
                 | GatewayIntents::GUILD_MEMBERS

@@ -867,9 +867,9 @@ dependencies = [
 
 [[package]]
 name = "command_attr"
-version = "0.3.3"
+version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef54b146e4ff8a036b9d632fd48c183c9757992535e5f557275f4a01dfd9c7c7"
+checksum = "d3479c246caa6e2064839ed6bb165fae9a8894bcc79d893090a091b49529b475"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3668,9 +3668,9 @@ dependencies = [
 
 [[package]]
 name = "serenity"
-version = "0.10.2"
+version = "0.10.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4dac8367ecfd3380c00dcedf5eb9a47888ae74ae391419b5b1f7735895ed8df4"
+checksum = "f86e9dc74c89931fe12f3af64ae484268c0a4864a90fb2b7d2e867a301f173c4"
 dependencies = [
  "async-trait",
  "async-tungstenite",
@@ -3688,7 +3688,6 @@ dependencies = [
  "static_assertions",
  "tokio 0.2.24",
  "tracing",
- "tracing-futures",
  "typemap_rev",
  "url",
  "uwl",
@@ -4645,9 +4644,9 @@ dependencies = [
 
 [[package]]
 name = "tracing"
-version = "0.1.22"
+version = "0.1.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9f47026cdc4080c07e49b37087de021820269d996f581aac150ef9e5583eefe3"
+checksum = "01ebdc2bb4498ab1ab5f5b73c5803825e60199229ccba0698170e3be0e7f959f"
 dependencies = [
  "cfg-if 1.0.0",
  "log",
