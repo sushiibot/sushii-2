@@ -83,22 +83,14 @@ pub async fn message(ctx: &Context, msg: &Message) {
                 tracing::warn!(message=%msg_string, "Failed to send role message: {}", e);
             };
 
-            // Delete messages after 10 seconds
-            delay_for(Duration::from_secs(10)).await;
+            // Delete messages after 5 seconds
+            delay_for(Duration::from_secs(5)).await;
 
             if let Ok(sent_msg) = sent_msg {
                 // Run both delete futures concurrently instead of in series
                 // try_join! better for Results but still want to try deleting both as
                 // try_join! short circuits and returns immediately on any Error
-                let (recv_res, sent_res) = join!(msg.delete(&ctx), sent_msg.delete(&ctx));
-
-                if let Err(e) = recv_res {
-                    tracing::warn!(?msg, "Failed to delete received message: {}", e);
-                }
-
-                if let Err(e) = sent_res {
-                    tracing::warn!(message=%msg_string, "Failed to delete sent message: {}", e);
-                }
+                let _ = join!(msg.delete(&ctx), sent_msg.delete(&ctx));
             } else {
                 // Role message failed sooo just delete user's message
                 let _ = msg.delete(&ctx).await;
