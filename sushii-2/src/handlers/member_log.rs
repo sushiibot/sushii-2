@@ -54,7 +54,7 @@ async fn _guild_member_addition(ctx: &Context, guild_id: &GuildId, member: &Memb
 
     write!(
         desc,
-        "Created at {}",
+        "Created {} ago",
         humantime::format_duration(age.to_std().unwrap())
     )?;
 
