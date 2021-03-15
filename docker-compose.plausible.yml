@@ -8,6 +8,8 @@ services:
             - plausible.env
         networks:
             - plausible_net
+        labels:
+            - "traefik.enable=false"
     plausible_db:
         image: postgres:12
         container_name: plausible_db
