@@ -68,6 +68,9 @@ async fn thirty_seconds(ctx: Context) {
 
         if let Err(e) = vlive::check_new_vlives(&ctx, tonic_client.clone()).await {
             tracing::error!("Failed checking for new vlives: {}", e);
+
+            // If failed, sleep before trying again
+            interval.tick().await;
         }
     }
 }
