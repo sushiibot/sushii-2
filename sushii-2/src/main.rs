@@ -139,7 +139,9 @@ async fn main() -> Result<()> {
         .group(&commands::settings::SETTINGS_GROUP)
         .group(&commands::roles::ROLES_GROUP)
         .group(&commands::OWNER_GROUP)
-        .normal_message(hooks::normal_message);
+        .normal_message(hooks::normal_message)
+        .bucket("rank", |b| b.delay(5))
+        .await;
 
     let mut client = ClientBuilder::new_with_http(http)
         .intents(

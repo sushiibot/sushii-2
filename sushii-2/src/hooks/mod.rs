@@ -58,6 +58,18 @@ pub async fn dispatch_error(ctx: &Context, msg: &Message, error: DispatchError) 
 
             let _ = msg.channel_id.say(&ctx, &s).await;
         }
+        DispatchError::Ratelimited(r) => {
+            let _ = msg
+                .channel_id
+                .say(
+                    &ctx,
+                    format!(
+                        "Error: Please wait {}s before using this command again",
+                        r.rate_limit.as_secs()
+                    ),
+                )
+                .await;
+        }
         _ => tracing::warn!("Unhandled dispatch error: {:?}", error),
     }
 }

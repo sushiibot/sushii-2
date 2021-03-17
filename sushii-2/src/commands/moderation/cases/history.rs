@@ -77,7 +77,10 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
 
     if entries.is_empty() {
         msg.channel_id
-            .say(&ctx.http, format!("No cases found for {}", target_user.tag()))
+            .say(
+                &ctx.http,
+                format!("No cases found for {}", target_user.tag()),
+            )
             .await?;
 
         return Ok(());

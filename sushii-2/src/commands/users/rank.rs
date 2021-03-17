@@ -14,6 +14,7 @@ use sushii_model::model::user::UserLevelProgress;
 #[command]
 #[only_in("guild")]
 #[aliases("profile", "rakn", "rnak", "arnk")]
+#[bucket("rank")]
 async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let guild_id = match msg.guild_id {
         Some(id) => id,
