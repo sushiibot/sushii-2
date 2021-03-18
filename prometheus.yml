@@ -10,9 +10,9 @@ scrape_configs:
       static_configs:
           - targets: ["sushii:9888"]
 
-    - job_name: "sushii site"
+    - job_name: "sushii-image-server"
       static_configs:
-          - targets: ["sushii-site:8000"]
+          - targets: ["sushii-image-server:3000"]
 
     - job_name: "cadvisor"
       static_configs:
