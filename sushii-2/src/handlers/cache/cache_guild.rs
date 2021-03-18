@@ -5,7 +5,7 @@ use crate::model::sql::*;
 
 pub async fn guild_create(ctx: &Context, guild: &Guild, is_new: bool) {
     if let Err(e) = _guild_create(ctx, guild, is_new).await {
-        tracing::error!(?guild, "Failed to run cache_guild create handler: {}", e);
+        tracing::error!(?guild.id, "Failed to run cache_guild create handler: {}", e);
     }
 }
 
