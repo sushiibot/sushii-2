@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.6] - 2021-03-18
+
+### Added
+
+-  Display target user tag when `history` is used and no cases are found
+
+### Changed
+
+-  Add 5s rate limit to `rank` command
+
+### Fixed
+
+-  Prevent `fishy` command from failing if adding content after user mention/id
+-  Escape backticks (`) in mod log usernames to prevent breaking formatting
+
+## [0.2.3] - 2021-03-06
+
+### Changed
+
+-  Reset guild config `log_msg` if channel is deleted
+-  Use image hashes for cached guild table instead of URLs
+
 ## [0.2.2] - 2021-02-23
 
 ### Added
@@ -338,7 +360,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Prevent role handler from running outside of role channels
 -   Fix mod log entry saving
 
-[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.2...HEAD
+[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.6...HEAD
+[0.2.9]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.8...sushii-2-v0.2.9
+[0.2.8]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.7...sushii-2-v0.2.8
+[0.2.7]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.6...sushii-2-v0.2.7
+[0.2.6]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.5...sushii-2-v0.2.6
+[0.2.5]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.4...sushii-2-v0.2.5
+[0.2.4]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.3...sushii-2-v0.2.4
+[0.2.3]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.2...sushii-2-v0.2.3
 [0.2.2]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.1...sushii-2-v0.2.2
 [0.2.1]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.0...sushii-2-v0.2.1
 [0.2.0]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.0-rc.7...sushii-2-v0.2.0
