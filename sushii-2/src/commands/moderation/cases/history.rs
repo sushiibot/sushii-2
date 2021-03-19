@@ -96,11 +96,8 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
         return Ok(());
     }
 
-    let mut s = String::new();
-
-    for entry in &entries {
-        let _ = write!(
-            s,
+    let entry_strs: Vec<String> = entries.iter().map(|entry| {
+        let mut entry_str = format!(
             "`[{} | #{}]` **{}**",
             entry.action_time.format("%y-%m-%d %H:%M"),
             entry.case_id,
@@ -108,15 +105,44 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
         );
 
         if let Some(id) = entry.executor_id {
-            let _ = write!(s, " by <@{}>", id);
+            let _ = write!(entry_str, " by <@{}>", id);
         }
 
         if let Some(ref reason) = entry.reason {
-            let _ = write!(s, " for `{}`", reason);
+            let _ = write!(entry_str, " for `{}`", reason);
         }
 
-        let _ = writeln!(s);
-    }
+        entry_str
+    })
+    .collect();
+
+    // First entry to display if exceeded message limit, truncate the ones in front
+    let mut start_index = None;
+
+    // Sum up string starting from last one
+    let _ = entry_strs
+        .iter()
+        .enumerate()
+        .rev()
+        .fold(0, |acc, (i, s)| {
+            if start_index.is_none() && acc + s.len() > 2048 {
+                // Set it to the next one since the current one exceeds limit
+                // Want to exclude this one
+                start_index = Some(i + 1);
+            }
+
+            acc + s.len()
+        });
+
+    let s = if let Some(index) = start_index {
+        format!(
+            "({} older entries not shown)\n{}",
+            index,
+            &entry_strs[index..].join("\n"),
+        )
+    } else {
+        entry_strs.join("\n")
+    };
 
     let action_counts = entries.iter().fold(HashMap::new(), |mut acc, case| {
         let entry = acc.entry(&case.action).or_insert(0u64);
