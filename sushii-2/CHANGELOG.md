@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.7] - 2021-03-21
+
+### Fixed
+
+-  Hide older cases in `history` if exceeds message size limit
+-  Fix infinite loop / OOM when last.fm commands fail
+
 ## [0.2.6] - 2021-03-18
 
 ### Added

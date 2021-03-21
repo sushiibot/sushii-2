@@ -1,6 +1,6 @@
 [package]
 name = "sushii-2"
-version = "0.2.6"
+version = "0.2.7"
 authors = ["drklee3 <derrick@dlee.dev>"]
 edition = "2018"
 build = "build.rs"
@@ -47,8 +47,8 @@ git = "https://github.com/drklee3/vlive-rs"
 rev = "19a280d951e2cd188eccf9c8e6addc60613607b7"
 
 [dependencies.lastfm-rs]
-git = "https://github.com/KamranMackey/lastfm-rs"
-rev = "cc935558551282a609d7824fdaf71613185855dc"
+git = "https://github.com/sushiibot/lastfm-rs"
+rev = "b7a7bbd0a72b3396d6b945f3c0caab807d832a2e"
 # path = "../lastfm-rs"
 
 [dependencies.tokio]

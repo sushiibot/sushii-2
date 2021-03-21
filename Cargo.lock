@@ -2390,7 +2390,7 @@ checksum = "a91d884b6667cd606bb5a69aa0c99ba811a115fc68915e7056ec08a46e93199a"
 [[package]]
 name = "lastfm-rs"
 version = "0.4.2"
-source = "git+https://github.com/KamranMackey/lastfm-rs?rev=cc935558551282a609d7824fdaf71613185855dc#cc935558551282a609d7824fdaf71613185855dc"
+source = "git+https://github.com/sushiibot/lastfm-rs?rev=b7a7bbd0a72b3396d6b945f3c0caab807d832a2e#b7a7bbd0a72b3396d6b945f3c0caab807d832a2e"
 dependencies = [
  "chrono",
  "reqwest",
@@ -4251,7 +4251,7 @@ checksum = "1e81da0851ada1f3e9d4312c704aa4f8806f0f9d69faaf8df2f3464b4a9437c2"
 
 [[package]]
 name = "sushii-2"
-version = "0.2.6"
+version = "0.2.7"
 dependencies = [
  "async-trait",
  "chrono",
