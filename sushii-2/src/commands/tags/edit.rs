@@ -151,7 +151,7 @@ async fn rename(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     msg.channel_id
         .say(
             &ctx,
-            format!("Renamed `{}` to `{}`", tag_name, tag.tag_name),
+            format!("Renamed `{}` to `{}`", tag_name, new_tag_name),
         )
         .await?;
 
