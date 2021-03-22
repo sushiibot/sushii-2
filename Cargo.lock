@@ -4251,7 +4251,7 @@ checksum = "1e81da0851ada1f3e9d4312c704aa4f8806f0f9d69faaf8df2f3464b4a9437c2"
 
 [[package]]
 name = "sushii-2"
-version = "0.2.7"
+version = "0.2.8"
 dependencies = [
  "async-trait",
  "chrono",
@@ -4287,7 +4287,7 @@ dependencies = [
  "tracing-attributes",
  "tracing-subscriber",
  "vergen",
- "vlive",
+ "vlive 0.2.0 (git+https://github.com/drklee3/vlive-rs?rev=9be4c9218d9dd775d168bd09c61b28364aec0d05)",
 ]
 
 [[package]]
@@ -4332,7 +4332,7 @@ dependencies = [
  "tonic-build",
  "tracing",
  "tracing-subscriber",
- "vlive",
+ "vlive 0.2.0 (git+https://github.com/drklee3/vlive-rs?rev=19a280d951e2cd188eccf9c8e6addc60613607b7)",
 ]
 
 [[package]]
@@ -5040,6 +5040,23 @@ checksum = "b5a972e5669d67ba988ce3dc826706fb0a8b01471c088cb0b6110b805cc36aed"
 name = "vlive"
 version = "0.2.0"
 source = "git+https://github.com/drklee3/vlive-rs?rev=19a280d951e2cd188eccf9c8e6addc60613607b7#19a280d951e2cd188eccf9c8e6addc60613607b7"
+dependencies = [
+ "async-trait",
+ "chrono",
+ "lazy_static",
+ "regex 0.2.11",
+ "reqwest",
+ "scraper",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "tracing",
+]
+
+[[package]]
+name = "vlive"
+version = "0.2.0"
+source = "git+https://github.com/drklee3/vlive-rs?rev=9be4c9218d9dd775d168bd09c61b28364aec0d05#9be4c9218d9dd775d168bd09c61b28364aec0d05"
 dependencies = [
  "async-trait",
  "chrono",
