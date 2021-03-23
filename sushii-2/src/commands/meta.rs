@@ -21,7 +21,7 @@ async fn invite(ctx: &Context, msg: &Message) -> CommandResult {
     // TODO: Pass invite link via config
     msg.channel_id.say(
         ctx,
-        "https://discord.com/oauth2/authorize?client_id=193163942502072320&permissions=268823622&scope=bot"
+        "https://discord.com/oauth2/authorize?client_id=193163942502072320&permissions=268823622&scope=applications.commands%20bot"
     ).await?;
 
     Ok(())
