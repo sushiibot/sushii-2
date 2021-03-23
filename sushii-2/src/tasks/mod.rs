@@ -57,7 +57,7 @@ async fn thirty_seconds(ctx: Context) {
 
                 // Sleep and increase sleep time for next failure
                 tokio::time::sleep(Duration::from_secs(sleep_secs)).await;
-                sleep_secs += 5;
+                sleep_secs *= 2;
             }
         }
     };
