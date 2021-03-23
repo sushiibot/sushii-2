@@ -9,7 +9,7 @@ use tokio_stream::StreamExt;
 use crate::model::sql::*;
 use crate::model::Paginator;
 
-const PAGE_SIZE: i64 = 10;
+const PAGE_SIZE: i64 = 20;
 
 fn fmt_tags(tags: &[Tag]) -> String {
     let mut s = String::new();
