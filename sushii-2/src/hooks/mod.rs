@@ -81,7 +81,8 @@ pub async fn after(ctx: &Context, msg: &Message, cmd_name: &str, error: Result<(
         tracing::error!(?msg, %e, "Error running command");
 
         // Downcast error
-        sentry::capture_error(&*e);
+        // Disable sentry for now since it causes too many infinite loops
+        // sentry::capture_error(&*e);
 
         let _ = msg
             .channel_id
