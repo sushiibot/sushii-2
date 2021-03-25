@@ -77,62 +77,66 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
 
     if entries.is_empty() {
         msg.channel_id
-            .send_message(&ctx.http, |m| {
-                m.content(format!(
-                    "No cases found for {} ({} | ID: {})",
-                    target_user.mention(),
-                    target_user.tag(),
-                    target_user.id
-                ));
-                m.allowed_mentions(|am| {
-                    am.empty_parse();
-                    am
+        .send_message(&ctx.http, |m| {
+            m.embed(|e| {
+                e.author(|a| {
+                    a.icon_url(target_user.face());
+
+                    a.name(format!(
+                        "Case history for {} (ID: {})",
+                        target_user.tag(),
+                        user_id
+                    ));
+
+                    a
                 });
 
-                m
+                e.description("No cases were found.");
+                e.color(0x228ae6);
+
+                e
             })
-            .await?;
+        })
+        .await?;
 
         return Ok(());
     }
 
-    let entry_strs: Vec<String> = entries.iter().map(|entry| {
-        let mut entry_str = format!(
-            "`[{} | #{}]` **{}**",
-            entry.action_time.format("%y-%m-%d %H:%M"),
-            entry.case_id,
-            entry.action
-        );
+    let entry_strs: Vec<String> = entries
+        .iter()
+        .map(|entry| {
+            let mut entry_str = format!(
+                "`[{} | #{}]` **{}**",
+                entry.action_time.format("%y-%m-%d %H:%M"),
+                entry.case_id,
+                entry.action
+            );
 
-        if let Some(id) = entry.executor_id {
-            let _ = write!(entry_str, " by <@{}>", id);
-        }
+            if let Some(id) = entry.executor_id {
+                let _ = write!(entry_str, " by <@{}>", id);
+            }
 
-        if let Some(ref reason) = entry.reason {
-            let _ = write!(entry_str, " for `{}`", reason);
-        }
+            if let Some(ref reason) = entry.reason {
+                let _ = write!(entry_str, " for `{}`", reason);
+            }
 
-        entry_str
-    })
-    .collect();
+            entry_str
+        })
+        .collect();
 
     // First entry to display if exceeded message limit, truncate the ones in front
     let mut start_index = None;
 
     // Sum up string starting from last one
-    let _ = entry_strs
-        .iter()
-        .enumerate()
-        .rev()
-        .fold(0, |acc, (i, s)| {
-            if start_index.is_none() && acc + s.len() > 2048 {
-                // Set it to the next one since the current one exceeds limit
-                // Want to exclude this one
-                start_index = Some(i + 1);
-            }
+    let _ = entry_strs.iter().enumerate().rev().fold(0, |acc, (i, s)| {
+        if start_index.is_none() && acc + s.len() > 2048 {
+            // Set it to the next one since the current one exceeds limit
+            // Want to exclude this one
+            start_index = Some(i + 1);
+        }
 
-            acc + s.len()
-        });
+        acc + s.len()
+    });
 
     let s = if let Some(index) = start_index {
         format!(
