@@ -1,4 +1,4 @@
-use chrono::Duration;
+use chrono::{DateTime, Duration, Utc};
 use core::time::Duration as StdDuration;
 use humantime::DurationError;
 
@@ -43,6 +43,18 @@ pub fn parse_duration_std(s: &str) -> Result<StdDuration, String> {
 pub fn parse_duration(s: &str) -> Result<Duration, String> {
     parse_duration_std(s)
         .and_then(|d| Duration::from_std(d).map_err(|_| "Duration is too long".into()))
+}
+
+// Formats a duration and truncates smaller units if longer than 1 day
+pub fn format_duration(now: &DateTime<Utc>, before: &DateTime<Utc>) -> String {
+    let dur_secs = Duration::seconds(now.signed_duration_since(*before).num_seconds());
+    let days = dur_secs.num_days();
+
+    if days >= 7 {
+        format!("{} days", days)
+    } else {
+        humantime::format_duration(dur_secs.to_std().unwrap()).to_string()
+    }
 }
 
 #[cfg(test)]

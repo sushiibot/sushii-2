@@ -1,9 +1,10 @@
-use chrono::{DateTime, Duration, Utc};
+use chrono::Utc;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use std::fmt::Write;
 
+use crate::utils::duration::format_duration;
 use crate::utils::user::parse_id;
 
 #[command]
@@ -127,15 +128,4 @@ async fn userinfo(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         .await?;
 
     Ok(())
-}
-
-fn format_duration(now: &DateTime<Utc>, before: &DateTime<Utc>) -> String {
-    let dur_secs = Duration::seconds(now.signed_duration_since(*before).num_seconds());
-    let days = dur_secs.num_days();
-
-    if days >= 1 {
-        format!("{} days", days)
-    } else {
-        humantime::format_duration(dur_secs.to_std().unwrap()).to_string()
-    }
 }

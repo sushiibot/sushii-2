@@ -1,3 +1,4 @@
+use chrono::Utc;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
@@ -6,6 +7,7 @@ use std::collections::HashMap;
 use std::fmt::Write;
 
 use crate::model::sql::ModLogEntry;
+use crate::utils::duration::format_duration;
 
 #[command]
 #[only_in("guild")]
@@ -59,6 +61,9 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
         }
     };
 
+    let member = GuildId(guild_id).member(ctx, user_id).await;
+    let now = Utc::now();
+
     let entries = match ModLogEntry::get_user_entries(&ctx, guild_id, user_id).await {
         Ok(entries) => entries,
         Err(e) => {
@@ -77,27 +82,48 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
 
     if entries.is_empty() {
         msg.channel_id
-        .send_message(&ctx.http, |m| {
-            m.embed(|e| {
-                e.author(|a| {
-                    a.icon_url(target_user.face());
+            .send_message(&ctx.http, |m| {
+                m.embed(|e| {
+                    e.author(|a| {
+                        a.icon_url(target_user.face());
 
-                    a.name(format!(
-                        "Case history for {} (ID: {})",
-                        target_user.tag(),
-                        user_id
-                    ));
+                        a.name(format!(
+                            "Case history for {} (ID: {})",
+                            target_user.tag(),
+                            user_id
+                        ));
 
-                    a
-                });
+                        a
+                    });
 
-                e.description("No cases were found.");
-                e.color(0x228ae6);
+                    e.color(0x228ae6);
+                    e.description("No cases were found.");
+                    e.field(
+                        "Joined Discord At",
+                        format!(
+                            "{} ({} ago)",
+                            target_user.created_at().format("%Y-%m-%d %H:%M:%S"),
+                            format_duration(&now, &target_user.created_at())
+                        ),
+                        false,
+                    );
 
-                e
+                    if let Some(ref joined_at) = member.ok().and_then(|m| m.joined_at) {
+                        e.field(
+                            "Joined Server At",
+                            format!(
+                                "{} ({} ago)",
+                                joined_at.format("%Y-%m-%d %H:%M:%S"),
+                                format_duration(&now, joined_at)
+                            ),
+                            false,
+                        );
+                    }
+
+                    e
+                })
             })
-        })
-        .await?;
+            .await?;
 
         return Ok(());
     }
@@ -179,9 +205,32 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
                     a
                 });
 
-                e.description(&s);
-                e.field("Summary", action_counts_string, false);
                 e.color(0xe67e22);
+                e.description(&s);
+
+                e.field("Summary", action_counts_string, false);
+
+                e.field(
+                    "Joined Discord At",
+                    format!(
+                        "{} ({} ago)",
+                        target_user.created_at().format("%Y-%m-%d %H:%M:%S"),
+                        format_duration(&now, &target_user.created_at())
+                    ),
+                    false,
+                );
+
+                if let Some(ref joined_at) = member.ok().and_then(|m| m.joined_at) {
+                    e.field(
+                        "Joined Server At",
+                        format!(
+                            "{} ({} ago)",
+                            joined_at.format("%Y-%m-%d %H:%M:%S"),
+                            format_duration(&now, joined_at)
+                        ),
+                        false,
+                    );
+                }
 
                 e.footer(|f| f.text("Date format: YY-MM-DD • Times in UTC"));
 
