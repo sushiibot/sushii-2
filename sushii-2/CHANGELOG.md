@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.10] - 2021-03-25
+
+### Added
+
+-  Re-add `hug` command from old sushii
+-  Show user create and member join date on `history`
+
+### Changed
+
+-  Tags per pages for `tag list` and `tag search` increased from 10 to 20
+-  Use embed format when no case history is found for user
+
 ## [0.2.8] - 2021-03-21
 
 ### Fixed
@@ -373,7 +385,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Prevent role handler from running outside of role channels
 -   Fix mod log entry saving
 
-[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.6...HEAD
+[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.10...HEAD
+[0.2.9]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.9...sushii-2-v0.2.10
 [0.2.9]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.8...sushii-2-v0.2.9
 [0.2.8]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.7...sushii-2-v0.2.8
 [0.2.7]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.6...sushii-2-v0.2.7

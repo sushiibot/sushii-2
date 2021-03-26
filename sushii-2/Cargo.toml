@@ -1,6 +1,6 @@
 [package]
 name = "sushii-2"
-version = "0.2.9"
+version = "0.2.10"
 authors = ["drklee3 <derrick@dlee.dev>"]
 edition = "2018"
 build = "build.rs"
