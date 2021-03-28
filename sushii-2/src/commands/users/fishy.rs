@@ -108,7 +108,7 @@ async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     let s = if is_golden {
         format!(
-            "You caught a golden fishy{}!!! ({} fishies)",
+            "You caught a golden fishy{}!!! <:goldenFishy:418676324157227008> ({} fishies)",
             name_str, fishies
         )
     } else {
