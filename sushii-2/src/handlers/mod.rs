@@ -18,8 +18,9 @@ pub struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn ready(&self, _: Context, ready: Ready) {
+    async fn ready(&self, ctx: Context, ready: Ready) {
         tracing::info!("Connected as {}", ready.user.name);
+        ctx.set_activity(Activity::playing("sushii.xyz")).await;
     }
 
     async fn cache_ready(&self, ctx: Context, _: Vec<GuildId>) {
