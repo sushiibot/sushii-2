@@ -63,7 +63,24 @@ async fn rep(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     author_user_data.reset_last_rep().save(&ctx).await?;
 
     msg.channel_id
-        .say(&ctx, format!("You gave {} a rep!", target_user.tag()))
+        .send_message(ctx, |m| {
+            m.embed(|e| {
+                e.author(|a| {
+                    a.name(&target_user.name);
+                    a.icon_url(target_user.face());
+
+                    a
+                });
+
+                e.colour(0x2F3136);
+                e.description(format!(
+                    "You gave {} a rep!",
+                    target_user.name
+                ));
+
+                e
+            })
+        })
         .await?;
 
     Ok(())
