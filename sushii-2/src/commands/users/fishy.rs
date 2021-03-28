@@ -75,6 +75,12 @@ async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         None
     };
 
+    // Total fishies is before adding more fishies
+    let total_fishies = target_user_data
+        .as_ref()
+        .map(|d| d.fishies)
+        .unwrap_or(author_user_data.fishies);
+
     let (fishies, is_golden) = match target_user_data {
         Some(mut target) => {
             // Someone else
@@ -97,7 +103,7 @@ async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let name_str = if is_self {
         "".to_string()
     } else {
-        format!(" for {}", target_user.tag())
+        format!(" for {}", target_user.name)
     };
 
     let s = if is_golden {
@@ -109,7 +115,28 @@ async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         format!("You caught {} fishies{}!", fishies, name_str)
     };
 
-    msg.channel_id.say(&ctx, s).await?;
+    msg.channel_id
+        .send_message(ctx, |m| {
+            m.embed(|e| {
+                e.author(|a| {
+                    a.name(&target_user.name);
+                    a.icon_url(target_user.face());
+
+                    a
+                });
+
+                e.colour(0x2F3136);
+                e.description(format!(
+                    "{} {} → {} fishies",
+                    s,
+                    total_fishies,
+                    total_fishies + fishies,
+                ));
+
+                e
+            })
+        })
+        .await?;
 
     Ok(())
 }

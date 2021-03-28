@@ -58,7 +58,7 @@ async fn rep(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     }
 
     let target_user_data = UserData::from_id_or_new(&ctx, target_id).await?;
-    target_user_data.inc_rep().save(&ctx).await?;
+    let target_user_data = target_user_data.inc_rep().save(&ctx).await?;
 
     author_user_data.reset_last_rep().save(&ctx).await?;
 
@@ -74,8 +74,10 @@ async fn rep(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
                 e.colour(0x2F3136);
                 e.description(format!(
-                    "You gave {} a rep!",
-                    target_user.name
+                    "You gave {} a rep! {} → {} rep",
+                    target_user.name,
+                    target_user_data.rep - 1,
+                    target_user_data.rep
                 ));
 
                 e
