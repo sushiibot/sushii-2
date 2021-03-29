@@ -28,8 +28,9 @@ impl EventHandler for Handler {
         tasks::start(&ctx).await;
     }
 
-    async fn resume(&self, _: Context, _: ResumedEvent) {
+    async fn resume(&self, ctx: Context, _: ResumedEvent) {
         tracing::info!("Resumed");
+        ctx.set_activity(Activity::playing("sushii.xyz")).await;
     }
 
     async fn message(&self, ctx: Context, msg: Message) {
