@@ -28,6 +28,18 @@ async fn invite(ctx: &Context, msg: &Message) -> CommandResult {
 }
 
 #[command]
+#[aliases("donate", "support")]
+async fn patreon(ctx: &Context, msg: &Message) -> CommandResult {
+    // TODO: Pass invite link via config
+    msg.channel_id.say(
+        ctx,
+        "You can support me here! <https://www.patreon.com/sushiibot>"
+    ).await?;
+
+    Ok(())
+}
+
+#[command]
 #[aliases("stats")]
 async fn about(ctx: &Context, msg: &Message) -> CommandResult {
     let version = env!("CARGO_PKG_VERSION");

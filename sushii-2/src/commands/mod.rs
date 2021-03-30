@@ -22,5 +22,5 @@ use self::{help::*, meta::*, owner::*, prefix::*};
 pub struct Owner;
 
 #[group]
-#[commands(prefix, ping, invite, about, help)]
+#[commands(prefix, ping, patreon, invite, about, help)]
 pub struct Meta;
