@@ -51,7 +51,7 @@ pub fn parse_duration(s: &str) -> Result<Duration, String> {
 pub fn find_duration(s: &str) -> Option<regex::Match> {
     lazy_static! {
         static ref RE: Regex = Regex::new(
-            r"(?:(?:\d+\s*(?:nanos|nsec|ns|usec|us|millis|msec|ms|seconds|second|secs|sec|s|minutes|minute|min|mins|m|hours|hour|hrs|hr|h|days|day|d|weeks|week|w|months|month|M|years|year|y))\s?)+"
+            r"(?:(?:\d+\s*(?:nanos|nsec|ns|usec|us|millis|msec|ms|seconds|second|secs|sec|s|minutes|minute|min|mins|m|hours|hour|hrs|hr|h|days|day|d|weeks|week|w|months|month|M|years|year|y))(?:\s|\b))+"
         ).unwrap();
     }
 
