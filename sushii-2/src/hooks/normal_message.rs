@@ -30,6 +30,12 @@ async fn _normal_message(ctx: &Context, msg: &Message) -> Result<()> {
         }
     };
 
+    if let Some(channel) = guild_conf.role_channel {
+        if msg.channel_id == channel as u64 {
+            return Ok(());
+        }
+    }
+
     if let Some(disabled_channels) = guild_conf.disabled_channels {
         if disabled_channels.contains(&(msg.channel_id.0 as i64)) {
             return Ok(());
