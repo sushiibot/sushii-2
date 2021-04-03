@@ -26,7 +26,7 @@ async fn mute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     let conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
     if conf.mute_role.is_none() {
-        msg.channel_id.say(&ctx.http, "Error: There is no mute role set")?;
+        msg.channel_id.say(&ctx.http, "Error: There is no mute role set").await?;
 
         return Ok(());
     }
