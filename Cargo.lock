@@ -2389,8 +2389,8 @@ checksum = "a91d884b6667cd606bb5a69aa0c99ba811a115fc68915e7056ec08a46e93199a"
 
 [[package]]
 name = "lastfm-rs"
-version = "0.4.2"
-source = "git+https://github.com/sushiibot/lastfm-rs?rev=b7a7bbd0a72b3396d6b945f3c0caab807d832a2e#b7a7bbd0a72b3396d6b945f3c0caab807d832a2e"
+version = "0.5.0"
+source = "git+https://github.com/KamranMackey/lastfm-rs?rev=0fa3b4da337989b56423df995eb75dfc5a1c5259#0fa3b4da337989b56423df995eb75dfc5a1c5259"
 dependencies = [
  "chrono",
  "reqwest",
@@ -3807,18 +3807,18 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.124"
+version = "1.0.125"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd761ff957cb2a45fbb9ab3da6512de9de55872866160b23c25f1a841e99d29f"
+checksum = "558dc50e1a5a5fa7112ca2ce4effcb321b0300c0d4ccf0776a9f60cd89031171"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.124"
+version = "1.0.125"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1800f7693e94e186f5e25a28291ae1570da908aff7d97a095dec1e56ff99069b"
+checksum = "b093b7a2bb58203b5da3056c05b4ec1fed827dcfdb37347a8841695263b3d06d"
 dependencies = [
  "proc-macro2",
  "quote",
