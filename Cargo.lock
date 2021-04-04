@@ -4251,7 +4251,7 @@ checksum = "1e81da0851ada1f3e9d4312c704aa4f8806f0f9d69faaf8df2f3464b4a9437c2"
 
 [[package]]
 name = "sushii-2"
-version = "0.2.10"
+version = "0.2.11"
 dependencies = [
  "async-trait",
  "chrono",

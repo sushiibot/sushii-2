@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.11] - 2021-04-04
+
+### Added
+
+-  `patreon` command to link to patreon.com/sushiibot
+
+### Changed
+
+-  `fishy` and `rep` now show the old / new number of fishies / reps
+-  Golden fishy emoji returns when caught
+-  `help` now links to new sushii support server
+
+### Fixed
+
+-  Ignore tag commands in role channels
+-  Prevent certain unintentional duration parsing for `ban` / `mute` / etc commands, ie "1 do not ..." will no longer parse as 1 day
+-  `mute` actually responds with error if a mute role isn't set
+-  Increment tag use count when using `[prefix][tagname]`
+
 ## [0.2.10] - 2021-03-25
 
 ### Added
