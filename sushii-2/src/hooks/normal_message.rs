@@ -78,5 +78,7 @@ async fn _normal_message(ctx: &Context, msg: &Message) -> Result<()> {
         })
         .await?;
 
+    tag.inc().save(&ctx).await?;
+
     Ok(())
 }
