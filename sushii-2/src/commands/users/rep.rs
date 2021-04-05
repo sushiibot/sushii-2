@@ -22,7 +22,7 @@ async fn rep(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         Some(id) => UserId(id),
         None => {
             msg.channel_id
-                .say(&ctx, "Error: Invalid user given")
+                .say(&ctx, "Give me someone to rep!")
                 .await?;
 
             return Ok(());
