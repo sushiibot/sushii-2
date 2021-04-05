@@ -25,6 +25,7 @@ fn fmt_tags(tags: &[Tag], highlight: &str) -> String {
 }
 
 #[command]
+#[aliases("s")]
 async fn search(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let guild_id = match msg.guild_id {
         Some(id) => id,
