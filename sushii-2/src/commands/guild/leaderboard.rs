@@ -3,7 +3,7 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 #[command]
-#[aliases("toplevels", "topranks")]
+#[aliases("lb", "toplevels", "topranks")]
 #[only_in("guild")]
 async fn leaderboard(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let is_global = args.rest().trim() == "global";
