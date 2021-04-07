@@ -79,6 +79,25 @@ impl Tag {
         get_search_count_query(&pool, guild_id, query).await
     }
 
+    /// Gets all (paginated) tags created by a user
+    pub async fn get_all_author(
+        ctx: &Context,
+        guild_id: GuildId,
+        user_id: UserId,
+        count: i64,
+        offset: Option<&str>,
+    ) -> Result<Vec<Tag>> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
+        get_all_author_query(&pool, guild_id, user_id, count, offset).await
+    }
+
+    pub async fn get_all_author_count(ctx: &Context, guild_id: GuildId, user_id: UserId) -> Result<i64> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
+        get_all_author_count_query(&pool, guild_id, user_id).await
+    }
+
     /// Get paginated list of all tags
     pub async fn get_page(
         ctx: &Context,
@@ -173,6 +192,57 @@ async fn random_query(pool: &sqlx::PgPool, guild_id: GuildId) -> Result<Option<T
     )
     .fetch_optional(pool)
     .await
+    .map_err(Into::into)
+}
+
+async fn get_all_author_query(
+    pool: &sqlx::PgPool,
+    guild_id: GuildId,
+    user_id: UserId,
+    count: i64,
+    offset: Option<&str>,
+) -> Result<Vec<Tag>> {
+    sqlx::query_as!(
+        Tag,
+        // Should have a trigram index for this search, B-tree indexes can't
+        // search patterns that aren't left-anchored
+        r#"
+              SELECT *
+                FROM app_public.tags
+               WHERE guild_id = $1
+                 AND owner_id = $2
+                 AND (tag_name > $3 OR $3 IS NULL)
+            ORDER BY tag_name ASC
+               LIMIT $4
+        "#,
+        i64::from(guild_id),
+        i64::from(user_id),
+        offset,
+        count,
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(Into::into)
+}
+
+async fn get_all_author_count_query(
+    pool: &sqlx::PgPool,
+    guild_id: GuildId,
+    user_id: UserId,
+) -> Result<i64> {
+    sqlx::query!(
+        r#"
+              SELECT COUNT(*) as "count!"
+                FROM app_public.tags
+               WHERE guild_id = $1
+                 AND owner_id = $2
+        "#,
+        i64::from(guild_id),
+        i64::from(user_id),
+    )
+    .fetch_one(pool)
+    .await
+    .map(|r| r.count)
     .map_err(Into::into)
 }
 
