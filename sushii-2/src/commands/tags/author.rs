@@ -2,13 +2,13 @@ use serenity::collector::reaction_collector::ReactionAction;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use serenity::utils::parse_mention;
 use std::fmt::Write;
 use std::time::Duration;
 use tokio_stream::StreamExt;
 
 use crate::model::sql::*;
 use crate::model::Paginator;
+use crate::utils::user::parse_id;
 
 const PAGE_SIZE: i64 = 20;
 
@@ -23,7 +23,7 @@ fn fmt_tags(tags: &[Tag]) -> String {
 }
 
 #[command]
-async fn author(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+async fn author(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let guild_id = match msg.guild_id {
         Some(id) => id,
         None => {
@@ -32,31 +32,25 @@ async fn author(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     };
 
-    let user_id_str = match args.single::<String>() {
-        Ok(s) => s,
-        Err(_) => {
-            msg.channel_id
-                .say(&ctx.http, "Please give a user mention or ID")
-                .await?;
+    let target_str = args.rest();
 
-            return Ok(());
-        }
-    };
-
-    let user_id = match user_id_str
-        .parse::<u64>()
-        .ok()
-        .or_else(|| parse_mention(user_id_str))
-    {
-        Some(id) => id,
+    let user_id = match parse_id(target_str) {
+        Some(id) => UserId(id),
         None => {
-            msg.channel_id.say(&ctx.http, "Invalid user given").await?;
+            if !target_str.is_empty() {
+                msg.channel_id
+                    .say(ctx, "Error: Invalid user given.")
+                    .await?;
 
-            return Ok(());
+                return Ok(());
+            }
+
+            // If empty use self
+            msg.author.id
         }
     };
 
-    let target_user = match UserId(user_id).to_user(&ctx).await {
+    let target_user = match user_id.to_user(&ctx).await {
         Ok(u) => u,
         Err(_) => {
             msg.reply(
