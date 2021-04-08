@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+-  `tag author` command to look up all tags created by a given user
+
+### Fixed
+
+-  `tag search` title missing the word tags on pages 2+
+-  Mentioning @sushiiDev will now actually work as a prefix
+
 ## [0.2.11] - 2021-04-04
 
 ### Added
