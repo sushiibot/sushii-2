@@ -34,6 +34,11 @@ impl Tag {
         }
     }
 
+    pub fn transfer(mut self, new_owner: UserId) -> Self {
+        self.owner_id = i64::from(new_owner);
+        self
+    }
+
     pub fn edit(mut self, content: &str) -> Self {
         self.content = content.to_string();
         self
@@ -367,7 +372,8 @@ async fn upsert_query(pool: &sqlx::PgPool, tag: &Tag) -> Result<Tag> {
              VALUES ($1, $2, $3, $4, $5, $6)
         ON CONFLICT (guild_id, tag_name)
           DO UPDATE
-                SET tag_name = $3,
+                SET owner_id = $1,
+                    tag_name = $3,
                     content = $4,
                     use_count = $5
           RETURNING *

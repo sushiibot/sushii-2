@@ -228,6 +228,61 @@
       ]
     }
   },
+  "0c702f6c2900b0095435d32f1e0e9e4c1470316364a9d7fd2d790612c6704f09": {
+    "query": "\n        INSERT INTO app_public.tags (owner_id, guild_id, tag_name, content, use_count, created)\n             VALUES ($1, $2, $3, $4, $5, $6)\n        ON CONFLICT (guild_id, tag_name)\n          DO UPDATE\n                SET owner_id = $1,\n                    tag_name = $3,\n                    content = $4,\n                    use_count = $5\n          RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "owner_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "tag_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "use_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "created",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Text",
+          "Text",
+          "Int8",
+          "Timestamp"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "0ea7d0e05012add2116321168131a4a73a08012fa96059d008419f097b30fd77": {
     "query": "\n            SELECT *\n              FROM app_public.mutes\n             WHERE guild_id = $1\n               AND user_id = $2\n        ",
     "describe": {
@@ -1072,61 +1127,6 @@
       "nullable": [
         false,
         true
-      ]
-    }
-  },
-  "6b78f6681464bea5d88dadaace3c7ccb04f836e57792c7ba88630b8880f2dcd1": {
-    "query": "\n        INSERT INTO app_public.tags (owner_id, guild_id, tag_name, content, use_count, created)\n             VALUES ($1, $2, $3, $4, $5, $6)\n        ON CONFLICT (guild_id, tag_name)\n          DO UPDATE\n                SET tag_name = $3,\n                    content = $4,\n                    use_count = $5\n          RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "owner_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "tag_name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 4,
-          "name": "use_count",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "created",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Text",
-          "Text",
-          "Int8",
-          "Timestamp"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
       ]
     }
   },

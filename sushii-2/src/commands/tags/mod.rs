@@ -8,12 +8,13 @@ mod info;
 mod list;
 mod search;
 mod top;
+mod transfer;
 
-use self::{add::*, author::*, edit::*, get::*, info::*, list::*, search::*, top::*};
+use self::{add::*, author::*, edit::*, get::*, info::*, list::*, search::*, top::*, transfer::*};
 
 #[group]
 #[commands(
-    add, author, edit, delete, info, get, rename, random, list, search, top
+    add, author, edit, delete, info, get, rename, random, list, search, top, transfer
 )]
 #[only_in("guild")]
 #[prefixes("tag", "t")]
