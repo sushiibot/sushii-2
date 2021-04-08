@@ -50,9 +50,7 @@ async fn author(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     {
         Some(id) => id,
         None => {
-            msg.channel_id
-                .say(&ctx.http, "Invalid user given")
-                .await?;
+            msg.channel_id.say(&ctx.http, "Invalid user given").await?;
 
             return Ok(());
         }
@@ -94,7 +92,8 @@ async fn author(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             m.embed(|e| {
                 e.title(format!(
                     "Server tags created by {} ({} total)",
-                    target_user.tag(), tag_count
+                    target_user.tag(),
+                    tag_count
                 ));
                 e.description(fmt_tags(&tags));
                 e.footer(|f| {
@@ -146,7 +145,14 @@ async fn author(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 }
 
                 // Get next page
-                tags = Tag::get_all_author(&ctx, guild_id, target_user.id, PAGE_SIZE, offset.as_deref()).await?;
+                tags = Tag::get_all_author(
+                    &ctx,
+                    guild_id,
+                    target_user.id,
+                    PAGE_SIZE,
+                    offset.as_deref(),
+                )
+                .await?;
             } else if r.emoji.unicode_eq("⬅️") {
                 // Ignore on first page
                 if paginator.current_page == 1 {
@@ -168,7 +174,11 @@ async fn author(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             sent_msg
                 .edit(&ctx, |m| {
                     m.embed(|e| {
-                        e.title(format!("Server tags created by {} ({} total)", target_user.tag(), tag_count));
+                        e.title(format!(
+                            "Server tags created by {} ({} total)",
+                            target_user.tag(),
+                            tag_count
+                        ));
                         e.description(fmt_tags(&tags));
                         e.footer(|f| {
                             f.text(format!(

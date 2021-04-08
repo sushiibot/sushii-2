@@ -143,7 +143,10 @@ async fn search(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             sent_msg
                 .edit(&ctx, |m| {
                     m.embed(|e| {
-                        e.title(format!("Server tags containing {} ({} total)", query, tag_count));
+                        e.title(format!(
+                            "Server tags containing {} ({} total)",
+                            query, tag_count
+                        ));
                         e.description(fmt_tags(&tags, &query));
                         e.footer(|f| {
                             f.text(format!(

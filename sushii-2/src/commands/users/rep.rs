@@ -21,9 +21,7 @@ async fn rep(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let target_id = match args.single::<String>().ok().and_then(parse_id) {
         Some(id) => UserId(id),
         None => {
-            msg.channel_id
-                .say(&ctx, "Give me someone to rep!")
-                .await?;
+            msg.channel_id.say(&ctx, "Give me someone to rep!").await?;
 
             return Ok(());
         }

@@ -76,9 +76,7 @@ async fn main() -> Result<()> {
         }
     };
 
-    let bot_id = http.get_current_user()
-        .await?
-        .id;
+    let bot_id = http.get_current_user().await?.id;
 
     // Create the framework
     let framework = StandardFramework::new()
