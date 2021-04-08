@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.12] - 2021-04-07
+
 ### Added
 
 -  `tag author` command to look up all tags created by a given user
@@ -413,8 +415,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Prevent role handler from running outside of role channels
 -   Fix mod log entry saving
 
-[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.10...HEAD
-[0.2.9]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.9...sushii-2-v0.2.10
+[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.12...HEAD
+[0.2.13]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.12...sushii-2-v0.2.13
+[0.2.12]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.11...sushii-2-v0.2.12
+[0.2.11]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.10...sushii-2-v0.2.11
+[0.2.10]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.9...sushii-2-v0.2.10
 [0.2.9]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.8...sushii-2-v0.2.9
 [0.2.8]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.7...sushii-2-v0.2.8
 [0.2.7]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.6...sushii-2-v0.2.7
