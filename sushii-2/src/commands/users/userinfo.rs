@@ -91,18 +91,26 @@ async fn userinfo(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         }
 
         if !member.roles.is_empty() {
-            write!(user_str, "**Roles:**")?;
-        }
-
-        for role in &member.roles {
-            write!(user_str, "{} ", role.mention())?;
-        }
-
-        if !member.roles.is_empty() {
-            writeln!(user_str)?;
+            write!(user_str, "**Roles:** ")?;
         }
 
         colour = member.colour(ctx).await;
+
+        let roles = match member.roles(ctx).await {
+            Some(mut roles) => {
+                roles.sort_by(|a, b| b.position.cmp(&a.position));
+                roles.into_iter().map(|r| r.id).collect::<Vec<RoleId>>()
+            }
+            None => member.roles,
+        };
+
+        for role in &roles {
+            write!(user_str, "{} ", role.mention())?;
+        }
+
+        if !roles.is_empty() {
+            writeln!(user_str)?;
+        }
     }
 
     msg.channel_id
@@ -121,6 +129,7 @@ async fn userinfo(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
                 e.thumbnail(user.face());
                 e.description(user_str);
+                e.footer(|f| f.text("Times in UTC"));
 
                 e
             })

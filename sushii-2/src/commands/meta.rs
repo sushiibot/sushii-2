@@ -2,14 +2,14 @@ use chrono::Utc;
 use heim::cpu::os::unix;
 use heim::units::{information, ratio, time};
 use heim::{memory, process};
+use serenity::client::bridge::gateway::ShardId;
 use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use serenity::utils::shard_id;
-use serenity::client::bridge::gateway::ShardId;
+use sqlx::Connection;
 use std::time::{Duration, Instant};
 use sushii_model::prelude::DbPool;
-use sqlx::Connection;
 
 use crate::keys::*;
 
@@ -42,8 +42,9 @@ async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
         .await
         .get(&ShardId(ctx.shard_id))
         .and_then(|s| s.latency);
-    
-    let shard_latency_ms_str = shard_latency_ms.map(|d| {
+
+    let shard_latency_ms_str = shard_latency_ms
+        .map(|d| {
             format!(
                 "{:.3}",
                 d.as_secs() as f64 / 1000.0 + f64::from(d.subsec_nanos()) * 1e-6
@@ -61,9 +62,7 @@ async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
                     "Discord Rest API (message send): `{} ms`\n\
                     Discord Shard latency (heartbeat ACK): `{} ms`\n\
                     PostgreSQL latency: `{} μs`\n",
-                    msg_ms,
-                    shard_latency_ms_str,
-                    pg_ms,
+                    msg_ms, shard_latency_ms_str, pg_ms,
                 ))
             })
         })

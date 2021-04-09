@@ -50,11 +50,18 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     };
 
-    let reason = args.rest();
+    let attachments_str = msg
+        .attachments
+        .iter()
+        .map(|a| a.url.as_str())
+        .collect::<Vec<&str>>()
+        .join(", ");
+
+    let reason = format!("{}\n**Attachments:** {}", args.rest(), attachments_str);
 
     if reason.is_empty() {
         msg.channel_id
-            .say(&ctx.http, "Please give a reason")
+            .say(&ctx.http, "Please give a reason or attachment")
             .await?;
 
         return Ok(());
