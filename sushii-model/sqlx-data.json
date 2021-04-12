@@ -831,82 +831,6 @@
       ]
     }
   },
-  "3af931158150ccf473dbaa1bda53c78ac51b1fa21ac91bb72e327eb9f7435dc8": {
-    "query": "\n        INSERT INTO app_public.users (id, is_patron, patron_emoji, rep, fishies, last_rep, last_fishies, profile_data, lastfm_username)\n             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET is_patron = $2,\n                    patron_emoji = $3,\n                    rep = $4,\n                    fishies = $5,\n                    last_rep = $6,\n                    last_fishies = $7,\n                    profile_data = $8,\n                    lastfm_username = $9\n          RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "is_patron",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 2,
-          "name": "patron_emoji",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "rep",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "fishies",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "last_rep",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 6,
-          "name": "last_fishies",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 7,
-          "name": "lastfm_username",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 8,
-          "name": "profile_data",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Bool",
-          "Text",
-          "Int8",
-          "Int8",
-          "Timestamp",
-          "Timestamp",
-          "Jsonb",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        true,
-        false,
-        false,
-        true,
-        true,
-        true,
-        true
-      ]
-    }
-  },
   "3e16c3c12001dbe1a3b1704e0b491bc94835a808e3f56d65c92f3acc903fd687": {
     "query": "\n            SELECT *\n              FROM app_public.feed_subscriptions\n             WHERE feed_id = $1\n            ",
     "describe": {
@@ -2268,6 +2192,74 @@
       ]
     }
   },
+  "d184f509bba6030055abe90fa08147c6d8454cd25eb322232ad1357ad07eb311": {
+    "query": "\n            SELECT id,\n                   is_patron,\n                   patron_emoji,\n                   rep,\n                   fishies,\n                   last_rep,\n                   last_fishies,\n                   lastfm_username,\n                   profile_data as \"profile_data: Json<UserProfileData>\"\n              FROM app_public.users\n             WHERE id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "is_patron",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 2,
+          "name": "patron_emoji",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "rep",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "fishies",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "last_rep",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 6,
+          "name": "last_fishies",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 7,
+          "name": "lastfm_username",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "profile_data: Json<UserProfileData>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
   "d3640ad9ade7e2fc7f630463ea8e143497d9ef15d2284d4bac80911c82388ceb": {
     "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM app_public.feeds\n             WHERE feed_id LIKE 'vlive:%'\n            ",
     "describe": {
@@ -2288,6 +2280,82 @@
       },
       "nullable": [
         false,
+        true
+      ]
+    }
+  },
+  "d63bf5a86a4df8d5fc1bace10171ee73fd32a24abd98f3d13d0d4642e49a96f8": {
+    "query": "\n        INSERT INTO app_public.users (id, is_patron, patron_emoji, rep, fishies, last_rep, last_fishies, profile_data, lastfm_username)\n             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET is_patron = $2,\n                    patron_emoji = $3,\n                    rep = $4,\n                    fishies = $5,\n                    last_rep = $6,\n                    last_fishies = $7,\n                    profile_data = $8,\n                    lastfm_username = $9\n         RETURNING id,\n                   is_patron,\n                   patron_emoji,\n                   rep,\n                   fishies,\n                   last_rep,\n                   last_fishies,\n                   lastfm_username,\n                   profile_data as \"profile_data: Json<UserProfileData>\"\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "is_patron",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 2,
+          "name": "patron_emoji",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "rep",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "fishies",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "last_rep",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 6,
+          "name": "last_fishies",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 7,
+          "name": "lastfm_username",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 8,
+          "name": "profile_data: Json<UserProfileData>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Bool",
+          "Text",
+          "Int8",
+          "Int8",
+          "Timestamp",
+          "Timestamp",
+          "Jsonb",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
         true
       ]
     }
@@ -2535,74 +2603,6 @@
         false,
         false,
         false
-      ]
-    }
-  },
-  "f32b2d4b8cd4ae467e2d8a673fcc32c77c36307ae93d476a25f59c8ce3c630f2": {
-    "query": "\n            SELECT *\n              FROM app_public.users\n             WHERE id = $1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "is_patron",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 2,
-          "name": "patron_emoji",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "rep",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "fishies",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "last_rep",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 6,
-          "name": "last_fishies",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 7,
-          "name": "lastfm_username",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 8,
-          "name": "profile_data",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        true,
-        false,
-        false,
-        true,
-        true,
-        true,
-        true
       ]
     }
   },

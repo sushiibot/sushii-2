@@ -108,7 +108,7 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 // Username stuff
                 "USERNAME": target_user.name,
                 "DISCRIMINATOR": format!("{:0>4}", target_user.discriminator),
-                "AVATAR_URL": target_user.face(),
+                "AVATAR_URL": target_user.face().replace(".gif", ".jpg"),
                 // Rep and fishies
                 "REP": user_data.rep,
                 "REP_LEVEL": user_data.rep_level(),

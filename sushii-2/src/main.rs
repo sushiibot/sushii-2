@@ -114,6 +114,7 @@ async fn main() -> Result<()> {
         .group(&commands::moderation::MODERATION_GROUP)
         .group(&commands::settings::SETTINGS_GROUP)
         .group(&commands::roles::ROLES_GROUP)
+        .group(&commands::patreon::PATREON_GROUP)
         .group(&commands::OWNER_GROUP)
         .normal_message(hooks::normal_message)
         .bucket("rank", |b| b.delay(5))

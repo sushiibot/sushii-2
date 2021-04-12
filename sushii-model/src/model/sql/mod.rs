@@ -20,7 +20,7 @@ pub use self::{
     mute::{delete_mute, Mute},
     user::{
         cached_user::CachedUser, notification::Notification, reminder::Reminder,
-        user_data::UserData, user_level::UserLevel, user_level_global::UserLevelGlobal,
+        user_data::{UserData, UserProfileData}, user_level::UserLevel, user_level_global::UserLevelGlobal,
         user_level_ranked::UserLevelRanked, user_xp::UserXP,
     },
 };
