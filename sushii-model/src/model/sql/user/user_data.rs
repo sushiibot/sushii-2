@@ -5,9 +5,16 @@ use rand_distr::StandardNormal;
 use serde::{Deserialize, Serialize};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use sqlx::types::Json;
 
 use crate::error::Result;
 use crate::keys::DbPool;
+
+#[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug, Default)]
+pub struct UserProfileData {
+    pub patron_cents: Option<i64>,
+    pub patron_emoji_url: Option<String>,
+}
 
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug, Default)]
 pub struct UserData {
@@ -18,8 +25,8 @@ pub struct UserData {
     pub fishies: i64,
     pub last_rep: Option<NaiveDateTime>,
     pub last_fishies: Option<NaiveDateTime>,
-    pub profile_data: Option<serde_json::Value>,
     pub lastfm_username: Option<String>,
+    pub profile_data: Option<Json<UserProfileData>>,
 }
 
 fn eligible(last_time: Option<NaiveDateTime>, cooldown: Duration) -> bool {
@@ -150,7 +157,15 @@ async fn from_id_query(pool: &sqlx::PgPool, user_id: UserId) -> Result<Option<Us
     sqlx::query_as!(
         UserData,
         r#"
-            SELECT *
+            SELECT id,
+                   is_patron,
+                   patron_emoji,
+                   rep,
+                   fishies,
+                   last_rep,
+                   last_fishies,
+                   lastfm_username,
+                   profile_data as "profile_data: Json<UserProfileData>"
               FROM app_public.users
              WHERE id = $1
         "#,
@@ -177,7 +192,15 @@ async fn upsert_query(pool: &sqlx::PgPool, user_data: &UserData) -> Result<UserD
                     last_fishies = $7,
                     profile_data = $8,
                     lastfm_username = $9
-          RETURNING *
+         RETURNING id,
+                   is_patron,
+                   patron_emoji,
+                   rep,
+                   fishies,
+                   last_rep,
+                   last_fishies,
+                   lastfm_username,
+                   profile_data as "profile_data: Json<UserProfileData>"
         "#,
         user_data.id,
         user_data.is_patron,
@@ -186,7 +209,7 @@ async fn upsert_query(pool: &sqlx::PgPool, user_data: &UserData) -> Result<UserD
         user_data.fishies,
         user_data.last_rep,
         user_data.last_fishies,
-        user_data.profile_data,
+        user_data.profile_data as _,
         user_data.lastfm_username,
     )
     .fetch_one(pool)

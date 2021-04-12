@@ -115,7 +115,9 @@ async fn rank(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 "FISHIES": user_data.fishies,
                 // Emojis
                 "IS_PATRON": user_data.is_patron,
-                "PATRON_EMOJI": user_data.patron_emoji,
+                "PATRON_EMOJI_URL": user_data.profile_data
+                    .and_then(|d| d.0.patron_emoji_url)
+                    .unwrap_or_else(|| "https://cdn.discordapp.com/emojis/830976556976963644.png".into()),
                 // levels
                 "LEVEL": level_prog.level,
                 "CURR_XP": level_prog.next_level_xp_progress,
