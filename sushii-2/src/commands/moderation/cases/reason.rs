@@ -55,16 +55,20 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .iter()
         .map(|a| a.url.as_str())
         .collect::<Vec<&str>>()
-        .join(", ");
+        .join("\n");
 
-    let reason = format!("{}\n**Attachments:** {}", args.rest(), attachments_str);
+    let mut reason = args.rest();
 
-    if reason.is_empty() {
+    if reason.is_empty() && msg.attachments.is_empty() {
         msg.channel_id
             .say(&ctx.http, "Please give a reason or attachment")
             .await?;
 
         return Ok(());
+    }
+
+    if reason.is_empty() && !msg.attachments.is_empty() {
+        reason = "View attachment(s)".into();
     }
 
     lazy_static! {
@@ -280,22 +284,44 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             }
         };
 
-        // Define here so we can use &str in the map below to not clone every line
-        let new_reason_line = format!("**Reason:** {}", reason);
+        // Old description only, no fields embed
+        if embed.fields.is_empty() {
+            // Define here so we can use &str in the map below to not clone every line
+            let new_reason_line = format!("**Reason:** {}", reason);
 
-        // edit reason
-        embed.description = embed.description.map(|d| {
-            d.split('\n')
-                .map(|line| {
-                    if line.starts_with("**Reason:**") {
-                        &new_reason_line
-                    } else {
-                        line
-                    }
-                })
-                .collect::<Vec<_>>()
-                .join("\n")
-        });
+            // edit reason
+            embed.description = embed.description.map(|d| {
+                d.split('\n')
+                    .map(|line| {
+                        if line.starts_with("**Reason:**") {
+                            &new_reason_line
+                        } else {
+                            line
+                        }
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            });
+        }
+
+        // New embeds with fields
+        if let Some(ref mut reason_field) = embed.fields.iter_mut().find(|f| f.name == "Reason") {
+            reason_field.value = reason.to_string();
+        }
+
+        if !msg.attachments.is_empty() {
+            if let Some(ref mut attachments_field) =
+                embed.fields.iter_mut().find(|f| f.name == "Attachments")
+            {
+                attachments_field.value = attachments_str.clone();
+            } else {
+                embed.fields.push(EmbedField::new(
+                    "Attachments",
+                    attachments_str.clone(),
+                    false,
+                ));
+            }
+        }
 
         if let Err(e) = message
             .edit(ctx, |m| {
@@ -307,6 +333,10 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
                         a
                     });
+
+                    if let Some(attachment) = msg.attachments.first() {
+                        e.image(&attachment.url);
+                    }
 
                     e
                 })
@@ -335,14 +365,14 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     }
 
-    sent_msg
-        .edit(&ctx, |m| {
-            m.content(format!(
-                "Finished updating {} with reason: {}",
-                num_cases_str, reason
-            ))
-        })
-        .await?;
+    let mut s = format!(
+        "Finished updating {} with reason: {}\n",
+        num_cases_str, reason
+    );
+
+    writeln!(s, "Attachments: {}", attachments_str)?;
+
+    sent_msg.edit(&ctx, |m| m.content(s)).await?;
 
     Ok(())
 }

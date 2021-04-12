@@ -1,5 +1,4 @@
 use serenity::{model::prelude::*, prelude::*};
-use std::fmt::Write;
 use std::time::Duration;
 
 use crate::error::{Error, Result};
@@ -137,34 +136,6 @@ impl<'a> ModLogReporter<'a> {
         executor_user: User,
         placeholder_reason: String,
     ) -> Result<Message> {
-        let mut s = String::new();
-
-        let _ = writeln!(
-            s,
-            "**User:** {} `{}` | `{}`",
-            self.user.mention(),
-            self.user.tag().replace("`", "\\`"),
-            self.user.id.0
-        );
-        let _ = writeln!(s, "**Action:** {}", entry.action);
-
-        if entry.action == "mute" {
-            let _ = writeln!(
-                s,
-                "**Duration:** {}",
-                self.duration.map_or_else(
-                    || "Indefinite".to_string(),
-                    |d| humantime::format_duration(d).to_string(),
-                )
-            );
-        }
-
-        let _ = writeln!(
-            s,
-            "**Reason:** {}",
-            entry.reason.clone().unwrap_or(placeholder_reason)
-        );
-
         ChannelId(channel_id)
             .send_message(&ctx.http, |m| {
                 m.embed(|e| {
@@ -174,8 +145,35 @@ impl<'a> ModLogReporter<'a> {
 
                         a
                     });
+                    e.title(&entry.action);
 
-                    e.description(s);
+                    e.field(
+                        "User",
+                        format!(
+                            "{} `{}` | `{}`",
+                            self.user.mention(),
+                            self.user.tag().replace("`", "\\`"),
+                            self.user.id.0
+                        ),
+                        false,
+                    );
+
+                    if entry.action == "mute" {
+                        e.field(
+                            "Duration",
+                            self.duration.map_or_else(
+                                || "Indefinite".to_string(),
+                                |d| humantime::format_duration(d).to_string(),
+                            ),
+                            false,
+                        );
+                    }
+
+                    e.field(
+                        "Reason",
+                        entry.reason.clone().unwrap_or(placeholder_reason),
+                        false,
+                    );
 
                     e.footer(|f| {
                         f.text(format!("Case #{}", &entry.case_id));

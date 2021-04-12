@@ -387,8 +387,10 @@ impl ModActionExecutor {
         }
 
         // Respond to user -- edit previously sent message
-        let _ = sent_msg
+        sent_msg
             .edit(ctx, |m| {
+                // Remove attempting to .. message
+                m.content("");
                 m.embed(|e| {
                     e.title(format!(
                         "Attempted to {} {} users",

@@ -69,7 +69,7 @@ async fn patron(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         } else {
             user_data.profile_data = Some(Json(UserProfileData {
                 patron_cents: Some(cents),
-                patron_emoji_url: emoji_url.clone()
+                patron_emoji_url: emoji_url.clone(),
             }));
         }
     } else if action == "remove" {
