@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+- `tag transfer` to transfer ownership to another user
+- `tag author` defaults to your own tags if no user is provided
+
+### Fixed
+
+- Correct `userinfo` role order
+
 ## [0.2.12] - 2021-04-07
 
 ### Added
