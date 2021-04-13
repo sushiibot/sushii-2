@@ -309,15 +309,22 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             reason_field.value = reason.to_string();
         }
 
+        // Add attachments if there are any
         if !msg.attachments.is_empty() {
+            let tip = if msg.attachments.len() == 1 {
+                "(attachment shown below)"
+            } else {
+                "(first attachment shown below)"
+            };
+
             if let Some(ref mut attachments_field) =
                 embed.fields.iter_mut().find(|f| f.name == "Attachments")
             {
-                attachments_field.value = attachments_str.clone();
+                attachments_field.value = format!("{}\n{}", attachments_str, tip);
             } else {
                 embed.fields.push(EmbedField::new(
                     "Attachments",
-                    attachments_str.clone(),
+                    format!("{}\n{}", attachments_str, tip),
                     false,
                 ));
             }
