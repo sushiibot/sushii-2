@@ -96,19 +96,25 @@ async fn send_msg(ctx: &Context, post: &Post, sub: FeedSubscription) -> Result<(
         })
         .await;
 
-    if let Err(SerenityError::Http(e)) = res {
-        // Box cant be matched
-        if let HttpError::UnsuccessfulRequest(e) = *e {
-            tracing::warn!(?e, ?e.error, ?e.error.code, "Failed vlive feed send");
+    match res {
+        Ok(_) => Ok(()),
+        Err(SerenityError::Http(e)) => {
+            // Box cant be matched
+            if let HttpError::UnsuccessfulRequest(ref e) = *e {
+                tracing::warn!(?e, ?e.error, ?e.error.code, "Failed vlive feed send");
 
-            // Unknown channel -- deleted channel so delete feed subscription
-            // Or Missing permissions, delete it anyways whatever
-            if e.error.code == 10003 || e.error.code == 50001 {
-                tracing::warn!(?sub, "Deleting feed subscription");
-                sub.delete(ctx).await?;
+                // Unknown channel -- deleted channel so delete feed subscription
+                // Or Missing permissions, delete it anyways whatever
+                if e.error.code == 10003 || e.error.code == 50001 {
+                    tracing::warn!(?sub, "Deleting feed subscription");
+                    sub.delete(ctx).await?;
+                }
             }
+
+            Err(Error::Serenity(SerenityError::Http(e)))
+        }
+        Err(e) => {
+            Err(Error::Serenity(e))
         }
     }
-
-    return Ok(());
 }
