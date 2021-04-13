@@ -169,6 +169,21 @@ services:
             - sushii_net
         labels:
             - "traefik.enable=false"
+    twilight-http-proxy:
+        build:
+            context: https://github.com/twilight-rs/http-proxy.git#trunk
+            args:
+                FEATURES: metrics
+        container_name: twilight-http-proxy
+        restart: unless-stopped
+        expose: :
+            - "80"
+        environment:
+            - DISCORD_TOKEN=$DISCORD_TOKEN
+        networks:
+            - sushii_net
+        labels:
+            - "traefik.enable=false"
     sushii:
         image: ghcr.io/sushiibot/sushii-2:latest
         container_name: sushii
@@ -186,6 +201,8 @@ services:
                 max-buffer-size: 4m
         env_file:
             - .env
+        environment:
+            - TWILIGHT_API_PROXY_URL=twilight-http-proxy:80
         networks:
             - sushii_net
         labels:
