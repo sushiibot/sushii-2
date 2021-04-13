@@ -147,7 +147,7 @@ impl<'a> ModLogReporter<'a> {
                     });
 
                     e.field(
-                        format!("User {}ed", entry.action),
+                        format!("User {}", entry.action),
                         format!(
                             "{} `{}` | `{}`",
                             self.user.mention(),
