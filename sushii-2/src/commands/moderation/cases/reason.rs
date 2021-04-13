@@ -377,7 +377,9 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         num_cases_str, reason
     );
 
-    writeln!(s, "Attachments: {}", attachments_str)?;
+    if !attachments_str.is_empty() {
+        writeln!(s, "Attachments: {}", attachments_str)?;
+    }
 
     sent_msg.edit(&ctx, |m| m.content(s)).await?;
 
