@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.14] - 2021-04-12
+
+### Fixed
+
+- `reason` now correctly handles attachments (adding an attachment to `ban` or `mute` doesn't work yet)
+
+## [0.2.13] - 2021-04-11
+
 ### Added
 
 - `tag transfer` to transfer ownership to another user
