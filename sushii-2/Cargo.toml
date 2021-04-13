@@ -61,9 +61,8 @@ default-features = false
 features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "offline", "migrate", "decimal" ]
 
 [dependencies.serenity]
-# git = "https://github.com/serenity-rs/serenity"
-# rev = "0b1fc2737efebde01f6f3b781bcdfc83a30e908e"
-version = "0.10.5"
+git = "https://github.com/serenity-rs/serenity"
+rev = "badb44891a73bc27df8b3e39d4baf92675e868a4"
 features = ["collector"]
 
 [build-dependencies.vergen]

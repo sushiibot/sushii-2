@@ -1,6 +1,6 @@
 use serenity::{
     client::bridge::gateway::GatewayIntents, client::ClientBuilder, framework::StandardFramework,
-    http::Http,
+    http::HttpBuilder,
 };
 use sqlx::postgres::PgPoolOptions;
 use std::collections::HashSet;
@@ -60,7 +60,14 @@ async fn main() -> Result<()> {
 
     let metrics = Arc::new(Metrics::new(&sushii_conf).await);
 
-    let http = Http::new_with_token(&sushii_conf.discord_token);
+    let http = HttpBuilder::new(&sushii_conf.discord_token)
+        .proxy(
+            std::env::var("TWILIGHT_API_PROXY_URL")
+                .expect("TWILIGHT_API_PROXY_URL not in environment"),
+        )?
+        .ratelimiter_disabled(true)
+        .await
+        .expect("Error creating Http");
 
     let owners = match http.get_current_application_info().await {
         Ok(info) => {
