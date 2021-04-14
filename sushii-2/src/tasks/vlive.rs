@@ -29,6 +29,7 @@ pub async fn check_new_vlives(
             .await?
             .is_some()
         {
+            tracing::debug!(?post.id, "Already saved");
             // Skip if item already saved
             continue;
         }
@@ -39,12 +40,16 @@ pub async fn check_new_vlives(
             continue;
         }
 
+        tracing::debug!(?post.id, "Saved");
+
         // If active feed found for this channel
         if let Some(feed) = feed_id_map.get(&item.feed_id.as_str()) {
             let subscriptions = FeedSubscription::from_feed_id(&ctx, &item.feed_id).await?;
+            tracing::debug!(?subscriptions, ?item.feed_id, "Subscriptions found");
 
             if subscriptions.is_empty() {
                 feed.delete(&ctx).await?;
+                tracing::debug!(?item.feed_id, "Feed deleted");
                 continue;
             }
 
@@ -53,6 +58,8 @@ pub async fn check_new_vlives(
                     tracing::warn!(?e, "Failed to send feed message");
                 }
             }
+        } else {
+            tracing::debug!(?post.id, "No matching feed found, ignoring");
         }
     }
 
