@@ -176,7 +176,7 @@ services:
                 FEATURES: metrics
         container_name: twilight-http-proxy
         restart: unless-stopped
-        expose: :
+        expose:
             - "80"
         environment:
             - DISCORD_TOKEN=$DISCORD_TOKEN
@@ -202,7 +202,7 @@ services:
         env_file:
             - .env
         environment:
-            - TWILIGHT_API_PROXY_URL=twilight-http-proxy:80
+            - TWILIGHT_API_PROXY_URL=http://twilight-http-proxy:80
         networks:
             - sushii_net
         labels:
