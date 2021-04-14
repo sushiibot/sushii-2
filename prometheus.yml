@@ -6,6 +6,10 @@ scrape_configs:
       static_configs:
           - targets: ["localhost:9090"]
 
+    - job_name: "http-proxy"
+      static_configs:
+          - targets: ["twilight-http-proxy:80"]
+
     - job_name: "sushii"
       static_configs:
           - targets: ["sushii:9888"]
