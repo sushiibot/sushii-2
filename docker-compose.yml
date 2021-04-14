@@ -173,7 +173,7 @@ services:
         build:
             context: https://github.com/twilight-rs/http-proxy.git#trunk
             args:
-                FEATURES: metrics
+                FEATURES: expose-metrics
         container_name: twilight-http-proxy
         restart: unless-stopped
         expose:
