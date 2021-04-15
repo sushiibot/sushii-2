@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+-  `tag add` now accepts attachments.
+
 ## [0.2.14] - 2021-04-12
 
 ### Fixed

@@ -27,12 +27,27 @@ async fn add(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     let tag_content = args.rest();
 
-    if tag_content.is_empty() {
+    let attachments_str = msg
+        .attachments
+        .iter()
+        .map(|a| a.url.as_str())
+        .collect::<Vec<&str>>()
+        .join("\n");
+
+    if tag_content.is_empty() && attachments_str.is_empty() {
         msg.channel_id
-            .say(&ctx, "Error: Please give tag content")
+            .say(&ctx, "Error: Please give tag content or attachment(s)")
             .await?;
         return Ok(());
     }
+
+    let content = if !attachments_str.is_empty() && tag_content.is_empty() {
+        attachments_str
+    } else if !attachments_str.is_empty() && !tag_content.is_empty() {
+        format!("{}\n{}", tag_content, attachments_str)
+    } else {
+        tag_content.to_string()
+    };
 
     if Tag::from_name(&ctx, &tag_name, guild_id).await?.is_some() {
         msg.channel_id
@@ -47,7 +62,7 @@ async fn add(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         return Ok(());
     }
 
-    let tag = Tag::new(msg.author.id, guild_id, &tag_name, tag_content)
+    let tag = Tag::new(msg.author.id, guild_id, &tag_name, content)
         .save(&ctx)
         .await?;
 
