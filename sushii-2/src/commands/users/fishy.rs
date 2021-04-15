@@ -6,7 +6,7 @@ use crate::model::sql::*;
 use crate::utils::user::parse_id;
 
 #[command]
-#[aliases("fwishy", "foshy")]
+#[aliases("fwishy", "foshy", "ifshy", "fsihy")]
 #[only_in("guild")]
 async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     // Check cooldown before checking args
