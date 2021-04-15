@@ -120,8 +120,6 @@ async fn send_msg(ctx: &Context, post: &Post, sub: FeedSubscription) -> Result<(
 
             Err(Error::Serenity(SerenityError::Http(e)))
         }
-        Err(e) => {
-            Err(Error::Serenity(e))
-        }
+        Err(e) => Err(Error::Serenity(e)),
     }
 }

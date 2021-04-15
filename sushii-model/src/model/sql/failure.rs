@@ -74,10 +74,7 @@ impl Failure {
     }
 }
 
-async fn get_from_id_query(
-    pool: &sqlx::PgPool,
-    failure_id: &str
-) -> Result<Option<Failure>> {
+async fn get_from_id_query(pool: &sqlx::PgPool, failure_id: &str) -> Result<Option<Failure>> {
     sqlx::query_as!(
         Failure,
         r#"

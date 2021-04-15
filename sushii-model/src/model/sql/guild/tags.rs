@@ -97,7 +97,11 @@ impl Tag {
         get_all_author_query(&pool, guild_id, user_id, count, offset).await
     }
 
-    pub async fn get_all_author_count(ctx: &Context, guild_id: GuildId, user_id: UserId) -> Result<i64> {
+    pub async fn get_all_author_count(
+        ctx: &Context,
+        guild_id: GuildId,
+        user_id: UserId,
+    ) -> Result<i64> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         get_all_author_count_query(&pool, guild_id, user_id).await
