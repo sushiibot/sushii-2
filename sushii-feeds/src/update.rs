@@ -1,11 +1,103 @@
 use anyhow::Result;
-use std::time::Duration;
-use sushii_model::model::sql::Feed;
-use vlive::VLiveRequester;
+use chrono::{DateTime, Utc};
+use std::collections::HashMap;
+use sushii_model::model::sql::{Feed, FeedSubscription};
+use twilight_http::api_error::{ApiError, ErrorCode};
+use twilight_http::error::Error as TwilightHttpError;
+use twilight_model::channel::embed::Embed;
+use twilight_model::id::ChannelId;
+use vlive::{
+    model::{recent_video::RecentVideo as VliveRecentVideo, video::PostDetail as VlivePostDetail},
+    VLiveRequester,
+};
 
-use sushii_feeds::feed_request::feed_update_reply::{Author, FeedItem as GrpcFeedItem, Post};
-
+use crate::embeddable::Embeddable;
 use crate::model::context::Context;
+
+pub async fn update_vlive(ctx: &Context, newer_than: DateTime<Utc>) -> Result<()> {
+    // Only return Err() if fatal errors
+    let new_vlives = get_new_vlive_items(ctx, newer_than).await?;
+
+    tracing::debug!(?new_vlives, "New videos found");
+
+    // Get list of feed ids
+    let feed_ids: Vec<_> = new_vlives
+        .iter()
+        .map(|item| format!("vlive:videos:{}", item.0.channel_code))
+        .collect();
+
+    // Fetch all subscriptions containing new video ids
+    let matching_feeds = FeedSubscription::get_matching_vlive(&ctx.db_pool, &feed_ids).await?;
+
+    // Create map feed_id -> Vec<subscriptions>
+    let mut subscription_map = HashMap::new();
+    for feed in matching_feeds {
+        let entry = subscription_map
+            .entry(feed.feed_id.clone())
+            .or_insert_with(Vec::new);
+        entry.push(feed);
+    }
+
+    for video in new_vlives {
+        let feed_id = format!("vlive:videos:{}", video.0.channel_code);
+
+        // subscriptions found
+        if let Some(subscriptions) = subscription_map.get(&feed_id) {
+            tracing::debug!(
+                ?subscriptions,
+                "Subscriptions found for {}",
+                video.0.video_url()
+            );
+
+            let embed = match video.to_embed() {
+                Ok(e) => e,
+                Err(e) => {
+                    tracing::error!(
+                        "Failed to create embed for vlive video {}: {}",
+                        video.0.video_url(),
+                        e
+                    );
+
+                    continue;
+                }
+            };
+
+            for sub in subscriptions {
+                if let Err(e) = send_msg(ctx, sub, embed.clone()).await {
+                    tracing::warn!(?e, "Failed to send feed message");
+                }
+            }
+        } else {
+            tracing::debug!(
+                "No matching feed for {} found, ignoring",
+                video.0.video_url()
+            );
+        }
+    }
+
+    Ok(())
+}
+
+async fn send_msg(ctx: &Context, subscription: &FeedSubscription, embed: Embed) -> Result<()> {
+    let res = ctx
+        .http
+        .create_message(ChannelId(subscription.channel_id as u64))
+        .embed(embed)?
+        .await;
+
+    if let Err(TwilightHttpError::Response {
+        error: ApiError::General(e),
+        ..
+    }) = res
+    {
+        if e.code == ErrorCode::UnknownChannel || e.code == ErrorCode::Missingaccess {
+            tracing::warn!(?subscription, "Deleting feed subscription");
+            subscription.delete_pool(&ctx.db_pool).await?;
+        }
+    }
+
+    Ok(())
+}
 
 async fn _update_rss(ctx: Context) -> Result<()> {
     let feeds = Feed::get_all_rss(&ctx.db_pool).await?;
@@ -26,71 +118,41 @@ async fn _update_rss(ctx: Context) -> Result<()> {
     Ok(())
 }
 
-pub async fn update_vlive(ctx: Context) -> Result<Vec<GrpcFeedItem>> {
+/// Only returns Err() if getting entire videos list fails
+/// Will not return Err() if a single video fails
+pub async fn get_new_vlive_items(
+    ctx: &Context,
+    newer_than: DateTime<Utc>,
+) -> Result<Vec<(VliveRecentVideo, VlivePostDetail)>> {
     let videos = ctx.client.get_recent_videos(12, 1).await?;
-    let mut grpc_items = Vec::new();
+
+    let mut new_items: Vec<(VliveRecentVideo, VlivePostDetail)> = Vec::new();
 
     for video in videos {
-        let video_data = ctx.client.get_video(video.video_seq).await;
+        let video_data = match ctx.client.get_video(video.video_seq).await {
+            Ok(d) => d,
+            Err(e) => {
+                tracing::error!(video.video_seq, "Failed to get vlive video: {}", e);
+                continue;
+            }
+        };
 
-        if let Err(ref e) = video_data {
-            tracing::warn!("Failed to fetch video {} data: {}", video.video_url(), e);
+        let detail = match video_data.post_detail.get_detail() {
+            Some(d) => d,
+            None => {
+                tracing::warn!(video.video_seq, "Video missing detail");
+                continue;
+            }
+        };
+
+        // Stop when videos are before newer_than. This relies on the fact that
+        // get_recent_videos are sorted chronologically
+        if detail.official_video.created_at < newer_than.naive_utc() {
+            break;
         }
 
-        tracing::info!("video: {:?}", &video);
-
-        let feed_id = format!("vlive:videos:{}", video.channel_code);
-
-        // Author icon
-        let icon = video_data
-            .as_ref()
-            .ok()
-            .and_then(|d| d.channel.channel.channel_profile_image.clone())
-            .unwrap_or_else(|| "https://i.imgur.com/NzGrmho.jpg".to_string());
-
-        // If live or vod
-        let title = if video.duration_secs.is_none() {
-            format!("[LIVE] {}", video.title)
-        } else {
-            format!("[VOD] {}", video.title)
-        };
-
-        let description = if let Some(secs) = video.duration_secs {
-            let d = Duration::from_secs(secs);
-            format!("Duration: {}", humantime::format_duration(d))
-        } else {
-            "".to_string()
-        };
-
-        // Colour usually kinda dark and ugly
-        /*
-        let color = video_data
-            .ok()
-            .and_then(|d| d.channel.channel.representative_color)
-            .and_then(|c| u32::from_str_radix(&c[1..], 16).ok())
-            .unwrap_or(0x1ecfff); // Default bright teal vlive color
-        */
-
-        let grpc_post = Post {
-            id: video.video_url(),
-            title,
-            author: Some(Author {
-                name: video.channel_name.clone(),
-                url: video.channel_url(),
-                icon,
-            }),
-            description,
-            thumbnail: video.thumbnail_url(),
-            url: video.video_url(),
-            color: 0x1ecfff,
-        };
-
-        let grpc_item = GrpcFeedItem {
-            feed_id,
-            post: Some(grpc_post),
-        };
-        grpc_items.push(grpc_item);
+        new_items.push((video, detail.clone()));
     }
 
-    Ok(grpc_items)
+    Ok(new_items)
 }

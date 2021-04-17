@@ -81,6 +81,10 @@ impl FeedSubscription {
         .map_err(Into::into)
     }
 
+    pub async fn get_matching_vlive(pool: &sqlx::PgPool, feed_ids: &[String]) -> Result<Vec<Self>> {
+        get_matching_vlive(pool, feed_ids).await
+    }
+
     pub async fn save(self, ctx: &Context) -> Result<Self> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
@@ -104,20 +108,43 @@ impl FeedSubscription {
     pub async fn delete(self, ctx: &Context) -> Result<()> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
-        sqlx::query_as!(
-            FeedSubscription,
-            r#"
-            DELETE FROM app_public.feed_subscriptions
-                  WHERE feed_id = $1
-                    AND channel_id = $2
-            "#,
-            // composite primary key
-            self.feed_id,
-            self.channel_id,
-        )
-        .execute(&pool)
-        .await?;
-
-        Ok(())
+        delete_query(&pool, &self).await
     }
+
+    pub async fn delete_pool(&self, pool: &sqlx::PgPool) -> Result<()> {
+        delete_query(pool, self).await
+    }
+}
+
+async fn get_matching_vlive(pool: &sqlx::PgPool, feed_ids: &[String]) -> Result<Vec<FeedSubscription>> {
+    sqlx::query_as!(
+        FeedSubscription,
+        r#"
+            SELECT *
+              FROM app_public.feed_subscriptions
+             WHERE feed_id = ANY($1)
+            "#,
+        feed_ids as _,
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(Into::into)
+}
+
+async fn delete_query(pool: &sqlx::PgPool, sub: &FeedSubscription) -> Result<()> {
+    sqlx::query_as!(
+        FeedSubscription,
+        r#"
+        DELETE FROM app_public.feed_subscriptions
+                WHERE feed_id = $1
+                AND channel_id = $2
+        "#,
+        // composite primary key
+        sub.feed_id,
+        sub.channel_id,
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
 }

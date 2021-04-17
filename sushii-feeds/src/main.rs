@@ -1,120 +1,70 @@
 use anyhow::Result;
-use dashmap::DashMap;
+use chrono::Utc;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
-use std::net::SocketAddr;
-use std::time::{Duration, Instant};
-use tonic::{transport::Server, Request, Response, Status};
+use tokio::time::{self, Duration};
 use tracing_subscriber::filter::EnvFilter;
+use twilight_http::Client;
 
+mod embeddable;
 mod model;
 mod update;
 use model::context::Context;
 
-use sushii_feeds::feed_request::feed_service_server::{FeedService, FeedServiceServer};
-use sushii_feeds::feed_request::{feed_update_reply::FeedItem, Empty, FeedUpdateReply};
+async fn run(ctx: Context) {
+    let mut interval = time::interval(Duration::from_secs(60));
 
-#[derive(Debug)]
-pub struct GrpcService {
-    ctx: Context,
-    cache: DashMap<String, (Instant, Vec<FeedItem>)>,
-    /// Default cache ttl is 1 minute
-    ttl: Duration,
-}
+    // Keep track of which feed items are considered "new"
+    // Any items older than this date will be ignored
+    let mut newer_than = Utc::now();
 
-impl GrpcService {
-    pub fn new(ctx: Context) -> Self {
-        Self {
-            ctx,
-            cache: DashMap::new(),
-            ttl: Duration::from_secs(60),
-        }
-    }
+    loop {
+        interval.tick().await;
 
-    pub fn update(&self, key: impl Into<String>, items: Vec<FeedItem>) {
-        self.cache.insert(key.into(), (Instant::now(), items));
-    }
+        // Now before update_feeds runs since there might be new items that are
+        // created during the update
+        let now = Utc::now();
 
-    pub fn get(&self, key: &str) -> Option<Vec<FeedItem>> {
-        let entry = self.cache.get(key)?;
-        let (last_update, items) = entry.value();
-
-        let now = Instant::now();
-        let age = now.duration_since(*last_update);
-
-        // Older than ttl, return None to get new items
-        if age > self.ttl {
-            tracing::debug!("Cache item stale");
-            return None;
+        // Actually update the feeds and send Discord feed messages
+        if let Err(e) = update::update_vlive(&ctx, newer_than).await {
+            tracing::error!("Failed to update vlive feeds: {}", e);
         }
 
-        // Younger than ttl, cache still fresh so return cache content
-        Some(items.clone())
-    }
-}
-
-#[tonic::async_trait]
-impl FeedService for GrpcService {
-    async fn update_feeds(
-        &self,
-        request: Request<Empty>,
-    ) -> Result<Response<FeedUpdateReply>, Status> {
-        tracing::info!("Got a request from {:?}", request.remote_addr());
-
-        // Check cache
-        let items = if let Some(items) = self.get("vlive") {
-            items
-        } else {
-            let items = update::update_vlive(self.ctx.clone())
-                .await
-                .map_err(|e| Status::internal(e.to_string()))?;
-            // Update cache
-            self.update("vlive", items.clone());
-
-            items
-        };
-
-        let reply = FeedUpdateReply { items };
-
-        Ok(Response::new(reply))
+        // Set new time after the update
+        newer_than = now;
     }
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv::dotenv().ok();
-
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
+    // Vars
     let db_url = env::var("DATABASE_URL").expect("Missing DATABASE_URL in environment");
+    let proxy_url =
+        env::var("TWILIGHT_API_PROXY_URL").expect("Missing TWILIGHT_API_PROXY_URL in environment");
 
+    // Database
     let db_pool = PgPoolOptions::new()
         .max_connections(2)
         .connect(&db_url)
         .await
         .expect("Failed to connect to database");
 
-    let listen_addr: SocketAddr = env::var("GRPC_ADDR")
-        .map(|s| {
-            s.parse::<SocketAddr>()
-                .expect("Failed to parse GRPC_ADDR as a SocketAddr")
-        })
-        .unwrap_or_else(|_| "0.0.0.0:50051".parse().unwrap());
+    // Twilight http client
+    let http = Client::builder()
+        .proxy(proxy_url, true)
+        .ratelimiter(None)
+        .build();
 
-    let ctx = Context::new(db_pool)?;
+    let ctx = Context::new(http, db_pool)?;
 
-    tracing::info!("Feed gRPC server listening on {}", listen_addr);
-
-    let service = GrpcService::new(ctx);
-
-    Server::builder()
-        .add_service(FeedServiceServer::new(service))
-        .serve(listen_addr)
-        .await?;
-
-    // run(ctx).await;
+    // Finally run update loop
+    // This should never return unless process is killed
+    run(ctx).await;
 
     Ok(())
 }

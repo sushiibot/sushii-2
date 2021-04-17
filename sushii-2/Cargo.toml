@@ -44,7 +44,7 @@ features = []
 
 [dependencies.vlive]
 git = "https://github.com/drklee3/vlive-rs"
-rev = "9be4c9218d9dd775d168bd09c61b28364aec0d05"
+rev = "806a07b0e443fde40024471f7aa6fa5fdb50f909"
 
 [dependencies.lastfm-rs]
 git = "https://github.com/KamranMackey/lastfm-rs"

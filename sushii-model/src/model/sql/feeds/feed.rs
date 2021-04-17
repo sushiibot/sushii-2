@@ -227,6 +227,12 @@ impl Feed {
         get_all_vlive(&pool).await
     }
 
+    pub async fn get_matching_vlive(ctx: &Context, feed_ids: &[&str]) -> Result<Vec<Self>> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
+        get_matching_vlive(&pool, feed_ids).await
+    }
+
     pub async fn save(self, ctx: &Context) -> Result<Self> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
@@ -280,3 +286,20 @@ async fn get_all_vlive(pool: &sqlx::PgPool) -> Result<Vec<Feed>> {
     .await
     .map_err(Into::into)
 }
+
+async fn get_matching_vlive(pool: &sqlx::PgPool, feed_ids: &[&str]) -> Result<Vec<Feed>> {
+    sqlx::query_as!(
+        Feed,
+        r#"
+            SELECT feed_id,
+                   metadata as "metadata: Json<FeedMetadata>"
+              FROM app_public.feeds
+             WHERE feed_id = ANY($1)
+            "#,
+        feed_ids as _,
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(Into::into)
+}
+

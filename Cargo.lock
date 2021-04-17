@@ -1288,6 +1288,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ct-logs"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c1a816186fa68d9e426e3cb4ae4dff1fcd8e4a2c34b781bf7a822574a0d0aac8"
+dependencies = [
+ "sct",
+]
+
+[[package]]
 name = "ctor"
 version = "0.1.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2189,10 +2198,12 @@ version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5f9f7a97316d44c0af9b0301e65010573a853a9fc97046d7331d7f6bc0fd5a64"
 dependencies = [
+ "ct-logs",
  "futures-util",
  "hyper 0.14.4",
  "log",
  "rustls",
+ "rustls-native-certs",
  "tokio 1.3.0",
  "tokio-rustls",
  "webpki",
@@ -3602,6 +3613,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustls-native-certs"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a07b7c1885bd8ed3831c289b7870b13ef46fe0e856d288c30d9cc17d75a2092"
+dependencies = [
+ "openssl-probe",
+ "rustls",
+ "schannel",
+ "security-framework",
+]
+
+[[package]]
 name = "ryu"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3814,6 +3837,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde-value"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f3a1a3341211875ef120e117ea7fd5228530ae7e7036a779fdc9117be6b3282c"
+dependencies = [
+ "ordered-float",
+ "serde",
+]
+
+[[package]]
 name = "serde_derive"
 version = "1.0.125"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3834,6 +3867,17 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
+]
+
+[[package]]
+name = "serde_repr"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2dc6b7951b17b051f3210b063f12cc17320e2fe30ae05b0fe2a3abb068551c76"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -4285,7 +4329,7 @@ dependencies = [
  "tracing-attributes",
  "tracing-subscriber",
  "vergen",
- "vlive 0.2.0 (git+https://github.com/drklee3/vlive-rs?rev=9be4c9218d9dd775d168bd09c61b28364aec0d05)",
+ "vlive",
 ]
 
 [[package]]
@@ -4325,12 +4369,16 @@ dependencies = [
  "sqlx",
  "strfmt",
  "sushii-model",
+ "thiserror",
  "tokio 1.3.0",
  "tonic",
  "tonic-build",
  "tracing",
  "tracing-subscriber",
- "vlive 0.2.0 (git+https://github.com/drklee3/vlive-rs?rev=19a280d951e2cd188eccf9c8e6addc60613607b7)",
+ "twilight-embed-builder",
+ "twilight-http",
+ "twilight-model",
+ "vlive",
 ]
 
 [[package]]
@@ -4852,6 +4900,49 @@ dependencies = [
 ]
 
 [[package]]
+name = "twilight-embed-builder"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "31b53c7675061a6d41ff8ee0f431f44103b10cce6a20f4f54b14b37d4f1c2d8a"
+dependencies = [
+ "twilight-model",
+]
+
+[[package]]
+name = "twilight-http"
+version = "0.3.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ccd5abf3edca789b90170bef8c09dafb9276cda3889507ebe1a5cf795dbfa805"
+dependencies = [
+ "bytes 1.0.1",
+ "futures-channel",
+ "futures-util",
+ "hyper 0.14.4",
+ "hyper-rustls",
+ "percent-encoding",
+ "rand 0.8.3",
+ "serde",
+ "serde_json",
+ "serde_repr",
+ "tokio 1.3.0",
+ "tracing",
+ "twilight-model",
+]
+
+[[package]]
+name = "twilight-model"
+version = "0.3.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dea0bac438b70fe8adbc9bf0b53b8a6ba2711e9982432dffbc83b46e38d2f200"
+dependencies = [
+ "bitflags",
+ "serde",
+ "serde-value",
+ "serde_repr",
+ "tracing",
+]
+
+[[package]]
 name = "typemap_rev"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5037,24 +5128,7 @@ checksum = "b5a972e5669d67ba988ce3dc826706fb0a8b01471c088cb0b6110b805cc36aed"
 [[package]]
 name = "vlive"
 version = "0.2.0"
-source = "git+https://github.com/drklee3/vlive-rs?rev=19a280d951e2cd188eccf9c8e6addc60613607b7#19a280d951e2cd188eccf9c8e6addc60613607b7"
-dependencies = [
- "async-trait",
- "chrono",
- "lazy_static",
- "regex 0.2.11",
- "reqwest",
- "scraper",
- "serde",
- "serde_derive",
- "serde_json",
- "tracing",
-]
-
-[[package]]
-name = "vlive"
-version = "0.2.0"
-source = "git+https://github.com/drklee3/vlive-rs?rev=9be4c9218d9dd775d168bd09c61b28364aec0d05#9be4c9218d9dd775d168bd09c61b28364aec0d05"
+source = "git+https://github.com/drklee3/vlive-rs?rev=806a07b0e443fde40024471f7aa6fa5fdb50f909#806a07b0e443fde40024471f7aa6fa5fdb50f909"
 dependencies = [
  "async-trait",
  "chrono",
