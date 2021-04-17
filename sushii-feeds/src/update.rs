@@ -18,7 +18,9 @@ pub async fn update_vlive(ctx: &Context, newer_than: DateTime<Utc>) -> Result<()
     // Only return Err() if fatal errors
     let new_vlives = get_new_vlive_items(ctx, newer_than).await?;
 
-    tracing::debug!(?new_vlives, "New videos found");
+    if !new_vlives.is_empty() {
+        tracing::debug!(?new_vlives, "New videos found");
+    }
 
     // Get list of feed ids
     let feed_ids: Vec<_> = new_vlives
@@ -79,21 +81,37 @@ pub async fn update_vlive(ctx: &Context, newer_than: DateTime<Utc>) -> Result<()
 }
 
 async fn send_msg(ctx: &Context, subscription: &FeedSubscription, embed: Embed) -> Result<()> {
-    let res = ctx
+    let mut msg = ctx
         .http
         .create_message(ChannelId(subscription.channel_id as u64))
-        .embed(embed)?
-        .await;
+        .embed(embed)?;
 
-    if let Err(TwilightHttpError::Response {
-        error: ApiError::General(e),
-        ..
-    }) = res
-    {
-        if e.code == ErrorCode::UnknownChannel || e.code == ErrorCode::Missingaccess {
-            tracing::warn!(?subscription, "Deleting feed subscription");
-            subscription.delete_pool(&ctx.db_pool).await?;
+    if let Some(role) = subscription.mention_role {
+        msg = msg.content(format!("<@&{}>", role as u64))?;
+    }
+
+    // Send message
+    let res = msg.await;
+    tracing::info!(
+        "Sent vlive update to #{} in {}",
+        subscription.channel_id as u64,
+        subscription.guild_id as u64
+    );
+
+    match res {
+        Err(TwilightHttpError::Response {
+            error: ApiError::General(e),
+            ..
+        }) => {
+            if e.code == ErrorCode::UnknownChannel || e.code == ErrorCode::Missingaccess {
+                tracing::warn!(?subscription, "Deleting feed subscription");
+                subscription.delete_pool(&ctx.db_pool).await?;
+            }
         }
+        Err(e) => {
+            return Err(e.into());
+        }
+        Ok(_) => {}
     }
 
     Ok(())
@@ -148,6 +166,7 @@ pub async fn get_new_vlive_items(
         // Stop when videos are before newer_than. This relies on the fact that
         // get_recent_videos are sorted chronologically
         if detail.official_video.created_at < newer_than.naive_utc() {
+            tracing::debug!("Found old video {}, skipping rest", video.video_url());
             break;
         }
 

@@ -12,7 +12,12 @@ mod update;
 use model::context::Context;
 
 async fn run(ctx: Context) {
-    let mut interval = time::interval(Duration::from_secs(60));
+    let interval_duration = Duration::from_secs(60);
+    tracing::info!(
+        "Starting feed loop, update interval: {:?}",
+        &interval_duration
+    );
+    let mut interval = time::interval(interval_duration);
 
     // Keep track of which feed items are considered "new"
     // Any items older than this date will be ignored
@@ -59,6 +64,9 @@ async fn main() -> Result<()> {
         .proxy(proxy_url, true)
         .ratelimiter(None)
         .build();
+
+    let current_user = http.current_user().await?;
+    tracing::info!("Connected as {}#{:0>4}", current_user.name, current_user.discriminator);
 
     let ctx = Context::new(http, db_pool)?;
 
