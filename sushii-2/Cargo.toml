@@ -37,11 +37,6 @@ tokio-stream = "0.1.3"
 [dependencies.sushii-model]
 path = "../sushii-model"
 
-[dependencies.sushii-feeds]
-path = "../sushii-feeds"
-default-features = false
-features = []
-
 [dependencies.vlive]
 git = "https://github.com/drklee3/vlive-rs"
 rev = "806a07b0e443fde40024471f7aa6fa5fdb50f909"

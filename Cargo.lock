@@ -4321,7 +4321,6 @@ dependencies = [
  "serde_yaml",
  "serenity",
  "sqlx",
- "sushii-feeds",
  "sushii-model",
  "tokio 1.3.0",
  "tokio-stream",
