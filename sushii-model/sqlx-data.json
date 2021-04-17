@@ -722,6 +722,44 @@
       ]
     }
   },
+  "2b7aebf43524fa8f2838905eaeec64877ce444e3dd6257dbff01c900f96c98ae": {
+    "query": "\n            SELECT *\n              FROM app_public.feed_subscriptions\n             WHERE feed_id = ANY($1)\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "feed_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "channel_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "mention_role",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "TextArray"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
   "2bd0b770d019ae2eb0d8609b226e122154bcd85e49d23729060816988a86994e": {
     "query": "\n              SELECT *\n                FROM app_public.tags\n               WHERE guild_id = $1\n                 AND tag_name ILIKE '%' || $2 || '%'\n                 AND (tag_name > $3 OR $3 IS NULL)\n            ORDER BY tag_name ASC\n               LIMIT $4\n        ",
     "describe": {
@@ -1210,19 +1248,6 @@
       ]
     }
   },
-  "880bddc8f15bd2fdfdc800c883c1ffc29cefdab10324c0a09851ebba50ae2021": {
-    "query": "\n            DELETE FROM app_public.feed_subscriptions\n                  WHERE feed_id = $1\n                    AND channel_id = $2\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Int8"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "8aa5fe177433b6603262f42c3ee769383012dabe524b56c4b6cb72dbe2780951": {
     "query": "\n        INSERT INTO app_public.user_levels (user_id, guild_id, msg_all_time, msg_month, msg_week, msg_day, last_msg)\n             VALUES ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (user_id, guild_id)\n          DO UPDATE\n                SET msg_all_time = $3,\n                    msg_month = $4,\n                    msg_week = $5,\n                    msg_day = $6,\n                    last_msg = $7\n          RETURNING user_id as \"user_id: BigInt\",\n                    guild_id as \"guild_id: BigInt\",\n                    msg_all_time as \"msg_all_time: BigInt\",\n                    msg_month as \"msg_month: BigInt\",\n                    msg_week as \"msg_week: BigInt\",\n                    msg_day as \"msg_day: BigInt\",\n                    last_msg\n        ",
     "describe": {
@@ -1371,6 +1396,32 @@
         false,
         false,
         false
+      ]
+    }
+  },
+  "8f7b9fec1f0aa20f29acf4e7acc0868f049cceac94cb9c8151f0383192553676": {
+    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM app_public.feeds\n             WHERE feed_id = ANY($1)\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "feed_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "metadata: Json<FeedMetadata>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "TextArray"
+        ]
+      },
+      "nullable": [
+        false,
+        true
       ]
     }
   },
@@ -2190,6 +2241,19 @@
         true,
         true
       ]
+    }
+  },
+  "d13f85dbf692a7b7c19d4c37492e5bc2de7d175ea36e59e2e65d11bfbb7bd768": {
+    "query": "\n        DELETE FROM app_public.feed_subscriptions\n                WHERE feed_id = $1\n                AND channel_id = $2\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int8"
+        ]
+      },
+      "nullable": []
     }
   },
   "d184f509bba6030055abe90fa08147c6d8454cd25eb322232ad1357ad07eb311": {
