@@ -13,8 +13,8 @@ sushii-2 is split up into a handful of packages, which uses a shared PostgreSQL
 database.
 
 * [`sushii-2`] - Discord bot process
-* [`sushii-api`] - GraphQL API server used by [`sushii-web`]
-* [`sushii-feeds`] - gRPC feed service to fetch RSS and vlive.tv feeds
+* [`sushii-api`] - GraphQL API server used by [`sushii-web`] (deprecated)
+* [`sushii-feeds`] - Feed service for RSS and vlive.tv feeds
 * [`sushii-model`] - Shared models and SQL queries
 
 [`sushii-2`]: ./sushii-2
