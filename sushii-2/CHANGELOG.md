@@ -7,9 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.16] - 2021-04-18
+
 ### Added
 
 -  `tag add` now accepts attachments.
+-  `ifshy` `fsihy` fishy aliases
 
 ## [0.2.14] - 2021-04-12
 
