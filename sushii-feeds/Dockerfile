@@ -23,8 +23,6 @@ RUN rm src/*.rs
 
 # copy source tree, proto, feeds, etc
 COPY ./sushii-feeds/src ./src
-COPY ./sushii-feeds/build.rs ./build.rs
-COPY ./sushii-feeds/proto ./proto
 COPY ./sushii-feeds/feeds.json ./feeds.json
 
 # build for release, remove dummy compiled files (in workspace root)
@@ -45,5 +43,4 @@ RUN apt-get update && apt-get install -y libssl-dev ca-certificates && rm -rf /v
 # target dir is still in workspace root
 COPY --from=build /usr/src/sushii/target/release/sushii-feeds /usr/local/bin/sushii-feeds
 
-EXPOSE 50051
 ENTRYPOINT ["sushii-feeds"]

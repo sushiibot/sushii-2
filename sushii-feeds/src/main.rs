@@ -66,7 +66,11 @@ async fn main() -> Result<()> {
         .build();
 
     let current_user = http.current_user().await?;
-    tracing::info!("Connected as {}#{:0>4}", current_user.name, current_user.discriminator);
+    tracing::info!(
+        "Connected as {}#{:0>4}",
+        current_user.name,
+        current_user.discriminator
+    );
 
     let ctx = Context::new(http, db_pool)?;
 

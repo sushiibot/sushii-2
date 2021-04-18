@@ -166,7 +166,11 @@ pub async fn get_new_vlive_items(
         // Stop when videos are before newer_than. This relies on the fact that
         // get_recent_videos are sorted chronologically
         if detail.official_video.created_at < newer_than.naive_utc() {
-            tracing::debug!("Found old video {}, skipping rest", video.video_url());
+            tracing::debug!(
+                "Found old video {} @ {}, skipping rest",
+                video.video_url(),
+                detail.official_video.created_at
+            );
             break;
         }
 

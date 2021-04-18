@@ -6,26 +6,8 @@ use std::collections::HashMap;
 use strfmt::strfmt;
 use sushii_model::model::sql::feeds::{Feed, FeedKind, FeedMetadata};
 
-pub mod feed_request {
-    tonic::include_proto!("feedrequest");
-}
-
-pub use feed_request::feed_service_client::FeedServiceClient;
-pub use feed_request::{feed_update_reply::FeedItem, Empty, FeedUpdateReply};
-pub use tonic;
-
 pub mod model;
 use crate::model::feeds::{FeedKindAttrs, FeedList};
-
-pub async fn get_new(
-    mut client: FeedServiceClient<tonic::transport::channel::Channel>,
-) -> Result<FeedUpdateReply> {
-    let request = tonic::Request::new(Empty {});
-
-    let res = client.update_feeds(request).await?;
-
-    Ok(res.into_inner())
-}
 
 pub async fn get_feed(client: Client, kind: FeedKind, feed: Feed) -> Result<Channel> {
     match kind {
