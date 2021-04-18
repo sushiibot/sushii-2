@@ -165,6 +165,9 @@ services:
             - "50051"
         env_file:
             - .env
+        environment:
+            # different from sushii, should not include http://
+            - TWILIGHT_API_PROXY_URL=twilight-http-proxy:80
         networks:
             - sushii_net
         labels:
