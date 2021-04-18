@@ -71,7 +71,7 @@ pub async fn update_vlive(ctx: &Context, newer_than: DateTime<Utc>) -> Result<()
             }
         } else {
             tracing::debug!(
-                "No matching feed for {} found, ignoring",
+                "No matching feeds for {} found, ignoring",
                 video.0.video_url()
             );
         }
@@ -163,9 +163,22 @@ pub async fn get_new_vlive_items(
             }
         };
 
+        // Created at might be an old date, ie scheduled video
+        let created_at = detail.official_video.created_at;
+        // (might be wrong) thinking even if this is far in future, it won't
+        // show up on front page unless it's live
+        let on_air_start_at = detail.official_video.on_air_start_at;
+
+        // Get older date
+        let actual_start = if created_at > on_air_start_at {
+            created_at
+        } else {
+            on_air_start_at
+        };
+
         // Stop when videos are before newer_than. This relies on the fact that
         // get_recent_videos are sorted chronologically
-        if detail.official_video.created_at < newer_than.naive_utc() {
+        if actual_start< newer_than.naive_utc() {
             tracing::debug!(
                 "Found old video {} @ {}, skipping rest",
                 video.video_url(),
