@@ -71,7 +71,7 @@ async fn np(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     };
 
-    let previous_track = recent_tracks.tracks.get(2);
+    let previous_track = recent_tracks.tracks.get(1);
 
     let now_playing = track
         .attrs
@@ -83,7 +83,7 @@ async fn np(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         "Last listened to"
     };
 
-    let thumbnail_url = track.images.get(2).map_or_else(
+    let thumbnail_url = track.images.get(1).map_or_else(
         || "https://i.imgur.com/oYm77EU.jpg",
         |i| i.image_url.as_str(),
     );
