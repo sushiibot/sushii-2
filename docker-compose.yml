@@ -159,8 +159,6 @@ services:
         image: ghcr.io/sushiibot/sushii-feeds:latest
         container_name: sushii-feeds
         restart: unless-stopped
-        depends_on:
-            - sushii
         expose:
             - "50051"
         env_file:
