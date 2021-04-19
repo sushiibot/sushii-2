@@ -1,0 +1,26 @@
+[package]
+name = "sushii-rules-engine"
+version = "0.1.0"
+authors = ["drklee3 <derrick@dlee.dev>"]
+edition = "2018"
+
+[[bin]]
+name = "export"
+path = "src/export.rs"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+tokio = "1.2.0"
+async-trait = "0.1.42"
+typetag = "0.1"
+typemap_rev = "0.1.4"
+twilight-model = "0.3.2"
+futures = "0.3.12"
+async-recursion = "0.3.2"
+aho-corasick = "0.7.15"
+dashmap = "4.0.2"
+schemars = { version = "0.8.0", features = ["chrono"] }
+serde_json = "1.0"
+handlebars = "3.5.3"
+thiserror = "1.0.24"
+chrono = { version = "0.4", features = ["serde"] }
