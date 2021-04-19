@@ -103,6 +103,8 @@ async fn send_msg(ctx: &Context, subscription: &FeedSubscription, embed: Embed) 
             error: ApiError::General(e),
             ..
         }) => {
+            tracing::warn!("Failed to send vlive update: {}", e);
+
             if e.code == ErrorCode::UnknownChannel || e.code == ErrorCode::Missingaccess {
                 tracing::warn!(?subscription, "Deleting feed subscription");
                 subscription.delete_pool(&ctx.db_pool).await?;
