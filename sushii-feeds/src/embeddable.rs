@@ -26,12 +26,10 @@ impl Embeddable for (VliveRecentVideo, VlivePostDetail) {
             format!("[VOD] {}", self.0.title)
         };
 
-        let description = if let Some(secs) = self.0.duration_secs {
+        let description = self.0.duration_secs.map(|secs| {
             let d = Duration::from_secs(secs);
             format!("Duration: {}", humantime::format_duration(d))
-        } else {
-            "".to_string()
-        };
+        });
 
         let author = EmbedAuthorBuilder::new()
             .name(&self.0.channel_name)?
@@ -39,15 +37,17 @@ impl Embeddable for (VliveRecentVideo, VlivePostDetail) {
             .url(self.0.channel_url())
             .build();
 
-        let embed = EmbedBuilder::new()
+        let mut embed = EmbedBuilder::new()
             .author(author)
             .title(title)?
             .url(self.0.video_url())
             .color(0x1ecfff)?
-            .description(description)?
-            .image(ImageSource::url(self.0.thumbnail_url())?)
-            .build()?;
+            .image(ImageSource::url(self.0.thumbnail_url())?);
 
-        Ok(embed)
+        if let Some(desc) = description {
+            embed = embed.description(desc)?;
+        }
+
+        Ok(embed.build()?)
     }
 }

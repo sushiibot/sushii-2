@@ -180,7 +180,7 @@ pub async fn get_new_vlive_items(
 
         // Stop when videos are before newer_than. This relies on the fact that
         // get_recent_videos are sorted chronologically
-        if actual_start< newer_than.naive_utc() {
+        if actual_start < newer_than.naive_utc() {
             tracing::debug!(
                 "Found old video {} @ {}, skipping rest",
                 video.video_url(),
