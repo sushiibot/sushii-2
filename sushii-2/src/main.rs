@@ -26,7 +26,7 @@ use sushii_model::keys::{DbPool, SushiiCache};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let sushii_conf = Arc::new(SushiiConfig::new_from_env()?);
+    let sushii_conf = Arc::new(SushiiConfig::from_env()?);
 
     // install global subscriber configured based on RUST_LOG envvar.
     tracing_subscriber::fmt()

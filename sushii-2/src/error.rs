@@ -1,3 +1,4 @@
+use config::ConfigError;
 use dotenv::Error as DotenvError;
 use humantime::DurationError;
 use serde_json::Error as SerdeJsonError;
@@ -5,113 +6,40 @@ use serenity::Error as SerenityError;
 use sqlx::migrate::MigrateError;
 use sqlx::Error as SqlxError;
 use std::env::VarError;
-use std::error::Error as StdError;
-use std::fmt::{Display, Error as FmtError, Formatter, Result as FmtResult};
+use std::fmt::Error as FmtError;
 use std::io::Error as IoError;
 use std::result::Result as StdResult;
 use sushii_model::Error as SushiiModelError;
+use thiserror::Error as ThisError;
 
 pub type Result<T> = StdResult<T, Error>;
 
-#[derive(Debug)]
+#[derive(ThisError, Debug)]
 pub enum Error {
     // Sushii errors
+    #[error("{0}")]
     Sushii(String),
-    Model(SushiiModelError),
+    #[error(transparent)]
+    Model(#[from] SushiiModelError),
     // Crate errors
-    Dotenv(DotenvError),
-    Fmt(FmtError),
-    Io(IoError),
-    Json(SerdeJsonError),
-    Serenity(SerenityError),
-    Sqlx(SqlxError),
-    Migrate(MigrateError),
-    Var(VarError),
-    Duration(DurationError),
-}
-
-impl From<SushiiModelError> for Error {
-    fn from(err: SushiiModelError) -> Error {
-        Error::Model(err)
-    }
-}
-
-impl From<SerdeJsonError> for Error {
-    fn from(err: SerdeJsonError) -> Error {
-        Error::Json(err)
-    }
-}
-
-impl From<SerenityError> for Error {
-    fn from(err: SerenityError) -> Error {
-        Error::Serenity(err)
-    }
-}
-
-impl From<DotenvError> for Error {
-    fn from(err: DotenvError) -> Error {
-        Error::Dotenv(err)
-    }
-}
-
-impl From<FmtError> for Error {
-    fn from(err: FmtError) -> Error {
-        Error::Fmt(err)
-    }
-}
-
-impl From<IoError> for Error {
-    fn from(err: IoError) -> Error {
-        Error::Io(err)
-    }
-}
-
-impl From<VarError> for Error {
-    fn from(err: VarError) -> Error {
-        Error::Var(err)
-    }
-}
-
-impl From<SqlxError> for Error {
-    fn from(err: SqlxError) -> Error {
-        Error::Sqlx(err)
-    }
-}
-
-impl From<MigrateError> for Error {
-    fn from(err: MigrateError) -> Error {
-        Error::Migrate(err)
-    }
-}
-
-impl From<DurationError> for Error {
-    fn from(err: DurationError) -> Error {
-        Error::Duration(err)
-    }
-}
-
-impl StdError for Error {
-    fn source(&self) -> Option<&(dyn StdError + 'static)> {
-        Some(self)
-    }
-}
-
-impl Display for Error {
-    fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        match *self {
-            // Sushii
-            Error::Sushii(ref inner) => inner.fmt(f),
-            Error::Model(ref inner) => inner.fmt(f),
-            // Crates
-            Error::Dotenv(ref inner) => inner.fmt(f),
-            Error::Fmt(ref inner) => inner.fmt(f),
-            Error::Io(ref inner) => inner.fmt(f),
-            Error::Json(ref inner) => inner.fmt(f),
-            Error::Serenity(ref inner) => inner.fmt(f),
-            Error::Sqlx(ref inner) => inner.fmt(f),
-            Error::Migrate(ref inner) => inner.fmt(f),
-            Error::Var(ref inner) => inner.fmt(f),
-            Error::Duration(ref inner) => inner.fmt(f),
-        }
-    }
+    #[error(transparent)]
+    Dotenv(#[from] DotenvError),
+    #[error(transparent)]
+    Fmt(#[from] FmtError),
+    #[error(transparent)]
+    Io(#[from] IoError),
+    #[error(transparent)]
+    Json(#[from] SerdeJsonError),
+    #[error(transparent)]
+    Serenity(#[from] SerenityError),
+    #[error(transparent)]
+    Sqlx(#[from] SqlxError),
+    #[error(transparent)]
+    Migrate(#[from] MigrateError),
+    #[error(transparent)]
+    Var(#[from] VarError),
+    #[error(transparent)]
+    Duration(#[from] DurationError),
+    #[error(transparent)]
+    Config(#[from] ConfigError),
 }
