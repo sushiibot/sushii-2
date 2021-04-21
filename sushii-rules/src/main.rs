@@ -36,8 +36,12 @@ async fn get_event(
     conn: &mut deadpool_redis::ConnectionWrapper,
     key: &str,
 ) -> Result<DispatchEvent> {
-    let event_str = conn.blpop::<&str, String>(&key, 0).await?;
-    let event: RedisEvent = serde_json::from_str(&event_str)?;
+    let popped: Vec<String> = conn.blpop::<&str, Vec<String>>(&key, 0).await?;
+    // https://redis.io/commands/blpop
+    // A two-element multi-bulk with the first element being the name of the key
+    // where an element was popped and the second element being the value of the
+    // popped element.
+    let event: RedisEvent = serde_json::from_str(&popped[1])?;
 
     let mut json_deserializer = Deserializer::from_str(&event.payload);
 
@@ -48,7 +52,7 @@ async fn get_event(
 }
 
 async fn process_event(event: DispatchEvent) {
-    tracing::debug!("Event: {:?}", event);
+    tracing::info!("Event: {:?}", event);
 }
 
 #[tokio::main]
