@@ -4642,6 +4642,7 @@ dependencies = [
  "tokio 1.3.0",
  "tracing",
  "tracing-subscriber",
+ "twilight-http",
  "twilight-model",
  "typemap_rev",
  "typetag",

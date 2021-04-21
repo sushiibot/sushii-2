@@ -2,6 +2,7 @@ use async_recursion::async_recursion;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
+use std::sync::Arc;
 use twilight_model::gateway::event::DispatchEvent;
 
 use crate::model::{Constraint, Context};
@@ -31,13 +32,13 @@ impl Condition {
     #[async_recursion]
     pub async fn check_event(
         &self,
-        event: &DispatchEvent,
+        event: Arc<DispatchEvent>,
         context: &Context,
     ) -> Result<bool, Box<dyn Error>> {
         match *self {
             Condition::And { ref and } => {
                 for child in and.iter() {
-                    if !child.check_event(event, context).await? {
+                    if !child.check_event(event.clone(), context).await? {
                         return Ok(false);
                     }
                 }
@@ -45,11 +46,11 @@ impl Condition {
                 Ok(true)
             }
             Condition::Not { not: ref c } => {
-                return c.check_event(event, context).await.map(|r| !r);
+                return c.check_event(event.clone(), context).await.map(|r| !r);
             }
             Condition::Or { ref or } => {
                 for child in or.iter() {
-                    if child.check_event(event, context).await? {
+                    if child.check_event(event.clone(), context).await? {
                         return Ok(true);
                     }
                 }
@@ -63,7 +64,7 @@ impl Condition {
                 let mut count = 0;
 
                 for child in conditions.iter() {
-                    if child.check_event(event, context).await? {
+                    if child.check_event(event.clone(), context).await? {
                         count += 1;
                     }
                 }

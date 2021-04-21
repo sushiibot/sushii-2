@@ -10,5 +10,6 @@ pub mod trigger;
 
 pub use self::{
     action::Action, condition::Condition, condition_result::ConditionResult,
-    constraint::Constraint, context::Context, rule::Rule, status::Status, trigger::Trigger,
+    constraint::Constraint, context::Context, engine::RulesEngine, rule::Rule, status::Status,
+    trigger::Trigger,
 };

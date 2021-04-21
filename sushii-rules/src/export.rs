@@ -1,4 +1,4 @@
-mod model;
+use sushii_rules::model;
 
 fn main() {
     let schema = schemars::schema_for!(model::Rule);

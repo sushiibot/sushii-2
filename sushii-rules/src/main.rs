@@ -3,7 +3,9 @@ use dotenv::dotenv;
 use redis::AsyncCommands;
 use serde::{de::DeserializeSeed, Deserialize, Serialize};
 use serde_json::Deserializer;
+use sushii_rules::model::RulesEngine;
 use tracing_subscriber::EnvFilter;
+use twilight_http::Client;
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::gateway::event::DispatchEventWithTypeDeserializer;
 
@@ -13,6 +15,8 @@ struct Config {
     /// being sent to multiple different workers. This isn't actually useful now
     /// since it's just a single cluster.
     pub cluster_id: u64,
+
+    pub twilight_api_proxy_url: String,
 
     #[serde(default)]
     pub redis: deadpool_redis::Config,
@@ -51,10 +55,6 @@ async fn get_event(
     Ok(gateway_event)
 }
 
-async fn process_event(event: DispatchEvent) {
-    tracing::info!("Event: {:?}", event);
-}
-
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv().ok();
@@ -77,6 +77,20 @@ async fn main() -> Result<()> {
 
     tracing::info!("Watching events on list `{}`", &key);
 
+    let http = Client::builder()
+        .proxy(cfg.twilight_api_proxy_url, true)
+        .ratelimiter(None)
+        .build();
+
+    let current_user = http.current_user().await?;
+    tracing::info!(
+        "Connected as {}#{:0>4}",
+        current_user.name,
+        current_user.discriminator
+    );
+
+    let engine = RulesEngine::new(http);
+
     loop {
         let event = match get_event(&mut conn, &key).await {
             Ok(e) => e,
@@ -86,10 +100,8 @@ async fn main() -> Result<()> {
             }
         };
 
-        tokio::spawn(async move {
-            process_event(event).await
-        });
+        if let Err(e) = engine.process_event(event) {
+            tracing::error!("Failed to process event: {}", e);
+        }
     }
-
-    Ok(())
 }

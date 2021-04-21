@@ -1,6 +1,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
+use std::sync::Arc;
 use twilight_model::gateway::event::DispatchEvent;
 
 use crate::model::{Action, Condition, Context, Trigger};
@@ -16,7 +17,7 @@ pub struct Rule {
 impl Rule {
     pub async fn check_event(
         &self,
-        event: &DispatchEvent,
+        event: Arc<DispatchEvent>,
         context: &Context,
     ) -> Option<Result<bool, Box<dyn Error>>> {
         // if event.kind() != self.trigger {

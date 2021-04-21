@@ -98,3 +98,9 @@ pub enum Trigger {
     #[serde(with = "TwilightEventType")]
     Twilight(EventType),
 }
+
+impl From<EventType> for Trigger {
+    fn from(event_type: EventType) -> Self {
+        Self::Twilight(event_type)
+    }
+}

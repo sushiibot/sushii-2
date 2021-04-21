@@ -1,6 +1,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
+use std::sync::Arc;
 use twilight_model::gateway::event::DispatchEvent;
 
 use crate::model::Context;
@@ -96,10 +97,10 @@ pub enum Constraint {
 impl Constraint {
     pub async fn check_event(
         &self,
-        event: &DispatchEvent,
+        event: Arc<DispatchEvent>,
         _context: &Context,
     ) -> Result<bool, Box<dyn Error>> {
-        let val = match (self, event) {
+        let val = match (self, event.as_ref()) {
             (
                 Constraint::Message(MessageConstraint::Content(c)),
                 DispatchEvent::MessageCreate(msg),
