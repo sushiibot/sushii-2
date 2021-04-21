@@ -4640,6 +4640,8 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tokio 1.3.0",
+ "tracing",
+ "tracing-subscriber",
  "twilight-model",
  "typemap_rev",
  "typetag",

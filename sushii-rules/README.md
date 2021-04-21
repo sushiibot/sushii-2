@@ -1,7 +1,8 @@
 # sushii-rules
 
 Rules engine for processing Discord events with user configurable logic. In very
-early development and mostly experimentation.
+early development and mostly experimentation. This readme is mostly a design
+doc and ideas, not actual documentation.
 
 ## Rule Configuration
 
@@ -175,11 +176,11 @@ engine (excluding sushii special types and actions).
 
 ## TODO
 
-1. Integrate proxy with `serenity-rs`, requires modification to serenity
-2. Serenity bot should serialize events into a redis queue to pass to rules
-   process (a bit of redundant deserializing/serializing but CPU load isn't
-   really a problem for now)
-3. Rules process should be able to read events from redis message queue and
-   respond with Discord HTTP API requests via twilight + twilight http proxy
-4. Reimplementing features in rules engine means native features can be disabled
-   in the main bot.
+* [x] Integrate proxy with `serenity-rs`, requires modification to serenity
+* [ ] Serenity bot should serialize events into a redis queue to pass to rules
+      process (a bit of redundant deserializing/serializing but CPU load isn't
+      really a problem for now)
+* [ ] Rules process should be able to read events from redis message queue and
+      respond with Discord HTTP API requests via twilight + twilight http proxy
+* [ ] Reimplementing features in rules engine means native features can be
+      disabled in the main bot.
