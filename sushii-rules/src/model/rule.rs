@@ -4,7 +4,7 @@ use std::error::Error;
 use std::sync::Arc;
 use twilight_model::gateway::event::DispatchEvent;
 
-use crate::model::{Action, Condition, Context, Trigger};
+use crate::model::{Action, Condition, RuleContext, Trigger};
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct Rule {
@@ -18,20 +18,23 @@ impl Rule {
     pub async fn check_event(
         &self,
         event: Arc<DispatchEvent>,
-        context: &Context,
+        ctx: &RuleContext,
     ) -> Result<bool, Box<dyn Error>> {
         // if event.kind() != self.trigger {
         //     return None;
         // }
 
-        let passes_conditions = self.conditions.check_event(event.clone(), context).await?;
+        let passes_conditions = self.conditions.check_event(event.clone(), ctx).await?;
 
-        if !dbg!(passes_conditions) {
+        if !passes_conditions {
             return Ok(false);
         }
 
+        tracing::debug!("Rule triggered");
+
+        // Run all actions in order if passes conditions
         for action in &self.actions {
-            action.execute(event.clone(), &context).await?;
+            action.execute(event.clone(), &ctx).await?;
         }
 
         Ok(true)

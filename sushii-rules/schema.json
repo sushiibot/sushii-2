@@ -1,0 +1,549 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Rule",
+  "type": "object",
+  "required": [
+    "actions",
+    "conditions",
+    "trigger"
+  ],
+  "properties": {
+    "trigger": {
+      "$ref": "#/definitions/Trigger"
+    },
+    "conditions": {
+      "$ref": "#/definitions/Condition"
+    },
+    "actions": {
+      "description": "Actions are executed sequentially if condition passes",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Action"
+      }
+    }
+  },
+  "definitions": {
+    "Trigger": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": [
+            "TWILIGHT"
+          ],
+          "properties": {
+            "TWILIGHT": {
+              "$ref": "#/definitions/EventType"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "EventType": {
+      "type": "string",
+      "enum": [
+        "GUILD_BAN_ADD",
+        "GUILD_BAN_REMOVE",
+        "CHANNEL_CREATE",
+        "CHANNEL_DELETE",
+        "CHANNEL_PINS_UPDATE",
+        "CHANNEL_UPDATE",
+        "GATEWAY_HEARTBEAT",
+        "GATEWAY_HEARTBEAT_ACK",
+        "GATEWAY_HELLO",
+        "GATEWAY_INVALIDATE_SESSION",
+        "GATEWAY_RECONNECT",
+        "GIFT_CODE_UPDATE",
+        "GUILD_CREATE",
+        "GUILD_DELETE",
+        "GUILD_EMOJIS_UPDATE",
+        "GUILD_INTEGRATIONS_UPDATE",
+        "GUILD_UPDATE",
+        "INVITE_CREATE",
+        "INVITE_DELETE",
+        "GUILD_MEMBER_ADD",
+        "GUILD_MEMBER_REMOVE",
+        "GUILD_MEMBER_UPDATE",
+        "GUILD_MEMBERS_CHUNK",
+        "MESSAGE_CREATE",
+        "MESSAGE_DELETE",
+        "MESSAGE_DELETE_BULK",
+        "MESSAGE_UPDATE",
+        "PRESENCE_UPDATE",
+        "PRESENCES_REPLACE",
+        "MESSAGE_REACTION_ADD",
+        "MESSAGE_REACTION_REMOVE",
+        "MESSAGE_REACTION_REMOVE_ALL",
+        "MESSAGE_REACTION_REMOVE_EMOJI",
+        "READY",
+        "RESUMED",
+        "GUILD_ROLE_CREATE",
+        "GUILD_ROLE_DELETE",
+        "GUILD_ROLE_UPDATE",
+        "SHARD_CONNECTED",
+        "SHARD_CONNECTING",
+        "SHARD_DISCONNECTED",
+        "SHARD_IDENTIFYING",
+        "SHARD_RECONNECTING",
+        "SHARD_PAYLOAD",
+        "SHARD_RESUMING",
+        "TYPING_START",
+        "UNAVAILABLE_GUILD",
+        "USER_UPDATE",
+        "VOICE_SERVER_UPDATE",
+        "VOICE_STATE_UPDATE",
+        "WEBHOOKS_UPDATE"
+      ]
+    },
+    "Condition": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": [
+            "And"
+          ],
+          "properties": {
+            "And": {
+              "type": "object",
+              "required": [
+                "and"
+              ],
+              "properties": {
+                "and": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Condition"
+                  }
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "Or"
+          ],
+          "properties": {
+            "Or": {
+              "type": "object",
+              "required": [
+                "or"
+              ],
+              "properties": {
+                "or": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Condition"
+                  }
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "Not"
+          ],
+          "properties": {
+            "Not": {
+              "type": "object",
+              "required": [
+                "not"
+              ],
+              "properties": {
+                "not": {
+                  "$ref": "#/definitions/Condition"
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "AtLeast"
+          ],
+          "properties": {
+            "AtLeast": {
+              "type": "object",
+              "required": [
+                "conditions",
+                "min_count"
+              ],
+              "properties": {
+                "min_count": {
+                  "type": "integer",
+                  "format": "uint",
+                  "minimum": 0.0
+                },
+                "conditions": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Condition"
+                  }
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "Condition"
+          ],
+          "properties": {
+            "Condition": {
+              "type": "object",
+              "anyOf": [
+                {
+                  "title": "On message",
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "$ref": "#/definitions/MessageConstraint"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "MessageConstraint": {
+      "anyOf": [
+        {
+          "title": "Message content",
+          "type": "object",
+          "required": [
+            "content"
+          ],
+          "properties": {
+            "content": {
+              "$ref": "#/definitions/StringConstraint"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Message author",
+          "type": "object",
+          "required": [
+            "author"
+          ],
+          "properties": {
+            "author": {
+              "$ref": "#/definitions/UserConstraint"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "StringConstraint": {
+      "anyOf": [
+        {
+          "title": "Equals",
+          "description": "Equals some text",
+          "type": "object",
+          "required": [
+            "equals"
+          ],
+          "properties": {
+            "equals": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "Does not equal some text",
+          "type": "object",
+          "required": [
+            "not_equals"
+          ],
+          "properties": {
+            "not_equals": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "Contains some text",
+          "type": "object",
+          "required": [
+            "contains"
+          ],
+          "properties": {
+            "contains": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "Contains all of the given texts",
+          "type": "object",
+          "required": [
+            "contains_all"
+          ],
+          "properties": {
+            "contains_all": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "Contains at least one of the given texts",
+          "type": "object",
+          "required": [
+            "contains_any"
+          ],
+          "properties": {
+            "contains_any": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "Does not contain the given text",
+          "type": "object",
+          "required": [
+            "does_not_contain"
+          ],
+          "properties": {
+            "does_not_contain": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "Does not contain any of the given texts",
+          "type": "object",
+          "required": [
+            "does_not_contain_any"
+          ],
+          "properties": {
+            "does_not_contain_any": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "Is any of the of given texts",
+          "type": "object",
+          "required": [
+            "in"
+          ],
+          "properties": {
+            "in": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "Is not any of the given texts",
+          "type": "object",
+          "required": [
+            "not_in"
+          ],
+          "properties": {
+            "not_in": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "Starts with given text",
+          "type": "object",
+          "required": [
+            "starts_with"
+          ],
+          "properties": {
+            "starts_with": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "Does not start with given text",
+          "type": "object",
+          "required": [
+            "does_not_starts_with"
+          ],
+          "properties": {
+            "does_not_starts_with": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "Ends with given text",
+          "type": "object",
+          "required": [
+            "ends_with"
+          ],
+          "properties": {
+            "ends_with": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "Does not end with given text",
+          "type": "object",
+          "required": [
+            "does_not_ends_with"
+          ],
+          "properties": {
+            "does_not_ends_with": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "UserConstraint": {
+      "anyOf": [
+        {
+          "title": "Username",
+          "type": "object",
+          "required": [
+            "username"
+          ],
+          "properties": {
+            "username": {
+              "$ref": "#/definitions/StringConstraint"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Action": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": [
+            "Ban"
+          ],
+          "properties": {
+            "Ban": {
+              "type": "object",
+              "required": [
+                "delete_days",
+                "user_id"
+              ],
+              "properties": {
+                "user_id": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                },
+                "delete_days": {
+                  "description": "Days of messages to delete, max 8",
+                  "type": "integer",
+                  "format": "uint8",
+                  "minimum": 0.0
+                },
+                "duration": {
+                  "description": "None for permanent, otherwise duration in seconds",
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "Reply"
+          ],
+          "properties": {
+            "Reply": {
+              "type": "object",
+              "required": [
+                "content"
+              ],
+              "properties": {
+                "content": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "SendMessage"
+          ],
+          "properties": {
+            "SendMessage": {
+              "type": "object",
+              "required": [
+                "channel_id",
+                "content"
+              ],
+              "properties": {
+                "channel_id": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                },
+                "content": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

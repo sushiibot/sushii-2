@@ -1,3 +1,4 @@
+use language_api_wrapper::error::Error as LanguageApiError;
 use std::result::Result as StdResult;
 use thiserror::Error as ThisError;
 
@@ -9,4 +10,6 @@ pub enum Error {
     MissingChannelId,
     #[error("unknown data store error")]
     Unknown,
+    #[error(transparent)]
+    LanguageApi(#[from] LanguageApiError),
 }

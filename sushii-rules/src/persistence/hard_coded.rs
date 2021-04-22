@@ -28,7 +28,7 @@ impl RuleStore for HardCodedStore {
                         constraint: Constraint::Message(MessageConstraint::Author(
                             UserConstraint::Username(StringConstraint::Equals("tzuwy".to_string())),
                         )),
-                    }
+                    },
                 ],
             },
             actions: vec![Action::Reply {

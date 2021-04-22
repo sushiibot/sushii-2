@@ -18,6 +18,7 @@ struct Config {
     pub cluster_id: u64,
 
     pub twilight_api_proxy_url: String,
+    pub language_api_endpoint: String,
 
     #[serde(default)]
     pub redis: deadpool_redis::Config,
@@ -90,7 +91,11 @@ async fn main() -> Result<()> {
         current_user.discriminator
     );
 
-    let engine = RulesEngine::new(http, Box::new(HardCodedStore::new()));
+    let engine = RulesEngine::new(
+        http,
+        Box::new(HardCodedStore::new()),
+        &cfg.language_api_endpoint,
+    );
 
     loop {
         let event = match get_event(&mut conn, &key).await {

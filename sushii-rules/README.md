@@ -132,8 +132,41 @@ make it easier for reuse and organization.
 
 ## Actions
 
-Actions should be able to reference to temporary data from other actions,
-similar to github actions' `outputs`.
+Actions should be able to reference to temporary data from conditions and other
+actions, similar to github actions' `outputs`. This data should be stored in a
+`RuleContext` which is *newly created* on each time a rule is triggered.
+
+Main problem right now is assigning unique IDs to each condition/action, if this
+should be done. This may cause it to be more confusing for end users. This is
+mainly useful for multiple of the same condition / action and this will either
+overwrite the previous one if they aren't unique, or will require users to
+specify which one they want to use
+
+Example structure in json form.
+
+```jsonc
+{
+  // Condition data, should contain information on what data passed conditions
+  // and the inputs / outputs
+  "conditions": {
+    "message.content": {
+      "value": "!ping",
+      "passed": true,
+    },
+    "message.author.id": {
+      "value": 123978123,
+      "passed": true,
+    }
+  },
+  // Actions
+  "actions": {
+    "send_message": {
+      "id": 1234567890,
+      "content": "pong!"
+    }
+  }
+}
+```
 
 ## Config
 

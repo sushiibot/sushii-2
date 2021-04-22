@@ -5,7 +5,8 @@ use std::error::Error;
 use std::sync::Arc;
 use twilight_model::gateway::event::DispatchEvent;
 
-use crate::model::{Constraint, Context};
+use crate::error::Result;
+use crate::model::{Constraint, RuleContext};
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Condition {
@@ -33,8 +34,8 @@ impl Condition {
     pub async fn check_event(
         &self,
         event: Arc<DispatchEvent>,
-        context: &Context,
-    ) -> Result<bool, Box<dyn Error>> {
+        context: &RuleContext,
+    ) -> Result<bool> {
         match *self {
             Condition::And { ref and } => {
                 for child in and.iter() {

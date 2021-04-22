@@ -5,7 +5,7 @@ use std::sync::Arc;
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::id::ChannelId;
 
-use super::Context;
+use super::RuleContext;
 use crate::error::Error;
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -27,7 +27,7 @@ pub enum Action {
 }
 
 impl Action {
-    pub async fn execute(&self, event: Arc<DispatchEvent>, ctx: &Context) -> Result<()> {
+    pub async fn execute(&self, event: Arc<DispatchEvent>, ctx: &RuleContext) -> Result<()> {
         match *self {
             Self::Reply { ref content } => {
                 let channel_id = event.channel_id().ok_or(Error::MissingChannelId)?;

@@ -28,7 +28,7 @@ deadpool-redis = "0.7.1"
 redis = { version = "0.20", features = ["tokio-comp"] }
 futures = "0.3.12"
 handlebars = "3.5.3"
-schemars = { version = "0.8.0", features = ["chrono"] }
+schemars = { version = "0.8.0", features = ["chrono", "preserve_order"] }
 serde = { version = "1.0.125", features = ["derive"] }
 serde_json = "1.0"
 thiserror = "1.0.24"
@@ -41,3 +41,6 @@ config = "0.11.0"
 tracing = "0.1.25"
 tracing-subscriber = "0.2.17"
 twilight-http = "0.3.6"
+lingua = "1.2.0"
+reqwest = "0.11.3"
+language-api = { git = "https://github.com/sushiibot/language-api", rev ="761f467177fdb287c2a3bf9e10e4cd46bcf81ca5" }
