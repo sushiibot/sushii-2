@@ -5,7 +5,7 @@ services:
             - "5432:5432"
     twilight-http-proxy:
         ports:
-            - "3000:80"
+            - "3001:80"
     sushii:
         build:
             dockerfile: ./sushii-2/Dockerfile
