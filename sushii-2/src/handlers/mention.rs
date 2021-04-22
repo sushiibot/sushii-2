@@ -46,7 +46,7 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
         You can also mention me ({}) as a prefix. \n\
         [The commands list can be found here](https://sushii.xyz/commands).\n\
         Still need help or have questions? \
-        [Join the sushii support server](https://discord.gg/tQkb3GKVhP) \n\
+        [Join the sushii support server](https://discord.gg/Bz5Q2WfuE7) \n\
         Want me in your server? [Add me to your server](https://discord.com/oauth2/authorize?client_id=193163942502072320&permissions=268823622&scope=applications.commands%20bot)",
         prefix,
         bot_id.mention()
