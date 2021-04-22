@@ -105,7 +105,12 @@ impl Constraint {
                 Constraint::Message(MessageConstraint::Content(c)),
                 DispatchEvent::MessageCreate(msg),
             ) => c.check_string(&msg.content),
-            _ => unimplemented!(),
+            (
+                Constraint::Message(MessageConstraint::Author(UserConstraint::Username(s))),
+                DispatchEvent::MessageCreate(msg),
+            ) => s.check_string(&msg.author.name),
+            // Add more later, not unimplemented! since that has a lot of panics
+            _ => return Ok(false),
         };
 
         Ok(val)

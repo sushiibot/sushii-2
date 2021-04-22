@@ -1,12 +1,32 @@
 use crate::error::Result;
-use crate::model::{Rule, Trigger};
+use crate::model::Rule;
+use std::fmt;
 
+pub mod hard_coded;
 pub mod postgres;
 
-pub trait RuleStore {
-    /// Fetches matched rules based on trigger
-    fn get_rule_from_trigger(guild_id: u64, trigger: Trigger) -> Result<Vec<Rule>>;
+pub use hard_coded::HardCodedStore;
 
-    /// Caches a rule
-    fn cache_rule(&self, guild_id: u64, rule: Rule) -> Result<bool>;
+pub trait RuleStore: RuleStoreClone + fmt::Debug {
+    /// Fetches all rules in a guild
+    fn get_guild_rules(&self, guild_id: u64) -> Result<Vec<Rule>>;
+}
+
+pub trait RuleStoreClone {
+    fn clone_box(&self) -> Box<dyn RuleStore>;
+}
+
+impl<T> RuleStoreClone for T
+where
+    T: 'static + RuleStore + Clone + fmt::Debug,
+{
+    fn clone_box(&self) -> Box<dyn RuleStore> {
+        Box::new(self.clone())
+    }
+}
+
+impl Clone for Box<dyn RuleStore> {
+    fn clone(&self) -> Box<dyn RuleStore> {
+        self.clone_box()
+    }
 }

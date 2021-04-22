@@ -3,18 +3,18 @@ name = "sushii-rules-engine"
 version = "0.1.0"
 authors = ["drklee3 <derrick@dlee.dev>"]
 edition = "2018"
-default-run = "main"
+default-run = "sushii_rules_worker"
 
 [lib]
 name = "sushii_rules"
 path = "src/lib.rs"
 
 [[bin]]
-name = "main"
+name = "sushii_rules_worker"
 path = "src/main.rs"
 
 [[bin]]
-name = "export"
+name = "sushii_rules_exporter"
 path = "src/export.rs"
 
 [dependencies]

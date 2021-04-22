@@ -8,20 +8,23 @@ use twilight_model::gateway::payload;
 use twilight_model::id::GuildId;
 
 use super::{Context, Rule, Trigger};
+use crate::persistence::RuleStore;
 
 #[derive(Clone, Debug)]
 pub struct RulesEngine {
     /// Stores rules fetched from file or database
-    pub rules_cache: Arc<DashMap<GuildId, DashMap<Trigger, Vec<Arc<Rule>>>>>,
+    pub guild_rules: Arc<DashMap<GuildId, DashMap<Trigger, Vec<Arc<Rule>>>>>,
+    pub rules_store: Box<dyn RuleStore>,
     /// Guild specific word lists
     pub word_lists: Arc<DashMap<GuildId, DashMap<String, AhoCorasick>>>,
     pub http: Client,
 }
 
 impl RulesEngine {
-    pub fn new(http: Client) -> Self {
+    pub fn new(http: Client, rules_store: Box<dyn RuleStore>) -> Self {
         Self {
-            rules_cache: Arc::new(DashMap::new()),
+            guild_rules: Arc::new(DashMap::new()),
+            rules_store,
             word_lists: Arc::new(DashMap::new()),
             http,
         }
@@ -32,17 +35,28 @@ impl RulesEngine {
         let guild_id = match event.guild_id() {
             Some(id) => id,
             None => {
-                tracing::debug!("No guild_id found for event, ignoring");
+                // tracing::debug!("No guild_id found for event, ignoring");
 
                 return Ok(());
             }
         };
 
-        let guild_rules = match self.rules_cache.get(&guild_id) {
+        let guild_rules = match self.guild_rules.get(&guild_id) {
             Some(r) => r,
             None => {
-                tracing::debug!(?guild_id, "No rules found for guild");
-                return Ok(());
+                tracing::debug!(?guild_id, "No rules cached, fetching");
+                let guild_rules = self.rules_store.get_guild_rules(guild_id.0)?;
+
+                let map = DashMap::new();
+                for rule in guild_rules {
+                    let mut entry = map.entry(rule.trigger).or_insert_with(Vec::new);
+                    entry.push(Arc::new(rule));
+                }
+
+                tracing::debug!(?guild_id, "Loaded guild rules");
+
+                self.guild_rules.insert(guild_id, map);
+                self.guild_rules.get(&guild_id).unwrap()
             }
         };
 
@@ -62,12 +76,15 @@ impl RulesEngine {
         let event = Arc::new(event);
 
         for rule in matching_rules.iter() {
-            let context = Context::new();
+            let context = Context::new(self.http.clone(), self.word_lists.clone());
             let event = event.clone();
             let rule = rule.clone();
+            dbg!("running rule");
 
             tokio::spawn(async move {
-                rule.check_event(event, &context).await;
+                if let Err(e) = rule.check_event(event, &context).await {
+                    tracing::warn!("Failed checking event");
+                }
             });
         }
 

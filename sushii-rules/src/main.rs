@@ -3,11 +3,12 @@ use dotenv::dotenv;
 use redis::AsyncCommands;
 use serde::{de::DeserializeSeed, Deserialize, Serialize};
 use serde_json::Deserializer;
-use sushii_rules::model::RulesEngine;
 use tracing_subscriber::EnvFilter;
 use twilight_http::Client;
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::gateway::event::DispatchEventWithTypeDeserializer;
+
+use sushii_rules::{model::RulesEngine, persistence::HardCodedStore};
 
 #[derive(Debug, Deserialize)]
 struct Config {
@@ -89,7 +90,7 @@ async fn main() -> Result<()> {
         current_user.discriminator
     );
 
-    let engine = RulesEngine::new(http);
+    let engine = RulesEngine::new(http, Box::new(HardCodedStore::new()));
 
     loop {
         let event = match get_event(&mut conn, &key).await {

@@ -4,6 +4,8 @@ use std::ops::Deref;
 pub struct ConditionResult {
     /// Name of condition related to this result
     name: String,
+    /// Detail on how this condition was triggered
+    trigger_detail: Option<String>,
     // If condition is successful
     success: bool,
 }

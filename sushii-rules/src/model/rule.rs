@@ -19,11 +19,21 @@ impl Rule {
         &self,
         event: Arc<DispatchEvent>,
         context: &Context,
-    ) -> Option<Result<bool, Box<dyn Error>>> {
+    ) -> Result<bool, Box<dyn Error>> {
         // if event.kind() != self.trigger {
         //     return None;
         // }
 
-        Some(self.conditions.check_event(event, context).await)
+        let passes_conditions = self.conditions.check_event(event.clone(), context).await?;
+
+        if !dbg!(passes_conditions) {
+            return Ok(false);
+        }
+
+        for action in &self.actions {
+            action.execute(event.clone(), &context).await?;
+        }
+
+        Ok(true)
     }
 }
