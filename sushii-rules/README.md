@@ -140,12 +140,23 @@ Main problem right now is assigning unique IDs to each condition/action, if this
 should be done. This may cause it to be more confusing for end users. This is
 mainly useful for multiple of the same condition / action and this will either
 overwrite the previous one if they aren't unique, or will require users to
-specify which one they want to use
+specify which one they want to use.
+
+This context data is also passed to any handlebars text templating.
 
 Example structure in json form.
 
 ```jsonc
 {
+  // Trigger data, e.g. a message
+  "trigger": {
+    "id": 12345,
+    "content": "ping!",
+    "author": {
+      "name": "bob",
+      "discriminator": 1234,
+    }
+  },
   // Condition data, should contain information on what data passed conditions
   // and the inputs / outputs
   "conditions": {

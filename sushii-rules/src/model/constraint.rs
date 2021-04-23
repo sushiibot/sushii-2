@@ -1,8 +1,11 @@
+use chrono::{DateTime, Utc};
 use lingua::Language;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use twilight_model::channel::message::Message;
 use twilight_model::gateway::event::DispatchEvent;
+use twilight_model::user::User;
 
 use crate::error::Result;
 use crate::model::RuleContext;
@@ -122,12 +125,27 @@ pub enum StringConstraint {
     EndsWith(String),
     /// Does not end with given text
     DoesNotEndsWith(String),
-    /// Is language
+    /// # Is language
+    ///
+    /// This will only match if the relative difference between multiple
+    /// language matches are high enough, basically only when sushii is
+    /// confident it is a single language.
+    ///
+    /// Short text is likely to have multiple languages that may match e.g.
+    /// prologue matches English and French. So this will *not* match unless the
+    /// most likely language has a significantly higher probability than other
+    /// languages. This means the longer the text the more likely to have a
+    /// language detected.
     #[serde(with = "LanguageType")]
     IsLanguage(Language),
+    /// # Is not a language
+    /// This will also not match unless the probability of a single language
+    /// match is significantly higher than others, e.g. for longer text.
     #[serde(with = "LanguageType")]
     IsNotLanguage(Language),
+    /// # Is any of the given languages
     IsInLanguage(Vec<LanguageWrapper>),
+    /// # Is not any of the given languages
     IsNotInLanguage(Vec<LanguageWrapper>),
 }
 
@@ -220,11 +238,83 @@ pub enum IntegerConstraint {
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
+pub enum IntegerListConstraint {
+    Includes(u64),
+    DoesNotInclude(u64),
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum BoolConstraint {
+    Equals(bool),
+    NotEquals(bool),
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum DateConstraint {
+    Equals(DateTime<Utc>),
+    NotEquals(DateTime<Utc>),
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
 pub enum UserConstraint {
     /// # Username
     Username(StringConstraint),
-    /// # User ID
+    /// # ID
     Id(IntegerConstraint),
+    /// # Server level
+    ServerLevel(IntegerConstraint),
+    /// # Server XP
+    ServerXp(IntegerConstraint),
+    /// # Global level
+    /// The user's level in **all** servers they share with sushii combined
+    GlobalLevel(IntegerConstraint),
+    /// # Global XP
+    /// The user's XP in **all** servers they share with sushii combined
+    GlobalXp(IntegerConstraint),
+}
+
+impl UserConstraint {
+    async fn check_event(&self, ctx: &RuleContext, user: &User) -> Result<bool> {
+        let val = match self {
+            UserConstraint::Username(s) => s.check_string(ctx, &user.name).await?,
+            _ => {
+                tracing::warn!("Unhandled author constraint check");
+
+                false
+            }
+        };
+
+        Ok(val)
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum MemberConstraint {
+    /// # Deaf
+    /// If member can hear in voice channels
+    Deaf(BoolConstraint),
+    /// # Mute
+    /// If member can mute in voice channels
+    Mute(BoolConstraint),
+    /// # Joined date
+    /// When a member joined the server
+    JoinedAt(DateConstraint),
+    /// # Nickname
+    /// Member's nickname in the server
+    Nickname(StringConstraint),
+    /// # Roles
+    /// Member's roles
+    Roles(IntegerListConstraint),
+    /// # Pending
+    /// If the member hasn't accepted the rules of the server yet
+    Pending(BoolConstraint),
+    /// # Boosting date
+    /// When the member boosted the server
+    PremiumSince(DateConstraint),
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -234,6 +324,24 @@ pub enum MessageConstraint {
     Content(StringConstraint),
     /// # Message author
     Author(UserConstraint),
+    /// # Member
+    Member(MemberConstraint),
+}
+
+impl MessageConstraint {
+    async fn check_event(&self, ctx: &RuleContext, msg: &Message) -> Result<bool> {
+        let val = match self {
+            MessageConstraint::Content(s) => s.check_string(ctx, &msg.content).await?,
+            MessageConstraint::Author(author) => author.check_event(ctx, &msg.author).await?,
+            _ => {
+                tracing::warn!("Unhandled message constraint check");
+
+                return Ok(false);
+            }
+        };
+
+        Ok(val)
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -247,24 +355,13 @@ impl Constraint {
     pub async fn check_event(&self, event: Arc<DispatchEvent>, ctx: &RuleContext) -> Result<bool> {
         let val = match event.as_ref() {
             // MESSAGE_CREATE
-            DispatchEvent::MessageCreate(msg) => {
-                match self {
-                    Constraint::Message(MessageConstraint::Content(s)) => {
-                        s.check_string(ctx, &msg.content).await?
-                    }
-                    Constraint::Message(MessageConstraint::Author(UserConstraint::Username(s))) => {
-                        s.check_string(ctx, &msg.author.name).await?
-                    }
-                    // Add more later, not unimplemented! since that has a lot of panics
-                    _ => {
-                        tracing::warn!("Unhandled constraint check");
-
-                        return Ok(false);
-                    }
+            DispatchEvent::MessageCreate(msg) => match self {
+                Constraint::Message(msg_constraint) => {
+                    msg_constraint.check_event(ctx, &msg.0).await?
                 }
-            }
+            },
             _ => {
-                tracing::warn!("Unhandled constraint event");
+                tracing::warn!("Unhandled event");
 
                 return Ok(false);
             }

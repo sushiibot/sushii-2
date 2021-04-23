@@ -1,5 +1,6 @@
 use crate::error::Result;
 use crate::model::{constraint::*, Action, Condition, Rule, Trigger};
+use lingua::Language;
 use twilight_model::gateway::event::EventType;
 
 use super::RuleStore;
@@ -21,7 +22,7 @@ impl RuleStore for HardCodedStore {
                 and: vec![
                     Condition::Condition {
                         constraint: Constraint::Message(MessageConstraint::Content(
-                            StringConstraint::Equals("!ping".to_string()),
+                            StringConstraint::IsNotLanguage(Language::English),
                         )),
                     },
                     Condition::Condition {
@@ -32,7 +33,7 @@ impl RuleStore for HardCodedStore {
                 ],
             },
             actions: vec![Action::Reply {
-                content: "Pong!".to_string(),
+                content: "English only!".to_string(),
             }],
         }];
 
