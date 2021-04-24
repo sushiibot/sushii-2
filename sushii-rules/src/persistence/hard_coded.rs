@@ -21,13 +21,13 @@ impl RuleStore for HardCodedStore {
             conditions: Condition::And {
                 and: vec![
                     Condition::Condition {
-                        constraint: Constraint::Message(MessageConstraint::Content(
-                            StringConstraint::IsNotLanguage(Language::English),
+                        constraint: Constraint::Message(MessageConstraint::Author(
+                            UserConstraint::Id(IntegerConstraint::Equals(150443906511667200)),
                         )),
                     },
                     Condition::Condition {
-                        constraint: Constraint::Message(MessageConstraint::Author(
-                            UserConstraint::Username(StringConstraint::Equals("tzuwy".to_string())),
+                        constraint: Constraint::Message(MessageConstraint::Content(
+                            StringConstraint::IsNotLanguage(Language::English),
                         )),
                     },
                 ],

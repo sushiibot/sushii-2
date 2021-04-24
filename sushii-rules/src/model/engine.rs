@@ -2,6 +2,7 @@ use aho_corasick::AhoCorasick;
 use anyhow::Result;
 use dashmap::DashMap;
 use std::sync::Arc;
+use std::time::Instant;
 use twilight_http::client::Client;
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::gateway::payload;
@@ -87,9 +88,14 @@ impl RulesEngine {
             let rule = rule.clone();
 
             tokio::spawn(async move {
+                let start = Instant::now();
+
                 if let Err(e) = rule.check_event(event, &context).await {
                     tracing::warn!("Failed checking event: {}", e);
                 }
+
+                let delta = start.elapsed();
+                metrics::histogram!("rule_execution", delta);
             });
         }
 

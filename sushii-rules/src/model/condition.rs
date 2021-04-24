@@ -1,7 +1,6 @@
 use async_recursion::async_recursion;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use std::error::Error;
 use std::sync::Arc;
 use twilight_model::gateway::event::DispatchEvent;
 

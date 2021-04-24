@@ -125,6 +125,9 @@ pub enum StringConstraint {
     EndsWith(String),
     /// Does not end with given text
     DoesNotEndsWith(String),
+    // Expensive constraints, rules should short circuit with these last
+    // TODO: Implement Ord on these so that language constraints are last, then
+    // sort the rule constraints so that these are last
     /// # Is language
     ///
     /// This will only match if the relative difference between multiple
@@ -233,7 +236,24 @@ pub enum IntegerConstraint {
     NotEquals(u64),
     GreaterThan(u64),
     LessThan(u64),
-    Between { lower: u64, upper: u64 },
+    InclusiveBetween { lower: u64, upper: u64 },
+    ExclusiveBetween { lower: u64, upper: u64 },
+}
+
+impl IntegerConstraint {
+    #[rustfmt::skip]
+    pub async fn check_integer(&self, ctx: &RuleContext, input: u64) -> Result<bool> {
+        let res = match *self {
+            Self::Equals(target) => input == target,
+            Self::NotEquals(target) => input != target,
+            Self::GreaterThan(target) => input > target,
+            Self::LessThan(target) => input < target,
+            Self::InclusiveBetween { lower, upper } => lower <= input && input <= upper,
+            Self::ExclusiveBetween { lower, upper } => lower < input && input < upper,
+        };
+
+        Ok(res)
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -280,6 +300,7 @@ impl UserConstraint {
     async fn check_event(&self, ctx: &RuleContext, user: &User) -> Result<bool> {
         let val = match self {
             UserConstraint::Username(s) => s.check_string(ctx, &user.name).await?,
+            UserConstraint::Id(s) => s.check_integer(ctx, user.id.0).await?,
             _ => {
                 tracing::warn!("Unhandled author constraint check");
 

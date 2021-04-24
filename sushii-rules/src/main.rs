@@ -1,5 +1,7 @@
 use anyhow::Result;
 use dotenv::dotenv;
+use metrics_exporter_prometheus::PrometheusBuilder;
+use metrics_util::layers::{Layer, PrefixLayer};
 use redis::AsyncCommands;
 use serde::{de::DeserializeSeed, Deserialize, Serialize};
 use serde_json::Deserializer;
@@ -8,7 +10,7 @@ use twilight_http::Client;
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::gateway::event::DispatchEventWithTypeDeserializer;
 
-use sushii_rules::{model::RulesEngine, persistence::HardCodedStore};
+use sushii_rules::{error::Error, model::RulesEngine, persistence::HardCodedStore};
 
 #[derive(Debug, Deserialize)]
 struct Config {
@@ -52,9 +54,29 @@ async fn get_event(
     let mut json_deserializer = Deserializer::from_str(&event.payload);
 
     let de = DispatchEventWithTypeDeserializer::new(&event.name);
-    let gateway_event = de.deserialize(&mut json_deserializer)?;
+    let gateway_event = de
+        .deserialize(&mut json_deserializer)
+        .map_err(|e| Error::EventDeserialize(event.name, e))?;
 
     Ok(gateway_event)
+}
+
+fn start_metrics() {
+    // Start metrics server
+    let (recorder, exporter) = PrometheusBuilder::new()
+        .build_with_exporter()
+        .expect("Failed to build metrics recorder");
+
+    let prefix = PrefixLayer::new("sushiirules_");
+    let layered = prefix.layer(recorder);
+    metrics::set_boxed_recorder(Box::new(layered)).expect("Failed to install recorder");
+
+    // Spawn metrics hyper server in background
+    tokio::spawn(async move {
+        if let Err(e) = exporter.await {
+            tracing::warn!("Metrics exporter error: {}", e);
+        }
+    });
 }
 
 #[tokio::main]
@@ -68,6 +90,8 @@ async fn main() -> Result<()> {
     let cfg = Config::from_env().expect("Failed to create config");
 
     tracing::info!("Config {:?}", &cfg);
+
+    start_metrics();
 
     let pool = cfg
         .redis
@@ -101,7 +125,7 @@ async fn main() -> Result<()> {
         let event = match get_event(&mut conn, &key).await {
             Ok(e) => e,
             Err(e) => {
-                tracing::error!("Failed to get_event: {}", e);
+                tracing::error!("Failed get_event: {}", e);
                 continue;
             }
         };

@@ -12,4 +12,6 @@ pub enum Error {
     Unknown,
     #[error(transparent)]
     LanguageApi(#[from] LanguageApiError),
+    #[error("Failed to deserialize event `{0}`, {1}")]
+    EventDeserialize(String, serde_json::Error),
 }

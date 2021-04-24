@@ -30,6 +30,8 @@ impl Rule {
             return Ok(false);
         }
 
+        metrics::increment_counter!("rule_triggered", "event_name" => event.kind().name().unwrap_or("UNKNOWN"));
+
         tracing::debug!("Rule triggered");
 
         // Run all actions in order if passes conditions

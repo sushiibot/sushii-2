@@ -44,3 +44,6 @@ twilight-http = "0.3.6"
 lingua = "1.2.0"
 reqwest = "0.11.3"
 language-api = { git = "https://github.com/sushiibot/language-api", rev ="761f467177fdb287c2a3bf9e10e4cd46bcf81ca5" }
+metrics = "0.14.2"
+metrics-exporter-prometheus = "0.3.0"
+metrics-util = "0.6.2"
