@@ -95,6 +95,8 @@ enum TwilightEventType {
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, JsonSchema)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Trigger {
+    /// # Discord event
+    /// Trigger event from Discord
     #[serde(with = "TwilightEventType")]
     Twilight(EventType),
 }

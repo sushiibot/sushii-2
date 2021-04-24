@@ -232,11 +232,23 @@ impl StringConstraint {
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum IntegerConstraint {
+    /// # Equals
+    /// Equals given number
     Equals(u64),
+    /// # Not equals
+    /// Does not equal given number
     NotEquals(u64),
+    /// # Greater than
+    /// Is greater than given number
     GreaterThan(u64),
+    /// # Less than 
+    /// Is less than given number
     LessThan(u64),
+    /// # Inclusive between
+    /// Is between given range, including the range boundaries
     InclusiveBetween { lower: u64, upper: u64 },
+    /// # Exclusive between
+    /// Is between given range, excluding the range boundaries
     ExclusiveBetween { lower: u64, upper: u64 },
 }
 
@@ -259,21 +271,33 @@ impl IntegerConstraint {
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum IntegerListConstraint {
+    /// # Includes
+    /// List of numbers includes given number
     Includes(u64),
+    /// # Does not include
+    /// List of numbers does not include given number
     DoesNotInclude(u64),
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum BoolConstraint {
+    /// # Equals
+    /// Equals given value
     Equals(bool),
+    /// # Not equals
+    /// Does not equal given value
     NotEquals(bool),
 }
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum DateConstraint {
+    /// # Equals
+    /// Equals given date
     Equals(DateTime<Utc>),
+    /// # Not equals
+    /// Does not equal given date
     NotEquals(DateTime<Utc>),
 }
 
@@ -284,6 +308,10 @@ pub enum UserConstraint {
     Username(StringConstraint),
     /// # ID
     Id(IntegerConstraint),
+    /// # Is bot
+    IsBot(BoolConstraint),
+    /// # Is verified bot
+    IsVerifiedBot(BoolConstraint),
     /// # Server level
     ServerLevel(IntegerConstraint),
     /// # Server XP
@@ -347,6 +375,9 @@ pub enum MessageConstraint {
     Author(UserConstraint),
     /// # Member
     Member(MemberConstraint),
+    /// # Created at
+    /// When this message was sent
+    CreatedAt(DateConstraint),
 }
 
 impl MessageConstraint {

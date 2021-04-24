@@ -9,19 +9,29 @@ use crate::model::{Constraint, RuleContext};
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Condition {
+    /// # And
+    /// Require *all** conditions to pass before running actions
     And {
         and: Vec<Condition>,
     },
+    /// # Or
+    /// Require *at least one** conditions to pass before running actions
     Or {
         or: Vec<Condition>,
     },
+    /// # Not
+    /// Require condition to fail before running actions
     Not {
         not: Box<Condition>,
     },
+    /// # At least n
+    /// Require at least a given number of conditions to pass before running actions
     AtLeast {
         min_count: usize,
         conditions: Vec<Condition>,
     },
+    /// # Condition
+    /// Conditions for the rule to run
     Condition {
         #[serde(flatten)]
         constraint: Constraint,

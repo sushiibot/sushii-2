@@ -26,6 +26,8 @@
     "Trigger": {
       "anyOf": [
         {
+          "title": "Discord event",
+          "description": "Trigger event from Discord",
           "type": "object",
           "required": [
             "TWILIGHT"
@@ -98,6 +100,8 @@
     "Condition": {
       "anyOf": [
         {
+          "title": "And",
+          "description": "Require *all** conditions to pass before running actions",
           "type": "object",
           "required": [
             "And"
@@ -121,6 +125,8 @@
           "additionalProperties": false
         },
         {
+          "title": "Or",
+          "description": "Require *at least one** conditions to pass before running actions",
           "type": "object",
           "required": [
             "Or"
@@ -144,6 +150,8 @@
           "additionalProperties": false
         },
         {
+          "title": "Not",
+          "description": "Require condition to fail before running actions",
           "type": "object",
           "required": [
             "Not"
@@ -164,6 +172,8 @@
           "additionalProperties": false
         },
         {
+          "title": "At least n",
+          "description": "Require at least a given number of conditions to pass before running actions",
           "type": "object",
           "required": [
             "AtLeast"
@@ -193,6 +203,8 @@
           "additionalProperties": false
         },
         {
+          "title": "Condition",
+          "description": "Conditions for the rule to run",
           "type": "object",
           "required": [
             "Condition"
@@ -245,6 +257,33 @@
           "properties": {
             "author": {
               "$ref": "#/definitions/UserConstraint"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Member",
+          "type": "object",
+          "required": [
+            "member"
+          ],
+          "properties": {
+            "member": {
+              "$ref": "#/definitions/MemberConstraint"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Created at",
+          "description": "When this message was sent",
+          "type": "object",
+          "required": [
+            "created_at"
+          ],
+          "properties": {
+            "created_at": {
+              "$ref": "#/definitions/DateConstraint"
             }
           },
           "additionalProperties": false
@@ -437,8 +476,151 @@
             }
           },
           "additionalProperties": false
+        },
+        {
+          "title": "Is language",
+          "description": "This will only match if the relative difference between multiple language matches are high enough, basically only when sushii is confident it is a single language.\n\nShort text is likely to have multiple languages that may match e.g. prologue matches English and French. So this will *not* match unless the most likely language has a significantly higher probability than other languages. This means the longer the text the more likely to have a language detected.",
+          "type": "object",
+          "required": [
+            "is_language"
+          ],
+          "properties": {
+            "is_language": {
+              "$ref": "#/definitions/Language"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Is not a language",
+          "description": "This will also not match unless the probability of a single language match is significantly higher than others, e.g. for longer text.",
+          "type": "object",
+          "required": [
+            "is_not_language"
+          ],
+          "properties": {
+            "is_not_language": {
+              "$ref": "#/definitions/Language"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Is any of the given languages",
+          "type": "object",
+          "required": [
+            "is_in_language"
+          ],
+          "properties": {
+            "is_in_language": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/LanguageWrapper"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Is not any of the given languages",
+          "type": "object",
+          "required": [
+            "is_not_in_language"
+          ],
+          "properties": {
+            "is_not_in_language": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/LanguageWrapper"
+              }
+            }
+          },
+          "additionalProperties": false
         }
       ]
+    },
+    "Language": {
+      "type": "string",
+      "enum": [
+        "AFRIKAANS",
+        "ALBANIAN",
+        "ARABIC",
+        "ARMENIAN",
+        "AZERBAIJANI",
+        "BASQUE",
+        "BELARUSIAN",
+        "BENGALI",
+        "BOKMAL",
+        "BOSNIAN",
+        "BULGARIAN",
+        "CATALAN",
+        "CHINESE",
+        "CROATIAN",
+        "CZECH",
+        "DANISH",
+        "DUTCH",
+        "ENGLISH",
+        "ESPERANTO",
+        "ESTONIAN",
+        "FINNISH",
+        "FRENCH",
+        "GANDA",
+        "GEORGIAN",
+        "GERMAN",
+        "GREEK",
+        "GUJARATI",
+        "HEBREW",
+        "HINDI",
+        "HUNGARIAN",
+        "ICELANDIC",
+        "INDONESIAN",
+        "IRISH",
+        "ITALIAN",
+        "JAPANESE",
+        "KAZAKH",
+        "KOREAN",
+        "LATIN",
+        "LATVIAN",
+        "LITHUANIAN",
+        "MACEDONIAN",
+        "MALAY",
+        "MAORI",
+        "MARATHI",
+        "MONGOLIAN",
+        "NYNORSK",
+        "PERSIAN",
+        "POLISH",
+        "PORTUGUESE",
+        "PUNJABI",
+        "ROMANIAN",
+        "RUSSIAN",
+        "SERBIAN",
+        "SHONA",
+        "SLOVAK",
+        "SLOVENE",
+        "SOMALI",
+        "SOTHO",
+        "SPANISH",
+        "SWAHILI",
+        "SWEDISH",
+        "TAGALOG",
+        "TAMIL",
+        "TELUGU",
+        "THAI",
+        "TSONGA",
+        "TSWANA",
+        "TURKISH",
+        "UKRAINIAN",
+        "URDU",
+        "VIETNAMESE",
+        "WELSH",
+        "XHOSA",
+        "YORUBA",
+        "ZULU"
+      ]
+    },
+    "LanguageWrapper": {
+      "$ref": "#/definitions/Language"
     },
     "UserConstraint": {
       "anyOf": [
@@ -451,6 +633,431 @@
           "properties": {
             "username": {
               "$ref": "#/definitions/StringConstraint"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "ID",
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/IntegerConstraint"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Is bot",
+          "type": "object",
+          "required": [
+            "is_bot"
+          ],
+          "properties": {
+            "is_bot": {
+              "$ref": "#/definitions/BoolConstraint"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Is verified bot",
+          "type": "object",
+          "required": [
+            "is_verified_bot"
+          ],
+          "properties": {
+            "is_verified_bot": {
+              "$ref": "#/definitions/BoolConstraint"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Server level",
+          "type": "object",
+          "required": [
+            "server_level"
+          ],
+          "properties": {
+            "server_level": {
+              "$ref": "#/definitions/IntegerConstraint"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Server XP",
+          "type": "object",
+          "required": [
+            "server_xp"
+          ],
+          "properties": {
+            "server_xp": {
+              "$ref": "#/definitions/IntegerConstraint"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Global level",
+          "description": "The user's level in **all** servers they share with sushii combined",
+          "type": "object",
+          "required": [
+            "global_level"
+          ],
+          "properties": {
+            "global_level": {
+              "$ref": "#/definitions/IntegerConstraint"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Global XP",
+          "description": "The user's XP in **all** servers they share with sushii combined",
+          "type": "object",
+          "required": [
+            "global_xp"
+          ],
+          "properties": {
+            "global_xp": {
+              "$ref": "#/definitions/IntegerConstraint"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "IntegerConstraint": {
+      "anyOf": [
+        {
+          "title": "Equals",
+          "description": "Equals given number",
+          "type": "object",
+          "required": [
+            "equals"
+          ],
+          "properties": {
+            "equals": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Not equals",
+          "description": "Does not equal given number",
+          "type": "object",
+          "required": [
+            "not_equals"
+          ],
+          "properties": {
+            "not_equals": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Greater than",
+          "description": "Is greater than given number",
+          "type": "object",
+          "required": [
+            "greater_than"
+          ],
+          "properties": {
+            "greater_than": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Less than",
+          "description": "Is less than given number",
+          "type": "object",
+          "required": [
+            "less_than"
+          ],
+          "properties": {
+            "less_than": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Inclusive between",
+          "description": "Is between given range, including the range boundaries",
+          "type": "object",
+          "required": [
+            "inclusive_between"
+          ],
+          "properties": {
+            "inclusive_between": {
+              "type": "object",
+              "required": [
+                "lower",
+                "upper"
+              ],
+              "properties": {
+                "lower": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                },
+                "upper": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Exclusive between",
+          "description": "Is between given range, excluding the range boundaries",
+          "type": "object",
+          "required": [
+            "exclusive_between"
+          ],
+          "properties": {
+            "exclusive_between": {
+              "type": "object",
+              "required": [
+                "lower",
+                "upper"
+              ],
+              "properties": {
+                "lower": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                },
+                "upper": {
+                  "type": "integer",
+                  "format": "uint64",
+                  "minimum": 0.0
+                }
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "BoolConstraint": {
+      "anyOf": [
+        {
+          "title": "Equals",
+          "description": "Equals given value",
+          "type": "object",
+          "required": [
+            "equals"
+          ],
+          "properties": {
+            "equals": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Not equals",
+          "description": "Does not equal given value",
+          "type": "object",
+          "required": [
+            "not_equals"
+          ],
+          "properties": {
+            "not_equals": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "MemberConstraint": {
+      "anyOf": [
+        {
+          "title": "Deaf",
+          "description": "If member can hear in voice channels",
+          "type": "object",
+          "required": [
+            "deaf"
+          ],
+          "properties": {
+            "deaf": {
+              "$ref": "#/definitions/BoolConstraint"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Mute",
+          "description": "If member can mute in voice channels",
+          "type": "object",
+          "required": [
+            "mute"
+          ],
+          "properties": {
+            "mute": {
+              "$ref": "#/definitions/BoolConstraint"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Joined date",
+          "description": "When a member joined the server",
+          "type": "object",
+          "required": [
+            "joined_at"
+          ],
+          "properties": {
+            "joined_at": {
+              "$ref": "#/definitions/DateConstraint"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Nickname",
+          "description": "Member's nickname in the server",
+          "type": "object",
+          "required": [
+            "nickname"
+          ],
+          "properties": {
+            "nickname": {
+              "$ref": "#/definitions/StringConstraint"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Roles",
+          "description": "Member's roles",
+          "type": "object",
+          "required": [
+            "roles"
+          ],
+          "properties": {
+            "roles": {
+              "$ref": "#/definitions/IntegerListConstraint"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Pending",
+          "description": "If the member hasn't accepted the rules of the server yet",
+          "type": "object",
+          "required": [
+            "pending"
+          ],
+          "properties": {
+            "pending": {
+              "$ref": "#/definitions/BoolConstraint"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Boosting date",
+          "description": "When the member boosted the server",
+          "type": "object",
+          "required": [
+            "premium_since"
+          ],
+          "properties": {
+            "premium_since": {
+              "$ref": "#/definitions/DateConstraint"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "DateConstraint": {
+      "anyOf": [
+        {
+          "title": "Equals",
+          "description": "Equals given date",
+          "type": "object",
+          "required": [
+            "equals"
+          ],
+          "properties": {
+            "equals": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Not equals",
+          "description": "Does not equal given date",
+          "type": "object",
+          "required": [
+            "not_equals"
+          ],
+          "properties": {
+            "not_equals": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "IntegerListConstraint": {
+      "anyOf": [
+        {
+          "title": "Includes",
+          "description": "List of numbers includes given number",
+          "type": "object",
+          "required": [
+            "includes"
+          ],
+          "properties": {
+            "includes": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Does not include",
+          "description": "List of numbers does not include given number",
+          "type": "object",
+          "required": [
+            "does_not_include"
+          ],
+          "properties": {
+            "does_not_include": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0.0
             }
           },
           "additionalProperties": false
