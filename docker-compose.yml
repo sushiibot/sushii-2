@@ -185,12 +185,23 @@ services:
             - sushii_net
         labels:
             - "traefik.enable=false"
+    redis:
+        image: redis:6
+        container_name: sushii-redis
+        restart: unless-stopped
+        expose:
+            - "6379"
+        networks:
+            - sushii_net
+        labels:
+            - "traefik.enable=false"
     sushii:
         image: ghcr.io/sushiibot/sushii-2:latest
         container_name: sushii
         restart: unless-stopped
         depends_on:
             - postgres
+            - redis
         expose:
             - "9888"
         logging:

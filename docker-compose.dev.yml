@@ -10,18 +10,15 @@ services:
         build:
             dockerfile: ./sushii-2/Dockerfile
             context: .
-    sushii-api:
-        build:
-            dockerfile: ./sushii-api/Dockerfile
-            context: .
-        ports:
-            - "8080:8080"
-    sushii-api:
+    sushii-feeds:
         build:
             dockerfile: ./sushii-feeds/Dockerfile
             context: .
         ports:
             - "50051:50051"
+    redis:
+        ports:
+            - "6379:6379"
     postgres_exporter:
         ports:
             - "9187:9187"
