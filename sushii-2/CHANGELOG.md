@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.16] - 2021-04-23
+
+### Added
+
+- `fm unset` command to remove your Last.fm username
+
+### Fixed
+
+-  Display the correct previous track in `fm np`
+-  Link the new support server instead of old on @mention
+
 ## [0.2.16] - 2021-04-18
 
 ### Added
