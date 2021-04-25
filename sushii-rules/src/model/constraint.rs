@@ -154,7 +154,7 @@ pub enum StringConstraint {
 
 impl StringConstraint {
     #[rustfmt::skip]
-    pub async fn check_string(&self, ctx: &RuleContext, in_str: &str) -> Result<bool> {
+    pub async fn check_string(&self, ctx: &RuleContext<'_>, in_str: &str) -> Result<bool> {
         let res = match self {
             Self::Equals(s) => {
                 in_str == *s
@@ -241,7 +241,7 @@ pub enum IntegerConstraint {
     /// # Greater than
     /// Is greater than given number
     GreaterThan(u64),
-    /// # Less than 
+    /// # Less than
     /// Is less than given number
     LessThan(u64),
     /// # Inclusive between
@@ -254,7 +254,7 @@ pub enum IntegerConstraint {
 
 impl IntegerConstraint {
     #[rustfmt::skip]
-    pub async fn check_integer(&self, ctx: &RuleContext, input: u64) -> Result<bool> {
+    pub async fn check_integer(&self, _ctx: &RuleContext<'_>, input: u64) -> Result<bool> {
         let res = match *self {
             Self::Equals(target) => input == target,
             Self::NotEquals(target) => input != target,
@@ -325,7 +325,7 @@ pub enum UserConstraint {
 }
 
 impl UserConstraint {
-    async fn check_event(&self, ctx: &RuleContext, user: &User) -> Result<bool> {
+    async fn check_event(&self, ctx: &RuleContext<'_>, user: &User) -> Result<bool> {
         let val = match self {
             UserConstraint::Username(s) => s.check_string(ctx, &user.name).await?,
             UserConstraint::Id(s) => s.check_integer(ctx, user.id.0).await?,
@@ -381,7 +381,7 @@ pub enum MessageConstraint {
 }
 
 impl MessageConstraint {
-    async fn check_event(&self, ctx: &RuleContext, msg: &Message) -> Result<bool> {
+    async fn check_event(&self, ctx: &RuleContext<'_>, msg: &Message) -> Result<bool> {
         let val = match self {
             MessageConstraint::Content(s) => s.check_string(ctx, &msg.content).await?,
             MessageConstraint::Author(author) => author.check_event(ctx, &msg.author).await?,
@@ -404,7 +404,11 @@ pub enum Constraint {
 }
 
 impl Constraint {
-    pub async fn check_event(&self, event: Arc<DispatchEvent>, ctx: &RuleContext) -> Result<bool> {
+    pub async fn check_event(
+        &self,
+        event: Arc<DispatchEvent>,
+        ctx: &RuleContext<'_>,
+    ) -> Result<bool> {
         let val = match event.as_ref() {
             // MESSAGE_CREATE
             DispatchEvent::MessageCreate(msg) => match self {

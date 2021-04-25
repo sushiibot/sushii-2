@@ -23,7 +23,7 @@ anyhow = "1.0.40"
 async-recursion = "0.3.2"
 async-trait = "0.1.42"
 chrono = { version = "0.4", features = ["serde"] }
-dashmap = "4.0.2"
+dashmap = { version = "4.0.2", features = ["serde"] }
 deadpool-redis = "0.7.1"
 redis = { version = "0.20", features = ["tokio-comp"] }
 futures = "0.3.12"

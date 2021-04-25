@@ -18,7 +18,7 @@ impl Rule {
     pub async fn check_event(
         &self,
         event: Arc<DispatchEvent>,
-        ctx: &RuleContext,
+        ctx: &RuleContext<'_>,
     ) -> Result<bool, Box<dyn Error>> {
         // if event.kind() != self.trigger {
         //     return None;

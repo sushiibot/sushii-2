@@ -1067,6 +1067,8 @@
     "Action": {
       "anyOf": [
         {
+          "title": "Ban",
+          "description": "Bans a user",
           "type": "object",
           "required": [
             "Ban"
@@ -1105,6 +1107,8 @@
           "additionalProperties": false
         },
         {
+          "title": "Reply",
+          "description": "Sends a reply to a message trigger",
           "type": "object",
           "required": [
             "Reply"
@@ -1125,6 +1129,8 @@
           "additionalProperties": false
         },
         {
+          "title": "Send message",
+          "description": "Sends a message to a channel",
           "type": "object",
           "required": [
             "SendMessage"

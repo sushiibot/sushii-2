@@ -10,6 +10,8 @@ use crate::error::Error;
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Action {
+    /// # Ban
+    /// Bans a user
     Ban {
         user_id: u64,
         /// Days of messages to delete, max 8
@@ -17,17 +19,16 @@ pub enum Action {
         /// None for permanent, otherwise duration in seconds
         duration: Option<u64>,
     },
-    Reply {
-        content: String,
-    },
-    SendMessage {
-        channel_id: u64,
-        content: String,
-    },
+    /// # Reply
+    /// Sends a reply to a message trigger
+    Reply { content: String },
+    /// # Send message
+    /// Sends a message to a channel
+    SendMessage { channel_id: u64, content: String },
 }
 
 impl Action {
-    pub async fn execute(&self, event: Arc<DispatchEvent>, ctx: &RuleContext) -> Result<()> {
+    pub async fn execute(&self, event: Arc<DispatchEvent>, ctx: &RuleContext<'_>) -> Result<()> {
         match *self {
             Self::Reply { ref content } => {
                 let channel_id = event.channel_id().ok_or(Error::MissingChannelId)?;

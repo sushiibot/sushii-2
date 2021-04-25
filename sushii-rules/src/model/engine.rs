@@ -1,8 +1,10 @@
 use aho_corasick::AhoCorasick;
 use anyhow::Result;
 use dashmap::DashMap;
+use handlebars::Handlebars;
 use std::sync::Arc;
 use std::time::Instant;
+use tokio::sync::RwLock;
 use twilight_http::client::Client;
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::gateway::payload;
@@ -17,11 +19,15 @@ pub struct RulesEngine {
     pub guild_rules: Arc<DashMap<GuildId, DashMap<Trigger, Vec<Arc<Rule>>>>>,
     /// Rules persistence backend, use this to fetch rules
     pub rules_store: Box<dyn RuleStore>,
+    /// Shared handlebars template to prevent reparsing
+    /// This is a RwLock since registering templates requires mut self
+    pub handlebars_templates: Arc<RwLock<Handlebars<'static>>>,
     /// Guild specific word lists
     pub word_lists: Arc<DashMap<GuildId, DashMap<String, AhoCorasick>>>,
     /// Twilight HTTP client
     pub http: Client,
     pub reqwest: reqwest::Client,
+    /// Wraps the reqwest client
     pub language_client: language_api_wrapper::LanguageApiClient,
 }
 
@@ -32,6 +38,7 @@ impl RulesEngine {
         Self {
             guild_rules: Arc::new(DashMap::new()),
             rules_store,
+            handlebars_templates: Arc::new(RwLock::new(Handlebars::new())),
             word_lists: Arc::new(DashMap::new()),
             http,
             reqwest: reqwest.clone(),
@@ -82,6 +89,7 @@ impl RulesEngine {
                 self.http.clone(),
                 self.reqwest.clone(),
                 self.language_client.clone(),
+                self.handlebars_templates.clone(),
                 self.word_lists.clone(),
             );
             let event = event.clone();

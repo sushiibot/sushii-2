@@ -11,19 +11,13 @@ use crate::model::{Constraint, RuleContext};
 pub enum Condition {
     /// # And
     /// Require *all** conditions to pass before running actions
-    And {
-        and: Vec<Condition>,
-    },
+    And { and: Vec<Condition> },
     /// # Or
     /// Require *at least one** conditions to pass before running actions
-    Or {
-        or: Vec<Condition>,
-    },
+    Or { or: Vec<Condition> },
     /// # Not
     /// Require condition to fail before running actions
-    Not {
-        not: Box<Condition>,
-    },
+    Not { not: Box<Condition> },
     /// # At least n
     /// Require at least a given number of conditions to pass before running actions
     AtLeast {
