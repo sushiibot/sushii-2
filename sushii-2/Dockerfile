@@ -13,7 +13,6 @@ COPY ./sushii-2/Cargo.toml ./sushii-2/Cargo.toml
 
 # copy local dependencies
 COPY ./sushii-model ./sushii-model
-COPY ./sushii-feeds ./sushii-feeds
 
 # switch to sushii-2 workspace project to run following commands in sushii-2 dir
 WORKDIR /usr/src/sushii/sushii-2
