@@ -1,12 +1,13 @@
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use tracing_subscriber::filter::{EnvFilter, LevelFilter};
-use twilight_http::error::Error as TwilightHttpError;
-use twilight_http::request::channel::message::create_message::CreateMessageError;
 use twilight_http::Client;
 use twilight_model::id::UserId;
 use warp::http::StatusCode;
 use warp::Filter;
+
+mod error;
+use error::Error;
 
 #[derive(Deserialize)]
 pub struct Config {
@@ -47,17 +48,17 @@ fn with_twilight_http(
     warp::any().map(move || http.clone())
 }
 
-#[derive(Debug)]
-struct InvalidId;
-impl warp::reject::Reject for InvalidId {}
+async fn _send_message(user_id: u64, http: Client) -> Result<(), Error> {
+    let channel = http
+        .create_private_channel(UserId(user_id))
+        .await?;
 
-#[derive(Debug)]
-struct TwilightError(TwilightHttpError);
-impl warp::reject::Reject for TwilightError {}
+    http.create_message(channel.id)
+        .content("Thanks for voting on top.gg!")?
+        .await?;
 
-#[derive(Debug)]
-struct TwilightCreateMessageError(CreateMessageError);
-impl warp::reject::Reject for TwilightCreateMessageError {}
+    Ok(())
+}
 
 async fn send_message(
     vote: TopGgBotVote,
@@ -66,19 +67,16 @@ async fn send_message(
     let user_id = vote
         .user
         .parse::<u64>()
-        .map_err(|_| warp::reject::custom(InvalidId))?;
+        .map_err(|_| warp::reject::custom(Error::InvalidId))?;
 
-    let channel = http
-        .create_private_channel(UserId(user_id))
-        .await
-        .map_err(|e| TwilightError(e))?;
+    // Don't want this to block response, if DM fails then that's fine whatever too
+    tokio::spawn(async move {
+        if let Err(e) = _send_message(user_id, http).await {
+            tracing::warn!(user_id, "Failed to send DM to user: {}", e);
+        }
+    });
 
-    http.create_message(channel.id)
-        .content("Thanks for voting on top.gg!")
-        .map_err(|e| TwilightCreateMessageError(e))?
-        .await
-        .map_err(|e| TwilightError(e))?;
-
+    // Immediately respond with 204
     Ok(StatusCode::NO_CONTENT)
 }
 
