@@ -5672,7 +5672,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sushii-rules-engine"
+name = "sushii-rules"
 version = "0.1.0"
 dependencies = [
  "aho-corasick 0.7.15",
@@ -5719,6 +5719,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "twilight-http",
+ "twilight-model",
  "warp",
 ]
 

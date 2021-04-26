@@ -1,6 +1,10 @@
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use tracing_subscriber::filter::{EnvFilter, LevelFilter};
+use twilight_http::error::Error as TwilightHttpError;
+use twilight_http::request::channel::message::create_message::CreateMessageError;
+use twilight_http::Client;
+use twilight_model::id::UserId;
 use warp::http::StatusCode;
 use warp::Filter;
 
@@ -8,6 +12,7 @@ use warp::Filter;
 pub struct Config {
     pub listen_addr: SocketAddr,
     pub top_gg_auth: String,
+    pub twilight_api_proxy_url: String,
 }
 
 impl Config {
@@ -36,6 +41,47 @@ struct TopGgBotVote {
     pub query: Option<String>,
 }
 
+fn with_twilight_http(
+    http: Client,
+) -> impl Filter<Extract = (Client,), Error = std::convert::Infallible> + Clone {
+    warp::any().map(move || http.clone())
+}
+
+#[derive(Debug)]
+struct InvalidId;
+impl warp::reject::Reject for InvalidId {}
+
+#[derive(Debug)]
+struct TwilightError(TwilightHttpError);
+impl warp::reject::Reject for TwilightError {}
+
+#[derive(Debug)]
+struct TwilightCreateMessageError(CreateMessageError);
+impl warp::reject::Reject for TwilightCreateMessageError {}
+
+async fn send_message(
+    vote: TopGgBotVote,
+    http: Client,
+) -> Result<impl warp::Reply, warp::Rejection> {
+    let user_id = vote
+        .user
+        .parse::<u64>()
+        .map_err(|_| warp::reject::custom(InvalidId))?;
+
+    let channel = http
+        .create_private_channel(UserId(user_id))
+        .await
+        .map_err(|e| TwilightError(e))?;
+
+    http.create_message(channel.id)
+        .content("Thanks for voting on top.gg!")
+        .map_err(|e| TwilightCreateMessageError(e))?
+        .await
+        .map_err(|e| TwilightError(e))?;
+
+    Ok(StatusCode::NO_CONTENT)
+}
+
 #[tokio::main]
 async fn main() {
     dotenv::dotenv().ok();
@@ -45,6 +91,11 @@ async fn main() {
         .init();
 
     let cfg = Config::from_env().expect("Failed to create config");
+
+    let http = Client::builder()
+        .proxy(cfg.twilight_api_proxy_url, true)
+        .ratelimiter(None)
+        .build();
 
     // Warp stuff
     let logger = warp::log("sushii_webhooks");
@@ -58,13 +109,8 @@ async fn main() {
         // Only accept bodies smaller than 16kb
         .and(warp::body::content_length_limit(1024 * 16))
         .and(warp::body::form())
-        .map(|vote: TopGgBotVote| {
-            tracing::info!("Vote received: {:?}", vote);
-            // TODO: Send message to user for vote thanks and set next fishy
-            // multiplier
-
-            Ok(StatusCode::NO_CONTENT)
-        })
+        .and(with_twilight_http(http))
+        .and_then(send_message)
         .with(logger);
 
     tracing::info!("Listening on {}", cfg.listen_addr);
