@@ -106,7 +106,7 @@ async fn main() {
         .and(top_gg_auth)
         // Only accept bodies smaller than 16kb
         .and(warp::body::content_length_limit(1024 * 16))
-        .and(warp::body::form())
+        .and(warp::body::json())
         .and(with_twilight_http(http))
         .and_then(send_message)
         .with(logger);
