@@ -6,6 +6,7 @@ on:
             - "sushii-2-v*"
             - "sushii-api-v*"
             - "sushii-feeds-v*"
+            - "sushii-webhooks-v*"
 
 env:
     SUSHII_2_IMAGE_NAME: ghcr.io/sushiibot/sushii-2
