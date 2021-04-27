@@ -230,7 +230,9 @@ services:
             - TOP_GG_AUTH=${TOP_GG_AUTH}
         networks:
             - sushii_net
+            - web
         labels:
+            - "traefik.docker.network=sushii-2_web"
             - "traefik.http.routers.sushii-webhooks.rule=Host(`webhooks.sushii.xyz`)"
             - "traefik.http.routers.sushii-webhooks.entrypoints=secure"
             - "traefik.http.routers.sushii-webhooks.tls.certresolver=acme"
