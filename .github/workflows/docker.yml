@@ -59,7 +59,7 @@ jobs:
                       echo ::set-output name=image::${{ env.SUSHII_WEBHOOKS_IMAGE_NAME}}
                       echo ::set-output name=docker_file::"./Dockerfile"
                       echo ::set-output name=title::"sushii-webhooks"
-                      echo ::set-output name=build_args::"sushii-webhooks"
+                      echo ::set-output name=build_args::"TARGET=sushii-webhooks"
                       echo ::set-output name=description::"Webhook service for sushii"
                       exit 0
                   fi
