@@ -219,6 +219,21 @@ services:
             - sushii_net
         labels:
             - "traefik.enable=false"
+    sushii-webhooks:
+        image: ghcr.io/sushiibot/sushii-webhooks:latest
+        container_name: sushii-webhooks
+        restart: unless-stopped
+        expose:
+            - "8080"
+        environment:
+            - TWILIGHT_API_PROXY_URL=twilight-http-proxy:80
+            - TOP_GG_AUTH=${TOP_GG_AUTH}
+        networks:
+            - sushii_net
+        labels:
+            - "traefik.http.routers.grafana.rule=Host(`webhooks.sushii.xyz`)"
+            - "traefik.http.routers.grafana.entrypoints=secure"
+            - "traefik.http.routers.grafana.tls.certresolver=acme"
     sushii-image-server:
         image: ghcr.io/sushiibot/sushii-image-server:latest
         container_name: sushii-image-server
