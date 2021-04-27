@@ -231,9 +231,9 @@ services:
         networks:
             - sushii_net
         labels:
-            - "traefik.http.routers.grafana.rule=Host(`webhooks.sushii.xyz`)"
-            - "traefik.http.routers.grafana.entrypoints=secure"
-            - "traefik.http.routers.grafana.tls.certresolver=acme"
+            - "traefik.http.routers.sushii-webhooks.rule=Host(`webhooks.sushii.xyz`)"
+            - "traefik.http.routers.sushii-webhooks.entrypoints=secure"
+            - "traefik.http.routers.sushii-webhooks.tls.certresolver=acme"
     sushii-image-server:
         image: ghcr.io/sushiibot/sushii-image-server:latest
         container_name: sushii-image-server
