@@ -11,6 +11,7 @@ env:
     SUSHII_2_IMAGE_NAME: ghcr.io/sushiibot/sushii-2
     SUSHII_API_IMAGE_NAME: ghcr.io/sushiibot/sushii-api
     SUSHII_FEEDS_IMAGE_NAME: ghcr.io/sushiibot/sushii-feeds
+    SUSHII_WEBHOOKS_IMAGE_NAME: ghcr.io/sushiibot/sushii-webhooks
 
 jobs:
     push:
@@ -52,6 +53,16 @@ jobs:
                       exit 0
                   fi
 
+                  if [[ ${GITHUB_REF#refs/*/} == sushii-webhooks* ]]
+                  then
+                      echo ::set-output name=image::${{ env.SUSHII_WEBHOOKS_IMAGE_NAME}}
+                      echo ::set-output name=docker_file::"./Dockerfile"
+                      echo ::set-output name=title::"sushii-webhooks"
+                      echo ::set-output name=build_args::"sushii-webhooks"
+                      echo ::set-output name=description::"Webhook service for sushii"
+                      exit 0
+                  fi
+
                   echo "Tags did not match packages"
                   exit 1
 
@@ -86,6 +97,7 @@ jobs:
               uses: docker/build-push-action@v2
               with:
                   context: .
+                  build-args: ${{ steps.docker_image_select.outputs.build_args }}
                   file: ${{ steps.docker_image_select.outputs.docker_file }}
                   push: true
                   cache-from: type=local,src=/tmp/.buildx-cache
