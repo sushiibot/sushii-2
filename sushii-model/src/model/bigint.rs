@@ -4,34 +4,6 @@ use serde::{Deserialize, Serialize};
 #[sqlx(transparent)]
 pub struct BigInt(pub i64);
 
-#[cfg(feature = "graphql")]
-use juniper::{ParseScalarResult, ParseScalarValue, Value};
-
-#[cfg(feature = "graphql")]
-#[juniper::graphql_scalar(description = "BigInt as string")]
-impl<S> GraphQLScalar for BigInt
-where
-    S: ScalarValue,
-{
-    // Define how to convert your custom scalar into a primitive type.
-    fn resolve(&self) -> Value {
-        Value::scalar((self.0 as u64).to_string())
-    }
-
-    // Define how to parse a primitive type into your custom scalar.
-    fn from_input_value(v: &InputValue) -> Option<BigInt> {
-        v.as_scalar_value()
-            .and_then(|v| v.as_str())
-            .and_then(|s| s.parse::<u64>().ok())
-            .map(|i| BigInt(i as i64))
-    }
-
-    // Define how to parse a string value.
-    fn from_str<'a>(value: ScalarToken<'a>) -> ParseScalarResult<'a, S> {
-        <String as ParseScalarValue<S>>::from_str(value)
-    }
-}
-
 impl From<BigInt> for u64 {
     fn from(id: BigInt) -> u64 {
         id.0 as u64

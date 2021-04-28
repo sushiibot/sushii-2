@@ -1,15 +1,8 @@
-#[cfg(feature = "graphql")]
-use juniper::GraphQLObject;
 use serde::{Deserialize, Serialize};
 
 use crate::model::BigInt;
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
-#[cfg_attr(
-    feature = "graphql",
-    graphql(description = "A user's level progress"),
-    derive(GraphQLObject)
-)]
 pub struct UserLevelProgress {
     pub level: BigInt,
     pub next_level_xp_required: BigInt,

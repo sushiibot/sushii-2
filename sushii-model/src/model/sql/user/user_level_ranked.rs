@@ -1,23 +1,13 @@
 use chrono::{naive::NaiveDateTime, offset::Utc, Datelike};
 use serde::{Deserialize, Serialize};
 
-#[cfg(not(feature = "graphql"))]
 use crate::keys::DbPool;
-#[cfg(not(feature = "graphql"))]
 use serenity::{model::prelude::*, prelude::*};
-
-#[cfg(feature = "graphql")]
-use juniper::GraphQLObject;
 
 use crate::error::Result;
 use crate::model::BigInt;
 
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug)]
-#[cfg_attr(
-    feature = "graphql",
-    graphql(description = "A user's level and ranks in a single guild"),
-    derive(GraphQLObject)
-)]
 pub struct UserLevelRanked {
     pub user_id: BigInt,
     pub guild_id: BigInt,
@@ -114,19 +104,6 @@ impl UserLevelRanked {
     }
 
     /// Get a single user's rank
-    #[cfg(feature = "graphql")]
-    pub async fn from_id(
-        pool: &sqlx::PgPool,
-        user_id: BigInt,
-        guild_id: BigInt,
-    ) -> Result<Option<UserLevelRanked>> {
-        ranked_from_id_query(pool, user_id.0, guild_id.0)
-            .await
-            .map(|o| o.map(UserLevelRanked::reset_stale_ranks))
-    }
-
-    /// Get a single user's rank
-    #[cfg(not(feature = "graphql"))]
     pub async fn from_id(
         ctx: &Context,
         user_id: UserId,

@@ -5,18 +5,10 @@ use crate::keys::DbPool;
 #[cfg(not(feature = "graphql"))]
 use serenity::{model::prelude::*, prelude::*};
 
-#[cfg(feature = "graphql")]
-use juniper::GraphQLObject;
-
 use crate::error::Result;
 use crate::model::BigInt;
 
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug)]
-#[cfg_attr(
-    feature = "graphql",
-    graphql(description = "A cached Discord guild"),
-    derive(GraphQLObject)
-)]
 pub struct CachedGuild {
     pub id: BigInt,
     pub name: String,
@@ -27,13 +19,7 @@ pub struct CachedGuild {
 }
 
 impl CachedGuild {
-    #[cfg(feature = "graphql")]
-    pub async fn from_id(pool: &sqlx::PgPool, guild_id: BigInt) -> Result<Option<Self>> {
-        from_id_query(pool, guild_id.0).await
-    }
-
     /// Updates guild
-    #[cfg(not(feature = "graphql"))]
     pub async fn update(ctx: &Context, guild: &Guild) -> Result<()> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
@@ -41,7 +27,6 @@ impl CachedGuild {
     }
 
     /// Updates guild from a partial guild obj
-    #[cfg(not(feature = "graphql"))]
     pub async fn update_from_partial(ctx: &Context, partial_guild: &PartialGuild) -> Result<()> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
@@ -54,27 +39,6 @@ impl CachedGuild {
             Ok(())
         }
     }
-}
-
-#[cfg(feature = "graphql")]
-async fn from_id_query(pool: &sqlx::PgPool, user_id: i64) -> Result<Option<CachedGuild>> {
-    sqlx::query_as!(
-        CachedGuild,
-        r#"
-            SELECT id as "id: BigInt",
-                   name,
-                   icon,
-                   splash,
-                   banner,
-                   features
-              FROM app_public.cached_guilds
-             WHERE id = $1
-        "#,
-        user_id
-    )
-    .fetch_optional(pool)
-    .await
-    .map_err(Into::into)
 }
 
 #[cfg(not(feature = "graphql"))]

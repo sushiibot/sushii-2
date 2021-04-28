@@ -26,6 +26,5 @@ pub use self::{
         user_level::UserLevel,
         user_level_global::UserLevelGlobal,
         user_level_ranked::UserLevelRanked,
-        user_xp::UserXP,
     },
 };

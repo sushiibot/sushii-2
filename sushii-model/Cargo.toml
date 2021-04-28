@@ -6,7 +6,7 @@ edition = "2018"
 
 [features]
 default = []
-graphql = ["juniper", "dataloader"]
+graphql = []
 feed_process = []
 
 [dependencies]
@@ -36,13 +36,3 @@ features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "of
 git = "https://github.com/serenity-rs/serenity"
 rev = "badb44891a73bc27df8b3e39d4baf92675e868a4"
 features = ["collector"]
-
-[dependencies.juniper]
-version = "0.15.1"
-optional = true
-
-[dependencies.dataloader]
-version = "0.14"
-optional = true
-default-features = false
-features = ["runtime-tokio"]
