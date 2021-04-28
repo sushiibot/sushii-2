@@ -100,16 +100,16 @@ services:
         labels:
             - "traefik.enable=false"
     postgres:
-        image: postgres:12
+        image: timescale/timescaledb:latest-pg12
         container_name: postgres
         restart: unless-stopped
-        command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
+        command: postgres -c 'config_file=/etc/postgresql/data/postgresql.conf'
         shm_size: 512mb
         env_file:
             - .env
         volumes:
             - ~/docker/postgres:/var/lib/postgresql/data
-            - ./postgres.conf:/etc/postgresql/postgresql.conf
+            - ./postgres.conf:/etc/postgresql/data/postgresql.conf
             - ~/docker/postgres_root:/root
         networks:
             - sushii_net
