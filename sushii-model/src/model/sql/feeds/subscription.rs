@@ -116,7 +116,10 @@ impl FeedSubscription {
     }
 }
 
-async fn get_matching_vlive(pool: &sqlx::PgPool, feed_ids: &[String]) -> Result<Vec<FeedSubscription>> {
+async fn get_matching_vlive(
+    pool: &sqlx::PgPool,
+    feed_ids: &[String],
+) -> Result<Vec<FeedSubscription>> {
     sqlx::query_as!(
         FeedSubscription,
         r#"

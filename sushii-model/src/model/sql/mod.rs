@@ -3,6 +3,7 @@ pub mod feeds;
 pub mod guild;
 pub mod mod_log;
 pub mod mute;
+pub mod rules;
 pub mod user;
 
 pub use self::{
@@ -27,4 +28,5 @@ pub use self::{
         user_level_global::UserLevelGlobal,
         user_level_ranked::UserLevelRanked,
     },
+    rules::gauge::RuleGauge,
 };

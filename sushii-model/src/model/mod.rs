@@ -4,4 +4,3 @@ pub mod sushii_cache;
 pub mod user;
 
 pub use self::{bigint::BigInt, sushii_cache::SushiiCache};
-

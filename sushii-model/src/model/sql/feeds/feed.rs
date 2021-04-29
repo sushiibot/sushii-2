@@ -302,4 +302,3 @@ async fn get_matching_vlive(pool: &sqlx::PgPool, feed_ids: &[&str]) -> Result<Ve
     .await
     .map_err(Into::into)
 }
-

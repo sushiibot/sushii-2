@@ -1,8 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[cfg(not(feature = "graphql"))]
 use crate::keys::DbPool;
-#[cfg(not(feature = "graphql"))]
 use serenity::{model::prelude::*, prelude::*};
 
 use crate::error::Result;
@@ -41,7 +39,6 @@ impl CachedGuild {
     }
 }
 
-#[cfg(not(feature = "graphql"))]
 async fn update_query(pool: &sqlx::PgPool, guild: &Guild) -> Result<()> {
     sqlx::query!(
         r#"
