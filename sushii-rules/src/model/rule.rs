@@ -3,9 +3,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::types::Uuid;
 use std::error::Error;
 use std::sync::Arc;
-use twilight_model::gateway::event::DispatchEvent;
 
-use crate::model::{Action, Condition, RuleContext, Trigger};
+use crate::model::{Action, Condition, Event, RuleContext, Trigger};
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct Rule {
@@ -25,7 +24,7 @@ pub struct Rule {
 impl Rule {
     pub async fn check_event(
         &self,
-        event: Arc<DispatchEvent>,
+        event: Arc<Event>,
         ctx: &RuleContext<'_>,
     ) -> Result<bool, Box<dyn Error>> {
         // if event.kind() != self.trigger {
@@ -44,7 +43,7 @@ impl Rule {
 
         metrics::increment_counter!("rule_triggered", "event_name" => event.kind().name().unwrap_or("UNKNOWN"));
 
-        tracing::debug!("Rule triggered");
+        tracing::debug!("Rule triggered on {:?}", event.kind().name());
 
         // Run all actions in order if passes conditions
         for action in &self.actions {

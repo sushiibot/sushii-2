@@ -139,7 +139,7 @@ async fn main() -> Result<()> {
             }
         };
 
-        if let Err(e) = engine.process_event(event) {
+        if let Err(e) = engine.process_event(event.into()) {
             tracing::error!("Failed to process event: {}", e);
         }
     }

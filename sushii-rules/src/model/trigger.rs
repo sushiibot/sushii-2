@@ -101,10 +101,21 @@ pub enum Trigger {
     /// Trigger event from Discord
     #[serde(with = "TwilightEventType")]
     Twilight(EventType),
+    Counter,
 }
 
 impl From<EventType> for Trigger {
     fn from(event_type: EventType) -> Self {
         Self::Twilight(event_type)
+    }
+}
+
+impl Trigger {
+    pub fn name(&self) -> Option<&'static str> {
+        match self {
+            Self::Twilight(event_type) => event_type.name(),
+            Self::Counter => Some("COUNTER")
+        } 
+
     }
 }

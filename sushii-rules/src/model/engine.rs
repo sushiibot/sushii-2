@@ -6,17 +6,20 @@ use std::sync::Arc;
 use std::time::Instant;
 use tokio::sync::RwLock;
 use twilight_http::client::Client;
-use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::id::GuildId;
 
-use super::{Rule, RuleContext, Trigger};
+use crate::model::{Rule, Event, RuleContext, Trigger};
 use crate::model::has_id::HasGuildId;
 use crate::persistence::RuleStore;
+
+type RuleList = Vec<Arc<Rule>>;
+type GuildTriggerRules = DashMap<Trigger, RuleList>;
+type GuildRulesMap = DashMap<GuildId, GuildTriggerRules>;
 
 #[derive(Clone, Debug)]
 pub struct RulesEngine {
     /// Stores rules fetched from file or database
-    pub guild_rules: Arc<DashMap<GuildId, DashMap<Trigger, Vec<Arc<Rule>>>>>,
+    pub guild_rules: Arc<GuildRulesMap>,
     /// Rules persistence backend, use this to fetch rules
     pub rules_store: Box<dyn RuleStore>,
     /// Shared handlebars template to prevent reparsing
@@ -57,40 +60,67 @@ impl RulesEngine {
         }
     }
 
+    /// Fetches rules from cache or from persistent store if not cached
     #[tracing::instrument]
-    pub fn process_event(&self, event: DispatchEvent) -> Result<()> {
+    fn get_guild_rules(&self, guild_id: GuildId) -> Result<GuildTriggerRules> {
+        if let Some(rules) = self.guild_rules.get(&guild_id) {
+            Ok(rules.clone())
+        } else {
+            let guild_rules = self.rules_store.get_guild_rules(guild_id.0)?;
+
+            let map = DashMap::new();
+            for rule in guild_rules {
+                let mut entry = map.entry(rule.trigger).or_insert_with(Vec::new);
+                entry.push(Arc::new(rule));
+            }
+
+            self.guild_rules.insert(guild_id, map);
+            Ok(self.guild_rules.get(&guild_id).unwrap().clone())
+        }
+    }
+
+    /// Fetches the matching rules corresponding to a given event or trigger
+    fn get_matching_rules(
+        &self,
+        event: &Arc<Event>,
+        trigger_override: Option<Trigger>,
+    ) -> Result<Option<RuleList>> {
         let guild_id = match event.guild_id() {
             Ok(id) => id,
             Err(_) => {
-                return Ok(());
+                return Ok(None);
             }
         };
 
-        let guild_rules = match self.guild_rules.get(&guild_id) {
+        let guild_rules = self.get_guild_rules(guild_id)?;
+
+        if let Some(trigger) = trigger_override {
+            Ok(guild_rules.get(&trigger).map(|r| r.clone()))
+        } else {
+            let event_type = event.kind();
+
+            Ok(guild_rules.get(&event_type.into()).map(|r| r.clone()))
+        }
+    }
+
+    /// Events that modify counters trigger this to process the counter separately
+    /// It provides the original event that triggered this counter
+    pub fn process_counter(&self, event: Arc<Event>) -> Result<()> {
+        let matching_rules = match self.get_matching_rules(&event, Some(Trigger::Counter))? {
             Some(r) => r,
-            None => {
-                let guild_rules = self.rules_store.get_guild_rules(guild_id.0)?;
-
-                let map = DashMap::new();
-                for rule in guild_rules {
-                    let mut entry = map.entry(rule.trigger).or_insert_with(Vec::new);
-                    entry.push(Arc::new(rule));
-                }
-
-                self.guild_rules.insert(guild_id, map);
-                self.guild_rules.get(&guild_id).unwrap()
-            }
+            None => return Ok(()),
         };
 
-        let event_type = event.kind();
-        let matching_rules = match guild_rules.get(&event_type.into()) {
-            Some(r) => r,
-            None => {
-                return Ok(());
-            }
-        };
+        Ok(())
+    }
 
+    #[tracing::instrument]
+    pub fn process_event(&self, event: Event) -> Result<()> {
         let event = Arc::new(event);
+        let matching_rules = match self.get_matching_rules(&event, None)? {
+            Some(r) => r,
+            None => return Ok(()),
+        };
 
         for rule in matching_rules.iter() {
             let context = RuleContext::new(

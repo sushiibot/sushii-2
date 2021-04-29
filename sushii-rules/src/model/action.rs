@@ -2,12 +2,11 @@ use anyhow::Result;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::id::RoleId;
 
 use sushii_model::model::sql::{RuleGauge, RuleScope};
 
-use super::RuleContext;
+use crate::model::{RuleContext, Event};
 use crate::model::has_id::*;
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -18,18 +17,22 @@ pub enum Action {
     /// # Send message
     /// Sends a message to a channel
     SendMessage { channel_id: u64, content: String },
+    // Counters
+    /// # Add to a counter
     AddCounter {
         /// Name of counter
         name: String,
         /// Scope this counter applies to
         scope: RuleScope,
     },
+    /// # Subtract from a counter
     SubtractCounter {
         /// Name of counter
         name: String,
         /// Scope this counter applies to
         scope: RuleScope,
     },
+    /// # Reset a counter
     ResetCounter {
         /// Name of counter
         name: String,
@@ -58,7 +61,7 @@ pub enum Action {
 }
 
 impl Action {
-    pub async fn execute(&self, event: Arc<DispatchEvent>, ctx: &RuleContext<'_>) -> Result<()> {
+    pub async fn execute(&self, event: Arc<Event>, ctx: &RuleContext<'_>) -> Result<()> {
         match *self {
             Self::Reply { ref content } => {
                 let channel_id = event.channel_id()?;

@@ -11,7 +11,7 @@ use sushii_model::model::sql::{RuleGauge, RuleScope};
 
 use crate::error::Result;
 use crate::model::has_id::*;
-use crate::model::RuleContext;
+use crate::model::{Event, RuleContext};
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, JsonSchema)]
 #[serde(rename_all(serialize = "UPPERCASE", deserialize = "UPPERCASE"))]
@@ -128,6 +128,11 @@ pub enum StringConstraint {
     EndsWith(String),
     /// Does not end with given text
     DoesNotEndsWith(String),
+    /// Length of some text
+    Length(IntegerConstraint),
+    /// Is all uppercase characters
+    IsUppercase,
+    IsLowercase,
     // Expensive constraints, rules should short circuit with these last
     // TODO: Implement Ord on these so that language constraints are last, then
     // sort the rule constraints so that these are last
@@ -197,6 +202,15 @@ impl StringConstraint {
             }
             Self::DoesNotEndsWith(s) => {
                 !in_str.ends_with(s)
+            }
+            Self::Length(int_constraint) => {
+                int_constraint.check_integer(ctx, in_str.len() as u64).await?
+            }
+            Self::IsUppercase => {
+                in_str == in_str.to_uppercase()
+            }
+            Self::IsLowercase => {
+                in_str == in_str.to_lowercase()
             }
             Self::IsLanguage(lang) => {
                 ctx.language_client
@@ -474,14 +488,10 @@ pub enum Constraint {
 }
 
 impl Constraint {
-    pub async fn check_event(
-        &self,
-        event: Arc<DispatchEvent>,
-        ctx: &RuleContext<'_>,
-    ) -> Result<bool> {
+    pub async fn check_event(&self, event: Arc<Event>, ctx: &RuleContext<'_>) -> Result<bool> {
         let val = match event.as_ref() {
             // MESSAGE_CREATE
-            DispatchEvent::MessageCreate(msg) => match self {
+            Event::Twilight(DispatchEvent::MessageCreate(msg)) => match self {
                 Constraint::Message(msg_constraint) => {
                     msg_constraint.check_event(ctx, &msg.0).await?
                 }

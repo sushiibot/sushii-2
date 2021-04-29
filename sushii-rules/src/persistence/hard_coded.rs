@@ -24,30 +24,68 @@ impl RuleStore for HardCodedStore {
             return Ok(Vec::new());
         }
 
-        let rules = vec![Rule {
-            id: Uuid::nil(),
-            name: "Language counter".into(),
-            enabled: true,
-            trigger: Trigger::Twilight(EventType::MessageCreate),
-            conditions: Condition::And {
-                and: vec![
-                    Condition::Condition {
-                        constraint: Constraint::Message(MessageConstraint::Author(
-                            UserConstraint::Id(IntegerConstraint::Equals(150443906511667200)),
-                        )),
+        let rules = vec![
+            Rule {
+                id: Uuid::nil(),
+                name: "Language counter".into(),
+                enabled: true,
+                trigger: Trigger::Twilight(EventType::MessageCreate),
+                conditions: Condition::And {
+                    and: vec![
+                        Condition::Condition {
+                            constraint: Constraint::Message(MessageConstraint::Author(
+                                UserConstraint::Id(IntegerConstraint::Equals(150443906511667200)),
+                            )),
+                        },
+                        Condition::Condition {
+                            constraint: Constraint::Message(MessageConstraint::Content(
+                                StringConstraint::IsNotLanguage(Language::English),
+                            )),
+                        },
+                    ],
+                },
+                actions: vec![Action::AddCounter {
+                    name: "language".to_string(),
+                    scope: RuleScope::User,
+                }],
+            },
+            Rule {
+                id: Uuid::nil(),
+                name: "Language warning".into(),
+                enabled: true,
+                trigger: Trigger::Twilight(EventType::MessageCreate),
+                conditions: Condition::And {
+                    and: vec![
+                        Condition::Condition {
+                            constraint: Constraint::Message(MessageConstraint::Author(
+                                UserConstraint::Id(IntegerConstraint::Equals(150443906511667200)),
+                            )),
+                        },
+                        Condition::Condition {
+                            constraint: Constraint::Message(MessageConstraint::Content(
+                                StringConstraint::IsNotLanguage(Language::English),
+                            )),
+                        },
+                        Condition::Condition {
+                            constraint: Constraint::Counter(CounterConstraint {
+                                name: "language".to_string(),
+                                scope: RuleScope::User,
+                                value: CounterValueConstraint::Equals(3),
+                            }),
+                        },
+                    ],
+                },
+                actions: vec![
+                    Action::Reply {
+                        content: "English only!".to_string(),
                     },
-                    Condition::Condition {
-                        constraint: Constraint::Message(MessageConstraint::Content(
-                            StringConstraint::IsNotLanguage(Language::English),
-                        )),
+                    Action::ResetCounter {
+                        name: "language".to_string(),
+                        scope: RuleScope::User,
                     },
                 ],
             },
-            actions: vec![Action::AddCounter {
-                name: "language".to_string(),
-                scope: RuleScope::User,
-            }],
-        }];
+        ];
 
         Ok(rules)
     }

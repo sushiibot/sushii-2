@@ -4,9 +4,19 @@ use twilight_model::gateway::payload;
 use twilight_model::id::{ChannelId, GuildId, UserId};
 
 use crate::error::{Error, Result};
+use crate::model::Event;
 
 pub trait HasScopeId {
     fn scope_id(&self, scope: RuleScope) -> Result<u64>;
+}
+
+impl HasScopeId for Event {
+    fn scope_id(&self, scope: RuleScope) -> Result<u64> {
+        match self {
+            Self::Twilight(event) => event.scope_id(scope),
+            Self::Counter(counter, ..) => Ok(counter.scope_id as u64),
+        }
+    }
 }
 
 impl HasScopeId for DispatchEvent {
@@ -21,6 +31,15 @@ impl HasScopeId for DispatchEvent {
 
 pub trait HasGuildId {
     fn guild_id(&self) -> Result<GuildId>;
+}
+
+impl HasGuildId for Event {
+    fn guild_id(&self) -> Result<GuildId> {
+        match self {
+            Self::Twilight(event) => event.guild_id(),
+            Self::Counter(counter, ..) => Ok(GuildId(counter.guild_id as u64)),
+        }
+    }
 }
 
 impl HasGuildId for DispatchEvent {
@@ -39,6 +58,15 @@ pub trait HasChannelId {
     fn channel_id(&self) -> Result<ChannelId>;
 }
 
+impl HasChannelId for Event {
+    fn channel_id(&self) -> Result<ChannelId> {
+        match self {
+            Self::Twilight(event) => event.channel_id(),
+            Self::Counter(_counter, event) => event.channel_id(),
+        }
+    }
+}
+
 impl HasChannelId for DispatchEvent {
     fn channel_id(&self) -> Result<ChannelId> {
         match *self {
@@ -51,6 +79,16 @@ impl HasChannelId for DispatchEvent {
 pub trait HasUserId {
     fn user_id(&self) -> Result<UserId>;
 }
+
+impl HasUserId for Event {
+    fn user_id(&self) -> Result<UserId> {
+        match self {
+            Self::Twilight(event) => event.user_id(),
+            Self::Counter(_counter, event) => event.user_id(),
+        }
+    }
+}
+
 
 impl HasUserId for DispatchEvent {
     fn user_id(&self) -> Result<UserId> {

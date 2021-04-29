@@ -2,10 +2,9 @@ use async_recursion::async_recursion;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use twilight_model::gateway::event::DispatchEvent;
 
 use crate::error::Result;
-use crate::model::{Constraint, RuleContext};
+use crate::model::{Event, Constraint, RuleContext};
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Condition {
@@ -36,7 +35,7 @@ impl Condition {
     #[async_recursion]
     pub async fn check_event(
         &self,
-        event: Arc<DispatchEvent>,
+        event: Arc<Event>,
         context: &RuleContext,
     ) -> Result<bool> {
         match *self {
