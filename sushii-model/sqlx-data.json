@@ -283,6 +283,30 @@
       ]
     }
   },
+  "0cb3bdc6ad59c788f3f8cc69698db83ceb46c0173bc236205b5b9ac64f469db8": {
+    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM app_public.feeds\n             WHERE feed_id NOT LIKE 'vlive:%'\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "feed_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "metadata: Json<FeedMetadata>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        true
+      ]
+    }
+  },
   "0ea7d0e05012add2116321168131a4a73a08012fa96059d008419f097b30fd77": {
     "query": "\n            SELECT *\n              FROM app_public.mutes\n             WHERE guild_id = $1\n               AND user_id = $2\n        ",
     "describe": {
