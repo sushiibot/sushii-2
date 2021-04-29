@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 use crate::error::Result;
-use crate::model::{Event, Constraint, RuleContext};
+use crate::model::{Constraint, Event, RuleContext};
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Condition {
@@ -33,11 +33,7 @@ pub enum Condition {
 
 impl Condition {
     #[async_recursion]
-    pub async fn check_event(
-        &self,
-        event: Arc<Event>,
-        context: &RuleContext,
-    ) -> Result<bool> {
+    pub async fn check_event(&self, event: Arc<Event>, context: &RuleContext) -> Result<bool> {
         match *self {
             Condition::And { ref and } => {
                 for child in and.iter() {

@@ -89,7 +89,6 @@ impl HasUserId for Event {
     }
 }
 
-
 impl HasUserId for DispatchEvent {
     fn user_id(&self) -> Result<UserId> {
         match *self {

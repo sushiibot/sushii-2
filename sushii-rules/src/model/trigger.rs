@@ -114,8 +114,7 @@ impl Trigger {
     pub fn name(&self) -> Option<&'static str> {
         match self {
             Self::Twilight(event_type) => event_type.name(),
-            Self::Counter => Some("COUNTER")
-        } 
-
+            Self::Counter => Some("COUNTER"),
+        }
     }
 }

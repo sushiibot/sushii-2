@@ -8,8 +8,8 @@ use tokio::sync::RwLock;
 use twilight_http::client::Client;
 use twilight_model::id::GuildId;
 
-use crate::model::{Rule, Event, RuleContext, Trigger};
 use crate::model::has_id::HasGuildId;
+use crate::model::{Event, Rule, RuleContext, Trigger};
 use crate::persistence::RuleStore;
 
 type RuleList = Vec<Arc<Rule>>;
@@ -80,11 +80,7 @@ impl RulesEngine {
     }
 
     /// Fetches the matching rules corresponding to a given event or trigger
-    fn get_matching_rules(
-        &self,
-        event: &Arc<Event>,
-        trigger_override: Option<Trigger>,
-    ) -> Result<Option<RuleList>> {
+    fn get_matching_rules(&self, event: &Arc<Event>) -> Result<Option<RuleList>> {
         let guild_id = match event.guild_id() {
             Ok(id) => id,
             Err(_) => {
@@ -94,35 +90,22 @@ impl RulesEngine {
 
         let guild_rules = self.get_guild_rules(guild_id)?;
 
-        if let Some(trigger) = trigger_override {
-            Ok(guild_rules.get(&trigger).map(|r| r.clone()))
-        } else {
-            let event_type = event.kind();
-
-            Ok(guild_rules.get(&event_type.into()).map(|r| r.clone()))
-        }
+        // This will be Counter or a Twilight(EventType)
+        let event_type = event.kind();
+        Ok(guild_rules.get(&event_type.into()).map(|r| r.clone()))
     }
 
-    /// Events that modify counters trigger this to process the counter separately
+    /// Events that modify counters also trigger this to process the counter.
     /// It provides the original event that triggered this counter
-    pub fn process_counter(&self, event: Arc<Event>) -> Result<()> {
-        let matching_rules = match self.get_matching_rules(&event, Some(Trigger::Counter))? {
-            Some(r) => r,
-            None => return Ok(()),
-        };
-
-        Ok(())
-    }
-
     #[tracing::instrument]
-    pub fn process_event(&self, event: Event) -> Result<()> {
-        let event = Arc::new(event);
-        let matching_rules = match self.get_matching_rules(&event, None)? {
+    pub fn process_event(&self, event: Arc<Event>) -> Result<()> {
+        let matching_rules = match self.get_matching_rules(&event)? {
             Some(r) => r,
             None => return Ok(()),
         };
 
         for rule in matching_rules.iter() {
+            // Create a new context on every rule trigger
             let context = RuleContext::new(
                 self.http.clone(),
                 self.pg_pool.clone(),
@@ -131,6 +114,7 @@ impl RulesEngine {
                 self.handlebars_templates.clone(),
                 self.word_lists.clone(),
             );
+
             let event = event.clone();
             let rule = rule.clone();
 

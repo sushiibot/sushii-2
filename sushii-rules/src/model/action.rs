@@ -6,8 +6,8 @@ use twilight_model::id::RoleId;
 
 use sushii_model::model::sql::{RuleGauge, RuleScope};
 
-use crate::model::{RuleContext, Event};
 use crate::model::has_id::*;
+use crate::model::{Event, RuleContext};
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub enum Action {

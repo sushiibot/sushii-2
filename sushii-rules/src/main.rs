@@ -5,6 +5,7 @@ use metrics_util::layers::{Layer, PrefixLayer};
 use redis::AsyncCommands;
 use serde::{de::DeserializeSeed, Deserialize, Serialize};
 use serde_json::Deserializer;
+use std::sync::Arc;
 use tracing_subscriber::EnvFilter;
 use twilight_http::Client;
 use twilight_model::gateway::event::DispatchEvent;
@@ -139,7 +140,7 @@ async fn main() -> Result<()> {
             }
         };
 
-        if let Err(e) = engine.process_event(event.into()) {
+        if let Err(e) = engine.process_event(Arc::new(event.into())) {
             tracing::error!("Failed to process event: {}", e);
         }
     }
