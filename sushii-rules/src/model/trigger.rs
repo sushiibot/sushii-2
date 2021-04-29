@@ -92,6 +92,8 @@ enum TwilightEventType {
     WebhooksUpdate,
 }
 
+// Main 3 triggers should just be:
+// message, member update, member join / leave
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, JsonSchema)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum Trigger {

@@ -7,10 +7,10 @@ use std::time::Instant;
 use tokio::sync::RwLock;
 use twilight_http::client::Client;
 use twilight_model::gateway::event::DispatchEvent;
-use twilight_model::gateway::payload;
 use twilight_model::id::GuildId;
 
 use super::{Rule, RuleContext, Trigger};
+use crate::model::has_id::HasGuildId;
 use crate::persistence::RuleStore;
 
 #[derive(Clone, Debug)]
@@ -117,21 +117,5 @@ impl RulesEngine {
         }
 
         Ok(())
-    }
-}
-
-pub trait HasGuildId {
-    fn guild_id(&self) -> Option<GuildId>;
-}
-
-impl HasGuildId for DispatchEvent {
-    fn guild_id(&self) -> Option<GuildId> {
-        match *self {
-            Self::BanAdd(payload::BanAdd { guild_id, .. }) => Some(guild_id),
-            Self::BanRemove(payload::BanRemove { guild_id, .. }) => Some(guild_id),
-            Self::MessageCreate(ref msg) => msg.guild_id,
-            Self::MemberAdd(ref member) => Some(member.guild_id),
-            _ => None,
-        }
     }
 }

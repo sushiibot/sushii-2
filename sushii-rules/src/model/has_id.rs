@@ -1,4 +1,5 @@
 use twilight_model::gateway::event::DispatchEvent;
+use twilight_model::gateway::payload;
 use twilight_model::id::{ChannelId, GuildId, UserId};
 
 pub trait HasGuildId {
@@ -8,7 +9,10 @@ pub trait HasGuildId {
 impl HasGuildId for DispatchEvent {
     fn guild_id(&self) -> Option<GuildId> {
         match *self {
+            Self::BanAdd(payload::BanAdd { guild_id, .. }) => Some(guild_id),
+            Self::BanRemove(payload::BanRemove { guild_id, .. }) => Some(guild_id),
             Self::MessageCreate(ref msg) => msg.guild_id,
+            Self::MemberAdd(ref member) => Some(member.guild_id),
             _ => None,
         }
     }
