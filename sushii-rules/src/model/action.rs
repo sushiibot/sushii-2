@@ -5,10 +5,9 @@ use std::sync::Arc;
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::id::RoleId;
 
-use sushii_model::model::sql::RuleGauge;
+use sushii_model::model::sql::{RuleGauge, RuleScope};
 
 use super::RuleContext;
-use crate::error::Error;
 use crate::model::has_id::*;
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
@@ -22,14 +21,20 @@ pub enum Action {
     AddCounter {
         /// Name of counter
         name: String,
+        /// Scope this counter applies to
+        scope: RuleScope,
     },
     SubtractCounter {
         /// Name of counter
         name: String,
+        /// Scope this counter applies to
+        scope: RuleScope,
     },
     ResetCounter {
         /// Name of counter
         name: String,
+        /// Scope this counter applies to
+        scope: RuleScope,
     },
     // Moderation stuff
     /// # Ban
@@ -56,7 +61,7 @@ impl Action {
     pub async fn execute(&self, event: Arc<DispatchEvent>, ctx: &RuleContext<'_>) -> Result<()> {
         match *self {
             Self::Reply { ref content } => {
-                let channel_id = event.channel_id().ok_or(Error::MissingChannelId)?;
+                let channel_id = event.channel_id()?;
 
                 ctx.http
                     .create_message(channel_id)
@@ -69,8 +74,8 @@ impl Action {
                 duration,
                 ref reason,
             } => {
-                let guild_id = event.guild_id().ok_or(Error::MissingGuildId)?;
-                let user_id = event.user_id().ok_or(Error::MissingUserId)?;
+                let guild_id = event.guild_id()?;
+                let user_id = event.user_id()?;
 
                 ctx.http
                     .create_ban(guild_id, user_id)
@@ -81,37 +86,31 @@ impl Action {
                 duration,
                 ref reason,
             } => {
-                let guild_id = event.guild_id().ok_or(Error::MissingGuildId)?;
-                let user_id = event.user_id().ok_or(Error::MissingUserId)?;
+                let guild_id = event.guild_id()?;
+                let user_id = event.user_id()?;
 
                 ctx.http
                     .add_guild_member_role(guild_id, user_id, RoleId(123))
                     .await?;
             }
             // Counters
-            Self::AddCounter { ref name } => {
-                let guild_id = match event.guild_id() {
-                    Some(id) => id,
-                    None => return Ok(()),
-                };
+            Self::AddCounter { ref name, scope } => {
+                let guild_id = event.guild_id()?;
+                let scope_id = event.scope_id(scope)?;
 
-                RuleGauge::inc(&ctx.pg_pool, guild_id.0, name).await?;
+                RuleGauge::inc(&ctx.pg_pool, guild_id.0, scope, scope_id, name).await?;
             }
-            Self::SubtractCounter { ref name } => {
-                let guild_id = match event.guild_id() {
-                    Some(id) => id,
-                    None => return Ok(()),
-                };
+            Self::SubtractCounter { ref name, scope } => {
+                let guild_id = event.guild_id()?;
+                let scope_id = event.scope_id(scope)?;
 
-                RuleGauge::dec(&ctx.pg_pool, guild_id.0, name).await?;
+                RuleGauge::dec(&ctx.pg_pool, guild_id.0, scope, scope_id, name).await?;
             }
-            Self::ResetCounter { ref name } => {
-                let guild_id = match event.guild_id() {
-                    Some(id) => id,
-                    None => return Ok(()),
-                };
+            Self::ResetCounter { ref name, scope } => {
+                let guild_id = event.guild_id()?;
+                let scope_id = event.scope_id(scope)?;
 
-                RuleGauge::reset(&ctx.pg_pool, guild_id.0, name).await?;
+                RuleGauge::reset(&ctx.pg_pool, guild_id.0, scope, scope_id, name).await?;
             }
             _ => {}
         }

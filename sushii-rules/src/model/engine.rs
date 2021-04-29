@@ -60,8 +60,8 @@ impl RulesEngine {
     #[tracing::instrument]
     pub fn process_event(&self, event: DispatchEvent) -> Result<()> {
         let guild_id = match event.guild_id() {
-            Some(id) => id,
-            None => {
+            Ok(id) => id,
+            Err(_) => {
                 return Ok(());
             }
         };

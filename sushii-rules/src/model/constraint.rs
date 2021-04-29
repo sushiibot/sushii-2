@@ -7,9 +7,9 @@ use twilight_model::channel::message::Message;
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::user::User;
 
-use sushii_model::model::sql::RuleGauge;
+use sushii_model::model::sql::{RuleGauge, RuleScope};
 
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::model::has_id::*;
 use crate::model::RuleContext;
 
@@ -410,6 +410,8 @@ impl MessageConstraint {
 pub struct CounterConstraint {
     /// # Counter name
     pub name: String,
+    /// # Counter scope
+    pub scope: RuleScope,
     /// # Value of counter
     pub value: CounterValueConstraint,
 }
@@ -437,11 +439,17 @@ pub enum CounterValueConstraint {
 }
 
 impl CounterConstraint {
-    async fn check_event(&self, ctx: &RuleContext<'_>, guild_id: u64) -> Result<bool> {
+    async fn check_event(
+        &self,
+        ctx: &RuleContext<'_>,
+        guild_id: u64,
+        scope_id: u64,
+    ) -> Result<bool> {
         let val = match self.value {
             CounterValueConstraint::Equals(num) => {
                 let current_value =
-                    RuleGauge::get_count(&ctx.pg_pool, guild_id, &self.name).await?;
+                    RuleGauge::get_count(&ctx.pg_pool, guild_id, self.scope, scope_id, &self.name)
+                        .await?;
 
                 current_value == num
             }
@@ -471,8 +479,6 @@ impl Constraint {
         event: Arc<DispatchEvent>,
         ctx: &RuleContext<'_>,
     ) -> Result<bool> {
-        let guild_id = event.guild_id();
-
         let val = match event.as_ref() {
             // MESSAGE_CREATE
             DispatchEvent::MessageCreate(msg) => match self {
@@ -480,8 +486,11 @@ impl Constraint {
                     msg_constraint.check_event(ctx, &msg.0).await?
                 }
                 Constraint::Counter(counter_constraint) => {
+                    let guild_id = event.guild_id()?;
+                    let scope_id = event.scope_id(counter_constraint.scope)?;
+
                     counter_constraint
-                        .check_event(ctx, guild_id.map(|id| id.0).ok_or(Error::MissingGuildId)?)
+                        .check_event(ctx, guild_id.0, scope_id)
                         .await?
                 }
             },

@@ -144,9 +144,11 @@ Example structure in json form.
   // Condition data, should contain information on what data passed conditions
   // and the inputs / outputs
   "conditions": {
-    "message.content": {
-      "value": "!ping",
-      "passed": true,
+    "message": {
+      "content": {
+        "value": "!ping",
+        "passed": true,
+      }
     },
     "message.author.id": {
       "value": 123978123,

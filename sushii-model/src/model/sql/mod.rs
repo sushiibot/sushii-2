@@ -28,5 +28,5 @@ pub use self::{
         user_level_global::UserLevelGlobal,
         user_level_ranked::UserLevelRanked,
     },
-    rules::gauge::RuleGauge,
+    rules::gauge::{RuleGauge, RuleScope},
 };

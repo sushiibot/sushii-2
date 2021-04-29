@@ -1,5 +1,80 @@
 {
   "db": "PostgreSQL",
+  "061c3f1bedf35968eb8681f3402f9add0cb0309fd6d53b0e5aabe6c98f198873": {
+    "query": "\n            INSERT INTO app_public.rule_gauges (time, guild_id, scope, scope_id, name, value)\n                VALUES (NOW(), $1, $2, $3, $4,\n                    -- select the most recent record and increment\n                    coalesce((SELECT value + 1\n                      FROM app_public.rule_gauges\n                     WHERE guild_id = $1\n                       AND scope = $2\n                       AND scope_id = $3\n                       AND name = $4\n                     ORDER BY time DESC\n                     LIMIT 1),\n                     1\n                    )\n                )\n                RETURNING time, guild_id, scope as \"scope: RuleScope\",\n                          scope_id, name, value\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "time",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "scope: RuleScope",
+          "type_info": {
+            "Custom": {
+              "name": "rule_scope",
+              "kind": {
+                "Enum": [
+                  "GUILD",
+                  "CHANNEL",
+                  "USER"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 3,
+          "name": "scope_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "value",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          {
+            "Custom": {
+              "name": "rule_scope",
+              "kind": {
+                "Enum": [
+                  "GUILD",
+                  "CHANNEL",
+                  "USER"
+                ]
+              }
+            }
+          },
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "06e8bf886ba37c24342ab8f651aeb37f5e285c1968200c2be21e1c2289ef8e61": {
     "query": "\n        INSERT INTO app_public.cached_guilds (id, name, icon, splash, banner, features)\n             VALUES ($1, $2, $3, $4, $5, $6)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET name = $2,\n                    icon = $3,\n                    splash = $4,\n                    banner = $5,\n                    features = $6\n        ",
     "describe": {
@@ -441,8 +516,21 @@
       ]
     }
   },
-  "0ff94f7a282a5f0ce3d89aed654954c82f218da884252a51ebba42943806f3cc": {
-    "query": "\n            INSERT INTO app_public.rule_gauges (time, guild_id, name, value)\n                VALUES (NOW(), $1, $2, 0)\n                RETURNING *\n            ",
+  "107ae4183cc201bb20d1fbafd9ce75f81f2f09b10115412000c0c35b07d9efe3": {
+    "query": "\n            INSERT INTO app_public.feeds\n                 VALUES ($1, $2)\n            ON CONFLICT (feed_id)\n              DO UPDATE\n                    SET metadata = $2\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Jsonb"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "1395927c198d2e60399798dcce30c9bb6f78e230f9f1b73c804b9cf41e5e7a86": {
+    "query": "\n            INSERT INTO app_public.rule_gauges (time, guild_id, scope, scope_id, name, value)\n                VALUES (NOW(), $1, $2, $3, $4,\n                    -- select the most recent record and increment\n                    coalesce((SELECT value - 1\n                      FROM app_public.rule_gauges\n                     WHERE guild_id = $1\n                       AND scope = $2\n                       AND scope_id = $3\n                       AND name = $4\n                     ORDER BY time DESC\n                     LIMIT 1),\n                     0\n                    )\n                )\n                RETURNING time, guild_id, scope as \"scope: RuleScope\",\n                          scope_id, name, value\n            ",
     "describe": {
       "columns": [
         {
@@ -457,17 +545,51 @@
         },
         {
           "ordinal": 2,
+          "name": "scope: RuleScope",
+          "type_info": {
+            "Custom": {
+              "name": "rule_scope",
+              "kind": {
+                "Enum": [
+                  "GUILD",
+                  "CHANNEL",
+                  "USER"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 3,
+          "name": "scope_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
           "name": "name",
           "type_info": "Text"
         },
         {
-          "ordinal": 3,
+          "ordinal": 5,
           "name": "value",
           "type_info": "Int8"
         }
       ],
       "parameters": {
         "Left": [
+          "Int8",
+          {
+            "Custom": {
+              "name": "rule_scope",
+              "kind": {
+                "Enum": [
+                  "GUILD",
+                  "CHANNEL",
+                  "USER"
+                ]
+              }
+            }
+          },
           "Int8",
           "Text"
         ]
@@ -476,21 +598,10 @@
         false,
         false,
         false,
+        false,
+        false,
         false
       ]
-    }
-  },
-  "107ae4183cc201bb20d1fbafd9ce75f81f2f09b10115412000c0c35b07d9efe3": {
-    "query": "\n            INSERT INTO app_public.feeds\n                 VALUES ($1, $2)\n            ON CONFLICT (feed_id)\n              DO UPDATE\n                    SET metadata = $2\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Jsonb"
-        ]
-      },
-      "nullable": []
     }
   },
   "13fc6cafdab3fe2ac2b30b0e0653d619ac79eac33e1cf515e9a617eae835e983": {
@@ -572,6 +683,40 @@
         true,
         true,
         true
+      ]
+    }
+  },
+  "1506bcf0c0c97d36c9a9b1553149995b962b96adfa925a67cadebfc022b0d0eb": {
+    "query": "\n            SELECT coalesce(\n                (SELECT value\n                  FROM app_public.rule_gauges\n                 WHERE guild_id = $1\n                   AND scope = $2\n                   AND scope_id = $3\n                   AND name = $4\n                 ORDER BY time DESC\n                 LIMIT 1),\n                0\n            ) as \"value!\"\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "value!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          {
+            "Custom": {
+              "name": "rule_scope",
+              "kind": {
+                "Enum": [
+                  "GUILD",
+                  "CHANNEL",
+                  "USER"
+                ]
+              }
+            }
+          },
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        null
       ]
     }
   },
@@ -1054,6 +1199,81 @@
       ]
     }
   },
+  "54e6cfb6c35621298cd4a8125774e1f14987aca50ac464b1326e97fa529f0392": {
+    "query": "\n            INSERT INTO app_public.rule_gauges (time, guild_id, scope, scope_id, name, value)\n                VALUES (NOW(), $1, $2, $3, $4, 0)\n                RETURNING time, guild_id, scope as \"scope: RuleScope\",\n                          scope_id, name, value\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "time",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "scope: RuleScope",
+          "type_info": {
+            "Custom": {
+              "name": "rule_scope",
+              "kind": {
+                "Enum": [
+                  "GUILD",
+                  "CHANNEL",
+                  "USER"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 3,
+          "name": "scope_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "value",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          {
+            "Custom": {
+              "name": "rule_scope",
+              "kind": {
+                "Enum": [
+                  "GUILD",
+                  "CHANNEL",
+                  "USER"
+                ]
+              }
+            }
+          },
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "649e6be8a90d8555db221d365b51468516f4d7d87f12730128d9ab721c2f67ac": {
     "query": "\n            SELECT *\n              FROM app_public.mod_logs\n             WHERE guild_id = $1\n               AND user_id = $2\n        ",
     "describe": {
@@ -1251,45 +1471,6 @@
         true,
         false,
         true
-      ]
-    }
-  },
-  "7eb595d1474cb1846825bd047473ebe6881d7e41cf9e1d0dafa5eb11bb73e38a": {
-    "query": "\n            INSERT INTO app_public.rule_gauges (time, guild_id, name, value)\n                VALUES (NOW(), $1, $2,\n                    -- select the most recent record and increment\n                    coalesce((SELECT value - 1\n                      FROM app_public.rule_gauges\n                     WHERE guild_id = $1\n                       AND name = $2\n                     ORDER BY time DESC\n                     LIMIT 1),\n                     0\n                    )\n                )\n                RETURNING *\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "time",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "value",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false
       ]
     }
   },
@@ -2526,45 +2707,6 @@
       ]
     }
   },
-  "d8e2bfed83a0fe4d93bcaa686009874983005205adbefb33da2bd7bab2daf19d": {
-    "query": "\n            INSERT INTO app_public.rule_gauges (time, guild_id, name, value)\n                VALUES (NOW(), $1, $2,\n                    -- select the most recent record and increment\n                    coalesce((SELECT value + 1\n                      FROM app_public.rule_gauges\n                     WHERE guild_id = $1\n                       AND name = $2\n                     ORDER BY time DESC\n                     LIMIT 1),\n                     1\n                    )\n                )\n                RETURNING *\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "time",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "value",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "d9ce38754fb44720b478ccfd1936e2b2424fbfd2969c841b521d5153d8d074e9": {
     "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"guild_id: BigInt\",\n                   msg_all_time as \"msg_all_time: BigInt\",\n                   msg_month as \"msg_month: BigInt\",\n                   msg_week as \"msg_week: BigInt\",\n                   msg_day as \"msg_day: BigInt\",\n                   last_msg,\n                   msg_all_time_rank as \"msg_all_time_rank: BigInt\",\n                   msg_all_time_total as \"msg_all_time_total: BigInt\",\n                   msg_month_rank as \"msg_month_rank: BigInt\",\n                   msg_month_total as \"msg_month_total: BigInt\",\n                   msg_week_rank as \"msg_week_rank: BigInt\",\n                   msg_week_total as \"msg_week_total: BigInt\",\n                   msg_day_rank as \"msg_day_rank: BigInt\",\n                   msg_day_total as \"msg_day_total: BigInt\"\n                FROM (\n                    SELECT *,\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(DOY FROM last_msg) ORDER BY msg_day DESC) AS msg_day_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(DOY FROM last_msg)) AS msg_day_total,\n\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(WEEK FROM last_msg) ORDER BY msg_week DESC) AS msg_week_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(WEEK FROM last_msg)) AS msg_week_total,\n\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(MONTH FROM last_msg) ORDER BY msg_month DESC) AS msg_month_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(MONTH FROM last_msg)) AS msg_month_total,\n\n                        ROW_NUMBER() OVER(ORDER BY msg_all_time DESC) AS msg_all_time_rank,\n                        COUNT(*) OVER() AS msg_all_time_total\n                    FROM app_public.user_levels WHERE guild_id = $1\n                ) t\n            WHERE t.user_id = $2\n        ",
     "describe": {
@@ -2711,27 +2853,6 @@
         false,
         false,
         false
-      ]
-    }
-  },
-  "e2ac0e0b9b67f75f407f91801cbb8d56c1834c4f711c7d3a6557ed7354f41405": {
-    "query": "\n            SELECT coalesce(\n                (SELECT value\n                  FROM app_public.rule_gauges\n                 WHERE guild_id = $1\n                   AND name = $2\n                 ORDER BY time DESC\n                 LIMIT 1),\n                0\n            ) as \"value!\"\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "value!",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
-        null
       ]
     }
   },

@@ -1,10 +1,12 @@
-use crate::error::Result;
-use crate::model::{constraint::*, Action, Condition, Rule, Trigger};
 use lingua::Language;
 use sqlx::types::Uuid;
 use twilight_model::gateway::event::EventType;
 
+use sushii_model::model::sql::RuleScope;
+
 use super::RuleStore;
+use crate::error::Result;
+use crate::model::{constraint::*, Action, Condition, Rule, Trigger};
 
 // Just for testing other functionality right now, main store should be postgres
 #[derive(Clone, Debug)]
@@ -24,7 +26,7 @@ impl RuleStore for HardCodedStore {
 
         let rules = vec![Rule {
             id: Uuid::nil(),
-            name: "Language test".into(),
+            name: "Language counter".into(),
             enabled: true,
             trigger: Trigger::Twilight(EventType::MessageCreate),
             conditions: Condition::And {
@@ -41,8 +43,9 @@ impl RuleStore for HardCodedStore {
                     },
                 ],
             },
-            actions: vec![Action::Reply {
-                content: "English only!".to_string(),
+            actions: vec![Action::AddCounter {
+                name: "language".to_string(),
+                scope: RuleScope::User,
             }],
         }];
 
