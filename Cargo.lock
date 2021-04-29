@@ -5685,6 +5685,7 @@ dependencies = [
  "serde 1.0.125",
  "serde_json",
  "sqlx",
+ "sushii-model",
  "thiserror",
  "tokio 1.3.0",
  "tracing",

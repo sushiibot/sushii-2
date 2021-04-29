@@ -16,6 +16,7 @@ type WordList = Arc<DashMap<GuildId, DashMap<String, AhoCorasick>>>;
 #[derive(Debug, Clone)]
 pub struct RuleContext<'a> {
     pub http: Client,
+    pub pg_pool: sqlx::PgPool,
     pub reqwest: reqwest::Client,
     pub language_client: language_api_wrapper::LanguageApiClient,
     pub handlebars_templates: Arc<RwLock<Handlebars<'a>>>,
@@ -26,6 +27,7 @@ pub struct RuleContext<'a> {
 impl<'a> RuleContext<'a> {
     pub fn new(
         http: Client,
+        pg_pool: sqlx::PgPool,
         reqwest: reqwest::Client,
         language_client: language_api_wrapper::LanguageApiClient,
         handlebars_templates: Arc<RwLock<Handlebars<'a>>>,
@@ -33,6 +35,7 @@ impl<'a> RuleContext<'a> {
     ) -> Self {
         Self {
             http,
+            pg_pool,
             reqwest,
             language_client,
             handlebars_templates,

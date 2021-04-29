@@ -7,7 +7,10 @@ use twilight_model::channel::message::Message;
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::user::User;
 
-use crate::error::Result;
+use sushii_model::model::sql::RuleGauge;
+
+use crate::error::{Error, Result};
+use crate::model::has_id::*;
 use crate::model::RuleContext;
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, JsonSchema)]
@@ -369,6 +372,9 @@ pub enum MemberConstraint {
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum MessageConstraint {
+    /// # Message ID
+    /// The ID of this message
+    Id(IntegerConstraint),
     /// # Message content
     Content(StringConstraint),
     /// # Message author
@@ -378,6 +384,9 @@ pub enum MessageConstraint {
     /// # Created at
     /// When this message was sent
     CreatedAt(DateConstraint),
+    /// # Channel ID
+    /// Which channel this message was sent in
+    ChannelId(IntegerConstraint),
 }
 
 impl MessageConstraint {
@@ -398,9 +407,62 @@ impl MessageConstraint {
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
+pub struct CounterConstraint {
+    /// # Counter name
+    pub name: String,
+    /// # Value of counter
+    pub value: CounterValueConstraint,
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum CounterValueConstraint {
+    /// # Equals
+    /// Equals the given value
+    Equals(i64),
+    /// # GreaterThan
+    /// Greater than the given value
+    GreaterThan(i64),
+    /// # LessThan
+    /// Less than the given value
+    LessThan(i64),
+    /// # CountsInDuration
+    /// How much the counter increased in a given duration, e.g. +5 in 1 minute
+    CountsInDuration {
+        /// How many counts the counter increased by
+        increased_by: u64,
+        /// Duration in seconds the counts increased by
+        duration: u64,
+    },
+}
+
+impl CounterConstraint {
+    async fn check_event(&self, ctx: &RuleContext<'_>, guild_id: u64) -> Result<bool> {
+        let val = match self.value {
+            CounterValueConstraint::Equals(num) => {
+                let current_value =
+                    RuleGauge::get_count(&ctx.pg_pool, guild_id, &self.name).await?;
+
+                current_value == num
+            }
+            _ => {
+                tracing::warn!("Unhandled counter constraint check");
+
+                return Ok(false);
+            }
+        };
+
+        Ok(val)
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
 pub enum Constraint {
-    /// # On message
+    /// # Message event constraints
     Message(MessageConstraint),
+    /// # Counters
+    Counter(CounterConstraint),
 }
 
 impl Constraint {
@@ -409,11 +471,18 @@ impl Constraint {
         event: Arc<DispatchEvent>,
         ctx: &RuleContext<'_>,
     ) -> Result<bool> {
+        let guild_id = event.guild_id();
+
         let val = match event.as_ref() {
             // MESSAGE_CREATE
             DispatchEvent::MessageCreate(msg) => match self {
                 Constraint::Message(msg_constraint) => {
                     msg_constraint.check_event(ctx, &msg.0).await?
+                }
+                Constraint::Counter(counter_constraint) => {
+                    counter_constraint
+                        .check_event(ctx, guild_id.map(|id| id.0).ok_or(Error::MissingGuildId)?)
+                        .await?
                 }
             },
             _ => {

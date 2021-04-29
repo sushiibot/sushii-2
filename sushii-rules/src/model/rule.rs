@@ -1,5 +1,6 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use sqlx::types::Uuid;
 use std::error::Error;
 use std::sync::Arc;
 use twilight_model::gateway::event::DispatchEvent;
@@ -8,7 +9,14 @@ use crate::model::{Action, Condition, RuleContext, Trigger};
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct Rule {
+    pub id: Uuid,
+    /// Name of this rule
+    pub name: String,
+    /// If this rule is enabled or not
+    pub enabled: bool,
+    /// Event that triggers this rule
     pub trigger: Trigger,
+    /// Conditions that need to pass before running actions
     pub conditions: Condition,
     /// Actions are executed sequentially if condition passes
     pub actions: Vec<Action>,
@@ -23,6 +31,10 @@ impl Rule {
         // if event.kind() != self.trigger {
         //     return None;
         // }
+
+        if !self.enabled {
+            return Ok(false);
+        }
 
         let passes_conditions = self.conditions.check_event(event.clone(), ctx).await?;
 

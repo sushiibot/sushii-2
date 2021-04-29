@@ -22,6 +22,8 @@ struct Config {
     pub twilight_api_proxy_url: String,
     pub language_api_endpoint: String,
 
+    pub database_url: String,
+
     #[serde(default)]
     pub redis: deadpool_redis::Config,
 }
@@ -93,6 +95,8 @@ async fn main() -> Result<()> {
 
     start_metrics();
 
+    let pg_pool = sqlx::PgPool::connect(&cfg.database_url).await?;
+
     let pool = cfg
         .redis
         .create_pool()
@@ -108,7 +112,11 @@ async fn main() -> Result<()> {
         .ratelimiter(None)
         .build();
 
-    let current_user = http.current_user().await?;
+    let current_user = http
+        .current_user()
+        .await
+        .expect("Failed to fetch Discord current user, proxy API may be down");
+
     tracing::info!(
         "Connected as {}#{:0>4}",
         current_user.name,
@@ -117,6 +125,7 @@ async fn main() -> Result<()> {
 
     let engine = RulesEngine::new(
         http,
+        pg_pool,
         Box::new(HardCodedStore::new()),
         &cfg.language_api_endpoint,
     );

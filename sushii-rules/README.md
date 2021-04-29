@@ -65,25 +65,9 @@ guild_rules
 
 * rules can only have 1 trigger
 
-| id   | rule_group_id           | rule_name | trigger_event | enabled |
-| ---- | ----------------------- | --------- | ------------- | ------- |
-| uuid | fk guild_rule_groups.id | text      | text          | bool    |
-
-guild_rule_conditions
-
-* json data of all conditions for given rule
-
-| id   | rule_id           | condition data |
-| ---- | ----------------- | -------------- |
-| uuid | fk guild_rules.id | jsonb          |
-
-guild_rule_actions
-
-* json data of all action steps
-
-| id   | condition_id                | actions data |
-| ---- | --------------------------- | ------------ |
-| uuid | fk guild_rule_conditions.id | jsonb        |
+| id   | rule_group_id           | rule_name | enabled | trigger | condition | actions |
+| ---- | ----------------------- | --------- | ------- | ------- | --------- | ------- |
+| uuid | fk guild_rule_groups.id | text      | bool    | text    | jsonb     | jsonb   |
 
 ### RuleStore Trait
 

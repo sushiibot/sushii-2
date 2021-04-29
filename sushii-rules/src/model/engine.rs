@@ -22,6 +22,8 @@ pub struct RulesEngine {
     /// Shared handlebars template to prevent reparsing
     /// This is a RwLock since registering templates requires mut self
     pub handlebars_templates: Arc<RwLock<Handlebars<'static>>>,
+    /// Postgres database pool
+    pub pg_pool: sqlx::PgPool,
     /// Guild specific word lists
     pub word_lists: Arc<DashMap<GuildId, DashMap<String, AhoCorasick>>>,
     /// Twilight HTTP client
@@ -32,13 +34,19 @@ pub struct RulesEngine {
 }
 
 impl RulesEngine {
-    pub fn new(http: Client, rules_store: Box<dyn RuleStore>, language_api_endpoint: &str) -> Self {
+    pub fn new(
+        http: Client,
+        pg_pool: sqlx::PgPool,
+        rules_store: Box<dyn RuleStore>,
+        language_api_endpoint: &str,
+    ) -> Self {
         let reqwest = reqwest::Client::new();
 
         Self {
             guild_rules: Arc::new(DashMap::new()),
             rules_store,
             handlebars_templates: Arc::new(RwLock::new(Handlebars::new())),
+            pg_pool,
             word_lists: Arc::new(DashMap::new()),
             http,
             reqwest: reqwest.clone(),
@@ -87,6 +95,7 @@ impl RulesEngine {
         for rule in matching_rules.iter() {
             let context = RuleContext::new(
                 self.http.clone(),
+                self.pg_pool.clone(),
                 self.reqwest.clone(),
                 self.language_client.clone(),
                 self.handlebars_templates.clone(),

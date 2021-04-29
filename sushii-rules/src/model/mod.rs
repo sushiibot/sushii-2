@@ -3,6 +3,7 @@ pub mod condition;
 // pub mod condition_result;
 pub mod constraint;
 pub mod engine;
+pub mod has_id;
 pub mod rule;
 pub mod rule_context;
 pub mod status;

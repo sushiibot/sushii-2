@@ -1,20 +1,20 @@
 [package]
-name = "sushii-rules-engine"
+name = "sushii-rules"
 version = "0.1.0"
 authors = ["drklee3 <derrick@dlee.dev>"]
 edition = "2018"
-default-run = "sushii_rules_worker"
+default-run = "sushii-rules"
 
 [lib]
 name = "sushii_rules"
 path = "src/lib.rs"
 
 [[bin]]
-name = "sushii_rules_worker"
+name = "sushii-rules"
 path = "src/main.rs"
 
 [[bin]]
-name = "sushii_rules_exporter"
+name = "sushii-rules-exporter"
 path = "src/export.rs"
 
 [dependencies]
@@ -23,27 +23,32 @@ anyhow = "1.0.40"
 async-recursion = "0.3.2"
 async-trait = "0.1.42"
 chrono = { version = "0.4", features = ["serde"] }
+config = "0.11.0"
 dashmap = { version = "4.0.2", features = ["serde"] }
 deadpool-redis = "0.7.1"
-redis = { version = "0.20", features = ["tokio-comp"] }
+dotenv = "0.15.0"
 futures = "0.3.12"
 handlebars = "3.5.3"
-schemars = { version = "0.8.0", features = ["chrono", "preserve_order"] }
-serde = { version = "1.0.125", features = ["derive"] }
-serde_json = "1.0"
-thiserror = "1.0.24"
-tokio = { version = "1.2.0", features = ["full"] }
-twilight-model = "0.3.2"
-typemap_rev = "0.1.4"
-typetag = "0.1"
-dotenv = "0.15.0"
-config = "0.11.0"
-tracing = "0.1.25"
-tracing-subscriber = "0.2.17"
-twilight-http = "0.3.6"
-lingua = "1.2.0"
-reqwest = "0.11.3"
 language-api = { git = "https://github.com/sushiibot/language-api", rev ="761f467177fdb287c2a3bf9e10e4cd46bcf81ca5" }
+lingua = "1.2.0"
 metrics = "0.14.2"
 metrics-exporter-prometheus = "0.3.0"
 metrics-util = "0.6.2"
+redis = { version = "0.20", features = ["tokio-comp"] }
+reqwest = "0.11.3"
+schemars = { version = "0.8.0", features = ["chrono", "preserve_order", "uuid"] }
+serde = { version = "1.0.125", features = ["derive"] }
+serde_json = "1.0"
+sqlx = { version = "0.5.2", features = ["runtime-tokio-rustls", "uuid", "json"] }
+thiserror = "1.0.24"
+tokio = { version = "1.2.0", features = ["full"] }
+tracing = "0.1.25"
+tracing-subscriber = "0.2.17"
+twilight-http = "0.3.6"
+twilight-model = "0.3.2"
+typemap_rev = "0.1.4"
+typetag = "0.1"
+uuid = { version = "0.8", features = ["serde"] }
+
+[dependencies.sushii-model]
+path = "../sushii-model"

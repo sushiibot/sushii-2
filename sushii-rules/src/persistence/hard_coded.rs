@@ -1,6 +1,7 @@
 use crate::error::Result;
 use crate::model::{constraint::*, Action, Condition, Rule, Trigger};
 use lingua::Language;
+use sqlx::types::Uuid;
 use twilight_model::gateway::event::EventType;
 
 use super::RuleStore;
@@ -22,6 +23,9 @@ impl RuleStore for HardCodedStore {
         }
 
         let rules = vec![Rule {
+            id: Uuid::nil(),
+            name: "Language test".into(),
+            enabled: true,
             trigger: Trigger::Twilight(EventType::MessageCreate),
             conditions: Condition::And {
                 and: vec![
