@@ -104,6 +104,7 @@ impl SavedMessage {
                             AND ctid NOT IN (
                                   SELECT ctid
                                     FROM app_public.messages
+                                   WHERE channel_id = $1
                                 ORDER BY created DESC
                                    LIMIT 100
                             )
