@@ -4,6 +4,7 @@ use dashmap::DashMap;
 use handlebars::Handlebars;
 use std::sync::Arc;
 use std::time::Instant;
+use tokio::sync::mpsc::Sender;
 use tokio::sync::RwLock;
 use twilight_http::client::Client;
 use twilight_model::id::GuildId;
@@ -16,7 +17,7 @@ type RuleList = Vec<Arc<Rule>>;
 type GuildTriggerRules = DashMap<Trigger, RuleList>;
 type GuildRulesMap = DashMap<GuildId, GuildTriggerRules>;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct RulesEngine {
     /// Stores rules fetched from file or database
     pub guild_rules: Arc<GuildRulesMap>,
@@ -34,6 +35,9 @@ pub struct RulesEngine {
     pub reqwest: reqwest::Client,
     /// Wraps the reqwest client
     pub language_client: language_api_wrapper::LanguageApiClient,
+    /// Counter triggers from other events
+    /// Events can send a new counter event
+    pub channel_tx: Sender<Event>,
 }
 
 impl RulesEngine {
@@ -42,6 +46,7 @@ impl RulesEngine {
         pg_pool: sqlx::PgPool,
         rules_store: Box<dyn RuleStore>,
         language_api_endpoint: &str,
+        channel_tx: Sender<Event>,
     ) -> Self {
         let reqwest = reqwest::Client::new();
 
@@ -57,6 +62,7 @@ impl RulesEngine {
                 reqwest,
                 language_api_endpoint,
             ),
+            channel_tx,
         }
     }
 
@@ -95,6 +101,20 @@ impl RulesEngine {
         Ok(guild_rules.get(&event_type.into()).map(|r| r.clone()))
     }
 
+    /*
+    pub async fn trigger_stream(&mut self) {
+        let channel_rx = self.channel_rx.take().expect("Receiving channel already taken!");
+
+        tokio::spawn(async move {
+            while let Some(event) = channel_rx.recv().await {
+                if let Err(e) = self.process_event(Arc::new(event)) {
+                    tracing::error!("Failed to process triggered event: {}", e);
+                }
+            }
+        });
+    }
+    */
+
     /// Events that modify counters also trigger this to process the counter.
     /// It provides the original event that triggered this counter
     #[tracing::instrument]
@@ -113,6 +133,7 @@ impl RulesEngine {
                 self.language_client.clone(),
                 self.handlebars_templates.clone(),
                 self.word_lists.clone(),
+                self.channel_tx.clone(),
             );
 
             let event = event.clone();

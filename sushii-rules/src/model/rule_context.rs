@@ -5,9 +5,12 @@ use handlebars::Handlebars;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::Hasher;
 use std::sync::Arc;
+use tokio::sync::mpsc::Sender;
 use tokio::sync::RwLock;
 use twilight_http::client::Client;
 use twilight_model::id::GuildId;
+
+use crate::model::Event;
 
 type WordList = Arc<DashMap<GuildId, DashMap<String, AhoCorasick>>>;
 
@@ -22,6 +25,7 @@ pub struct RuleContext<'a> {
     pub handlebars_templates: Arc<RwLock<Handlebars<'a>>>,
     pub word_lists: WordList,
     pub data: DashMap<String, serde_json::Value>,
+    pub channel_tx: Sender<Event>,
 }
 
 impl<'a> RuleContext<'a> {
@@ -32,6 +36,7 @@ impl<'a> RuleContext<'a> {
         language_client: language_api_wrapper::LanguageApiClient,
         handlebars_templates: Arc<RwLock<Handlebars<'a>>>,
         word_lists: WordList,
+        channel_tx: Sender<Event>,
     ) -> Self {
         Self {
             http,
@@ -41,6 +46,7 @@ impl<'a> RuleContext<'a> {
             handlebars_templates,
             word_lists,
             data: DashMap::new(),
+            channel_tx,
         }
     }
 

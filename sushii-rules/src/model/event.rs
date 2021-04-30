@@ -3,7 +3,7 @@ use twilight_model::gateway::event::DispatchEvent;
 
 use crate::model::Trigger;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Event {
     /// Gateway dispatch event by itself
     Twilight(DispatchEvent),

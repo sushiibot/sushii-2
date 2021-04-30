@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::Result;
 
-#[derive(Deserialize, Serialize, sqlx::Type, Clone, Copy, Debug, schemars::JsonSchema)]
-#[serde(rename_all = "UPPERCASE")]
+#[derive(Deserialize, Serialize, sqlx::Type, Clone, Copy, Eq, PartialEq, Debug, schemars::JsonSchema)]
+#[sqlx(type_name = "rule_scope", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum RuleScope {
     Guild,
     Channel,

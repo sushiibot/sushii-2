@@ -6,12 +6,15 @@ use redis::AsyncCommands;
 use serde::{de::DeserializeSeed, Deserialize, Serialize};
 use serde_json::Deserializer;
 use std::sync::Arc;
+use std::pin::Pin;
+use tokio::sync::mpsc;
 use tracing_subscriber::EnvFilter;
+use tokio_stream::{StreamExt, Stream};
 use twilight_http::Client;
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::gateway::event::DispatchEventWithTypeDeserializer;
 
-use sushii_rules::{error::Error, model::RulesEngine, persistence::HardCodedStore};
+use sushii_rules::{error::Error, model::{RulesEngine, Event}, persistence::HardCodedStore};
 
 #[derive(Debug, Deserialize)]
 struct Config {
@@ -124,24 +127,43 @@ async fn main() -> Result<()> {
         current_user.discriminator
     );
 
+    // Trigger events from counter updates
+    let (channel_tx, mut channel_rx) = mpsc::channel(32);
+
     let engine = RulesEngine::new(
         http,
         pg_pool,
         Box::new(HardCodedStore::new()),
         &cfg.language_api_endpoint,
+        channel_tx,
     );
 
-    loop {
-        let event = match get_event(&mut conn, &key).await {
-            Ok(e) => e,
-            Err(e) => {
-                tracing::error!("Failed get_event: {}", e);
-                continue;
+    let redis_stream = Box::pin(async_stream::stream! {
+        loop {
+            match get_event(&mut conn, &key).await {
+                Ok(e) => yield Event::Twilight(e),
+                Err(e) => {
+                    tracing::error!("Failed get_event: {}", e);
+                    continue;
+                }
             }
-        };
+        }
+    }) as Pin<Box<dyn Stream<Item = Event> + Send>>;
 
-        if let Err(e) = engine.process_event(Arc::new(event.into())) {
+    let trigger_stream = Box::pin(async_stream::stream! {
+        while let Some(event) = channel_rx.recv().await {
+            yield event;
+        }
+    }) as Pin<Box<dyn Stream<Item = Event> + Send>>;
+
+    // Merge both redis events and triggered events
+    let mut rx = redis_stream.merge(trigger_stream);
+
+    while let Some(event) = rx.next().await {
+        if let Err(e) = engine.process_event(Arc::new(event)) {
             tracing::error!("Failed to process event: {}", e);
         }
     }
+
+    Ok(())
 }

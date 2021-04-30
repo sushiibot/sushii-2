@@ -49,6 +49,9 @@ twilight-model = "0.3.2"
 typemap_rev = "0.1.4"
 typetag = "0.1"
 uuid = { version = "0.8", features = ["serde"] }
+futures-util = "0.3.14"
+async-stream = "0.3.1"
+tokio-stream = "0.1.5"
 
 [dependencies.sushii-model]
 path = "../sushii-model"

@@ -2,6 +2,7 @@ use anyhow::Result;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use twilight_http::request::AuditLogReason;
 use twilight_model::id::RoleId;
 
 use sushii_model::model::sql::{RuleGauge, RuleScope};
@@ -74,46 +75,78 @@ impl Action {
             // Moderation
             Self::Ban {
                 delete_days,
-                duration,
+                duration: _,
                 ref reason,
             } => {
                 let guild_id = event.guild_id()?;
                 let user_id = event.user_id()?;
 
-                ctx.http
+                let mut fut = ctx
+                    .http
                     .create_ban(guild_id, user_id)
-                    .delete_message_days(delete_days)?
-                    .await?;
+                    .delete_message_days(delete_days)?;
+
+                // TODO: Add default reason
+                if let Some(reason) = reason {
+                    fut = fut.reason(reason)?;
+                }
+
+                fut.await?;
             }
             Self::Mute {
-                duration,
+                duration: _,
                 ref reason,
             } => {
                 let guild_id = event.guild_id()?;
                 let user_id = event.user_id()?;
 
-                ctx.http
-                    .add_guild_member_role(guild_id, user_id, RoleId(123))
-                    .await?;
+                let mut fut = ctx
+                    .http
+                    .add_guild_member_role(guild_id, user_id, RoleId(123));
+
+                // TODO: Add default reason
+                if let Some(reason) = reason {
+                    fut = fut.reason(reason)?;
+                }
+
+                fut.await?;
             }
             // Counters
             Self::AddCounter { ref name, scope } => {
                 let guild_id = event.guild_id()?;
                 let scope_id = event.scope_id(scope)?;
 
-                RuleGauge::inc(&ctx.pg_pool, guild_id.0, scope, scope_id, name).await?;
+                let counter =
+                    RuleGauge::inc(&ctx.pg_pool, guild_id.0, scope, scope_id, name).await?;
+
+                // Only trigger if incrementing from a twilight event Don't
+                // trigger another if this is currently a counter otherwise that
+                // would cause infinite loops
+                if let Event::Twilight(e) = (*event).clone() {
+                    ctx.channel_tx.send(Event::Counter(counter, e)).await?;
+                }
             }
             Self::SubtractCounter { ref name, scope } => {
                 let guild_id = event.guild_id()?;
                 let scope_id = event.scope_id(scope)?;
 
-                RuleGauge::dec(&ctx.pg_pool, guild_id.0, scope, scope_id, name).await?;
+                let counter =
+                    RuleGauge::dec(&ctx.pg_pool, guild_id.0, scope, scope_id, name).await?;
+
+                if let Event::Twilight(e) = (*event).clone() {
+                    ctx.channel_tx.send(Event::Counter(counter, e)).await?;
+                }
             }
             Self::ResetCounter { ref name, scope } => {
                 let guild_id = event.guild_id()?;
                 let scope_id = event.scope_id(scope)?;
 
-                RuleGauge::reset(&ctx.pg_pool, guild_id.0, scope, scope_id, name).await?;
+                let counter =
+                    RuleGauge::reset(&ctx.pg_pool, guild_id.0, scope, scope_id, name).await?;
+
+                if let Event::Twilight(e) = (*event).clone() {
+                    ctx.channel_tx.send(Event::Counter(counter, e)).await?;
+                }
             }
             _ => {}
         }

@@ -1,15 +1,17 @@
 use chrono::{DateTime, Utc};
+use futures_util::FutureExt;
 use lingua::Language;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use std::future::Future;
+use std::pin::Pin;
 use std::sync::Arc;
-use twilight_model::channel::message::Message;
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::user::User;
 
-use sushii_model::model::sql::{RuleGauge, RuleScope};
+use sushii_model::model::sql::RuleScope;
 
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::model::has_id::*;
 use crate::model::{Event, RuleContext};
 
@@ -307,6 +309,17 @@ pub enum BoolConstraint {
     NotEquals(bool),
 }
 
+impl BoolConstraint {
+    pub async fn check_bool(&self, _ctx: &RuleContext<'_>, input: bool) -> Result<bool> {
+        let res = match *self {
+            Self::Equals(target) => input == target,
+            Self::NotEquals(target) => input != target,
+        };
+
+        Ok(res)
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum DateConstraint {
@@ -383,6 +396,30 @@ pub enum MemberConstraint {
     PremiumSince(DateConstraint),
 }
 
+impl MemberConstraint {
+    async fn check_event(&self, ctx: &RuleContext<'_>, event: Arc<Event>) -> Result<bool> {
+        let msg = match event.as_ref() {
+            Event::Twilight(DispatchEvent::MessageCreate(msg)) => msg,
+            Event::Counter(_, DispatchEvent::MessageCreate(msg)) => msg,
+            _ => return Err(Error::InvalidEventConstraint("Member", event.kind())),
+        };
+
+        let member = msg.member.as_ref().ok_or(Error::MissingMember)?;
+
+        let val = match self {
+            MemberConstraint::Deaf(b) => b.check_bool(ctx, member.deaf).await?,
+            MemberConstraint::Mute(b) => b.check_bool(ctx, member.mute).await?,
+            _ => {
+                tracing::warn!("Unhandled member constraint check");
+
+                false
+            }
+        };
+
+        Ok(val)
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum MessageConstraint {
@@ -404,14 +441,24 @@ pub enum MessageConstraint {
 }
 
 impl MessageConstraint {
-    async fn check_event(&self, ctx: &RuleContext<'_>, msg: &Message) -> Result<bool> {
+    async fn check_event(&self, ctx: &RuleContext<'_>, event: Arc<Event>) -> Result<bool> {
+        // Only valid for on message
+        let msg = match event.as_ref() {
+            Event::Twilight(DispatchEvent::MessageCreate(msg)) => msg,
+            Event::Counter(_, DispatchEvent::MessageCreate(msg)) => msg,
+            _ => return Err(Error::InvalidEventConstraint("Message", event.kind())),
+        };
+
         let val = match self {
+            MessageConstraint::Id(id) => id.check_integer(ctx, msg.id.0).await?,
             MessageConstraint::Content(s) => s.check_string(ctx, &msg.content).await?,
             MessageConstraint::Author(author) => author.check_event(ctx, &msg.author).await?,
+            MessageConstraint::Member(member) => member.check_event(ctx, event).await?,
+            MessageConstraint::ChannelId(id) => id.check_integer(ctx, msg.channel_id.0).await?,
             _ => {
                 tracing::warn!("Unhandled message constraint check");
 
-                return Ok(false);
+                false
             }
         };
 
@@ -453,20 +500,25 @@ pub enum CounterValueConstraint {
 }
 
 impl CounterConstraint {
-    async fn check_event(
-        &self,
-        ctx: &RuleContext<'_>,
-        guild_id: u64,
-        scope_id: u64,
-    ) -> Result<bool> {
-        let val = match self.value {
-            CounterValueConstraint::Equals(num) => {
-                let current_value =
-                    RuleGauge::get_count(&ctx.pg_pool, guild_id, self.scope, scope_id, &self.name)
-                        .await?;
+    async fn check_event(&self, _ctx: &RuleContext<'_>, event: Arc<Event>) -> Result<bool> {
+        // Check if the triggered counter matches the constraint
+        let triggered_counter = match event.as_ref() {
+            Event::Counter(counter, _event) => counter,
+            _ => return Err(Error::InvalidEventConstraint("Counter", event.kind())),
+        };
 
-                current_value == num
-            }
+        // Different counter
+        if triggered_counter.name != self.name {
+            return Ok(false);
+        }
+
+        // Different scopes can have same name
+        if triggered_counter.scope != self.scope {
+            return Ok(false);
+        }
+
+        let val = match self.value {
+            CounterValueConstraint::Equals(num) => triggered_counter.value == num,
             _ => {
                 tracing::warn!("Unhandled counter constraint check");
 
@@ -487,30 +539,55 @@ pub enum Constraint {
     Counter(CounterConstraint),
 }
 
+// Requires to box future since it recurses below
+type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + 'a + Send>>;
+
 impl Constraint {
-    pub async fn check_event(&self, event: Arc<Event>, ctx: &RuleContext<'_>) -> Result<bool> {
-        let val = match event.as_ref() {
-            // MESSAGE_CREATE
-            Event::Twilight(DispatchEvent::MessageCreate(msg)) => match self {
-                Constraint::Message(msg_constraint) => {
-                    msg_constraint.check_event(ctx, &msg.0).await?
+    pub fn check_event<'a>(
+        &'a self,
+        event: Arc<Event>,
+        ctx: &'a RuleContext<'_>,
+    ) -> BoxFuture<'a, Result<bool>> {
+        async move {
+            let val = match event.as_ref() {
+                // MESSAGE_CREATE
+                Event::Twilight(DispatchEvent::MessageCreate(_msg)) => match self {
+                    Constraint::Message(msg_constraint) => {
+                        msg_constraint.check_event(ctx, event).await?
+                    }
+                    Constraint::Counter(counter_constraint) => {
+                        counter_constraint.check_event(ctx, event).await?
+                    }
+                },
+                // COUNTER MODIFIED
+                Event::Counter(_counter, original_event) => match self {
+                    Constraint::Message(msg_constraint) => {
+                        msg_constraint
+                            .check_event(ctx, Arc::new(original_event.clone().into()))
+                            .await?
+                    }
+                    Constraint::Counter(counter_constraint) => {
+                        // Check the original event if it passes the new counter
+                        // preconditions
+                        if !self
+                            .check_event(Arc::new(original_event.clone().into()), ctx)
+                            .await?
+                        {
+                            return Ok(false);
+                        }
+
+                        counter_constraint.check_event(ctx, event).await?
+                    }
+                },
+                _ => {
+                    tracing::warn!("Unhandled event");
+
+                    return Ok(false);
                 }
-                Constraint::Counter(counter_constraint) => {
-                    let guild_id = event.guild_id()?;
-                    let scope_id = event.scope_id(counter_constraint.scope)?;
+            };
 
-                    counter_constraint
-                        .check_event(ctx, guild_id.0, scope_id)
-                        .await?
-                }
-            },
-            _ => {
-                tracing::warn!("Unhandled event");
-
-                return Ok(false);
-            }
-        };
-
-        Ok(val)
+            Ok(val)
+        }
+        .boxed()
     }
 }
