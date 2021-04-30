@@ -45,7 +45,7 @@ impl RuleStore for HardCodedStore {
                     ],
                 },
                 actions: vec![Action::AddCounter {
-                    name: "language".to_string(),
+                    name: "language warning".to_string(),
                     scope: RuleScope::User,
                 }],
             },
@@ -53,34 +53,46 @@ impl RuleStore for HardCodedStore {
                 id: Uuid::nil(),
                 name: "Language warning".into(),
                 enabled: true,
-                trigger: Trigger::Twilight(EventType::MessageCreate),
-                conditions: Condition::And {
-                    and: vec![
-                        Condition::Condition {
-                            constraint: Constraint::Message(MessageConstraint::Author(
-                                UserConstraint::Id(IntegerConstraint::Equals(150443906511667200)),
-                            )),
-                        },
-                        Condition::Condition {
-                            constraint: Constraint::Message(MessageConstraint::Content(
-                                StringConstraint::IsNotLanguage(Language::English),
-                            )),
-                        },
-                        Condition::Condition {
-                            constraint: Constraint::Counter(CounterConstraint {
-                                name: "language".to_string(),
-                                scope: RuleScope::User,
-                                value: CounterValueConstraint::Equals(3),
-                            }),
-                        },
-                    ],
+                trigger: Trigger::Counter,
+                conditions: Condition::Condition {
+                    constraint: Constraint::Counter(CounterConstraint {
+                        name: "language warning".to_string(),
+                        scope: RuleScope::User,
+                        value: CounterValueConstraint::GreaterThan(3),
+                    }),
                 },
                 actions: vec![
                     Action::Reply {
-                        content: "English only!".to_string(),
+                        content: "Warning: Please keep chat in English!".to_string(),
                     },
                     Action::ResetCounter {
-                        name: "language".to_string(),
+                        name: "language warning".to_string(),
+                        scope: RuleScope::User,
+                    },
+                    Action::AddCounter {
+                        name: "language mute".to_string(),
+                        scope: RuleScope::User,
+                    },
+                ],
+            },
+            Rule {
+                id: Uuid::nil(),
+                name: "Language mute".into(),
+                enabled: true,
+                trigger: Trigger::Counter,
+                conditions: Condition::Condition {
+                    constraint: Constraint::Counter(CounterConstraint {
+                        name: "language mute".to_string(),
+                        scope: RuleScope::User,
+                        value: CounterValueConstraint::GreaterThan(3),
+                    }),
+                },
+                actions: vec![
+                    Action::Reply {
+                        content: "Muted for non-English chat".to_string(),
+                    },
+                    Action::ResetCounter {
+                        name: "language mute".to_string(),
                         scope: RuleScope::User,
                     },
                 ],

@@ -66,10 +66,16 @@ impl Action {
         match *self {
             Self::Reply { ref content } => {
                 let channel_id = event.channel_id()?;
+                let message_id = event.message_id()?;
 
                 ctx.http
                     .create_message(channel_id)
                     .content(content)?
+                    .reply(message_id)
+                    // Add required mentions in order to ping the user
+                    .allowed_mentions()
+                    .replied_user(true)
+                    .build()
                     .await?;
             }
             // Moderation
@@ -123,6 +129,7 @@ impl Action {
                 // trigger another if this is currently a counter otherwise that
                 // would cause infinite loops
                 if let Event::Twilight(e) = (*event).clone() {
+                    tracing::debug!(?counter, "Triggering new Counter event");
                     ctx.channel_tx.send(Event::Counter(counter, e)).await?;
                 }
             }

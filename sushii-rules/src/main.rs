@@ -5,16 +5,20 @@ use metrics_util::layers::{Layer, PrefixLayer};
 use redis::AsyncCommands;
 use serde::{de::DeserializeSeed, Deserialize, Serialize};
 use serde_json::Deserializer;
-use std::sync::Arc;
 use std::pin::Pin;
+use std::sync::Arc;
 use tokio::sync::mpsc;
+use tokio_stream::{Stream, StreamExt};
 use tracing_subscriber::EnvFilter;
-use tokio_stream::{StreamExt, Stream};
 use twilight_http::Client;
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::gateway::event::DispatchEventWithTypeDeserializer;
 
-use sushii_rules::{error::Error, model::{RulesEngine, Event}, persistence::HardCodedStore};
+use sushii_rules::{
+    error::Error,
+    model::{Event, RulesEngine},
+    persistence::HardCodedStore,
+};
 
 #[derive(Debug, Deserialize)]
 struct Config {
@@ -127,7 +131,7 @@ async fn main() -> Result<()> {
         current_user.discriminator
     );
 
-    // Trigger events from counter updates
+    // Trigger events from other rules, like counter updates or timers
     let (channel_tx, mut channel_rx) = mpsc::channel(32);
 
     let engine = RulesEngine::new(

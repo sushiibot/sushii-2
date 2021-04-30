@@ -1,7 +1,7 @@
 use sushii_model::model::sql::RuleScope;
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::gateway::payload;
-use twilight_model::id::{ChannelId, GuildId, UserId};
+use twilight_model::id::{ChannelId, GuildId, MessageId, UserId};
 
 use crate::error::{Error, Result};
 use crate::model::Event;
@@ -72,6 +72,28 @@ impl HasChannelId for DispatchEvent {
         match *self {
             Self::MessageCreate(ref msg) => Ok(msg.channel_id),
             _ => Err(Error::MissingChannelId),
+        }
+    }
+}
+
+pub trait HasMessageId {
+    fn message_id(&self) -> Result<MessageId>;
+}
+
+impl HasMessageId for Event {
+    fn message_id(&self) -> Result<MessageId> {
+        match self {
+            Self::Twilight(event) => event.message_id(),
+            Self::Counter(_counter, event) => event.message_id(),
+        }
+    }
+}
+
+impl HasMessageId for DispatchEvent {
+    fn message_id(&self) -> Result<MessageId> {
+        match *self {
+            Self::MessageCreate(ref msg) => Ok(msg.id),
+            _ => Err(Error::MissingMessageId),
         }
     }
 }

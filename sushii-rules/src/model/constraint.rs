@@ -484,7 +484,9 @@ pub enum CounterValueConstraint {
     /// Equals the given value
     Equals(i64),
     /// # GreaterThan
-    /// Greater than the given value
+    /// Greater than the given value. You should only use this if you actually
+    /// want this to trigger multiple times, otherwise you should use Equals for
+    /// single one-off then reset actions.
     GreaterThan(i64),
     /// # LessThan
     /// Less than the given value
@@ -519,6 +521,8 @@ impl CounterConstraint {
 
         let val = match self.value {
             CounterValueConstraint::Equals(num) => triggered_counter.value == num,
+            CounterValueConstraint::GreaterThan(num) => triggered_counter.value > num,
+            CounterValueConstraint::LessThan(num) => triggered_counter.value < num,
             _ => {
                 tracing::warn!("Unhandled counter constraint check");
 
@@ -569,12 +573,18 @@ impl Constraint {
                     Constraint::Counter(counter_constraint) => {
                         // Check the original event if it passes the new counter
                         // preconditions
+
+                        // TODO: Not sure if this is necessary, precondition
+                        // fail if checked against counter constraints since
+                        // they are mismatched events
+                        /*
                         if !self
                             .check_event(Arc::new(original_event.clone().into()), ctx)
                             .await?
                         {
                             return Ok(false);
                         }
+                        */
 
                         counter_constraint.check_event(ctx, event).await?
                     }

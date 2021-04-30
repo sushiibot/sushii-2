@@ -15,6 +15,8 @@ pub enum Error {
     MissingUserId,
     #[error("Event is missing server ID")]
     MissingGuildId,
+    #[error("Event is missing message ID")]
+    MissingMessageId,
     #[error("Event is missing member data")]
     MissingMember,
     #[error("Unknown data store error")]
