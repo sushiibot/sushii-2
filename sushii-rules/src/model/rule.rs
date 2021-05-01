@@ -25,7 +25,7 @@ impl Rule {
     pub async fn check_event(
         &self,
         event: Arc<Event>,
-        ctx: &RuleContext<'_>,
+        mut ctx: &mut RuleContext<'_>,
     ) -> Result<bool, Box<dyn Error>> {
         // if event.kind() != self.trigger {
         //     return None;
@@ -47,7 +47,7 @@ impl Rule {
 
         // Run all actions in order if passes conditions
         for action in &self.actions {
-            action.execute(event.clone(), &ctx).await?;
+            action.execute(event.clone(), &mut ctx).await?;
         }
 
         Ok(true)

@@ -9,7 +9,7 @@ use std::sync::Arc;
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::user::User;
 
-use sushii_model::model::sql::RuleScope;
+use sushii_model::model::sql::{RuleGauge, RuleScope};
 
 use crate::error::{Error, Result};
 use crate::model::has_id::*;
@@ -494,9 +494,15 @@ pub enum CounterValueConstraint {
     /// want this to trigger multiple times, otherwise you should use Equals for
     /// single one-off then reset actions.
     GreaterThan(i64),
+    /// # GreaterThanOrEqual
+    /// Greater than or equal to the given value (>=).
+    GreaterThanOrEqual(i64),
     /// # LessThan
     /// Less than the given value
     LessThan(i64),
+    /// # LessThanOrEqual
+    /// Less than or equal to the given value (<=).
+    LessThanOrEqual(i64),
     /// # CountsInDuration
     /// How much the counter increased in a given duration, e.g. +5 in 1 minute
     CountsInDuration {
@@ -508,11 +514,29 @@ pub enum CounterValueConstraint {
 }
 
 impl CounterConstraint {
-    async fn check_event(&self, _ctx: &RuleContext<'_>, event: Arc<Event>) -> Result<bool> {
+    async fn check_event(&self, ctx: &RuleContext<'_>, event: Arc<Event>) -> Result<bool> {
         // Check if the triggered counter matches the constraint
         let triggered_counter = match event.as_ref() {
-            Event::Counter { counter, .. } => counter,
-            _ => return Err(Error::InvalidEventConstraint("Counter", event.kind())),
+            Event::Counter { counter, .. } => Some(counter),
+            _ => None,
+        };
+
+        // Other events, fetch counter from db below need to do separate since
+        // above counter is borrowed. This is so it doesn't fetch from db on
+        // every event including counter trigger
+        let db_counter = if triggered_counter.is_none() {
+            let guild_id = event.guild_id()?;
+            let scope_id = event.scope_id(self.scope)?;
+
+            RuleGauge::get(&ctx.pg_pool, guild_id.0, self.scope, scope_id, &self.name).await?
+        } else {
+            None
+        };
+
+        let triggered_counter = match triggered_counter.or(db_counter.as_ref()) {
+            Some(c) => c,
+            // No counter found, should not perform actions
+            None => return Ok(false),
         };
 
         // Different counter
@@ -528,7 +552,9 @@ impl CounterConstraint {
         let val = match self.value {
             CounterValueConstraint::Equals(num) => triggered_counter.value == num,
             CounterValueConstraint::GreaterThan(num) => triggered_counter.value > num,
+            CounterValueConstraint::GreaterThanOrEqual(num) => triggered_counter.value >= num,
             CounterValueConstraint::LessThan(num) => triggered_counter.value < num,
+            CounterValueConstraint::LessThanOrEqual(num) => triggered_counter.value <= num,
             _ => {
                 tracing::warn!("Unhandled counter constraint check");
 

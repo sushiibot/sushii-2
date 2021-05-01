@@ -62,7 +62,7 @@ pub enum Action {
 }
 
 impl Action {
-    pub async fn execute(&self, event: Arc<Event>, ctx: &RuleContext<'_>) -> Result<()> {
+    pub async fn execute(&self, event: Arc<Event>, ctx: &mut RuleContext<'_>) -> Result<()> {
         match *self {
             Self::Reply { ref content } => {
                 let channel_id = event.channel_id()?;
@@ -127,6 +127,8 @@ impl Action {
                 let counter =
                     RuleGauge::inc(&ctx.pg_pool, guild_id.0, scope, scope_id, name).await?;
 
+                ctx.data.actions.push(serde_json::to_value(&counter)?);
+
                 // Only trigger if incrementing from a twilight event Don't
                 // trigger another if this is currently a counter otherwise that
                 // would cause infinite loops
@@ -147,6 +149,8 @@ impl Action {
                 let counter =
                     RuleGauge::dec(&ctx.pg_pool, guild_id.0, scope, scope_id, name).await?;
 
+                ctx.data.actions.push(serde_json::to_value(&counter)?);
+
                 if let Event::Twilight(original_event) = (*event).clone() {
                     tracing::debug!(?counter, "Triggering new Counter event");
                     ctx.channel_tx
@@ -163,6 +167,8 @@ impl Action {
 
                 let counter =
                     RuleGauge::reset(&ctx.pg_pool, guild_id.0, scope, scope_id, name).await?;
+
+                ctx.data.actions.push(serde_json::to_value(&counter)?);
 
                 if let Event::Twilight(original_event) = (*event).clone() {
                     tracing::debug!(?counter, "Triggering new Counter event");

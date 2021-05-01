@@ -58,22 +58,14 @@ impl RuleStore for HardCodedStore {
                     constraint: Constraint::Counter(CounterConstraint {
                         name: "language warning".to_string(),
                         scope: RuleScope::User,
-                        value: CounterValueConstraint::GreaterThan(3),
+                        value: CounterValueConstraint::LessThanOrEqual(3),
                     }),
                 },
-                actions: vec![
-                    Action::Reply {
-                        content: "Warning: Please keep chat in English! (Warning {{ trigger.counter.value }}/3)".to_string(),
-                    },
-                    Action::ResetCounter {
-                        name: "language warning".to_string(),
-                        scope: RuleScope::User,
-                    },
-                    Action::AddCounter {
-                        name: "language mute".to_string(),
-                        scope: RuleScope::User,
-                    },
-                ],
+                actions: vec![Action::Reply {
+                    content:
+                        "**Warning {{ trigger.counter.value }} / 3**: Please keep chat in English!"
+                            .to_string(),
+                }],
             },
             Rule {
                 id: Uuid::nil(),
@@ -82,7 +74,7 @@ impl RuleStore for HardCodedStore {
                 trigger: Trigger::Counter,
                 conditions: Condition::Condition {
                     constraint: Constraint::Counter(CounterConstraint {
-                        name: "language mute".to_string(),
+                        name: "language warning".to_string(),
                         scope: RuleScope::User,
                         value: CounterValueConstraint::GreaterThan(3),
                     }),
@@ -92,7 +84,7 @@ impl RuleStore for HardCodedStore {
                         content: "Muted for non-English chat".to_string(),
                     },
                     Action::ResetCounter {
-                        name: "language mute".to_string(),
+                        name: "language warning".to_string(),
                         scope: RuleScope::User,
                     },
                 ],

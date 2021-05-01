@@ -133,7 +133,7 @@ impl RulesEngine {
 
         for rule in matching_rules.iter() {
             // Create a new context on every rule trigger
-            let context = RuleContext::new(
+            let mut context = RuleContext::new(
                 self.http.clone(),
                 self.pg_pool.clone(),
                 self.reqwest.clone(),
@@ -149,7 +149,7 @@ impl RulesEngine {
             tokio::spawn(async move {
                 let start = Instant::now();
 
-                if let Err(e) = rule.check_event(event, &context).await {
+                if let Err(e) = rule.check_event(event, &mut context).await {
                     tracing::warn!("Failed checking event: {}", e);
                 }
 
