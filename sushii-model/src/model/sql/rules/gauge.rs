@@ -3,7 +3,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::Result;
 
-#[derive(Deserialize, Serialize, sqlx::Type, Clone, Copy, Eq, PartialEq, Debug, schemars::JsonSchema)]
+#[derive(
+    Deserialize, Serialize, sqlx::Type, Clone, Copy, Eq, PartialEq, Debug, schemars::JsonSchema,
+)]
 #[sqlx(type_name = "rule_scope", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum RuleScope {
     Guild,
@@ -22,34 +24,58 @@ pub struct RuleGauge {
 }
 
 impl RuleGauge {
-    /// Gets the current value of a gauge or 0 if it doesn't exist
-    pub async fn get_count(pool: &sqlx::PgPool, guild_id: u64, scope: RuleScope, scope_id: u64, name: &str) -> Result<i64> {
-        sqlx::query!(
+    pub async fn get(
+        pool: &sqlx::PgPool,
+        guild_id: u64,
+        scope: RuleScope,
+        scope_id: u64,
+        name: &str,
+    ) -> Result<Option<Self>> {
+        sqlx::query_as!(
+            RuleGauge,
             r#"
-            SELECT coalesce(
-                (SELECT value
+                SELECT time, guild_id, scope as "scope: RuleScope",
+                       scope_id, name, value
                   FROM app_public.rule_gauges
                  WHERE guild_id = $1
                    AND scope = $2
                    AND scope_id = $3
                    AND name = $4
                  ORDER BY time DESC
-                 LIMIT 1),
-                0
-            ) as "value!"
+                 LIMIT 1
             "#,
             guild_id as i64,
             scope as _,
             scope_id as i64,
             name,
         )
-        .fetch_one(pool)
+        .fetch_optional(pool)
         .await
-        .map(|r| r.value)
         .map_err(Into::into)
     }
 
-    pub async fn inc(pool: &sqlx::PgPool, guild_id: u64, scope: RuleScope, scope_id: u64, name: &str) -> Result<Self> {
+    /// Gets the current value of a gauge or 0 if it doesn't exist
+    pub async fn get_count(
+        pool: &sqlx::PgPool,
+        guild_id: u64,
+        scope: RuleScope,
+        scope_id: u64,
+        name: &str,
+    ) -> Result<i64> {
+        let counter = RuleGauge::get(pool, guild_id, scope, scope_id, name)
+            .await?
+            .map(|c| c.value);
+
+        Ok(counter.unwrap_or(0))
+    }
+
+    pub async fn inc(
+        pool: &sqlx::PgPool,
+        guild_id: u64,
+        scope: RuleScope,
+        scope_id: u64,
+        name: &str,
+    ) -> Result<Self> {
         sqlx::query_as!(
             RuleGauge,
             r#"
@@ -80,7 +106,13 @@ impl RuleGauge {
         .map_err(Into::into)
     }
 
-    pub async fn dec(pool: &sqlx::PgPool, guild_id: u64, scope: RuleScope, scope_id: u64, name: &str) -> Result<Self> {
+    pub async fn dec(
+        pool: &sqlx::PgPool,
+        guild_id: u64,
+        scope: RuleScope,
+        scope_id: u64,
+        name: &str,
+    ) -> Result<Self> {
         sqlx::query_as!(
             RuleGauge,
             r#"
@@ -111,7 +143,13 @@ impl RuleGauge {
         .map_err(Into::into)
     }
 
-    pub async fn reset(pool: &sqlx::PgPool, guild_id: u64, scope: RuleScope, scope_id: u64, name: &str) -> Result<Self> {
+    pub async fn reset(
+        pool: &sqlx::PgPool,
+        guild_id: u64,
+        scope: RuleScope,
+        scope_id: u64,
+        name: &str,
+    ) -> Result<Self> {
         sqlx::query_as!(
             RuleGauge,
             r#"

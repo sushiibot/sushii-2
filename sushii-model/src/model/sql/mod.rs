@@ -19,6 +19,7 @@ pub use self::{
     },
     mod_log::ModLogEntry,
     mute::{delete_mute, Mute},
+    rules::gauge::{RuleGauge, RuleScope},
     user::{
         cached_user::CachedUser,
         notification::Notification,
@@ -28,5 +29,4 @@ pub use self::{
         user_level_global::UserLevelGlobal,
         user_level_ranked::UserLevelRanked,
     },
-    rules::gauge::{RuleGauge, RuleScope},
 };

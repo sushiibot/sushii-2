@@ -686,40 +686,6 @@
       ]
     }
   },
-  "1506bcf0c0c97d36c9a9b1553149995b962b96adfa925a67cadebfc022b0d0eb": {
-    "query": "\n            SELECT coalesce(\n                (SELECT value\n                  FROM app_public.rule_gauges\n                 WHERE guild_id = $1\n                   AND scope = $2\n                   AND scope_id = $3\n                   AND name = $4\n                 ORDER BY time DESC\n                 LIMIT 1),\n                0\n            ) as \"value!\"\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "value!",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          {
-            "Custom": {
-              "name": "rule_scope",
-              "kind": {
-                "Enum": [
-                  "GUILD",
-                  "CHANNEL",
-                  "USER"
-                ]
-              }
-            }
-          },
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
-        null
-      ]
-    }
-  },
   "17bcdd2bfcea675c29e0904ff0d4cda55303d5462f24d22610ef0be59ed8f4ff": {
     "query": "\n        INSERT INTO app_public.notifications (user_id, guild_id, keyword)\n             VALUES ($1, $2, LOWER($3))\n          RETURNING *\n        ",
     "describe": {
@@ -1349,6 +1315,81 @@
       ]
     }
   },
+  "69e01c12a010511eb8280372425921a6a6d677d3f1e2e057536e7ac52f6a6855": {
+    "query": "\n                SELECT time, guild_id, scope as \"scope: RuleScope\",\n                       scope_id, name, value\n                  FROM app_public.rule_gauges\n                 WHERE guild_id = $1\n                   AND scope = $2\n                   AND scope_id = $3\n                   AND name = $4\n                 ORDER BY time DESC\n                 LIMIT 1\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "time",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "scope: RuleScope",
+          "type_info": {
+            "Custom": {
+              "name": "rule_scope",
+              "kind": {
+                "Enum": [
+                  "GUILD",
+                  "CHANNEL",
+                  "USER"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "ordinal": 3,
+          "name": "scope_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "value",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          {
+            "Custom": {
+              "name": "rule_scope",
+              "kind": {
+                "Enum": [
+                  "GUILD",
+                  "CHANNEL",
+                  "USER"
+                ]
+              }
+            }
+          },
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "6a0d2d04a3d415ed526fb6b64b6821caa88194b7e7a4ed3bcc5c1f168a96f7c0": {
     "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM app_public.feeds\n             WHERE feed_id = $1\n            ",
     "describe": {
@@ -1951,18 +1992,6 @@
           "Timestamp",
           "Text",
           "Jsonb"
-        ]
-      },
-      "nullable": []
-    }
-  },
-  "a67679cafb28151b2cb3b271323a2d18e316a995785c2de3574024cfc23a073c": {
-    "query": "\n                DELETE FROM app_public.messages\n                      WHERE channel_id = $1\n                            AND ctid NOT IN (\n                                  SELECT ctid\n                                    FROM app_public.messages\n                                ORDER BY created DESC\n                                   LIMIT 100\n                            )\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8"
         ]
       },
       "nullable": []
@@ -2810,6 +2839,18 @@
         null,
         null
       ]
+    }
+  },
+  "e0dd1f10d5143cd74bd82f0d7fb1827a03af5709d0152981791fae7db367f220": {
+    "query": "\n                DELETE FROM app_public.messages\n                      WHERE channel_id = $1\n                            AND ctid NOT IN (\n                                  SELECT ctid\n                                    FROM app_public.messages\n                                   WHERE channel_id = $1\n                                ORDER BY created DESC\n                                   LIMIT 100\n                            )\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": []
     }
   },
   "e1b0fe1bd4d275cc30a835c1611781e01f74c3ee1a360b73fcd7553719455c43": {
