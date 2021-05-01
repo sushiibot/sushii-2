@@ -50,10 +50,20 @@ impl<'a> RuleContext<'a> {
         }
     }
 
-    pub async fn render_string(&self, input: &str) -> Result<String> {
+    pub async fn render_string(&self, event: Arc<Event>, input: &str) -> Result<String> {
+        // Hash template string so that the same template used in multiple
+        // places will use the same pre-compiled template
         let mut hasher = DefaultHasher::new();
         hasher.write(input.as_bytes());
         let hash = format!("{:x}", hasher.finish());
+
+        // Insert context data
+        if !self.data.contains_key("trigger") {
+            tracing::debug!("Inserting trigger to handlebars context data");
+
+            self.data
+                .insert("trigger".to_string(), serde_json::to_value(event)?);
+        }
 
         if !self.handlebars_templates.read().await.has_template(&hash) {
             self.handlebars_templates
@@ -61,6 +71,8 @@ impl<'a> RuleContext<'a> {
                 .await
                 .register_template_string(&hash, input)?;
         }
+
+        tracing::debug!("Rendering template with context: {:?}", self.data);
 
         self.handlebars_templates
             .read()

@@ -63,7 +63,7 @@ impl RuleStore for HardCodedStore {
                 },
                 actions: vec![
                     Action::Reply {
-                        content: "Warning: Please keep chat in English!".to_string(),
+                        content: "Warning: Please keep chat in English! (Warning {{ trigger.Counter.0.value }}/3)".to_string(),
                     },
                     Action::ResetCounter {
                         name: "language warning".to_string(),

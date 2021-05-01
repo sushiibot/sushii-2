@@ -68,9 +68,11 @@ impl Action {
                 let channel_id = event.channel_id()?;
                 let message_id = event.message_id()?;
 
+                let rendered_content = ctx.render_string(event, content).await?;
+
                 ctx.http
                     .create_message(channel_id)
-                    .content(content)?
+                    .content(rendered_content)?
                     .reply(message_id)
                     // Add required mentions in order to ping the user
                     .allowed_mentions()

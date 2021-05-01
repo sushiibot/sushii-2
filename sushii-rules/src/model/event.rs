@@ -1,9 +1,10 @@
+use serde::Serialize;
 use sushii_model::model::sql::RuleGauge;
 use twilight_model::gateway::event::DispatchEvent;
 
 use crate::model::Trigger;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum Event {
     /// Gateway dispatch event by itself
     Twilight(DispatchEvent),

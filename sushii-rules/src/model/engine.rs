@@ -9,6 +9,8 @@ use tokio::sync::RwLock;
 use twilight_http::client::Client;
 use twilight_model::id::GuildId;
 
+use sushii_model::model::sql::GuildConfig;
+
 use crate::model::has_id::HasGuildId;
 use crate::model::{Event, Rule, RuleContext, Trigger};
 use crate::persistence::RuleStore;
@@ -17,12 +19,16 @@ type RuleList = Vec<Arc<Rule>>;
 type GuildTriggerRules = DashMap<Trigger, RuleList>;
 type GuildRulesMap = DashMap<GuildId, GuildTriggerRules>;
 
+type GuildConfigMap = DashMap<GuildId, GuildConfig>;
+
 #[derive(Debug)]
 pub struct RulesEngine {
     /// Stores rules fetched from file or database
     pub guild_rules: Arc<GuildRulesMap>,
     /// Rules persistence backend, use this to fetch rules
     pub rules_store: Box<dyn RuleStore>,
+    /// Stores rules fetched from file or database
+    pub guild_configs: Arc<GuildConfigMap>,
     /// Shared handlebars template to prevent reparsing
     /// This is a RwLock since registering templates requires mut self
     pub handlebars_templates: Arc<RwLock<Handlebars<'static>>>,
@@ -53,6 +59,7 @@ impl RulesEngine {
         Self {
             guild_rules: Arc::new(DashMap::new()),
             rules_store,
+            guild_configs: Arc::new(DashMap::new()),
             handlebars_templates: Arc::new(RwLock::new(Handlebars::new())),
             pg_pool,
             word_lists: Arc::new(DashMap::new()),
