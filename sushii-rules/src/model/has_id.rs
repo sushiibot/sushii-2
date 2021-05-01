@@ -14,7 +14,7 @@ impl HasScopeId for Event {
     fn scope_id(&self, scope: RuleScope) -> Result<u64> {
         match self {
             Self::Twilight(event) => event.scope_id(scope),
-            Self::Counter(counter, ..) => Ok(counter.scope_id as u64),
+            Self::Counter { counter, .. } => Ok(counter.scope_id as u64),
         }
     }
 }
@@ -37,7 +37,7 @@ impl HasGuildId for Event {
     fn guild_id(&self) -> Result<GuildId> {
         match self {
             Self::Twilight(event) => event.guild_id(),
-            Self::Counter(counter, ..) => Ok(GuildId(counter.guild_id as u64)),
+            Self::Counter { counter, .. } => Ok(GuildId(counter.guild_id as u64)),
         }
     }
 }
@@ -62,7 +62,7 @@ impl HasChannelId for Event {
     fn channel_id(&self) -> Result<ChannelId> {
         match self {
             Self::Twilight(event) => event.channel_id(),
-            Self::Counter(_counter, event) => event.channel_id(),
+            Self::Counter { original_event, .. } => original_event.channel_id(),
         }
     }
 }
@@ -84,7 +84,7 @@ impl HasMessageId for Event {
     fn message_id(&self) -> Result<MessageId> {
         match self {
             Self::Twilight(event) => event.message_id(),
-            Self::Counter(_counter, event) => event.message_id(),
+            Self::Counter { original_event, .. } => original_event.message_id(),
         }
     }
 }
@@ -106,7 +106,7 @@ impl HasUserId for Event {
     fn user_id(&self) -> Result<UserId> {
         match self {
             Self::Twilight(event) => event.user_id(),
-            Self::Counter(_counter, event) => event.user_id(),
+            Self::Counter { original_event, .. } => original_event.user_id(),
         }
     }
 }

@@ -130,9 +130,14 @@ impl Action {
                 // Only trigger if incrementing from a twilight event Don't
                 // trigger another if this is currently a counter otherwise that
                 // would cause infinite loops
-                if let Event::Twilight(e) = (*event).clone() {
+                if let Event::Twilight(original_event) = (*event).clone() {
                     tracing::debug!(?counter, "Triggering new Counter event");
-                    ctx.channel_tx.send(Event::Counter(counter, e)).await?;
+                    ctx.channel_tx
+                        .send(Event::Counter {
+                            counter,
+                            original_event,
+                        })
+                        .await?;
                 }
             }
             Self::SubtractCounter { ref name, scope } => {
@@ -142,8 +147,14 @@ impl Action {
                 let counter =
                     RuleGauge::dec(&ctx.pg_pool, guild_id.0, scope, scope_id, name).await?;
 
-                if let Event::Twilight(e) = (*event).clone() {
-                    ctx.channel_tx.send(Event::Counter(counter, e)).await?;
+                if let Event::Twilight(original_event) = (*event).clone() {
+                    tracing::debug!(?counter, "Triggering new Counter event");
+                    ctx.channel_tx
+                        .send(Event::Counter {
+                            counter,
+                            original_event,
+                        })
+                        .await?;
                 }
             }
             Self::ResetCounter { ref name, scope } => {
@@ -153,8 +164,14 @@ impl Action {
                 let counter =
                     RuleGauge::reset(&ctx.pg_pool, guild_id.0, scope, scope_id, name).await?;
 
-                if let Event::Twilight(e) = (*event).clone() {
-                    ctx.channel_tx.send(Event::Counter(counter, e)).await?;
+                if let Event::Twilight(original_event) = (*event).clone() {
+                    tracing::debug!(?counter, "Triggering new Counter event");
+                    ctx.channel_tx
+                        .send(Event::Counter {
+                            counter,
+                            original_event,
+                        })
+                        .await?;
                 }
             }
             _ => {}

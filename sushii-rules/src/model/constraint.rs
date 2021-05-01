@@ -400,7 +400,10 @@ impl MemberConstraint {
     async fn check_event(&self, ctx: &RuleContext<'_>, event: Arc<Event>) -> Result<bool> {
         let msg = match event.as_ref() {
             Event::Twilight(DispatchEvent::MessageCreate(msg)) => msg,
-            Event::Counter(_, DispatchEvent::MessageCreate(msg)) => msg,
+            Event::Counter {
+                original_event: DispatchEvent::MessageCreate(msg),
+                ..
+            } => msg,
             _ => return Err(Error::InvalidEventConstraint("Member", event.kind())),
         };
 
@@ -445,7 +448,10 @@ impl MessageConstraint {
         // Only valid for on message
         let msg = match event.as_ref() {
             Event::Twilight(DispatchEvent::MessageCreate(msg)) => msg,
-            Event::Counter(_, DispatchEvent::MessageCreate(msg)) => msg,
+            Event::Counter {
+                original_event: DispatchEvent::MessageCreate(msg),
+                ..
+            } => msg,
             _ => return Err(Error::InvalidEventConstraint("Message", event.kind())),
         };
 
@@ -505,7 +511,7 @@ impl CounterConstraint {
     async fn check_event(&self, _ctx: &RuleContext<'_>, event: Arc<Event>) -> Result<bool> {
         // Check if the triggered counter matches the constraint
         let triggered_counter = match event.as_ref() {
-            Event::Counter(counter, _event) => counter,
+            Event::Counter { counter, .. } => counter,
             _ => return Err(Error::InvalidEventConstraint("Counter", event.kind())),
         };
 
@@ -564,7 +570,7 @@ impl Constraint {
                     }
                 },
                 // COUNTER MODIFIED
-                Event::Counter(_counter, original_event) => match self {
+                Event::Counter { original_event, .. } => match self {
                     Constraint::Message(msg_constraint) => {
                         msg_constraint
                             .check_event(ctx, Arc::new(original_event.clone().into()))
