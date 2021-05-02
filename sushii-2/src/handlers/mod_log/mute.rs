@@ -29,12 +29,18 @@ async fn _guild_member_addition(
     // TODO: Check if this is needed, don't think this ever happens, since if it's already expired it would be deleted
     if let Some(end) = mute.end_time {
         if now > end {
-            ModLogEntry::new("unmute", true, guild_id.0, &member.user)
-                .reason(&Some(
-                    "Automated Unmute: User re-joined after mute expired.".into(),
-                ))
-                .save(&ctx)
-                .await?;
+            ModLogEntry::new(
+                "unmute",
+                true,
+                guild_id.0,
+                member.user.id.0,
+                &member.user.tag(),
+            )
+            .reason(&Some(
+                "Automated Unmute: User re-joined after mute expired.".into(),
+            ))
+            .save(&ctx)
+            .await?;
 
             return Ok(());
         }

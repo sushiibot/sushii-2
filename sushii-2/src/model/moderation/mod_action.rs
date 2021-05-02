@@ -324,11 +324,17 @@ impl ModActionExecutor {
                 continue;
             }
 
-            let entry = match ModLogEntry::new(&self.action.to_string(), true, guild_id.0, &user)
-                .reason(&self.reason)
-                .executor_id(msg.author.id.0)
-                .save(&ctx)
-                .await
+            let entry = match ModLogEntry::new(
+                &self.action.to_string(),
+                true,
+                guild_id.0,
+                user.id.0,
+                &user.tag(),
+            )
+            .reason(&self.reason)
+            .executor_id(msg.author.id.0)
+            .save(&ctx)
+            .await
             {
                 Ok(v) => v,
                 Err(e) => {

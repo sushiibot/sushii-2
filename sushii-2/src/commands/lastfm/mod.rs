@@ -5,8 +5,8 @@ mod np;
 mod profile;
 mod recent;
 mod set;
-mod unset;
 mod topartists;
+mod unset;
 
 use self::{loved::*, np::*, profile::*, recent::*, set::*, topartists::*, unset::*};
 

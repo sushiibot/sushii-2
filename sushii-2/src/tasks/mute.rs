@@ -88,7 +88,7 @@ pub async fn unmute_member(ctx: &Context, mute: &Mute) -> Result<()> {
         reason.push_str(" User is currently not in guild and will not be muted on re-join.");
     }
 
-    ModLogEntry::new("unmute", true, guild_id.0, &user)
+    ModLogEntry::new("unmute", true, guild_id.0, user.id.0, &user.tag())
         .reason(&Some(reason))
         .save(&ctx)
         .await?;

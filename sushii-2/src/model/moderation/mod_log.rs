@@ -53,9 +53,15 @@ impl<'a> ModLogReporter<'a> {
         {
             Some(entry) => entry,
             None => {
-                ModLogEntry::new(self.action, false, self.guild_id.0, &self.user)
-                    .save(&ctx)
-                    .await?
+                ModLogEntry::new(
+                    self.action,
+                    false,
+                    self.guild_id.0,
+                    self.user.id.0,
+                    &self.user.tag(),
+                )
+                .save(&ctx)
+                .await?
             }
         };
 
