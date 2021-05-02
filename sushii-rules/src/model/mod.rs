@@ -8,6 +8,7 @@ pub mod event;
 pub mod has_id;
 pub mod rule;
 pub mod rule_context;
+pub mod rule_set;
 pub mod status;
 pub mod trigger;
 
@@ -19,6 +20,7 @@ pub use self::{
     event::Event,
     rule::Rule,
     rule_context::RuleContext,
+    rule_set::RuleSet,
     status::Status,
     trigger::Trigger,
 };

@@ -1,5 +1,5 @@
 use crate::error::Result;
-use crate::model::Rule;
+use crate::model::RuleSet;
 use std::fmt;
 
 pub mod hard_coded;
@@ -9,7 +9,7 @@ pub use hard_coded::HardCodedStore;
 
 pub trait RuleStore: RuleStoreClone + fmt::Debug {
     /// Fetches all rules in a guild
-    fn get_guild_rules(&self, guild_id: u64) -> Result<Vec<Rule>>;
+    fn get_guild_rule_sets(&self, guild_id: u64) -> Result<Vec<RuleSet>>;
 }
 
 pub trait RuleStoreClone {

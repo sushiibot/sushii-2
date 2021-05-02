@@ -1,15 +1,15 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use sqlx::types::Uuid;
+use std::collections::HashMap;
 use std::error::Error;
 use std::sync::Arc;
 use twilight_model::gateway::event::DispatchEvent;
-use sqlx::types::Uuid;
-use serde_json::Value;
-use std::collections::HashMap;
 
-use crate::model::{Action, Condition, RuleContext, Trigger, Rule};
+use crate::model::{Action, Condition, Rule, RuleContext, Trigger};
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct RuleSet {
     pub id: Uuid,
     /// Guild ID this rule set belongs to
@@ -26,9 +26,9 @@ pub struct RuleSet {
     /// Author ID of this rule set, for display in web UI
     pub author: u64,
     /// Rule set category, e.g. moderation, fun, etc.
-    pub category: String,
+    pub category: Option<String>,
     /// Rule set configuration, map of json values
     pub config: HashMap<String, Value>,
     /// List of rules in this rule set
-    pub rules: Vec<Rule>
+    pub rules: Vec<Rule>,
 }

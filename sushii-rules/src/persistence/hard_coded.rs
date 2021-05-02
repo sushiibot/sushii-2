@@ -1,12 +1,13 @@
 use lingua::Language;
 use sqlx::types::Uuid;
+use std::collections::HashMap;
 use twilight_model::gateway::event::EventType;
 
 use sushii_model::model::sql::RuleScope;
 
 use super::RuleStore;
 use crate::error::Result;
-use crate::model::{constraint::*, Action, Condition, Rule, Trigger};
+use crate::model::{constraint::*, Action, Condition, Rule, RuleSet, Trigger};
 
 // Just for testing other functionality right now, main store should be postgres
 #[derive(Clone, Debug)]
@@ -19,7 +20,7 @@ impl HardCodedStore {
 }
 
 impl RuleStore for HardCodedStore {
-    fn get_guild_rules(&self, guild_id: u64) -> Result<Vec<Rule>> {
+    fn get_guild_rule_sets(&self, guild_id: u64) -> Result<Vec<RuleSet>> {
         if guild_id != 167058919611564043 {
             return Ok(Vec::new());
         }
@@ -96,6 +97,19 @@ impl RuleStore for HardCodedStore {
             },
         ];
 
-        Ok(rules)
+        let rule_set = RuleSet {
+            id: Uuid::nil(),
+            guild_id: 167058919611564043,
+            name: "Language auto-mod".into(),
+            description: Some("Auto mutes users speaking non-English languages".into()),
+            enabled: true,
+            editable: true,
+            author: 150443906511667200,
+            category: Some("Auto-moderator".into()),
+            config: HashMap::new(),
+            rules: rules,
+        };
+
+        Ok(vec![rule_set])
     }
 }

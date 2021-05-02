@@ -97,10 +97,10 @@ pub enum LanguageType {
 }
 
 // This is needed so that we can use the remote Language struct
-#[derive(Debug, Serialize, Deserialize, JsonSchema, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq)]
 pub struct LanguageWrapper(#[serde(with = "LanguageType")] Language);
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum StringConstraint {
     /// # Equals
@@ -248,7 +248,7 @@ impl StringConstraint {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum IntegerConstraint {
     /// # Equals
@@ -287,7 +287,7 @@ impl IntegerConstraint {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum IntegerListConstraint {
     /// # Includes
@@ -298,7 +298,7 @@ pub enum IntegerListConstraint {
     DoesNotInclude(u64),
 }
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum BoolConstraint {
     /// # Equals
@@ -320,7 +320,7 @@ impl BoolConstraint {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum DateConstraint {
     /// # Equals
@@ -331,7 +331,7 @@ pub enum DateConstraint {
     NotEquals(DateTime<Utc>),
 }
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum UserConstraint {
     /// # Username
@@ -370,7 +370,7 @@ impl UserConstraint {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum MemberConstraint {
     /// # Deaf
@@ -423,7 +423,7 @@ impl MemberConstraint {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum MessageConstraint {
     /// # Message ID
@@ -472,7 +472,7 @@ impl MessageConstraint {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub struct CounterConstraint {
     /// # Counter name
@@ -483,7 +483,7 @@ pub struct CounterConstraint {
     pub value: CounterValueConstraint,
 }
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum CounterValueConstraint {
     /// # Equals
@@ -566,7 +566,7 @@ impl CounterConstraint {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum Constraint {
     /// # Message event constraints

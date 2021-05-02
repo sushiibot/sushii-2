@@ -13,7 +13,7 @@ use crate::error::Error;
 use crate::model::has_id::*;
 use crate::model::{Event, RuleContext};
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub enum Action {
     /// # Reply
     /// Sends a reply to a message trigger

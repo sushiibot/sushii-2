@@ -6,7 +6,7 @@ use std::sync::Arc;
 use crate::error::Result;
 use crate::model::{Constraint, Event, RuleContext};
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub enum Condition {
     /// # And
     /// Require *all** conditions to pass before running actions

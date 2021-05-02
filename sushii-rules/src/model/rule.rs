@@ -6,7 +6,7 @@ use std::sync::Arc;
 
 use crate::model::{Action, Condition, Event, RuleContext, Trigger};
 
-#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Rule {
     pub id: Uuid,
     /// Name of this rule

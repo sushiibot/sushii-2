@@ -10,19 +10,13 @@ use twilight_http::client::Client;
 use twilight_model::id::GuildId;
 
 use crate::model::has_id::HasGuildId;
-use crate::model::{cache::GuildConfigCache, Event, Rule, RuleContext, Trigger};
+use crate::model::{cache::{GuildConfigCache, RuleSetsCache}, Event, Rule, RuleContext, Trigger};
 use crate::persistence::RuleStore;
-
-type RuleList = Vec<Arc<Rule>>;
-type GuildTriggerRules = DashMap<Trigger, RuleList>;
-type GuildRulesMap = DashMap<GuildId, GuildTriggerRules>;
 
 #[derive(Debug)]
 pub struct RulesEngine {
-    /// Stores rules fetched from file or database
-    pub guild_rules: Arc<GuildRulesMap>,
-    /// Rules persistence backend, use this to fetch rules
-    pub rules_store: Box<dyn RuleStore>,
+    /// Cached guild rulesets backed by file or database
+    pub guild_rules: RuleSetsCache,
     /// Stores rules fetched from file or database
     pub guild_configs: GuildConfigCache,
     /// Shared handlebars template to prevent reparsing
@@ -53,8 +47,7 @@ impl RulesEngine {
         let reqwest = reqwest::Client::new();
 
         Self {
-            guild_rules: Arc::new(DashMap::new()),
-            rules_store,
+            guild_rules: RuleSetsCache::new(rules_store),
             guild_configs: GuildConfigCache::new(),
             handlebars_templates: Arc::new(RwLock::new(Handlebars::new())),
             pg_pool,
@@ -69,63 +62,15 @@ impl RulesEngine {
         }
     }
 
-    /// Fetches rules from cache or from persistent store if not cached
-    #[tracing::instrument]
-    fn get_guild_rules(&self, guild_id: GuildId) -> Result<GuildTriggerRules> {
-        if let Some(rules) = self.guild_rules.get(&guild_id) {
-            Ok(rules.clone())
-        } else {
-            let guild_rules = self.rules_store.get_guild_rules(guild_id.0)?;
-
-            let map = DashMap::new();
-            for rule in guild_rules {
-                let mut entry = map.entry(rule.trigger).or_insert_with(Vec::new);
-                entry.push(Arc::new(rule));
-            }
-
-            self.guild_rules.insert(guild_id, map);
-            Ok(self.guild_rules.get(&guild_id).unwrap().clone())
-        }
-    }
-
-    /// Fetches the matching rules corresponding to a given event or trigger
-    fn get_matching_rules(&self, event: &Arc<Event>) -> Result<Option<RuleList>> {
-        let guild_id = match event.guild_id() {
-            Ok(id) => id,
-            Err(_) => {
-                return Ok(None);
-            }
-        };
-
-        let guild_rules = self.get_guild_rules(guild_id)?;
-
-        // This will be Counter or a Twilight(EventType)
-        let event_type = event.kind();
-        Ok(guild_rules.get(&event_type.into()).map(|r| r.clone()))
-    }
-
-    /*
-    pub async fn trigger_stream(&mut self) {
-        let channel_rx = self.channel_rx.take().expect("Receiving channel already taken!");
-
-        tokio::spawn(async move {
-            while let Some(event) = channel_rx.recv().await {
-                if let Err(e) = self.process_event(Arc::new(event)) {
-                    tracing::error!("Failed to process triggered event: {}", e);
-                }
-            }
-        });
-    }
-    */
-
     /// Events that modify counters also trigger this to process the counter.
     /// It provides the original event that triggered this counter
     #[tracing::instrument]
     pub async fn process_event(&self, event: Arc<Event>) -> Result<()> {
-        let matching_rules = match self.get_matching_rules(&event)? {
-            Some(r) => r,
-            None => return Ok(()),
-        };
+        let matching_rules = self.guild_rules.get_matching_rules(&event)?;
+
+        if matching_rules.is_empty() {
+            return Ok(());
+        }
 
         let guild_id = event.guild_id()?;
         let guild_config = self.guild_configs.get(&self.pg_pool, guild_id).await?;
