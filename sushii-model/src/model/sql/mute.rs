@@ -133,6 +133,13 @@ impl Mute {
         upsert_query(&pool, &self).await
     }
 
+    pub async fn save_exec<'a, E: sqlx::Executor<'a, Database = sqlx::Postgres>>(
+        &self,
+        exec: E,
+    ) -> Result<Self> {
+        upsert_query(exec, &self).await
+    }
+
     /// Deletes a mute from the database
     pub async fn delete(&self, ctx: &Context) -> Result<()> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
@@ -213,7 +220,10 @@ async fn get_ongoing_query(pool: &sqlx::PgPool, guild_id: u64) -> Result<Vec<Mut
     .map_err(Into::into)
 }
 
-async fn upsert_query(pool: &sqlx::PgPool, mute: &Mute) -> Result<Mute> {
+async fn upsert_query<'a, E: sqlx::Executor<'a, Database = sqlx::Postgres>>(
+    pool: E,
+    mute: &Mute,
+) -> Result<Mute> {
     sqlx::query_as!(
         Mute,
         r#"

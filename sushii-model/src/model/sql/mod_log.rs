@@ -1,7 +1,6 @@
 use chrono::naive::NaiveDateTime;
 use chrono::offset::Utc;
 use serde::{Deserialize, Serialize};
-use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 use crate::error::Result;
@@ -149,7 +148,10 @@ impl ModLogEntry {
         self.save_exec(&pool).await
     }
 
-    pub async fn save_exec<'a, E: sqlx::Executor<'a, Database = sqlx::Postgres>>(&self, exec: E) -> Result<Self> {
+    pub async fn save_exec<'a, E: sqlx::Executor<'a, Database = sqlx::Postgres>>(
+        &self,
+        exec: E,
+    ) -> Result<Self> {
         // New cases via ::new() will have a -1 ID, cases that return from DB
         // will have a >=0 ID
         if self.case_id == -1 {
@@ -279,7 +281,10 @@ async fn get_latest_query(
     .map_err(Into::into)
 }
 
-async fn add_mod_action_query<'a, E: sqlx::Executor<'a, Database = sqlx::Postgres>>(pool: E, entry: &ModLogEntry) -> Result<ModLogEntry> {
+async fn add_mod_action_query<'a, E: sqlx::Executor<'a, Database = sqlx::Postgres>>(
+    pool: E,
+    entry: &ModLogEntry,
+) -> Result<ModLogEntry> {
     sqlx::query_as!(
         ModLogEntry,
         r#"
@@ -308,7 +313,10 @@ async fn add_mod_action_query<'a, E: sqlx::Executor<'a, Database = sqlx::Postgre
     .map_err(Into::into)
 }
 
-async fn update_mod_action_query<'a, E: sqlx::Executor<'a, Database = sqlx::Postgres>>(pool: E, entry: &ModLogEntry) -> Result<ModLogEntry> {
+async fn update_mod_action_query<'a, E: sqlx::Executor<'a, Database = sqlx::Postgres>>(
+    pool: E,
+    entry: &ModLogEntry,
+) -> Result<ModLogEntry> {
     sqlx::query_as!(
         ModLogEntry,
         r#"

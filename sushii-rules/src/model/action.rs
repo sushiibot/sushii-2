@@ -1,11 +1,13 @@
 use anyhow::Result;
+use chrono::Duration;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use std::convert::TryInto;
 use std::sync::Arc;
 use twilight_http::request::AuditLogReason;
 use twilight_model::id::RoleId;
 
-use sushii_model::model::sql::{ModLogEntry, RuleGauge, RuleScope};
+use sushii_model::model::sql::{ModLogEntry, Mute, RuleGauge, RuleScope};
 
 use crate::error::Error;
 use crate::model::has_id::*;
@@ -103,11 +105,16 @@ impl Action {
                 fut.await?;
             }
             Self::Mute {
-                duration: _,
+                duration,
                 ref reason,
             } => {
                 let guild_id = event.guild_id()?;
                 let user = event.user()?;
+
+                let mute_role = ctx
+                    .guild_config
+                    .mute_role
+                    .ok_or(Error::ConfigMissingField("mute_role"))?;
 
                 // Start transaction since adding role could fail and we don't
                 // want pending entry sitting around if it does
@@ -125,21 +132,29 @@ impl Action {
                 .save_exec(&mut txn)
                 .await?;
 
-                let mute_role = ctx
-                    .guild_config
-                    .mute_role
-                    .ok_or(Error::ConfigMissingField("mute_role"))?;
+                // Add new mute entry
+                Mute::new(
+                    guild_id.0,
+                    user.id.0,
+                    duration
+                        .and_then(|s| s.try_into().ok())
+                        .map(Duration::seconds),
+                )
+                .pending(true)
+                .save_exec(&mut txn)
+                .await?;
 
-                let mut fut =
+                let mut add_role_fut =
                     ctx.http
                         .add_guild_member_role(guild_id, user.id, RoleId(mute_role as u64));
 
                 // TODO: Add default reason
                 if let Some(reason) = reason {
-                    fut = fut.reason(reason)?;
+                    add_role_fut = add_role_fut.reason(reason)?;
                 }
 
-                fut.await?;
+                // Add mute role to user
+                add_role_fut.await?;
 
                 // Add mute entry to handlebars ctx data
                 ctx.data.actions.push(serde_json::to_value(&entry)?);
