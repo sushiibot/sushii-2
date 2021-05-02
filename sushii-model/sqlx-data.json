@@ -1515,6 +1515,57 @@
       ]
     }
   },
+  "7c6cc4ffb6f25d5f13630217e41f811b1d59c4e524718d9deba3b50cc5c3b3e6": {
+    "query": "\n              SELECT *\n                FROM app_public.tags\n               WHERE guild_id = $1\n                 AND tag_name ILIKE '%' || $2 || '%'\n            ORDER BY random()\n             LIMIT 1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "owner_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "tag_name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 4,
+          "name": "use_count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "created",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "820bbaf983fc85fb11ebe5e202e9fde02b5585617d1cbe88dc5cb805c1a77031": {
     "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"guild_id: BigInt\",\n                   msg_all_time as \"msg_all_time: BigInt\",\n                   msg_month as \"msg_month: BigInt\",\n                   msg_week as \"msg_week: BigInt\",\n                   msg_day as \"msg_day: BigInt\",\n                   last_msg\n              FROM app_public.user_levels\n             WHERE user_id = $1\n               AND guild_id = $2\n        ",
     "describe": {

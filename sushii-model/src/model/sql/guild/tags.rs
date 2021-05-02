@@ -59,10 +59,18 @@ impl Tag {
         from_name_query(&pool, tag_name, guild_id).await
     }
 
-    pub async fn random(ctx: &Context, guild_id: GuildId) -> Result<Option<Tag>> {
+    pub async fn random(
+        ctx: &Context,
+        guild_id: GuildId,
+        query: Option<&str>,
+    ) -> Result<Option<Tag>> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
-        random_query(&pool, guild_id).await
+        if let Some(query) = query {
+            random_search_query(&pool, guild_id, query).await
+        } else {
+            random_query(&pool, guild_id).await
+        }
     }
 
     pub async fn search(
@@ -181,6 +189,29 @@ async fn from_name_query(
         "#,
         tag_name,
         i64::from(guild_id),
+    )
+    .fetch_optional(pool)
+    .await
+    .map_err(Into::into)
+}
+
+async fn random_search_query(
+    pool: &sqlx::PgPool,
+    guild_id: GuildId,
+    query: &str,
+) -> Result<Option<Tag>> {
+    sqlx::query_as!(
+        Tag,
+        r#"
+              SELECT *
+                FROM app_public.tags
+               WHERE guild_id = $1
+                 AND tag_name ILIKE '%' || $2 || '%'
+            ORDER BY random()
+             LIMIT 1
+        "#,
+        i64::from(guild_id),
+        query,
     )
     .fetch_optional(pool)
     .await

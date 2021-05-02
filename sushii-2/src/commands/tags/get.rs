@@ -56,7 +56,7 @@ async fn get(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 }
 
 #[command]
-async fn random(ctx: &Context, msg: &Message) -> CommandResult {
+async fn random(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let guild_id = match msg.guild_id {
         Some(id) => id,
         None => {
@@ -65,7 +65,9 @@ async fn random(ctx: &Context, msg: &Message) -> CommandResult {
         }
     };
 
-    let tag = match Tag::random(&ctx, guild_id).await? {
+    let query = args.single::<String>().ok();
+
+    let tag = match Tag::random(&ctx, guild_id, query.as_deref()).await? {
         Some(t) => t,
         None => {
             msg.channel_id

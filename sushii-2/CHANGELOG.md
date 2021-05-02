@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added 
+
+- `tag random [query]` to get a random tag with a given search query
+
 ## [0.2.17] - 2021-04-23
 
 ### Added
