@@ -380,7 +380,7 @@ async fn delete_mod_action_query<'a, E: sqlx::Executor<'a, Database = sqlx::Post
 
 #[test]
 fn new_mod_log_entry() {
-    let entry = ModLogEntry::new("ban", false, 1234, 5678, "username#tag");
+    let entry = ModLogEntry::new("ban", false, 1234, 210, "test#1432");
 
     // https://docs.rs/serenity/0.9.0-rc.0/src/serenity/model/user.rs.html#409-426
     assert_eq!(entry.user_id, 210);
