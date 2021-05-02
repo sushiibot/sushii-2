@@ -5,8 +5,9 @@ use std::sync::Arc;
 use twilight_http::request::AuditLogReason;
 use twilight_model::id::RoleId;
 
-use sushii_model::model::sql::{RuleGauge, RuleScope};
+use sushii_model::model::sql::{ModLogEntry, RuleGauge, RuleScope};
 
+use crate::error::Error;
 use crate::model::has_id::*;
 use crate::model::{Event, RuleContext};
 
@@ -106,11 +107,32 @@ impl Action {
                 ref reason,
             } => {
                 let guild_id = event.guild_id()?;
-                let user_id = event.user_id()?;
+                let user = event.user()?;
 
-                let mut fut = ctx
-                    .http
-                    .add_guild_member_role(guild_id, user_id, RoleId(123));
+                // Start transaction since adding role could fail and we don't
+                // want pending entry sitting around if it does
+                let mut txn = ctx.pg_pool.begin().await?;
+
+                // Create pending case
+                let entry = ModLogEntry::new(
+                    "mute",
+                    true,
+                    guild_id.0,
+                    user.id.0,
+                    &format!("{}#{:0>4}", user.name, user.discriminator),
+                )
+                .reason(reason)
+                .save_exec(&mut txn)
+                .await?;
+
+                let mute_role = ctx
+                    .guild_config
+                    .mute_role
+                    .ok_or(Error::ConfigMissingField("mute_role"))?;
+
+                let mut fut =
+                    ctx.http
+                        .add_guild_member_role(guild_id, user.id, RoleId(mute_role as u64));
 
                 // TODO: Add default reason
                 if let Some(reason) = reason {
@@ -118,6 +140,12 @@ impl Action {
                 }
 
                 fut.await?;
+
+                // Add mute entry to handlebars ctx data
+                ctx.data.actions.push(serde_json::to_value(&entry)?);
+
+                // After everything else successful, commit
+                txn.commit().await?;
             }
             // Counters
             Self::AddCounter { ref name, scope } => {

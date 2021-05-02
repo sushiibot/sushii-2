@@ -29,7 +29,7 @@ pub struct ModLogEntry {
 
 impl ModLogEntry {
     /// Creates a new ModLogEntry, with the case_id of -1
-    pub fn new(action: &str, pending: bool, guild_id: u64, user: &User) -> Self {
+    pub fn new(action: &str, pending: bool, guild_id: u64, user: u64, user_tag: &str) -> Self {
         ModLogEntry {
             guild_id: guild_id as i64,
             // This is temporary as we get the actual case_id when inserting into db
@@ -37,8 +37,8 @@ impl ModLogEntry {
             action: action.to_string(),
             action_time: Utc::now().naive_utc(),
             pending,
-            user_id: user.id.0 as i64,
-            user_tag: user.tag(),
+            user_id: user as i64,
+            user_tag: user_tag.to_string(),
             executor_id: None,
             reason: None,
             msg_id: None,
@@ -146,12 +146,16 @@ impl ModLogEntry {
     pub async fn save(&self, ctx: &Context) -> Result<Self> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
+        self.save_exec(&pool).await
+    }
+
+    pub async fn save_exec<'a, E: sqlx::Executor<'a, Database = sqlx::Postgres>>(&self, exec: E) -> Result<Self> {
         // New cases via ::new() will have a -1 ID, cases that return from DB
         // will have a >=0 ID
         if self.case_id == -1 {
-            add_mod_action_query(&pool, self).await
+            add_mod_action_query(exec, self).await
         } else {
-            update_mod_action_query(&pool, self).await
+            update_mod_action_query(exec, self).await
         }
     }
 
@@ -275,7 +279,7 @@ async fn get_latest_query(
     .map_err(Into::into)
 }
 
-async fn add_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Result<ModLogEntry> {
+async fn add_mod_action_query<'a, E: sqlx::Executor<'a, Database = sqlx::Postgres>>(pool: E, entry: &ModLogEntry) -> Result<ModLogEntry> {
     sqlx::query_as!(
         ModLogEntry,
         r#"
@@ -304,7 +308,7 @@ async fn add_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Resul
     .map_err(Into::into)
 }
 
-async fn update_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Result<ModLogEntry> {
+async fn update_mod_action_query<'a, E: sqlx::Executor<'a, Database = sqlx::Postgres>>(pool: E, entry: &ModLogEntry) -> Result<ModLogEntry> {
     sqlx::query_as!(
         ModLogEntry,
         r#"
@@ -358,7 +362,7 @@ async fn delete_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Re
 
 #[test]
 fn new_mod_log_entry() {
-    let entry = ModLogEntry::new("ban", false, 1234, &User::default());
+    let entry = ModLogEntry::new("ban", false, 1234, 5678, "username#tag");
 
     // https://docs.rs/serenity/0.9.0-rc.0/src/serenity/model/user.rs.html#409-426
     assert_eq!(entry.user_id, 210);

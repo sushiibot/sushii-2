@@ -299,6 +299,11 @@ impl GuildConfig {
         }
     }
 
+    /// Gets from db without cache
+    pub async fn from_id_db(pool: &sqlx::PgPool, guild_id: u64) -> Result<Option<GuildConfig>> {
+        get_guild_config_query(pool, guild_id).await
+    }
+
     /// Gets a Guildconfig from a guild id
     pub async fn from_id(ctx: &Context, guild_id: &GuildId) -> Result<Option<GuildConfig>> {
         GuildConfig::get(ctx, None, Some(guild_id)).await

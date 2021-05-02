@@ -7,6 +7,25 @@ use crate::model::Trigger;
 
 pub type Result<T> = StdResult<T, Error>;
 
+/// Errors from triggering a rule
+#[derive(ThisError, Debug)]
+pub enum RuleError {
+    #[error("Event is missing channel ID")]
+    MissingChannelId,
+    #[error("Event is missing user ID")]
+    MissingUserId,
+    #[error("Event is missing server ID")]
+    MissingGuildId,
+    #[error("Event is missing message ID")]
+    MissingMessageId,
+    #[error("Event is missing member data")]
+    MissingMember,
+    #[error("Unknown data store error")]
+    Unknown,
+    #[error("Invalid event constraint, {0:?} is not applicable to event {1:?}")]
+    InvalidEventConstraint(&'static str, Trigger),
+}
+
 #[derive(ThisError, Debug)]
 pub enum Error {
     #[error("Event is missing channel ID")]
@@ -19,6 +38,8 @@ pub enum Error {
     MissingMessageId,
     #[error("Event is missing member data")]
     MissingMember,
+    #[error("Guild config does not have {0:?} set")]
+    ConfigMissingField(&'static str),
     #[error("Unknown data store error")]
     Unknown,
     #[error("Invalid event constraint, {0:?} is not applicable to event {1:?}")]

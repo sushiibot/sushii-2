@@ -9,17 +9,13 @@ use tokio::sync::RwLock;
 use twilight_http::client::Client;
 use twilight_model::id::GuildId;
 
-use sushii_model::model::sql::GuildConfig;
-
 use crate::model::has_id::HasGuildId;
-use crate::model::{Event, Rule, RuleContext, Trigger};
+use crate::model::{cache::GuildConfigCache, Event, Rule, RuleContext, Trigger};
 use crate::persistence::RuleStore;
 
 type RuleList = Vec<Arc<Rule>>;
 type GuildTriggerRules = DashMap<Trigger, RuleList>;
 type GuildRulesMap = DashMap<GuildId, GuildTriggerRules>;
-
-type GuildConfigMap = DashMap<GuildId, GuildConfig>;
 
 #[derive(Debug)]
 pub struct RulesEngine {
@@ -28,7 +24,7 @@ pub struct RulesEngine {
     /// Rules persistence backend, use this to fetch rules
     pub rules_store: Box<dyn RuleStore>,
     /// Stores rules fetched from file or database
-    pub guild_configs: Arc<GuildConfigMap>,
+    pub guild_configs: GuildConfigCache,
     /// Shared handlebars template to prevent reparsing
     /// This is a RwLock since registering templates requires mut self
     pub handlebars_templates: Arc<RwLock<Handlebars<'static>>>,
@@ -59,7 +55,7 @@ impl RulesEngine {
         Self {
             guild_rules: Arc::new(DashMap::new()),
             rules_store,
-            guild_configs: Arc::new(DashMap::new()),
+            guild_configs: GuildConfigCache::new(),
             handlebars_templates: Arc::new(RwLock::new(Handlebars::new())),
             pg_pool,
             word_lists: Arc::new(DashMap::new()),
@@ -125,15 +121,19 @@ impl RulesEngine {
     /// Events that modify counters also trigger this to process the counter.
     /// It provides the original event that triggered this counter
     #[tracing::instrument]
-    pub fn process_event(&self, event: Arc<Event>) -> Result<()> {
+    pub async fn process_event(&self, event: Arc<Event>) -> Result<()> {
         let matching_rules = match self.get_matching_rules(&event)? {
             Some(r) => r,
             None => return Ok(()),
         };
 
+        let guild_id = event.guild_id()?;
+        let guild_config = self.guild_configs.get(&self.pg_pool, guild_id).await?;
+
         for rule in matching_rules.iter() {
             // Create a new context on every rule trigger
             let mut context = RuleContext::new(
+                guild_config.clone(),
                 self.http.clone(),
                 self.pg_pool.clone(),
                 self.reqwest.clone(),

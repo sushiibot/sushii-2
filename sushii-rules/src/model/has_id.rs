@@ -1,7 +1,10 @@
 use sushii_model::model::sql::RuleScope;
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::gateway::payload;
-use twilight_model::id::{ChannelId, GuildId, MessageId, UserId};
+use twilight_model::{
+    id::{ChannelId, GuildId, MessageId, UserId},
+    user::User,
+};
 
 use crate::error::{Error, Result};
 use crate::model::Event;
@@ -115,6 +118,28 @@ impl HasUserId for DispatchEvent {
     fn user_id(&self) -> Result<UserId> {
         match *self {
             Self::MessageCreate(ref msg) => Ok(msg.author.id),
+            _ => Err(Error::MissingUserId),
+        }
+    }
+}
+
+pub trait HasUser {
+    fn user(&self) -> Result<&User>;
+}
+
+impl HasUser for Event {
+    fn user(&self) -> Result<&User> {
+        match self {
+            Self::Twilight(event) => event.user(),
+            Self::Counter { original_event, .. } => original_event.user(),
+        }
+    }
+}
+
+impl HasUser for DispatchEvent {
+    fn user(&self) -> Result<&User> {
+        match *self {
+            Self::MessageCreate(ref msg) => Ok(&msg.author),
             _ => Err(Error::MissingUserId),
         }
     }

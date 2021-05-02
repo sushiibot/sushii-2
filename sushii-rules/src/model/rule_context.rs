@@ -11,6 +11,8 @@ use tokio::sync::RwLock;
 use twilight_http::client::Client;
 use twilight_model::id::GuildId;
 
+use sushii_model::model::sql::GuildConfig;
+
 use crate::model::Event;
 
 #[derive(Debug, Default, Clone, Serialize)]
@@ -28,6 +30,7 @@ type WordList = Arc<DashMap<GuildId, DashMap<String, AhoCorasick>>>;
 /// Created each time an event fires.
 #[derive(Debug, Clone)]
 pub struct RuleContext<'a> {
+    pub guild_config: Arc<GuildConfig>,
     pub http: Client,
     pub pg_pool: sqlx::PgPool,
     pub reqwest: reqwest::Client,
@@ -40,6 +43,7 @@ pub struct RuleContext<'a> {
 
 impl<'a> RuleContext<'a> {
     pub fn new(
+        guild_config: Arc<GuildConfig>,
         http: Client,
         pg_pool: sqlx::PgPool,
         reqwest: reqwest::Client,
@@ -49,6 +53,7 @@ impl<'a> RuleContext<'a> {
         channel_tx: Sender<Event>,
     ) -> Self {
         Self {
+            guild_config,
             http,
             pg_pool,
             reqwest,

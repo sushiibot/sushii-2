@@ -164,7 +164,7 @@ async fn main() -> Result<()> {
     let mut rx = redis_stream.merge(trigger_stream);
 
     while let Some(event) = rx.next().await {
-        if let Err(e) = engine.process_event(Arc::new(event)) {
+        if let Err(e) = engine.process_event(Arc::new(event)).await {
             tracing::error!("Failed to process event: {}", e);
         }
     }
