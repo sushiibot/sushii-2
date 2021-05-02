@@ -166,6 +166,13 @@ impl ModLogEntry {
 
         delete_mod_action_query(&pool, self).await
     }
+
+    pub async fn delete_exec<'a, E: sqlx::Executor<'a, Database = sqlx::Postgres>>(
+        &self,
+        exec: E,
+    ) -> Result<()> {
+        delete_mod_action_query(exec, self).await
+    }
 }
 
 async fn from_case_id_query(
@@ -351,7 +358,10 @@ async fn update_mod_action_query<'a, E: sqlx::Executor<'a, Database = sqlx::Post
     .map_err(Into::into)
 }
 
-async fn delete_mod_action_query(pool: &sqlx::PgPool, entry: &ModLogEntry) -> Result<()> {
+async fn delete_mod_action_query<'a, E: sqlx::Executor<'a, Database = sqlx::Postgres>>(
+    pool: E,
+    entry: &ModLogEntry,
+) -> Result<()> {
     sqlx::query!(
         r#"
             DELETE FROM app_public.mod_logs

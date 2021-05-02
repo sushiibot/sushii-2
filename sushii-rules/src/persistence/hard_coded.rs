@@ -80,8 +80,13 @@ impl RuleStore for HardCodedStore {
                     }),
                 },
                 actions: vec![
+                    Action::Mute {
+                        // 1 hour mute
+                        duration: Some(60 * 60),
+                        reason: Some("Rule 6, Repeated chat not in English ".to_string()),
+                    },
                     Action::Reply {
-                        content: "Muted for non-English chat".to_string(),
+                        content: "muted lol".to_string(),
                     },
                     Action::ResetCounter {
                         name: "language warning".to_string(),

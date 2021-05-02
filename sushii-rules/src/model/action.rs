@@ -133,7 +133,7 @@ impl Action {
                 .await?;
 
                 // Add new mute entry
-                Mute::new(
+                let mute_entry = Mute::new(
                     guild_id.0,
                     user.id.0,
                     duration
@@ -143,6 +143,11 @@ impl Action {
                 .pending(true)
                 .save_exec(&mut txn)
                 .await?;
+
+                // After everything else successful, commit
+                // Can't do this after the role add since we need it in the db
+                // before role is added
+                txn.commit().await?;
 
                 let mut add_role_fut =
                     ctx.http
@@ -154,13 +159,13 @@ impl Action {
                 }
 
                 // Add mute role to user
-                add_role_fut.await?;
+                if let Err(_) = add_role_fut.await {
+                    entry.delete_exec(&ctx.pg_pool).await?;
+                    mute_entry.delete_exec(&ctx.pg_pool).await?;
+                }
 
                 // Add mute entry to handlebars ctx data
                 ctx.data.actions.push(serde_json::to_value(&entry)?);
-
-                // After everything else successful, commit
-                txn.commit().await?;
             }
             // Counters
             Self::AddCounter { ref name, scope } => {

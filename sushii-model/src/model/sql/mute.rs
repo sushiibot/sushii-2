@@ -146,6 +146,13 @@ impl Mute {
 
         delete_mute_query(&pool, self.guild_id, self.user_id).await
     }
+
+    pub async fn delete_exec<'a, E: sqlx::Executor<'a, Database = sqlx::Postgres>>(
+        &self,
+        exec: E,
+    ) -> Result<()> {
+        delete_mute_query(exec, self.guild_id, self.user_id).await
+    }
 }
 
 async fn get_from_id_query(
@@ -257,7 +264,11 @@ pub async fn delete_mute(ctx: &Context, guild_id: u64, user_id: u64) -> Result<(
     delete_mute_query(&pool, guild_id as i64, user_id as i64).await
 }
 
-async fn delete_mute_query(pool: &sqlx::PgPool, guild_id: i64, user_id: i64) -> Result<()> {
+async fn delete_mute_query<'a, E: sqlx::Executor<'a, Database = sqlx::Postgres>>(
+    pool: E,
+    guild_id: i64,
+    user_id: i64,
+) -> Result<()> {
     sqlx::query!(
         r#"
             DELETE FROM app_public.mutes
