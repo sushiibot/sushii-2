@@ -1,8 +1,9 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 use futures_util::FutureExt;
 use lingua::Language;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use std::convert::TryInto;
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
@@ -555,10 +556,26 @@ impl CounterConstraint {
             CounterValueConstraint::GreaterThanOrEqual(num) => triggered_counter.value >= num,
             CounterValueConstraint::LessThan(num) => triggered_counter.value < num,
             CounterValueConstraint::LessThanOrEqual(num) => triggered_counter.value <= num,
-            _ => {
-                tracing::warn!("Unhandled counter constraint check");
+            CounterValueConstraint::CountsInDuration {
+                increased_by,
+                duration,
+            } => {
+                let guild_id = event.guild_id()?;
+                let scope_id = event.scope_id(self.scope)?;
 
-                return Ok(false);
+                let d = Duration::seconds(duration.try_into()?);
+
+                let curr_count = RuleGauge::get_interval_count(
+                    &ctx.pg_pool,
+                    guild_id.0,
+                    self.scope,
+                    scope_id,
+                    &self.name,
+                    d,
+                )
+                .await?;
+
+                curr_count as u64 >= increased_by
             }
         };
 

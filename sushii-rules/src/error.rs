@@ -1,5 +1,6 @@
 use language_api_wrapper::error::Error as LanguageApiError;
 use std::result::Result as StdResult;
+use std::num::TryFromIntError;
 use sushii_model::Error as SushiiModelError;
 use thiserror::Error as ThisError;
 
@@ -50,4 +51,6 @@ pub enum Error {
     EventDeserialize(String, serde_json::Error),
     #[error(transparent)]
     SushiiModel(#[from] SushiiModelError),
+    #[error("Failed to convert from integer {0}")]
+    TryFromInt(#[from] TryFromIntError)
 }
