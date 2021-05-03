@@ -2380,6 +2380,41 @@
       ]
     }
   },
+  "cd3fe33b749fb11245b5b71807d8b9724bb57304eec0b68b3003593b72da16c4": {
+    "query": "\n                SELECT count(*) as \"count!\"\n                  FROM app_public.rule_gauges\n                 WHERE guild_id = $1\n                   AND scope = $2\n                   AND scope_id = $3\n                   AND name = $4\n                    -- only select the ones newer than duration\n                   AND time > NOW() - ($5)::interval\n                    -- select the ones since the last reset\n                   AND time > (SELECT time\n                                 FROM app_public.rule_gauges\n                                WHERE value = 0\n                             ORDER BY time DESC\n                                LIMIT 1)\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "count!",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          {
+            "Custom": {
+              "name": "rule_scope",
+              "kind": {
+                "Enum": [
+                  "GUILD",
+                  "CHANNEL",
+                  "USER"
+                ]
+              }
+            }
+          },
+          "Int8",
+          "Text",
+          "Interval"
+        ]
+      },
+      "nullable": [
+        null
+      ]
+    }
+  },
   "cd823eaba751e26f3b2d54da256d7477e2fbcbb21b2ac45f697c86a85a291820": {
     "query": "\n              SELECT *\n                FROM app_public.mod_logs\n               WHERE guild_id = $1\n            ORDER BY case_id DESC\n               LIMIT $2\n        ",
     "describe": {
