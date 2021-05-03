@@ -3,11 +3,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::types::Uuid;
 use std::collections::HashMap;
-use std::error::Error;
-use std::sync::Arc;
-use twilight_model::gateway::event::DispatchEvent;
 
-use crate::model::{Action, Condition, Rule, RuleContext, Trigger};
+use crate::model::Rule;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct RuleSet {

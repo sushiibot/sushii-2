@@ -102,6 +102,7 @@ pub enum Trigger {
     #[serde(with = "TwilightEventType")]
     Twilight(EventType),
     Counter,
+    LevelUp,
 }
 
 impl From<EventType> for Trigger {
@@ -115,6 +116,7 @@ impl Trigger {
         match self {
             Self::Twilight(event_type) => event_type.name(),
             Self::Counter => Some("COUNTER"),
+            Self::LevelUp => Some("LEVEL_UP"),
         }
     }
 }

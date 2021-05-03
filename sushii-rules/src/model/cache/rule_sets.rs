@@ -4,7 +4,7 @@ use std::sync::Arc;
 use twilight_model::id::GuildId;
 
 use crate::model::has_id::HasGuildId;
-use crate::model::{cache::GuildConfigCache, Event, Rule, RuleSet, Trigger};
+use crate::model::{Event, Rule, RuleSet, Trigger};
 use crate::persistence::RuleStore;
 
 /// A single rule set with a rule cache

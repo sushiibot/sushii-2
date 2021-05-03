@@ -10,7 +10,10 @@ use twilight_http::client::Client;
 use twilight_model::id::GuildId;
 
 use crate::model::has_id::HasGuildId;
-use crate::model::{cache::{GuildConfigCache, RuleSetsCache}, Event, Rule, RuleContext, Trigger};
+use crate::model::{
+    cache::{GuildConfigCache, RuleSetsCache},
+    Event, RuleContext,
+};
 use crate::persistence::RuleStore;
 
 #[derive(Debug)]

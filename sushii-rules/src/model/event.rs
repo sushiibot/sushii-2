@@ -1,5 +1,6 @@
 use serde::Serialize;
 use sushii_model::model::sql::RuleGauge;
+use twilight_model::channel::message::Message;
 use twilight_model::gateway::event::DispatchEvent;
 
 use crate::model::Trigger;
@@ -15,6 +16,19 @@ pub enum Event {
         counter: RuleGauge,
         original_event: DispatchEvent,
     },
+    /// Timer
+    LevelUp {
+        /// ID of the user
+        user_id: u64,
+        /// Message that triggered this event
+        message: Message,
+        /// New user level
+        level: u64,
+        /// Current user XP
+        xp: u64,
+        /// Previous user level
+        old_level: u64,
+    },
 }
 
 impl From<DispatchEvent> for Event {
@@ -28,6 +42,7 @@ impl Event {
         match self {
             Self::Twilight(event) => event.kind().into(),
             Self::Counter { .. } => Trigger::Counter,
+            Self::LevelUp { .. } => Trigger::LevelUp,
         }
     }
 }
