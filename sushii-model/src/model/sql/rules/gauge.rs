@@ -1,7 +1,9 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
+use sqlx::postgres::types::PgInterval;
+use std::convert::TryFrom;
 
-use crate::error::Result;
+use crate::error::{Error, Result};
 
 #[derive(
     Deserialize, Serialize, sqlx::Type, Clone, Copy, Eq, PartialEq, Debug, schemars::JsonSchema,
@@ -67,6 +69,44 @@ impl RuleGauge {
             .map(|c| c.value);
 
         Ok(counter.unwrap_or(0))
+    }
+
+    /// Gets the number of counts in a given interval
+    pub async fn get_interval_count(
+        pool: &sqlx::PgPool,
+        guild_id: u64,
+        scope: RuleScope,
+        scope_id: u64,
+        name: &str,
+        duration: Duration,
+    ) -> Result<i64> {
+        sqlx::query!(
+            r#"
+                SELECT count(*) as "count!"
+                  FROM app_public.rule_gauges
+                 WHERE guild_id = $1
+                   AND scope = $2
+                   AND scope_id = $3
+                   AND name = $4
+                    -- only select the ones newer than duration
+                   AND time > NOW() - ($5)::interval
+                    -- select the ones since the last reset
+                   AND time > (SELECT time
+                                 FROM app_public.rule_gauges
+                                WHERE value = 0
+                             ORDER BY time DESC
+                                LIMIT 1)
+            "#,
+            guild_id as i64,
+            scope as _,
+            scope_id as i64,
+            name,
+            PgInterval::try_from(duration).map_err(|e| Error::PgInterval(e))?,
+        )
+        .fetch_one(pool)
+        .await
+        .map(|r| r.count)
+        .map_err(Into::into)
     }
 
     pub async fn inc(
