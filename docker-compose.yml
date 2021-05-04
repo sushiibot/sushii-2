@@ -25,15 +25,21 @@ services:
     grafana:
         image: grafana/grafana:7.1.5
         container_name: grafana
+        logging:
+            driver: loki
+            options:
+                loki-url: "http://loki:3100/loki/api/v1/push"
         expose:
             - "3000"
         volumes:
             - ~/docker/grafana:/var/lib/grafana
         networks:
             - web
+            - loki
         env_file:
             - .env.grafana
         labels:
+            - "traefik.docker.network=sushii-2_web"
             - "traefik.http.routers.grafana.rule=Host(`grafana.sushii.xyz`)"
             - "traefik.http.routers.grafana.entrypoints=secure"
             - "traefik.http.routers.grafana.tls.certresolver=acme"
@@ -47,12 +53,32 @@ services:
         networks:
             - sushii_net
             - web
+            - loki
         labels:
             - "traefik.docker.network=sushii-2_web"
             - "traefik.http.routers.prometheus.rule=Host(`prometheus.sushii.xyz`)"
             - "traefik.http.routers.prometheus.entrypoints=secure"
             - "traefik.http.routers.prometheus.tls.certresolver=acme"
             - "traefik.http.routers.prometheus.middlewares=auth@file"
+    loki:
+        image: grafana/loki:2.0.0
+        container_name: loki
+        expose:
+            - "3100"
+        command: -config.file=/etc/loki/local-config.yaml
+        volumes:
+            - ./loki-config.yml:/etc/loki/local-config.yaml
+        networks:
+            - loki
+    promtail:
+        image: grafana/promtail:2.0.0
+        container_name: promtail
+        command: -config.file=/etc/promtail/config.yml
+        volumes:
+            - /var/log:/var/log
+            - ./promtail-config.yml:/etc/promtail/config.yml:ro
+        networks:
+            - loki
     cadvisor:
         image: gcr.io/google-containers/cadvisor:latest
         container_name: cadvisor
@@ -189,6 +215,13 @@ services:
         image: redis:6
         container_name: sushii-redis
         restart: unless-stopped
+        logging:
+            driver: json-file
+            options:
+                max-size: "10m"
+                max-file: "3"
+                mode: non-blocking
+                max-buffer-size: 4m
         expose:
             - "6379"
         networks:
@@ -268,4 +301,6 @@ networks:
     web:
         internal: false
     sushii_net:
+        external: false
+    loki:
         external: false
