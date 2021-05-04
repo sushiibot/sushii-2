@@ -12,7 +12,6 @@ async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     // Check cooldown before checking args
     let mut author_user_data = UserData::from_id_or_new(&ctx, msg.author.id).await?;
 
-    /*
     if let Some(duration_str) = author_user_data.fishies_humantime_cooldown() {
         msg.channel_id
             .say(&ctx, format!("You can fishy again in {}", duration_str))
@@ -20,7 +19,6 @@ async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
         return Ok(());
     }
-    */
 
     let target_str = match args.single::<String>() {
         Ok(s) => s,
