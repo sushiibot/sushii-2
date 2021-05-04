@@ -107,7 +107,7 @@ impl RuleStore for HardCodedStore {
             author: 150443906511667200,
             category: Some("Auto-moderator".into()),
             config: HashMap::new(),
-            rules: rules,
+            rules,
         };
 
         Ok(vec![rule_set])

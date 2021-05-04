@@ -9,6 +9,7 @@ use std::pin::Pin;
 use std::sync::Arc;
 use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::user::User;
+use twilight_model::user::UserFlags;
 
 use sushii_model::model::sql::{RuleGauge, RuleScope};
 
@@ -330,6 +331,26 @@ pub enum DateConstraint {
     /// # Not equals
     /// Does not equal given date
     NotEquals(DateTime<Utc>),
+    /// # Older than a duration
+    /// Is older than a given duration in seconds
+    OlderThan(u64),
+}
+
+impl DateConstraint {
+    pub async fn check_date(&self, _ctx: &RuleContext<'_>, input: DateTime<Utc>) -> Result<bool> {
+        let res = match *self {
+            Self::Equals(target) => input == target,
+            Self::NotEquals(target) => input != target,
+            Self::OlderThan(secs) => {
+                let d = Duration::seconds(secs.try_into()?);
+                let now = Utc::now();
+
+                input < now - d
+            }
+        };
+
+        Ok(res)
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
@@ -360,8 +381,17 @@ impl UserConstraint {
         let val = match self {
             UserConstraint::Username(s) => s.check_string(ctx, &user.name).await?,
             UserConstraint::Id(s) => s.check_integer(ctx, user.id.0).await?,
+            UserConstraint::IsBot(s) => s.check_bool(ctx, user.bot).await?,
+            UserConstraint::IsVerifiedBot(s) => {
+                s.check_bool(
+                    ctx,
+                    user.public_flags
+                        .map_or(false, |f| f.contains(UserFlags::VERIFIED_BOT)),
+                )
+                .await?
+            }
             _ => {
-                tracing::warn!("Unhandled author constraint check");
+                tracing::warn!("Unhandled user constraint check");
 
                 false
             }
@@ -413,6 +443,31 @@ impl MemberConstraint {
         let val = match self {
             MemberConstraint::Deaf(b) => b.check_bool(ctx, member.deaf).await?,
             MemberConstraint::Mute(b) => b.check_bool(ctx, member.mute).await?,
+            MemberConstraint::JoinedAt(b) => {
+                if let Some(joined_at) = &member.joined_at {
+                    b.check_date(ctx, DateTime::parse_from_rfc3339(joined_at)?.into())
+                        .await?
+                } else {
+                    false
+                }
+            }
+            MemberConstraint::Nickname(b) => {
+                if let Some(nick) = &member.nick {
+                    b.check_string(ctx, nick).await?
+                } else {
+                    false
+                }
+            }
+            // pending not in partial member
+            // MemberConstraint::Pending(b) => b.check_bool(ctx, member.pending).await?,
+            MemberConstraint::PremiumSince(b) => {
+                if let Some(premium_since) = &member.premium_since {
+                    b.check_date(ctx, DateTime::parse_from_rfc3339(premium_since)?.into())
+                        .await?
+                } else {
+                    false
+                }
+            }
             _ => {
                 tracing::warn!("Unhandled member constraint check");
 
@@ -534,7 +589,7 @@ impl CounterConstraint {
             None
         };
 
-        let triggered_counter = match triggered_counter.or(db_counter.as_ref()) {
+        let triggered_counter = match triggered_counter.or_else(|| db_counter.as_ref()) {
             Some(c) => c,
             // No counter found, should not perform actions
             None => return Ok(false),

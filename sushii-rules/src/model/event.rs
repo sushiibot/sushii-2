@@ -20,8 +20,10 @@ pub enum Event {
     LevelUp {
         /// ID of the user
         user_id: u64,
+        // Boxed because of clippy
+        // https://rust-lang.github.io/rust-clippy/master/index.html#large_enum_variant
         /// Message that triggered this event
-        message: Message,
+        message: Box<Message>,
         /// New user level
         level: u64,
         /// Current user XP

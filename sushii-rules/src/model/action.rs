@@ -159,7 +159,7 @@ impl Action {
                 }
 
                 // Add mute role to user
-                if let Err(_) = add_role_fut.await {
+                if add_role_fut.await.is_err() {
                     entry.delete_exec(&ctx.pg_pool).await?;
                     mute_entry.delete_exec(&ctx.pg_pool).await?;
                 }

@@ -1,6 +1,6 @@
 use language_api_wrapper::error::Error as LanguageApiError;
-use std::result::Result as StdResult;
 use std::num::TryFromIntError;
+use std::result::Result as StdResult;
 use sushii_model::Error as SushiiModelError;
 use thiserror::Error as ThisError;
 
@@ -52,5 +52,7 @@ pub enum Error {
     #[error(transparent)]
     SushiiModel(#[from] SushiiModelError),
     #[error("Failed to convert from integer {0}")]
-    TryFromInt(#[from] TryFromIntError)
+    TryFromInt(#[from] TryFromIntError),
+    #[error("Failed to parse DateTime {0}")]
+    DateTimeParse(#[from] chrono::ParseError),
 }

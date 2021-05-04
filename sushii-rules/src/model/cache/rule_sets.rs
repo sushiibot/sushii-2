@@ -88,7 +88,7 @@ impl RuleSetsCache {
                 continue;
             }
 
-            if let Some(rules) = set.trigger_map.get(&event_type.into()).map(|r| r.clone()) {
+            if let Some(rules) = set.trigger_map.get(&event_type).map(|r| r.clone()) {
                 for rule in rules {
                     matching_rules.push(rule.clone());
                 }
