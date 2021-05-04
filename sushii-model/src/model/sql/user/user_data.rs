@@ -1,7 +1,4 @@
 use chrono::{naive::NaiveDateTime, offset::Utc, Duration};
-use rand::distributions::{Bernoulli, Distribution};
-use rand::prelude::*;
-use rand_distr::StandardNormal;
 use serde::{Deserialize, Serialize};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
@@ -9,6 +6,7 @@ use sqlx::types::Json;
 
 use crate::error::Result;
 use crate::keys::DbPool;
+use crate::model::sql::FishyType;
 
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug, Default)]
 pub struct UserProfileData {
@@ -95,30 +93,12 @@ impl UserData {
         self
     }
 
-    pub fn inc_fishies(&mut self, is_self: bool) -> (i64, bool) {
-        // 1% chance of golden fishy
-        let d = Bernoulli::new(0.01).unwrap();
-        let is_golden = d.sample(&mut thread_rng());
+    pub fn inc_fishies(&mut self, is_self: bool) -> (FishyType, u64) {
+        let (kind, count) = FishyType::get_rand_fishies(is_self);
 
-        // N(0, 1)
-        let mut fishies: f64 = thread_rng().sample(StandardNormal);
+        self.fishies += count as i64;
 
-        fishies = fishies.abs() * 8.0;
-        fishies += 5.0;
-
-        // For someone else, multiply by 1.5
-        if !is_self {
-            fishies *= 1.7f64;
-        }
-
-        // If golden fishy, multiply x6
-        if is_golden {
-            fishies *= 8.0;
-        }
-
-        self.fishies += fishies.round() as i64;
-
-        (fishies.round() as i64, is_golden)
+        (kind, count)
     }
 
     pub fn rep_level(&self) -> String {

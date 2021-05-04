@@ -12,6 +12,7 @@ async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     // Check cooldown before checking args
     let mut author_user_data = UserData::from_id_or_new(&ctx, msg.author.id).await?;
 
+    /*
     if let Some(duration_str) = author_user_data.fishies_humantime_cooldown() {
         msg.channel_id
             .say(&ctx, format!("You can fishy again in {}", duration_str))
@@ -19,6 +20,7 @@ async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
         return Ok(());
     }
+    */
 
     let target_str = match args.single::<String>() {
         Ok(s) => s,
@@ -81,7 +83,7 @@ async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .map(|d| d.fishies)
         .unwrap_or(author_user_data.fishies);
 
-    let (fishies, is_golden) = match target_user_data {
+    let (fishy_kind, fishy_count) = match target_user_data {
         Some(mut target) => {
             // Someone else
             let fishies_tup = target.inc_fishies(is_self);
@@ -106,14 +108,13 @@ async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         format!(" for {}", target_user.name)
     };
 
-    let s = if is_golden {
-        format!(
-            "You caught a **golden fishy**{}!!! <:goldenFishy:418676324157227008> ({} fishies)",
-            name_str, fishies
-        )
-    } else {
-        format!("You caught **{} fishies**{}!", fishies, name_str)
-    };
+    let s = format!(
+        "You caught a {}{}! {} ({} fishies)",
+        fishy_kind,
+        name_str,
+        fishy_kind.emoji(),
+        fishy_count
+    );
 
     msg.channel_id
         .send_message(ctx, |m| {
@@ -130,7 +131,7 @@ async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                     "{} {} → {} fishies",
                     s,
                     total_fishies,
-                    total_fishies + fishies,
+                    total_fishies + fishy_count as i64,
                 ));
 
                 e

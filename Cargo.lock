@@ -5592,7 +5592,6 @@ dependencies = [
  "num-traits 0.2.14",
  "num_cpus",
  "rand 0.7.3",
- "rand_distr",
  "redis",
  "regex 1.4.5",
  "reqwest",

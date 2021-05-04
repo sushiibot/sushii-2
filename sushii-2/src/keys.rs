@@ -1,3 +1,4 @@
+use deadpool_redis::Pool as RedisPool;
 use reqwest::Client as ReqwestClient;
 use serenity::{
     client::bridge::gateway::ShardManager,
@@ -25,4 +26,10 @@ pub struct ReqwestContainer;
 
 impl TypeMapKey for ReqwestContainer {
     type Value = ReqwestClient;
+}
+
+pub struct RedisPoolContainer;
+
+impl TypeMapKey for RedisPoolContainer {
+    type Value = RedisPool;
 }

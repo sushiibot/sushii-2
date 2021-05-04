@@ -22,6 +22,7 @@ pub use self::{
     rules::gauge::{RuleGauge, RuleScope},
     user::{
         cached_user::CachedUser,
+        fishies::FishyType,
         notification::Notification,
         reminder::Reminder,
         user_data::{UserData, UserProfileData},
