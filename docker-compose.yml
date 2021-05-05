@@ -136,6 +136,25 @@ services:
             - sushii_net
         labels:
             - traefik.enable=false
+    sushii-web:
+        image: ghcr.io/sushiibot/sushii-web:latest
+        container_name: sushii-web
+        restart: unless-stopped
+        depends_on:
+            - postgres
+        expose:
+            - "3000"
+        env_file:
+            - .sushii-web.env
+        networks:
+            - sushii_net
+            - web
+        labels:
+            - "traefik.docker.network=sushii-2_web"
+            - "traefik.http.services.sushii-web.loadbalancer.server.port=3000"
+            - "traefik.http.routers.sushii-web.rule=Host(`staging.sushii.xyz`)"
+            - "traefik.http.routers.sushii-web.entrypoints=secure"
+            - "traefik.http.routers.sushii-web.tls.certresolver=acme"
     sushii-api:
         image: ghcr.io/sushiibot/sushii-api:latest
         container_name: sushii-api
