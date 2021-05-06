@@ -18,6 +18,10 @@ scrape_configs:
       static_configs:
           - targets: ["sushii-image-server:3000"]
 
+    - job_name: "sushii-web"
+      static_configs:
+          - targets: ["sushii-web:3000"]
+
     - job_name: "cadvisor"
       static_configs:
           - targets: ["cadvisor:8080"]
