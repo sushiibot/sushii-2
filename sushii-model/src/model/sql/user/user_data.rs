@@ -83,7 +83,7 @@ impl UserData {
         self
     }
 
-    pub fn reset_last_fishy(mut self) -> Self {
+    pub fn reset_last_fishy(&mut self) -> &mut Self {
         self.last_fishies.replace(Utc::now().naive_utc());
         self
     }
@@ -93,8 +93,8 @@ impl UserData {
         self
     }
 
-    pub fn inc_fishies(&mut self, is_self: bool) -> (FishyType, u64) {
-        let (kind, count) = FishyType::get_rand_fishies(is_self);
+    pub fn inc_fishies(&mut self, is_self: bool, from_patron: bool) -> (FishyType, u64) {
+        let (kind, count) = FishyType::get_rand_fishies(is_self, from_patron);
 
         self.fishies += count as i64;
 

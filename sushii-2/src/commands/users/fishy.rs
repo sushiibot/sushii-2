@@ -84,7 +84,7 @@ async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let (fishy_kind, fishy_count) = match target_user_data {
         Some(mut target) => {
             // Someone else
-            let fishies_tup = target.inc_fishies(is_self);
+            let fishies_tup = target.inc_fishies(is_self, author_user_data.is_patron);
             target.save(&ctx).await?;
             // So we need to save author separately
             author_user_data.reset_last_fishy().save(&ctx).await?;
@@ -92,7 +92,7 @@ async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             fishies_tup
         }
         None => {
-            let fishies_tup = author_user_data.inc_fishies(is_self);
+            let fishies_tup = author_user_data.inc_fishies(is_self, author_user_data.is_patron);
 
             author_user_data.reset_last_fishy().save(&ctx).await?;
 
@@ -131,6 +131,10 @@ async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                     total_fishies,
                     total_fishies + fishy_count as i64,
                 ));
+
+                if author_user_data.is_patron {
+                    e.footer(|f| f.text("2% golden fishy patron bonus"));
+                }
 
                 e
             })

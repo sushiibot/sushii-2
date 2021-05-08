@@ -70,8 +70,12 @@ impl FishyType {
         ]
     }
 
-    fn rare_fishies() -> &'static [FishyType] {
-        &[Self::Rotten, Self::Golden]
+    fn rare_fishies_good() -> &'static [FishyType] {
+        &[Self::Golden]
+    }
+
+    fn rare_fishies_bad() -> &'static [FishyType] {
+        &[Self::Rotten]
     }
 
     pub fn emoji(&self) -> &'static str {
@@ -97,18 +101,29 @@ impl FishyType {
     }
 
     /// Randomly picks a fishy type, returning the type and amount
-    pub fn get_rand_fishies(is_self: bool) -> (FishyType, u64) {
+    pub fn get_rand_fishies(is_self: bool, is_patron: bool) -> (FishyType, u64) {
         let mut rng = thread_rng();
         // Exclusive of high
         let n: u32 = rng.gen_range(1, 101);
 
         // Unwrap ok since it's only None when slice is empty
-        let fishy_type = match n {
-            1..=79 => *Self::common_fishies().choose(&mut rng).unwrap(),
-            80..=99 => *Self::patron_fishies().choose(&mut rng).unwrap(),
-            100 => *Self::rare_fishies().choose(&mut rng).unwrap(),
-            // Should be unreachable but just in case I guess
-            _ => *Self::common_fishies().choose(&mut rng).unwrap(),
+        let fishy_type = if is_patron {
+            // Patreon rates
+            match n {
+                1 => *Self::rare_fishies_bad().choose(&mut rng).unwrap(),
+                2..=74 => *Self::common_fishies().choose(&mut rng).unwrap(),
+                75..=98 => *Self::patron_fishies().choose(&mut rng).unwrap(),
+                // 99 +, 2%
+                _ => *Self::rare_fishies_good().choose(&mut rng).unwrap(),
+            }
+        } else {
+            match n {
+                1 => *Self::rare_fishies_bad().choose(&mut rng).unwrap(),
+                2..=79 => *Self::common_fishies().choose(&mut rng).unwrap(),
+                80..=99 => *Self::patron_fishies().choose(&mut rng).unwrap(),
+                // 100 +, 1%
+                _ => *Self::rare_fishies_good().choose(&mut rng).unwrap(),
+            }
         };
 
         let mut fishy_count: f64 = fishy_type.fishy_range().choose(&mut rng).unwrap() as f64;
