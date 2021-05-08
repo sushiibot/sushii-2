@@ -11,6 +11,7 @@ impl RawEventHandler for RawHandler {
 
         metrics.raw_event(&ctx, &event).await;
 
+        /*
         let event_type = event.event_type();
 
         // Guild unavailable = None
@@ -54,5 +55,6 @@ impl RawEventHandler for RawHandler {
         {
             tracing::error!("Failed to push event to redis: {}", e);
         }
+        */
     }
 }

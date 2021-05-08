@@ -56,10 +56,13 @@ async fn main() -> Result<()> {
         .connect(&sushii_conf.database_url)
         .await?;
 
+    /*
+    // Disabled for now
     let redis_pool = sushii_conf
         .redis
         .create_pool()
         .expect("Failed to create redis pool");
+    */
 
     // sqlx::migrate!("./migrations").run(&pool).await?;
 
@@ -156,7 +159,7 @@ async fn main() -> Result<()> {
         data.insert::<SushiiConfig>(Arc::clone(&sushii_conf));
         data.insert::<SushiiCache>(SushiiCache::default());
         data.insert::<DbPool>(pool.clone());
-        data.insert::<RedisPoolContainer>(redis_pool.clone());
+        // data.insert::<RedisPoolContainer>(redis_pool.clone());
         data.insert::<Metrics>(Arc::clone(&metrics));
         data.insert::<ReqwestContainer>(reqwest::Client::new());
     }
