@@ -155,7 +155,7 @@ mod tests {
         let mut total = 0;
 
         for _ in 0..100 {
-            let (kind, count) = FishyType::get_rand_fishies(false);
+            let (kind, count) = FishyType::get_rand_fishies(false, false);
             total += count;
 
             // type -> (num catches, average)
