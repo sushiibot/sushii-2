@@ -36,7 +36,6 @@ async fn serverinfo(ctx: &Context, msg: &Message) -> CommandResult {
         "**Members:** {}",
         guild.member_count.to_formatted_string(&Locale::en)
     )?;
-    writeln!(guild_str, "**Region:** {}", guild.region)?;
     writeln!(guild_str, "**Roles:** {}", guild.roles.len())?;
     writeln!(
         guild_str,
