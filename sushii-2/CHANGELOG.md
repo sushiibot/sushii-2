@@ -7,9 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.18] - 2021-05-08
+
 ### Added 
 
 - `tag random [query]` to get a random tag with a given search query
+- Variety of new fishy types for `fishy`
+- 2% golden fishy chance to patrons
 
 ## [0.2.17] - 2021-04-23
 
@@ -454,7 +458,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Prevent role handler from running outside of role channels
 -   Fix mod log entry saving
 
-[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.12...HEAD
+[unreleased]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.18...HEAD
+[0.2.21]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.20...sushii-2-v0.2.21
+[0.2.20]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.19...sushii-2-v0.2.20
+[0.2.19]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.18...sushii-2-v0.2.19
+[0.2.18]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.17...sushii-2-v0.2.18
+[0.2.17]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.16...sushii-2-v0.2.17
+[0.2.16]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.15...sushii-2-v0.2.16
+[0.2.15]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.14...sushii-2-v0.2.15
+[0.2.14]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.13...sushii-2-v0.2.14
 [0.2.13]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.12...sushii-2-v0.2.13
 [0.2.12]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.11...sushii-2-v0.2.12
 [0.2.11]: https://github.com/sushiibot/sushii-2/compare/sushii-2-v0.2.10...sushii-2-v0.2.11
