@@ -27,6 +27,8 @@ fn is_member_unknown_error(err: &serenity::Error) -> bool {
                 serenity::http::error::Error::UnsuccessfulRequest(
                     serenity::http::error::ErrorResponse { error, .. },
                 ) => {
+                    tracing::error!("Failed to fetch member: {:#?}", error.errors);
+
                     // https://discord.com/developers/docs/topics/opcodes-and-status-codes#json
                     // Member not found, Unknown Member
                     // Meaning they are not in the guild
