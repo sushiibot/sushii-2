@@ -41,6 +41,41 @@ fn is_member_unknown_error(err: &serenity::Error) -> bool {
 
 pub async fn unmute_member(ctx: &Context, mute: &Mute) -> Result<()> {
     let guild_id = GuildId(mute.guild_id as u64);
+
+    let failure_id = format!(
+        "app_public.mutes:{}:{}",
+        mute.guild_id as u64, mute.user_id as u64
+    );
+
+    // First check if this failed too many times
+    let failure = match Failure::from_id(ctx, &failure_id).await? {
+        Some(f) => {
+            // Too many attempts, delete and exit
+            if f.exceeded_attempts() {
+                tracing::info!(
+                    ?mute,
+                    "Mute fail count exceeded max attempts ({}), deleting",
+                    f.attempt_count
+                );
+                mute.delete(ctx).await?;
+
+                // Also delete failure since we don't need to keep track anymore
+                f.delete(ctx).await?;
+
+                return Ok(());
+            }
+
+            // Failed attempt before, skip until next attempt time
+            // May accumulate for certain amount of time (25 failures)
+            if !f.should_attempt() {
+                return Ok(());
+            }
+
+            Some(f)
+        }
+        None => None,
+    };
+
     // Possibly inefficient here since there can be the same guild config
     // fetched here, but it's likely that there aren't many entries at a single
     // time since the check happens every 10 seconds
@@ -70,6 +105,20 @@ pub async fn unmute_member(ctx: &Context, mute: &Mute) -> Result<()> {
         Err(e) => {
             // Some other error failed, member could still be in the guild
             if !is_member_unknown_error(&e) {
+                // Inc failures
+                let mut failure = failure.unwrap_or_else(|| Failure::new(failure_id));
+                failure.inc();
+                failure = failure.save(ctx).await?;
+
+                tracing::warn!(
+                    ?mute,
+                    "Mute member fetch for guild {} user {} failed (attempt {}), trying again at {}",
+                    mute.guild_id as u64,
+                    mute.user_id as u64,
+                    failure.attempt_count,
+                    failure.next_attempt
+                );
+
                 return Err(e.into());
             }
 
@@ -94,10 +143,28 @@ pub async fn unmute_member(ctx: &Context, mute: &Mute) -> Result<()> {
         .await?;
 
     if let Some(mut m) = member {
-        m.remove_role(&ctx, mute_role).await?;
+        if let Err(e) = m.remove_role(&ctx, mute_role).await {
+            let mut failure = failure.unwrap_or_else(|| Failure::new(failure_id));
+            failure.inc();
+            failure = failure.save(ctx).await?;
+
+            tracing::warn!(
+                ?mute,
+                "Mute role remove for guild {} user {} failed (attempt {}), trying again at {}",
+                mute.guild_id as u64,
+                mute.user_id as u64,
+                failure.attempt_count,
+                failure.next_attempt
+            );
+
+            return Err(e.into());
+        }
     }
 
     mute.delete(&ctx).await?;
+    if let Some(failure) = failure {
+        failure.delete(ctx).await?;
+    }
 
     Ok(())
 }

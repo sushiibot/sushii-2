@@ -11,7 +11,13 @@ pub async fn update_stats(ctx: &Context) -> Result<()> {
     let guild_count = ctx.cache.guild_count().await;
 
     BotStat::set(&pool, "bot", "guild_count", guild_count as i64).await?;
-    BotStat::set(&pool, "bot", "member_count", (*metrics.member_total.lock().await) as i64).await?;
+    BotStat::set(
+        &pool,
+        "bot",
+        "member_count",
+        (*metrics.member_total.lock().await) as i64,
+    )
+    .await?;
 
     Ok(())
 }

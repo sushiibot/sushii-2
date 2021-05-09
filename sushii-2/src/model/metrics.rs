@@ -110,7 +110,7 @@ impl Metrics {
                     *(self.member_total.lock().await) += guild.member_count;
                 }
             }
-            Event::GuildDelete(GuildDeleteEvent { guild, ..  }) => {
+            Event::GuildDelete(GuildDeleteEvent { guild, .. }) => {
                 decrement_gauge!("guilds", 1.0);
 
                 if let Some(count) = self.member_counts.get(&guild.id) {
