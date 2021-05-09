@@ -52,7 +52,7 @@ async fn main() -> Result<()> {
         });
 
     let pool = PgPoolOptions::new()
-        .max_connections(4)
+        .max_connections(32)
         .connect(&sushii_conf.database_url)
         .await?;
 

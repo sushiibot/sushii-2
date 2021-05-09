@@ -30,7 +30,8 @@ version = "1.0"
 features = ["macros", "rt-multi-thread", "time", "signal"]
 
 [dependencies.sqlx]
-version = "0.5"
+git = "https://github.com/launchbadge/sqlx/"
+branch = "ab/more-pool-fixes"
 default-features = false
 features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "offline", "migrate", "decimal" ]
 

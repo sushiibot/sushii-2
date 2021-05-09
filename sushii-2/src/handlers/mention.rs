@@ -25,7 +25,11 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
     let bot_id = ctx.cache.current_user_id().await;
 
     // If mentioned **without** a command (since mention can be prefix)
-    if msg.content.trim() != format!("<@!{}>", bot_id.0) {
+    let trimmed_content = msg.content.trim_start_matches("<@")
+        .trim_start_matches("!")
+        .trim_end_matches(">");
+
+    if trimmed_content != bot_id.0.to_string() {
         return Ok(());
     }
 
