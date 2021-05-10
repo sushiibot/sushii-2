@@ -5,8 +5,6 @@ use metrics_exporter_prometheus::PrometheusBuilder;
 use metrics_util::layers::{Layer, PrefixLayer};
 use serenity::{model::prelude::*, prelude::*};
 use std::net::SocketAddr;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 
 use crate::SushiiConfig;
 
@@ -29,10 +27,7 @@ impl UserType {
 }
 
 #[derive(Clone)]
-pub struct Metrics {
-    /// Buffer for count before writing to db
-    pub commands_executed_buffer: Arc<Mutex<u64>>,
-}
+pub struct Metrics;
 
 impl Metrics {
     pub async fn new(conf: &SushiiConfig) -> Self {
@@ -75,9 +70,7 @@ impl Metrics {
             "Number of triggered notifications"
         );
 
-        Self {
-            commands_executed_buffer: Arc::new(Mutex::new(0)),
-        }
+        Self
     }
 
     pub async fn raw_event(&self, ctx: &Context, event: &Event) {

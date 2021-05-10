@@ -4,7 +4,6 @@ pub mod guild;
 pub mod mod_log;
 pub mod mute;
 pub mod rules;
-pub mod stats;
 pub mod user;
 
 pub use self::{
@@ -21,7 +20,6 @@ pub use self::{
     mod_log::ModLogEntry,
     mute::{delete_mute, Mute},
     rules::gauge::{RuleGauge, RuleScope},
-    stats::BotStat,
     user::{
         cached_user::CachedUser,
         fishies::FishyType,
