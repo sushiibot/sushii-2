@@ -107,7 +107,7 @@ pub async fn after(ctx: &Context, msg: &Message, cmd_name: &str, error: Result<(
             buf_count.clone()
         };
 
-        if buf_count >= 10 {
+        if buf_count > 10 {
             // Reset before writing to db
             {
                 let mut buf_count = metrics.commands_executed_buffer.lock().await;

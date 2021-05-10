@@ -1,4 +1,3 @@
-use dashmap::DashMap;
 use metrics::{
     counter, decrement_gauge, increment_gauge, register_counter, register_gauge, register_histogram,
 };
@@ -33,9 +32,6 @@ impl UserType {
 pub struct Metrics {
     /// Buffer for count before writing to db
     pub commands_executed_buffer: Arc<Mutex<u64>>,
-    /// Member counts
-    pub member_counts: Arc<DashMap<GuildId, u64>>,
-    pub member_total: Arc<Mutex<u64>>,
 }
 
 impl Metrics {
@@ -81,8 +77,6 @@ impl Metrics {
 
         Self {
             commands_executed_buffer: Arc::new(Mutex::new(0)),
-            member_counts: Arc::new(DashMap::new()),
-            member_total: Arc::new(Mutex::new(0)),
         }
     }
 
@@ -101,37 +95,20 @@ impl Metrics {
                 }
             }
             Event::GuildCreate(GuildCreateEvent { guild, .. }) => {
-                // Check if already added, since this can be sent again
-                if !self.member_counts.contains_key(&guild.id) {
-                    increment_gauge!("guilds", 1.0);
-                    increment_gauge!("members", guild.member_count as f64);
-
-                    self.member_counts.insert(guild.id, guild.member_count);
-                    *(self.member_total.lock().await) += guild.member_count;
-                }
+                increment_gauge!("guilds", 1.0);
+                increment_gauge!("members", guild.member_count as f64);
             }
-            Event::GuildDelete(GuildDeleteEvent { guild, .. }) => {
+            Event::GuildDelete(_) => {
                 decrement_gauge!("guilds", 1.0);
 
-                if let Some(count) = self.member_counts.get(&guild.id) {
-                    decrement_gauge!("members", (*count) as f64);
-                    *(self.member_total.lock().await) -= *count;
-
-                    self.member_counts.remove(&guild.id);
-                }
+                // self.members stale value,
+                // don't have the guild anymore so don't know how many to sub()
             }
-            Event::GuildMemberAdd(GuildMemberAddEvent { guild_id, .. }) => {
-                let mut entry = self.member_counts.entry(*guild_id).or_insert(0);
-                *entry += 1;
-
+            Event::GuildMemberAdd(_) => {
                 increment_gauge!("members", 1.0);
-                *(self.member_total.lock().await) += 1;
             }
-            Event::GuildMemberRemove(GuildMemberRemoveEvent { guild_id, .. }) => {
-                let mut entry = self.member_counts.entry(*guild_id).or_insert(0);
-                *entry -= 1;
+            Event::GuildMemberRemove(_) => {
                 decrement_gauge!("members", 1.0);
-                *(self.member_total.lock().await) -= 1;
             }
             _ => {}
         }
