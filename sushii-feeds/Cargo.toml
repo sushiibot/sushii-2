@@ -39,7 +39,6 @@ path = "../sushii-model"
 features = ["feed_process"]
 
 [dependencies.sqlx]
-git = "https://github.com/launchbadge/sqlx/"
-branch = "ab/more-pool-fixes"
+version= "0.5.2"
 default-features = false
 features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "offline", "migrate", "decimal" ]

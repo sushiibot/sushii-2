@@ -5336,17 +5336,8 @@ version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d582b9bc04ec6c03084196efc42c2226b018e9941f03ee62bd88921d500917c0"
 dependencies = [
- "sqlx-core 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "sqlx-macros 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "sqlx"
-version = "0.5.2"
-source = "git+https://github.com/launchbadge/sqlx/?branch=ab/more-pool-fixes#0847a04b7afabc47b9a8b40aa0365cd275e24dd9"
-dependencies = [
- "sqlx-core 0.5.2 (git+https://github.com/launchbadge/sqlx/?branch=ab/more-pool-fixes)",
- "sqlx-macros 0.5.2 (git+https://github.com/launchbadge/sqlx/?branch=ab/more-pool-fixes)",
+ "sqlx-core",
+ "sqlx-macros",
 ]
 
 [[package]]
@@ -5392,64 +5383,12 @@ dependencies = [
  "sha2",
  "smallvec",
  "sqlformat",
- "sqlx-rt 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sqlx-rt",
  "stringprep",
  "thiserror",
  "tokio-stream",
  "url",
  "uuid",
- "webpki",
- "webpki-roots 0.21.0",
- "whoami",
-]
-
-[[package]]
-name = "sqlx-core"
-version = "0.5.2"
-source = "git+https://github.com/launchbadge/sqlx/?branch=ab/more-pool-fixes#0847a04b7afabc47b9a8b40aa0365cd275e24dd9"
-dependencies = [
- "ahash 0.7.2",
- "atoi",
- "base64 0.13.0",
- "bitflags",
- "byteorder",
- "bytes 1.0.1",
- "chrono",
- "crc",
- "crossbeam-channel 0.5.0",
- "crossbeam-queue 0.3.1",
- "crossbeam-utils 0.8.3",
- "dirs",
- "either",
- "futures-channel",
- "futures-core",
- "futures-util",
- "hashlink",
- "hex",
- "hmac",
- "itoa",
- "libc",
- "log",
- "md-5",
- "memchr",
- "num-bigint 0.3.2",
- "once_cell",
- "parking_lot",
- "percent-encoding",
- "rand 0.8.3",
- "rust_decimal",
- "rustls",
- "serde 1.0.125",
- "serde_json",
- "sha-1 0.9.4",
- "sha2",
- "smallvec",
- "sqlformat",
- "sqlx-rt 0.5.2 (git+https://github.com/launchbadge/sqlx/?branch=ab/more-pool-fixes)",
- "stringprep",
- "thiserror",
- "tokio-stream",
- "url",
  "webpki",
  "webpki-roots 0.21.0",
  "whoami",
@@ -5472,30 +5411,8 @@ dependencies = [
  "serde 1.0.125",
  "serde_json",
  "sha2",
- "sqlx-core 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "sqlx-rt 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "syn",
- "url",
-]
-
-[[package]]
-name = "sqlx-macros"
-version = "0.5.2"
-source = "git+https://github.com/launchbadge/sqlx/?branch=ab/more-pool-fixes#0847a04b7afabc47b9a8b40aa0365cd275e24dd9"
-dependencies = [
- "dotenv",
- "either",
- "futures",
- "heck",
- "hex",
- "once_cell",
- "proc-macro2",
- "quote",
- "serde 1.0.125",
- "serde_json",
- "sha2",
- "sqlx-core 0.5.2 (git+https://github.com/launchbadge/sqlx/?branch=ab/more-pool-fixes)",
- "sqlx-rt 0.5.2 (git+https://github.com/launchbadge/sqlx/?branch=ab/more-pool-fixes)",
+ "sqlx-core",
+ "sqlx-rt",
  "syn",
  "url",
 ]
@@ -5505,16 +5422,6 @@ name = "sqlx-rt"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6ae97ab05063ed515cdc23d90253213aa24dda0a288c5ec079af3d10f9771bc"
-dependencies = [
- "once_cell",
- "tokio 1.3.0",
- "tokio-rustls",
-]
-
-[[package]]
-name = "sqlx-rt"
-version = "0.5.2"
-source = "git+https://github.com/launchbadge/sqlx/?branch=ab/more-pool-fixes#0847a04b7afabc47b9a8b40aa0365cd275e24dd9"
 dependencies = [
  "once_cell",
  "tokio 1.3.0",
@@ -5664,7 +5571,7 @@ checksum = "1e81da0851ada1f3e9d4312c704aa4f8806f0f9d69faaf8df2f3464b4a9437c2"
 
 [[package]]
 name = "sushii-2"
-version = "0.2.20"
+version = "0.2.21"
 dependencies = [
  "async-trait",
  "chrono",
@@ -5693,7 +5600,7 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "serenity",
- "sqlx 0.5.2 (git+https://github.com/launchbadge/sqlx/?branch=ab/more-pool-fixes)",
+ "sqlx",
  "sushii-model",
  "thiserror",
  "tokio 1.3.0",
@@ -5716,7 +5623,7 @@ dependencies = [
  "dotenv",
  "juniper",
  "juniper_actix",
- "sqlx 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sqlx",
  "sushii-model",
  "tracing",
  "tracing-subscriber",
@@ -5738,7 +5645,7 @@ dependencies = [
  "rss",
  "serde 1.0.125",
  "serde_json",
- "sqlx 0.5.2 (git+https://github.com/launchbadge/sqlx/?branch=ab/more-pool-fixes)",
+ "sqlx",
  "strfmt",
  "sushii-model",
  "thiserror",
@@ -5768,7 +5675,7 @@ dependencies = [
  "serde 1.0.125",
  "serde_json",
  "serenity",
- "sqlx 0.5.2 (git+https://github.com/launchbadge/sqlx/?branch=ab/more-pool-fixes)",
+ "sqlx",
  "thiserror",
  "tokio 1.3.0",
  "tracing",
@@ -5801,7 +5708,7 @@ dependencies = [
  "schemars",
  "serde 1.0.125",
  "serde_json",
- "sqlx 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sqlx",
  "sushii-model",
  "thiserror",
  "tokio 1.3.0",
