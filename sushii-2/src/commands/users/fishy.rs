@@ -107,7 +107,7 @@ async fn fishy(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     };
 
     let s = format!(
-        "You caught a {}{}! {} ({} fishies)",
+        "You caught a {} fishy{}! {} ({} fishies)",
         fishy_kind,
         name_str,
         fishy_kind.emoji(),
