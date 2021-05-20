@@ -165,6 +165,8 @@ services:
             - "3000"
         env_file:
             - .sushii-web.env
+        environment:
+            - ROOT_URL=https://staging.sushii.xyz
         networks:
             - sushii_net
             - web
