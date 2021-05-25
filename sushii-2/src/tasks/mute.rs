@@ -6,7 +6,6 @@ use crate::model::sql::*;
 
 pub async fn check_pending_unmutes(ctx: &Context) -> Result<()> {
     let expired_mutes = Mute::get_expired(&ctx).await?;
-    tracing::debug!("Found {} expired mute entries", expired_mutes.len());
 
     for mute in expired_mutes {
         // Don't use ? since we want to try the rest of the mute entries instead
