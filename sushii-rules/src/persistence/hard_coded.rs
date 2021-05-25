@@ -28,6 +28,7 @@ impl RuleStore for HardCodedStore {
         let rules = vec![
             Rule {
                 id: Uuid::nil(),
+                guild_id: 167058919611564043,
                 name: "Language counter".into(),
                 enabled: true,
                 trigger: Trigger::Twilight(EventType::MessageCreate),
@@ -52,6 +53,7 @@ impl RuleStore for HardCodedStore {
             },
             Rule {
                 id: Uuid::nil(),
+                guild_id: 167058919611564043,
                 name: "Language warning".into(),
                 enabled: true,
                 trigger: Trigger::Counter,
@@ -70,6 +72,7 @@ impl RuleStore for HardCodedStore {
             },
             Rule {
                 id: Uuid::nil(),
+                guild_id: 167058919611564043,
                 name: "Language mute".into(),
                 enabled: true,
                 trigger: Trigger::Counter,
