@@ -5724,7 +5724,7 @@ dependencies = [
 
 [[package]]
 name = "sushii-webhooks"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "config 0.11.0",
  "dotenv",

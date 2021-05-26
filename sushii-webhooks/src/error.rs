@@ -9,7 +9,7 @@ pub enum Error {
     #[error(transparent)]
     TwilightHttp(#[from] TwilightHttpError),
     #[error(transparent)]
-    TwilightCreateMessageError(#[from] CreateMessageError)
+    TwilightCreateMessageError(#[from] CreateMessageError),
 }
 
 impl warp::reject::Reject for Error {}

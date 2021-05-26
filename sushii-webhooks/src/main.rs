@@ -49,9 +49,7 @@ fn with_twilight_http(
 }
 
 async fn _send_message(user_id: u64, http: Client) -> Result<(), Error> {
-    let channel = http
-        .create_private_channel(UserId(user_id))
-        .await?;
+    let channel = http.create_private_channel(UserId(user_id)).await?;
 
     http.create_message(channel.id)
         .content("Thanks for voting on top.gg!")?
