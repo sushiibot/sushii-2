@@ -4,6 +4,9 @@ use serenity::builder::CreateEmbed;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use serenity::model::interactions::{
+    ButtonStyle, Component, InteractionData, InteractionResponseType, MessageComponent,
+};
 use std::fmt::Write;
 use std::time::Duration;
 
@@ -21,6 +24,20 @@ enum CaseRange {
     Latest,
     /// The latest number of cases
     LatestCount(u64),
+}
+
+fn disable_buttons_in_component(component: &mut Component) {
+    match component {
+        Component::ActionRow(row) => {
+            for component in &mut row.components {
+                disable_buttons_in_component(component);
+            }
+        }
+        Component::Button(button) => {
+            button.disabled = true;
+        }
+        _ => {}
+    }
 }
 
 #[command]
@@ -174,23 +191,11 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         writeln!(desc, "with a reason already set.")?;
 
         writeln!(desc)?;
-        writeln!(desc, "React to choose and confirm your action")?;
-
-        let mut opts = Vec::new();
-
-        writeln!(desc, ":a: Overwrite all case reasons")?;
-        opts.push((ReactionType::Unicode("🅰️".into()), "overwrite"));
-        // If all cases have a reason, it's either overwrite all, or write none
-        if num_with_reason != entries.len() {
-            writeln!(desc, ":regional_indicator_s: Update only cases without a reason (skip cases already with a reason)")?;
-            opts.push((ReactionType::Unicode("🇸".into()), "only_unset"));
-        }
-
-        writeln!(desc, ":x: Abort, don't update any case reasons")?;
-        opts.push((ReactionType::Unicode("❌".into()), "abort"));
+        writeln!(desc, "Please confirm your action")?;
 
         let reason = reason.to_owned();
 
+        /*
         let mut confirm = Confirmation::new(msg.author.id, move |e| {
             e.title("Warning");
             e.description(desc.clone());
@@ -201,7 +206,118 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         })
         .options(opts)
         .timeout(Duration::from_secs(60));
+        */
 
+        let mut confirm_msg = msg
+            .channel_id
+            .send_message(&ctx.http, |m| {
+                m.embed(|e| {
+                    e.title("Warning");
+                    e.description(desc.clone());
+                    e.field("Reason", reason, false);
+                    e.footer(|f| f.text("Aborts in 1 minute"));
+
+                    e
+                });
+
+                m.components(|comps| {
+                    comps.create_action_row(|action_row| {
+                        action_row.create_button(|button| {
+                            button
+                                .label("Overwrite All")
+                                .style(ButtonStyle::Danger)
+                                .custom_id("overwrite_all")
+                        });
+
+                        if num_with_reason != entries.len() {
+                            action_row.create_button(|button| {
+                                button
+                                    .label("Set for cases without reason")
+                                    .style(ButtonStyle::Primary)
+                                    .custom_id("without_reason")
+                            });
+                        }
+
+                        action_row.create_button(|button| {
+                            button
+                                .label("Cancel")
+                                .style(ButtonStyle::Secondary)
+                                .custom_id("cancel")
+                        });
+
+                        action_row
+                    });
+                    comps
+                });
+
+                m
+            })
+            .await?;
+
+        if let Some(interaction) = confirm_msg
+            .await_component_interaction(&ctx)
+            .timeout(Duration::from_secs(120))
+            .author_id(msg.author.id)
+            .await
+        {
+            if let InteractionData::MessageComponent(MessageComponent { custom_id, .. }) =
+                interaction.data.as_ref().unwrap()
+            {
+                match custom_id.as_str() {
+                    "overwrite_all" => {
+                        interaction
+                            .create_interaction_response(&ctx.http, |res| {
+                                res.kind(InteractionResponseType::DeferredUpdateMessage)
+                            })
+                            .await?;
+                    }
+                    "without_reason" => {
+                        interaction
+                            .create_interaction_response(&ctx.http, |res| {
+                                res.kind(InteractionResponseType::ChannelMessageWithSource);
+                                res.interaction_response_data(|msg| msg.content("Updating cases without reasons."));
+                                res
+                            })
+                            .await?;
+
+                        entries = entries.into_iter().filter(|e| e.reason.is_none()).collect();
+                    }
+                    "cancel" => {
+                        interaction
+                            .create_interaction_response(&ctx.http, |res| {
+                                res.kind(InteractionResponseType::ChannelMessageWithSource);
+                                res.interaction_response_data(|msg| msg.content("Cancelled, no case reasons were updated."));
+                                res
+                            })
+                            .await?;
+
+                        return Ok(());
+                    }
+                    _ => {}
+                }
+            }
+        } else {
+            // Disable buttons
+            let components = confirm_msg.components.clone();
+
+            confirm_msg.edit(&ctx.http, move |msg| {
+                msg.content("No response after 2 minutes, cancelling.");
+
+                msg.components(|comps| {
+                    for mut component in components {
+                        disable_buttons_in_component(&mut component);
+                        comps.0.push(serde_json::to_value(component).unwrap());
+                    }
+                    comps
+                });
+                msg
+            })
+            .await?;
+
+            return Ok(());
+        }
+
+        /*
         match confirm.await_confirmation(ctx, msg.channel_id).await? {
             Some(r) if r == "overwrite" => {
                 // Overwrite means just do nothing and continue
@@ -226,6 +342,7 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 return Ok(());
             }
         }
+        */
     }
 
     // Since take ownership of entries in the iteration, just saving the length
