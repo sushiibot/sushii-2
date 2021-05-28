@@ -276,11 +276,7 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                     "without_reason" => {
                         interaction
                             .create_interaction_response(&ctx.http, |res| {
-                                res.kind(InteractionResponseType::ChannelMessageWithSource);
-                                res.interaction_response_data(|msg| {
-                                    msg.content("Updating cases without reasons.")
-                                });
-                                res
+                                res.kind(InteractionResponseType::DeferredUpdateMessage)
                             })
                             .await?;
 
@@ -289,11 +285,19 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                     "cancel" => {
                         interaction
                             .create_interaction_response(&ctx.http, |res| {
-                                res.kind(InteractionResponseType::ChannelMessageWithSource);
-                                res.interaction_response_data(|msg| {
-                                    msg.content("Cancelled, no case reasons were updated.")
+                                res.kind(InteractionResponseType::DeferredUpdateMessage)
+                            })
+                            .await?;
+
+                        conf_msg
+                            .edit(&ctx.http, move |msg| {
+                                msg.embed(|e| e.description("Cancelled, no case reasons were updated."));
+
+                                msg.components(|comps| {
+                                    comps.set_action_rows(Vec::new());
+                                    comps
                                 });
-                                res
+                                msg
                             })
                             .await?;
 
@@ -336,7 +340,7 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     if let Some(ref mut sent_msg) = sent_msg {
         sent_msg
             .edit(&ctx.http, move |msg| {
-                msg.content(&cases_str);
+                msg.embed(|e| e.description(&cases_str));
 
                 msg.components(|comps| {
                     comps.set_action_rows(Vec::new());
@@ -347,7 +351,18 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             .await?;
     } else {
         // No confirmation message, send new message
-        sent_msg = Some(msg.channel_id.say(ctx, &cases_str).await?);
+        sent_msg = Some(
+            msg.channel_id
+                .send_message(ctx, |m| {
+                    m.embed(|e| {
+                        e.description(&cases_str);
+                        e
+                    });
+
+                    m
+                })
+                .await?,
+        );
     }
 
     for mut entry in entries {
@@ -491,7 +506,13 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     // sent_msg should be Some() here
     sent_msg
         .expect("Sent confirmation is None!")
-        .edit(&ctx, |m| m.content(s))
+        .edit(&ctx, |m| {
+            m.embed(|e| {
+                e.description(s);
+
+                e
+            })
+        })
         .await?;
 
     Ok(())

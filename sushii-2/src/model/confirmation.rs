@@ -25,7 +25,7 @@ impl Confirmation {
             options: Vec::new(),
             options_map: HashMap::new(),
             // Default 1 minute
-            timeout: Duration::from_secs(60),
+            timeout: Duration::from_secs(120),
             author,
         }
     }

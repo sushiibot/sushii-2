@@ -8,6 +8,7 @@ use crate::error::Result;
 #[derive(Debug, Deserialize, Clone)]
 pub struct SushiiConfig {
     pub discord_token: String,
+    pub application_id: u64,
     pub database_url: String,
     pub default_prefix: String,
     pub lastfm_key: String,

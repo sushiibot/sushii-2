@@ -74,6 +74,7 @@ async fn main() -> Result<()> {
                 .expect("TWILIGHT_API_PROXY_URL not in environment"),
         )?
         .ratelimiter_disabled(true)
+        .application_id(sushii_conf.application_id)
         .await
         .expect("Error creating Http");
 
