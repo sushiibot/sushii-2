@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.22] - 2021-05-28
+
+### Added
+
+- Buttons for `reason` confirmation messages
+- Bulk message delete logs
+
+### Changed
+
+- Update new `leaderboard` url
+
 ## [0.2.18] - 2021-05-08
 
 ### Added 
