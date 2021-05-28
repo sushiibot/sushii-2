@@ -178,6 +178,137 @@ async fn _message_delete(
     Ok(())
 }
 
+pub async fn message_delete_bulk(
+    ctx: &Context,
+    channel_id: ChannelId,
+    msg_ids: Vec<MessageId>,
+    guild_id: Option<GuildId>,
+) {
+    if let Err(e) = _message_delete_bulk(ctx, channel_id, msg_ids, guild_id).await {
+        tracing::error!("Failed to run message_delete_bulk handler: {}", e);
+    }
+}
+
+#[tracing::instrument(skip(ctx))]
+async fn _message_delete_bulk(
+    ctx: &Context,
+    channel_id: ChannelId,
+    msg_ids: Vec<MessageId>,
+    guild_id: Option<GuildId>,
+) -> Result<()> {
+    let guild_id = match guild_id {
+        Some(id) => id,
+        None => return Ok(()),
+    };
+
+    let mut guild_conf = match GuildConfig::from_id(ctx, &guild_id).await? {
+        Some(conf) => conf,
+        None => return Ok(()),
+    };
+
+    // Don't log messages if message log isn't enabled or channel isn't set
+    if !guild_conf.log_msg_enabled {
+        return Ok(());
+    }
+
+    let log_msg_channel = match guild_conf.log_msg {
+        Some(c) => c,
+        None => return Ok(()),
+    };
+
+    // Ignore role channel
+    if let Some(channel) = guild_conf.role_channel {
+        if channel_id.0 == channel as u64 {
+            return Ok(());
+        }
+    }
+
+    let saved_msgs = SavedMessage::from_ids(ctx, msg_ids).await?;
+
+    // None found
+    if saved_msgs.is_empty() {
+        return Ok(());
+    }
+
+    let mut s = String::new();
+
+    for saved_msg in saved_msgs {
+        writeln!(s, "[<@{}>]: {}", saved_msg.author_id, saved_msg.content)?;
+
+        if !saved_msg.msg.attachments.is_empty() {
+            write!(s, "> ")?;
+        }
+
+        for (i, attachment_url) in saved_msg
+            .msg
+            .attachments
+            .iter()
+            .map(|a| a.proxy_url.as_str())
+            .enumerate()
+        {
+            write!(s, "[Attachment #{}]({})", i + 1, attachment_url)?;
+
+            // Add comma if not last one
+            if i < saved_msg.msg.attachments.len() - 1 {
+                write!(s, ", ")?;
+            }
+        }
+    }
+
+    let now = Utc::now().naive_utc();
+
+    let channel = ctx.cache.channel(channel_id).await;
+
+    let res = ChannelId(log_msg_channel as u64)
+        .send_message(ctx, |m| {
+            m.embed(|e| {
+                e.title(format!(
+                    "Multiple messages deleted in #{}",
+                    channel
+                        .and_then(|c| c.guild())
+                        .map(|c| c.name)
+                        .unwrap_or_else(|| channel_id.to_string())
+                ));
+                e.description(s);
+
+                e.footer(|f| {
+                    f.text("Deleted at");
+
+                    f
+                });
+
+                e.timestamp(now.format("%Y-%m-%dT%H:%M:%S").to_string());
+                e.colour(0xe74c3c);
+
+                e
+            });
+
+            m
+        })
+        .await;
+
+    if let Err(SerenityError::Http(e)) = res {
+        // Box cant be matched
+        if let HttpError::UnsuccessfulRequest(e) = *e {
+            tracing::warn!(?e, "HttpError::UnsuccessfulRequest");
+
+            // Unknown channel -- deleted channel so just unset
+            if e.error.code == 10003 {
+                guild_conf.log_msg = None;
+                guild_conf.save(ctx).await?;
+            }
+
+            // Missing access -- no perms so might as well just disable
+            if e.error.code == 50001 {
+                guild_conf.log_msg_enabled = false;
+                guild_conf.save(ctx).await?;
+            }
+        }
+    }
+
+    Ok(())
+}
+
 pub async fn message_update(
     ctx: &Context,
     old_msg: &Option<Message>,
