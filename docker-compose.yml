@@ -176,25 +176,6 @@ services:
             - "traefik.http.routers.sushii-web-staging.rule=Host(`staging.sushii.xyz`)"
             - "traefik.http.routers.sushii-web-staging.entrypoints=secure"
             - "traefik.http.routers.sushii-web-staging.tls.certresolver=acme"
-    sushii-api:
-        image: ghcr.io/sushiibot/sushii-api:latest
-        container_name: sushii-api
-        restart: unless-stopped
-        depends_on:
-            - postgres
-        expose:
-            - "8080"
-        env_file:
-            - .env
-        networks:
-            - sushii_net
-            - web
-        labels:
-            - "traefik.docker.network=sushii-2_web"
-            - "traefik.http.services.sushii-api.loadbalancer.server.port=8080"
-            - "traefik.http.routers.sushii-api.rule=Host(`api.sushii.xyz`)"
-            - "traefik.http.routers.sushii-api.entrypoints=secure"
-            - "traefik.http.routers.sushii-api.tls.certresolver=acme"
     sushii-feeds:
         image: ghcr.io/sushiibot/sushii-feeds:latest
         container_name: sushii-feeds
