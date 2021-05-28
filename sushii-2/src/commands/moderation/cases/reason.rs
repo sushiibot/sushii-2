@@ -217,7 +217,7 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                     e.title("Warning");
                     e.description(desc.clone());
                     e.field("Reason", reason, false);
-                    e.footer(|f| f.text("Aborts in 1 minute"));
+                    e.footer(|f| f.text("Cancels in 2 minutes"));
 
                     e
                 });
