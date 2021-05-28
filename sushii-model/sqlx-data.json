@@ -358,30 +358,6 @@
       ]
     }
   },
-  "0cb3bdc6ad59c788f3f8cc69698db83ceb46c0173bc236205b5b9ac64f469db8": {
-    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM app_public.feeds\n             WHERE feed_id NOT LIKE 'vlive:%'\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "feed_id",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "metadata: Json<FeedMetadata>",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        true
-      ]
-    }
-  },
   "0ea7d0e05012add2116321168131a4a73a08012fa96059d008419f097b30fd77": {
     "query": "\n            SELECT *\n              FROM app_public.mutes\n             WHERE guild_id = $1\n               AND user_id = $2\n        ",
     "describe": {
@@ -1719,6 +1695,62 @@
         false,
         false,
         false,
+        true
+      ]
+    }
+  },
+  "8dffa8adb8e1b4adec63abc3d91a848c05c841b1316c304a65a676f1ddc1cfeb": {
+    "query": "\n                SELECT message_id as \"message_id!: i64\",\n                       author_id as \"author_id!: i64\",\n                       channel_id as \"channel_id!: i64\",\n                       guild_id as \"guild_id!: i64\",\n                       created as \"created!: NaiveDateTime\",\n                       content as \"content!: String\",\n                       msg as \"msg!: Json<Message>\"\n                  FROM app_public.messages\n                  JOIN unnest($1::bigint[]) as ids(message_id)\n                       USING (message_id)\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "message_id!: i64",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "author_id!: i64",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "channel_id!: i64",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "guild_id!: i64",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "created!: NaiveDateTime",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 5,
+          "name": "content!: String",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "msg!: Json<Message>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8Array"
+        ]
+      },
+      "nullable": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
         true
       ]
     }
@@ -3179,6 +3211,30 @@
       },
       "nullable": [
         null
+      ]
+    }
+  },
+  "0cb3bdc6ad59c788f3f8cc69698db83ceb46c0173bc236205b5b9ac64f469db8": {
+    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM app_public.feeds\n             WHERE feed_id NOT LIKE 'vlive:%'\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "feed_id",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "metadata: Json<FeedMetadata>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        true
       ]
     }
   }
