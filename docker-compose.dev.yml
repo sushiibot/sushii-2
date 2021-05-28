@@ -6,6 +6,8 @@ services:
     twilight-http-proxy:
         ports:
             - "3001:80"
+        environment:
+            - RUST_LOG=twilight_http_proxy=trace
     sushii:
         build:
             dockerfile: ./sushii-2/Dockerfile
