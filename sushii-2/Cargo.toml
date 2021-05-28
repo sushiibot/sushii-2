@@ -59,9 +59,10 @@ default-features = false
 features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "offline", "migrate", "decimal" ]
 
 [dependencies.serenity]
-git = "https://github.com/serenity-rs/serenity"
-rev = "b995482142a541cb4294a49fdb6f1687693532ef"
-features = ["collector"]
+git = "https://github.com/drklee3/serenity"
+rev = "e6735fff9817226331b36f4c378d5ede6b6e20b6"
+# path = "../../serenity"
+features = ["collector", "unstable_discord_api"]
 
 [build-dependencies.vergen]
 version = "4.2.0"
