@@ -93,6 +93,31 @@ impl SavedMessage {
         .map_err(Into::into)
     }
 
+    /// Bulk fetch
+    pub async fn from_ids(ctx: &Context, message_ids: Vec<MessageId>) -> Result<Vec<Self>> {
+        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+
+        sqlx::query_as!(
+            SavedMessage,
+            r#"
+                SELECT message_id as "message_id!: i64",
+                       author_id as "author_id!: i64",
+                       channel_id as "channel_id!: i64",
+                       guild_id as "guild_id!: i64",
+                       created as "created!: NaiveDateTime",
+                       content as "content!: String",
+                       msg as "msg!: Json<Message>"
+                  FROM app_public.messages
+                  JOIN unnest($1::bigint[]) as ids(message_id)
+                       USING (message_id)
+            "#,
+            &message_ids.iter().map(|id| id.0 as i64).collect::<Vec<_>>(),
+        )
+        .fetch_all(&pool)
+        .await
+        .map_err(Into::into)
+    }
+
     pub async fn prune_old(ctx: &Context, channel_id: ChannelId) -> Result<()> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 

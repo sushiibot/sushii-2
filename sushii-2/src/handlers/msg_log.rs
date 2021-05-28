@@ -55,6 +55,117 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
     Ok(())
 }
 
+pub async fn message_update(
+    ctx: &Context,
+    old_msg: &Option<Message>,
+    new_msg: &Option<Message>,
+    event: &MessageUpdateEvent,
+) {
+    if let Err(e) = _message_update(ctx, old_msg, new_msg, event).await {
+        tracing::error!("Failed to run message_update handler: {}", e);
+    }
+}
+
+#[tracing::instrument(skip(ctx))]
+async fn _message_update(
+    ctx: &Context,
+    _old_msg: &Option<Message>,
+    _new_msg: &Option<Message>,
+    event: &MessageUpdateEvent,
+) -> Result<()> {
+    let new_content = match &event.content {
+        Some(c) => c,
+        None => return Ok(()),
+    };
+
+    let mut saved_msg = match SavedMessage::from_id(ctx, event.id).await? {
+        Some(msg) => msg,
+        None => return Ok(()), // Not found
+    };
+
+    let mut guild_conf =
+        match GuildConfig::from_id(ctx, &GuildId(saved_msg.guild_id as u64)).await? {
+            Some(conf) => conf,
+            None => return Ok(()),
+        };
+
+    // Don't log messages if message log isn't enabled or channel isn't set
+    if !guild_conf.log_msg_enabled {
+        return Ok(());
+    }
+
+    let log_msg_channel = match guild_conf.log_msg {
+        Some(c) => c,
+        None => return Ok(()),
+    };
+
+    // Ignore role channel
+    if let Some(channel) = guild_conf.role_channel {
+        if saved_msg.channel_id == channel {
+            return Ok(());
+        }
+    }
+
+    let s = format!(
+        "**Before:** {}\n\
+        **+After:** {}",
+        saved_msg.content, new_content,
+    );
+
+    let now = Utc::now().naive_utc();
+
+    let res = ChannelId(log_msg_channel as u64)
+        .send_message(ctx, |m| {
+            m.embed(|e| {
+                e.description(format!(
+                    "<@{}> in <#{}>",
+                    saved_msg.author_id as u64, saved_msg.channel_id as u64
+                ));
+                e.field("Message Edited", s, false);
+
+                e.footer(|f| {
+                    f.text("Edited at");
+
+                    f
+                });
+
+                e.timestamp(now.format("%Y-%m-%dT%H:%M:%S").to_string());
+                e.colour(0x9b59b6);
+
+                e
+            });
+
+            m
+        })
+        .await;
+
+    saved_msg.content = new_content.clone();
+
+    // This doesn't update the actual serenity Message object in saved_msg.msg
+    saved_msg.save(ctx).await?;
+
+    if let Err(SerenityError::Http(e)) = res {
+        // Box cant be matched
+        if let HttpError::UnsuccessfulRequest(e) = *e {
+            tracing::warn!(?e, "HttpError::UnsuccessfulRequest");
+
+            // Unknown channel -- deleted channel so just unset
+            if e.error.code == 10003 {
+                guild_conf.log_msg = None;
+                guild_conf.save(ctx).await?;
+            }
+
+            // Missing access -- no perms so might as well just disable
+            if e.error.code == 50001 {
+                guild_conf.log_msg_enabled = false;
+                guild_conf.save(ctx).await?;
+            }
+        }
+    }
+
+    Ok(())
+}
+
 pub async fn message_delete(
     ctx: &Context,
     channel_id: ChannelId,
@@ -178,39 +289,33 @@ async fn _message_delete(
     Ok(())
 }
 
-pub async fn message_update(
+pub async fn message_delete_bulk(
     ctx: &Context,
-    old_msg: &Option<Message>,
-    new_msg: &Option<Message>,
-    event: &MessageUpdateEvent,
+    channel_id: ChannelId,
+    msg_ids: Vec<MessageId>,
+    guild_id: Option<GuildId>,
 ) {
-    if let Err(e) = _message_update(ctx, old_msg, new_msg, event).await {
-        tracing::error!("Failed to run message_update handler: {}", e);
+    if let Err(e) = _message_delete_bulk(ctx, channel_id, msg_ids, guild_id).await {
+        tracing::error!("Failed to run message_delete_bulk handler: {}", e);
     }
 }
 
 #[tracing::instrument(skip(ctx))]
-async fn _message_update(
+async fn _message_delete_bulk(
     ctx: &Context,
-    _old_msg: &Option<Message>,
-    _new_msg: &Option<Message>,
-    event: &MessageUpdateEvent,
+    channel_id: ChannelId,
+    msg_ids: Vec<MessageId>,
+    guild_id: Option<GuildId>,
 ) -> Result<()> {
-    let new_content = match &event.content {
-        Some(c) => c,
+    let guild_id = match guild_id {
+        Some(id) => id,
         None => return Ok(()),
     };
 
-    let mut saved_msg = match SavedMessage::from_id(ctx, event.id).await? {
-        Some(msg) => msg,
-        None => return Ok(()), // Not found
+    let mut guild_conf = match GuildConfig::from_id(ctx, &guild_id).await? {
+        Some(conf) => conf,
+        None => return Ok(()),
     };
-
-    let mut guild_conf =
-        match GuildConfig::from_id(ctx, &GuildId(saved_msg.guild_id as u64)).await? {
-            Some(conf) => conf,
-            None => return Ok(()),
-        };
 
     // Don't log messages if message log isn't enabled or channel isn't set
     if !guild_conf.log_msg_enabled {
@@ -224,36 +329,67 @@ async fn _message_update(
 
     // Ignore role channel
     if let Some(channel) = guild_conf.role_channel {
-        if saved_msg.channel_id == channel {
+        if channel_id.0 == channel as u64 {
             return Ok(());
         }
     }
 
-    let s = format!(
-        "**Before:** {}\n\
-        **+After:** {}",
-        saved_msg.content, new_content,
-    );
+    let saved_msgs = SavedMessage::from_ids(ctx, msg_ids).await?;
+
+    // None found
+    if saved_msgs.is_empty() {
+        return Ok(());
+    }
+
+    let mut s = String::new();
+
+    for saved_msg in saved_msgs {
+        writeln!(s, "<@{}>: {}", saved_msg.author_id, saved_msg.content)?;
+
+        if !saved_msg.msg.attachments.is_empty() {
+            write!(s, "> ")?;
+        }
+
+        for (i, attachment_url) in saved_msg
+            .msg
+            .attachments
+            .iter()
+            .map(|a| a.proxy_url.as_str())
+            .enumerate()
+        {
+            write!(s, "[Attachment #{}]({})", i + 1, attachment_url)?;
+
+            // Add comma if not last one
+            if i < saved_msg.msg.attachments.len() - 1 {
+                write!(s, ", ")?;
+            }
+        }
+    }
 
     let now = Utc::now().naive_utc();
+
+    let channel = ctx.cache.channel(channel_id).await;
 
     let res = ChannelId(log_msg_channel as u64)
         .send_message(ctx, |m| {
             m.embed(|e| {
-                e.description(format!(
-                    "<@{}> in <#{}>",
-                    saved_msg.author_id as u64, saved_msg.channel_id as u64
+                e.title(format!(
+                    "Multiple messages deleted in #{}",
+                    channel
+                        .and_then(|c| c.guild())
+                        .map(|c| c.name)
+                        .unwrap_or_else(|| channel_id.to_string())
                 ));
-                e.field("Message Edited", s, false);
+                e.description(s);
 
                 e.footer(|f| {
-                    f.text("Edited at");
+                    f.text("Deleted at");
 
                     f
                 });
 
                 e.timestamp(now.format("%Y-%m-%dT%H:%M:%S").to_string());
-                e.colour(0x9b59b6);
+                e.colour(0xe74c3c);
 
                 e
             });
@@ -261,11 +397,6 @@ async fn _message_update(
             m
         })
         .await;
-
-    saved_msg.content = new_content.clone();
-
-    // This doesn't update the actual serenity Message object in saved_msg.msg
-    saved_msg.save(ctx).await?;
 
     if let Err(SerenityError::Http(e)) = res {
         // Box cant be matched

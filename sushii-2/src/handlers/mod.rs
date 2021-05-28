@@ -54,6 +54,16 @@ impl EventHandler for Handler {
         msg_log::message_delete(&ctx, channel_id, msg_id, guild_id).await;
     }
 
+    async fn message_delete_bulk(
+        &self,
+        ctx: Context,
+        channel_id: ChannelId,
+        msg_ids: Vec<MessageId>,
+        guild_id: Option<GuildId>,
+    ) {
+        msg_log::message_delete_bulk(&ctx, channel_id, msg_ids, guild_id).await;
+    }
+
     async fn message_update(
         &self,
         ctx: Context,
