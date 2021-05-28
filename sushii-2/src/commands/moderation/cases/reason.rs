@@ -2,11 +2,11 @@ use lazy_static::lazy_static;
 use regex::Regex;
 use serenity::builder::CreateEmbed;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
 use serenity::model::interactions::{
     ButtonStyle, Component, InteractionData, InteractionResponseType, MessageComponent,
 };
+use serenity::model::prelude::*;
+use serenity::prelude::*;
 use std::fmt::Write;
 use std::time::Duration;
 
@@ -178,7 +178,9 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             },
         );
 
-    // Get confirmation if theres some cases already with reason se
+    let mut sent_msg = None;
+
+    // Get confirmation if theres some cases already with reason set
     if num_with_reason > 0 {
         let mut desc = "There ".to_string();
 
@@ -208,7 +210,7 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .timeout(Duration::from_secs(60));
         */
 
-        let mut confirm_msg = msg
+        let mut conf_msg = msg
             .channel_id
             .send_message(&ctx.http, |m| {
                 m.embed(|e| {
@@ -254,7 +256,7 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             })
             .await?;
 
-        if let Some(interaction) = confirm_msg
+        if let Some(interaction) = conf_msg
             .await_component_interaction(&ctx)
             .timeout(Duration::from_secs(120))
             .author_id(msg.author.id)
@@ -275,7 +277,9 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                         interaction
                             .create_interaction_response(&ctx.http, |res| {
                                 res.kind(InteractionResponseType::ChannelMessageWithSource);
-                                res.interaction_response_data(|msg| msg.content("Updating cases without reasons."));
+                                res.interaction_response_data(|msg| {
+                                    msg.content("Updating cases without reasons.")
+                                });
                                 res
                             })
                             .await?;
@@ -286,7 +290,9 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                         interaction
                             .create_interaction_response(&ctx.http, |res| {
                                 res.kind(InteractionResponseType::ChannelMessageWithSource);
-                                res.interaction_response_data(|msg| msg.content("Cancelled, no case reasons were updated."));
+                                res.interaction_response_data(|msg| {
+                                    msg.content("Cancelled, no case reasons were updated.")
+                                });
                                 res
                             })
                             .await?;
@@ -297,52 +303,22 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 }
             }
         } else {
-            // Disable buttons
-            let components = confirm_msg.components.clone();
+            conf_msg
+                .edit(&ctx.http, move |msg| {
+                    msg.content("No response after 2 minutes, cancelling.");
 
-            confirm_msg.edit(&ctx.http, move |msg| {
-                msg.content("No response after 2 minutes, cancelling.");
-
-                msg.components(|comps| {
-                    for mut component in components {
-                        disable_buttons_in_component(&mut component);
-                        comps.0.push(serde_json::to_value(component).unwrap());
-                    }
-                    comps
-                });
-                msg
-            })
-            .await?;
+                    msg.components(|comps| {
+                        comps.set_action_rows(Vec::new());
+                        comps
+                    });
+                    msg
+                })
+                .await?;
 
             return Ok(());
         }
 
-        /*
-        match confirm.await_confirmation(ctx, msg.channel_id).await? {
-            Some(r) if r == "overwrite" => {
-                // Overwrite means just do nothing and continue
-            }
-            Some(r) if r == "only_unset" => {
-                // Filter out cases with a reason set
-                entries = entries.into_iter().filter(|e| e.reason.is_none()).collect();
-            }
-            Some(r) if r == "abort" => {
-                msg.reply(ctx, "Aborted, no case reasons were updated.")
-                    .await?;
-                return Ok(());
-            }
-            Some(r) => {
-                tracing::error!("Unhandled confirmation option: {}", r);
-                msg.reply(ctx, "Error: Invalid options").await?;
-                return Ok(());
-            }
-            None => {
-                msg.reply(ctx, "No response after 1 minute, aborting.")
-                    .await?;
-                return Ok(());
-            }
-        }
-        */
+        sent_msg = Some(conf_msg);
     }
 
     // Since take ownership of entries in the iteration, just saving the length
@@ -355,10 +331,24 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         format!("{} cases", num_entries)
     };
 
-    let mut sent_msg = msg
-        .channel_id
-        .say(&ctx, format!("Updating {}...", num_cases_str))
-        .await?;
+    let cases_str = format!("Updating {}...", num_cases_str);
+
+    if let Some(ref mut sent_msg) = sent_msg {
+        sent_msg
+            .edit(&ctx.http, move |msg| {
+                msg.content(&cases_str);
+
+                msg.components(|comps| {
+                    comps.set_action_rows(Vec::new());
+                    comps
+                });
+                msg
+            })
+            .await?;
+    } else {
+        // No confirmation message, send new message
+        sent_msg = Some(msg.channel_id.say(ctx, &cases_str).await?);
+    }
 
     for mut entry in entries {
         let msg_id = match entry.msg_id {
@@ -498,7 +488,11 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         writeln!(s, "Attachments: {}", attachments_str)?;
     }
 
-    sent_msg.edit(&ctx, |m| m.content(s)).await?;
+    // sent_msg should be Some() here
+    sent_msg
+        .expect("Sent confirmation is None!")
+        .edit(&ctx, |m| m.content(s))
+        .await?;
 
     Ok(())
 }
