@@ -193,7 +193,7 @@ services:
             - "traefik.enable=false"
     twilight-http-proxy:
         build:
-            context: https://github.com/twilight-rs/http-proxy.git#trunk
+            context: https://github.com/drklee3/http-proxy.git#interactions-buttons
             args:
                 FEATURES: expose-metrics
         container_name: twilight-http-proxy
