@@ -1904,6 +1904,52 @@
       ]
     }
   },
+  "9a456dee5ae90363eed039e4843130a6337f1b960e7a50e77774c696d0f3c6a3": {
+    "query": "\n                INSERT INTO app_public.bot_stats (name, category, count)\n                     VALUES ($1, $2, $3)\n                ON CONFLICT (name, category)\n                  DO UPDATE SET count = $3\n                RETURNING *\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "category",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "9c30e526664b43af6c906c887c20054548f63c4af86028aa18d43f2dda61abda": {
     "query": "\n            WITH words(word) AS (\n                SELECT s\n                  FROM regexp_split_to_table(LOWER($2), '[^[:alnum:]]+') s\n                 WHERE s <> ''\n            )\n            SELECT app_public.notifications.*\n              FROM app_public.notifications, words\n             WHERE guild_id = $1\n               AND keyword = word\n        ",
     "describe": {
@@ -1981,6 +2027,52 @@
       },
       "nullable": [
         false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "a0424d14af830c7f5739aaa1c97a90143c6e431e5db49e72c71022f5afd3068f": {
+    "query": "\n                INSERT INTO app_public.bot_stats (name, category, count)\n                     VALUES ($1, $2, $3)\n                ON CONFLICT (name, category)\n                  DO UPDATE SET count = app_public.bot_stats.count + $3\n                RETURNING *\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "category",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "count",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "created_at",
+          "type_info": "Timestamptz"
+        },
+        {
+          "ordinal": 4,
+          "name": "updated_at",
+          "type_info": "Timestamptz"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Int8"
+        ]
+      },
+      "nullable": [
         false,
         false,
         false,

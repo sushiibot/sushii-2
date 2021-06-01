@@ -7,7 +7,11 @@ use serenity::prelude::*;
 pub mod normal_message;
 pub use self::normal_message::normal_message;
 
-use crate::model::sql::GuildConfig;
+use crate::model::{
+    sql::{BotStat, GuildConfig},
+    Metrics,
+};
+use crate::DbPool;
 
 #[hook]
 pub async fn before(ctx: &Context, msg: &Message, cmd_name: &str) -> bool {
@@ -91,6 +95,31 @@ pub async fn after(ctx: &Context, msg: &Message, cmd_name: &str, error: Result<(
                 format!("Something went wrong while running this command :(\n{}", e),
             )
             .await;
+    }
+
+    {
+        let metrics = ctx.data.read().await.get::<Metrics>().cloned().unwrap();
+        let buf_count = {
+            let mut buf_count = metrics.commands_executed_buffer.lock().await;
+            *buf_count += 1;
+
+            // Cloned
+            buf_count.clone()
+        };
+
+        if buf_count >= 10 {
+            // Reset before writing to db
+            {
+                let mut buf_count = metrics.commands_executed_buffer.lock().await;
+                *buf_count = 0;
+            }
+
+            let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+            if let Err(e) = BotStat::inc(&pool, "bot", "commands_executed", buf_count as i64).await
+            {
+                tracing::error!("Failed to inc bot commands_executed stat: {}", e);
+            }
+        }
     }
 
     metrics::counter!("commands", 1, "command_name" => cmd_name.to_string());
