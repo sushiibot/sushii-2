@@ -107,9 +107,10 @@ async fn _message_update(
     }
 
     let s = format!(
-        "**Before:** {}\n\
+        "**Message edited in <#{}>**
+        **Before:** {}\n\
         **+After:** {}",
-        saved_msg.content, new_content,
+        saved_msg.channel_id as u64, saved_msg.content, new_content,
     );
 
     let now = Utc::now().naive_utc();
@@ -117,11 +118,18 @@ async fn _message_update(
     let res = ChannelId(log_msg_channel as u64)
         .send_message(ctx, |m| {
             m.embed(|e| {
-                e.description(format!(
-                    "<@{}> in <#{}>",
-                    saved_msg.author_id as u64, saved_msg.channel_id as u64
-                ));
-                e.field("Message Edited", s, false);
+                e.author(|a| {
+                    a.name(format!(
+                        "{} (ID: {})",
+                        saved_msg.msg.0.author.tag(),
+                        saved_msg.author_id
+                    ));
+                    a.icon_url(saved_msg.msg.0.author.face());
+
+                    a
+                });
+
+                e.description(s);
 
                 e.footer(|f| {
                     f.text("Edited at");
@@ -216,7 +224,11 @@ async fn _message_delete(
         None => return Ok(()), // Not found
     };
 
-    let mut attachments_s = String::new();
+    let mut s = format!("**Message deleted in <#{}>**\n", saved_msg.channel_id as u64);
+
+    if !saved_msg.content.is_empty() {
+        writeln!(s, "{}", saved_msg.content)?;
+    }
 
     for (i, attachment_url) in saved_msg
         .msg
@@ -225,31 +237,32 @@ async fn _message_delete(
         .map(|a| a.proxy_url.as_str())
         .enumerate()
     {
-        let _ = write!(attachments_s, "[Attachment #{}]({})", i + 1, attachment_url);
+        let _ = write!(s, "[Attachment #{}]({})", i + 1, attachment_url);
 
         // Add comma if not last one
         if i < saved_msg.msg.attachments.len() - 1 {
-            let _ = write!(attachments_s, ", ");
+            let _ = write!(s, ", ");
         }
     }
-
-    let s = format!(
-        "> {}\n\
-        {}",
-        saved_msg.content, attachments_s,
-    );
 
     let now = Utc::now().naive_utc();
 
     let res = ChannelId(log_msg_channel as u64)
         .send_message(ctx, |m| {
             m.embed(|e| {
-                e.description(format!(
-                    "<@{}> in {}",
-                    saved_msg.author_id as u64,
-                    channel_id.mention()
-                ));
-                e.field("Message Deleted", s, false);
+                // e.title("Message Deleted");
+                e.author(|a| {
+                    a.name(format!(
+                        "{} (ID: {})",
+                        saved_msg.msg.0.author.tag(),
+                        saved_msg.author_id
+                    ));
+                    a.icon_url(saved_msg.msg.0.author.face());
+
+                    a
+                });
+
+                e.description(s);
 
                 e.footer(|f| {
                     f.text("Deleted at");

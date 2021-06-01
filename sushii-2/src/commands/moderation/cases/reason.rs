@@ -291,7 +291,9 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
                         conf_msg
                             .edit(&ctx.http, move |msg| {
-                                msg.embed(|e| e.description("Cancelled, no case reasons were updated."));
+                                msg.embed(|e| {
+                                    e.description("Cancelled, no case reasons were updated.")
+                                });
 
                                 msg.components(|comps| {
                                     comps.set_action_rows(Vec::new());
