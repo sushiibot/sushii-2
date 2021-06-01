@@ -6,8 +6,8 @@ use metrics_exporter_prometheus::PrometheusBuilder;
 use metrics_util::layers::{Layer, PrefixLayer};
 use serenity::{model::prelude::*, prelude::*};
 use std::net::SocketAddr;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
 use crate::SushiiConfig;
 
@@ -32,10 +32,10 @@ impl UserType {
 #[derive(Clone)]
 pub struct Metrics {
     /// Buffer for count before writing to db
-    pub commands_executed_buffer: Arc<Mutex<u64>>,
+    pub commands_executed_buffer: Arc<AtomicU64>,
     /// Member counts
     pub member_counts: Arc<DashMap<GuildId, u64>>,
-    pub member_total: Arc<Mutex<u64>>,
+    pub member_total: Arc<AtomicU64>,
 }
 
 impl Metrics {
@@ -80,9 +80,9 @@ impl Metrics {
         );
 
         Self {
-            commands_executed_buffer: Arc::new(Mutex::new(0)),
+            commands_executed_buffer: Arc::new(AtomicU64::new(0)),
             member_counts: Arc::new(DashMap::new()),
-            member_total: Arc::new(Mutex::new(0)),
+            member_total: Arc::new(AtomicU64::new(0)),
         }
     }
 
@@ -107,7 +107,8 @@ impl Metrics {
                     increment_gauge!("members", guild.member_count as f64);
 
                     self.member_counts.insert(guild.id, guild.member_count);
-                    *(self.member_total.lock().await) += guild.member_count;
+                    self.member_total
+                        .fetch_add(guild.member_count, Ordering::Relaxed);
                 }
             }
             Event::GuildDelete(GuildDeleteEvent { guild, .. }) => {
@@ -115,7 +116,7 @@ impl Metrics {
 
                 if let Some(count) = self.member_counts.get(&guild.id) {
                     decrement_gauge!("members", (*count) as f64);
-                    *(self.member_total.lock().await) -= *count;
+                    self.member_total.fetch_sub(*count, Ordering::Relaxed);
 
                     self.member_counts.remove(&guild.id);
                 }
@@ -125,13 +126,13 @@ impl Metrics {
                 *entry += 1;
 
                 increment_gauge!("members", 1.0);
-                *(self.member_total.lock().await) += 1;
+                self.member_total.fetch_add(1, Ordering::Relaxed);
             }
             Event::GuildMemberRemove(GuildMemberRemoveEvent { guild_id, .. }) => {
                 let mut entry = self.member_counts.entry(*guild_id).or_insert(0);
                 *entry -= 1;
                 decrement_gauge!("members", 1.0);
-                *(self.member_total.lock().await) -= 1;
+                self.member_total.fetch_sub(1, Ordering::Relaxed);
             }
             _ => {}
         }

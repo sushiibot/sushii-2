@@ -1,4 +1,5 @@
 use serenity::prelude::*;
+use std::sync::atomic::Ordering;
 
 use crate::error::Result;
 use crate::model::sql::*;
@@ -15,7 +16,7 @@ pub async fn update_stats(ctx: &Context) -> Result<()> {
         &pool,
         "bot",
         "member_count",
-        (*metrics.member_total.lock().await) as i64,
+        metrics.member_total.load(Ordering::Relaxed) as i64,
     )
     .await?;
 

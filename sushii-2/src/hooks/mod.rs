@@ -3,6 +3,7 @@ use serenity::framework::standard::CommandError;
 use serenity::framework::standard::DispatchError;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use std::sync::atomic::Ordering;
 
 pub mod normal_message;
 pub use self::normal_message::normal_message;
@@ -99,24 +100,17 @@ pub async fn after(ctx: &Context, msg: &Message, cmd_name: &str, error: Result<(
 
     {
         let metrics = ctx.data.read().await.get::<Metrics>().cloned().unwrap();
-        let buf_count = {
-            let mut buf_count = metrics.commands_executed_buffer.lock().await;
-            *buf_count += 1;
+        let curr = metrics
+            .commands_executed_buffer
+            .fetch_add(1, Ordering::Relaxed)
+            + 1;
 
-            // Cloned
-            buf_count.clone()
-        };
-
-        if buf_count >= 10 {
+        if curr >= 10 {
             // Reset before writing to db
-            {
-                let mut buf_count = metrics.commands_executed_buffer.lock().await;
-                *buf_count = 0;
-            }
+            metrics.commands_executed_buffer.store(0, Ordering::Relaxed);
 
             let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
-            if let Err(e) = BotStat::inc(&pool, "bot", "commands_executed", buf_count as i64).await
-            {
+            if let Err(e) = BotStat::inc(&pool, "bot", "commands_executed", curr as i64).await {
                 tracing::error!("Failed to inc bot commands_executed stat: {}", e);
             }
         }
