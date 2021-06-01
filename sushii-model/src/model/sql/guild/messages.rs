@@ -110,6 +110,7 @@ impl SavedMessage {
                   FROM app_public.messages
                   JOIN unnest($1::bigint[]) as ids(message_id)
                        USING (message_id)
+              ORDER BY created ASC
             "#,
             &message_ids.iter().map(|id| id.0 as i64).collect::<Vec<_>>(),
         )

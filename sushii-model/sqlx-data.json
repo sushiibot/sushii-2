@@ -796,6 +796,62 @@
       ]
     }
   },
+  "29a3a6d19f6dd9d95a87bf66efeb845c62716583f5b381e1bf70ee6ac74a97b8": {
+    "query": "\n                SELECT message_id as \"message_id!: i64\",\n                       author_id as \"author_id!: i64\",\n                       channel_id as \"channel_id!: i64\",\n                       guild_id as \"guild_id!: i64\",\n                       created as \"created!: NaiveDateTime\",\n                       content as \"content!: String\",\n                       msg as \"msg!: Json<Message>\"\n                  FROM app_public.messages\n                  JOIN unnest($1::bigint[]) as ids(message_id)\n                       USING (message_id)\n              ORDER BY created ASC\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "message_id!: i64",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "author_id!: i64",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "channel_id!: i64",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "guild_id!: i64",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "created!: NaiveDateTime",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 5,
+          "name": "content!: String",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "msg!: Json<Message>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8Array"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "2a29555e14f688e84a378799520795dd4f5a4aa0d0fed743cc9e37d37cc89505": {
     "query": "\n            SELECT *\n              FROM app_public.mod_logs\n             WHERE guild_id = $1\n               AND case_id >= $2\n               AND case_id <= $3\n        ",
     "describe": {
@@ -1695,62 +1751,6 @@
         false,
         false,
         false,
-        true
-      ]
-    }
-  },
-  "8dffa8adb8e1b4adec63abc3d91a848c05c841b1316c304a65a676f1ddc1cfeb": {
-    "query": "\n                SELECT message_id as \"message_id!: i64\",\n                       author_id as \"author_id!: i64\",\n                       channel_id as \"channel_id!: i64\",\n                       guild_id as \"guild_id!: i64\",\n                       created as \"created!: NaiveDateTime\",\n                       content as \"content!: String\",\n                       msg as \"msg!: Json<Message>\"\n                  FROM app_public.messages\n                  JOIN unnest($1::bigint[]) as ids(message_id)\n                       USING (message_id)\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "message_id!: i64",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "author_id!: i64",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "channel_id!: i64",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "guild_id!: i64",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "created!: NaiveDateTime",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 5,
-          "name": "content!: String",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "msg!: Json<Message>",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8Array"
-        ]
-      },
-      "nullable": [
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
         true
       ]
     }
