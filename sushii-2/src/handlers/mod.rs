@@ -123,4 +123,8 @@ impl EventHandler for Handler {
     ) {
         member_log::guild_member_removal(&ctx, &guild_id, &user, &member).await;
     }
+
+    async fn interaction_create(&self, _ctx: Context, interaction: Interaction) {
+        tracing::debug!(?interaction, "Received interaction");
+    }
 }

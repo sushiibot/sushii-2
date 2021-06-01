@@ -10,10 +10,7 @@ use serenity::prelude::*;
 use std::fmt::Write;
 use std::time::Duration;
 
-use crate::model::{
-    sql::{GuildConfig, ModLogEntry},
-    Confirmation,
-};
+use crate::model::sql::{GuildConfig, ModLogEntry};
 
 enum CaseRange {
     /// A single case ID
@@ -262,6 +259,8 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             .author_id(msg.author.id)
             .await
         {
+            tracing::debug!(?interaction, "Received interaction");
+
             if let InteractionData::MessageComponent(MessageComponent { custom_id, .. }) =
                 interaction.data.as_ref().unwrap()
             {
@@ -305,7 +304,10 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
                         return Ok(());
                     }
-                    _ => {}
+                    _ => {
+                        tracing::error!("Unhandled reason interaction: {:?}", interaction);
+                        return Ok(());
+                    }
                 }
             }
         } else {

@@ -224,7 +224,10 @@ async fn _message_delete(
         None => return Ok(()), // Not found
     };
 
-    let mut s = format!("**Message deleted in <#{}>**\n", saved_msg.channel_id as u64);
+    let mut s = format!(
+        "**Message deleted in <#{}>**\n",
+        saved_msg.channel_id as u64
+    );
 
     if !saved_msg.content.is_empty() {
         writeln!(s, "{}", saved_msg.content)?;
