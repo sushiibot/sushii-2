@@ -8,6 +8,7 @@ use serenity::{model::prelude::*, prelude::*};
 use std::net::SocketAddr;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use tokio::sync::Mutex;
 
 use crate::SushiiConfig;
 
@@ -118,19 +119,27 @@ impl Metrics {
                     decrement_gauge!("members", (*count) as f64);
                     self.member_total.fetch_sub(*count, Ordering::Relaxed);
 
+                    // Drop guard before remove to prevent deadlock
+                    drop(count);
+
                     self.member_counts.remove(&guild.id);
                 }
             }
             Event::GuildMemberAdd(GuildMemberAddEvent { guild_id, .. }) => {
-                let mut entry = self.member_counts.entry(*guild_id).or_insert(0);
-                *entry += 1;
+                {
+                    let mut entry = self.member_counts.entry(*guild_id).or_insert(0);
+                    *entry += 1;
+                }
 
                 increment_gauge!("members", 1.0);
                 self.member_total.fetch_add(1, Ordering::Relaxed);
             }
             Event::GuildMemberRemove(GuildMemberRemoveEvent { guild_id, .. }) => {
-                let mut entry = self.member_counts.entry(*guild_id).or_insert(0);
-                *entry -= 1;
+                {
+                    let mut entry = self.member_counts.entry(*guild_id).or_insert(0);
+                    *entry -= 1;
+                }
+
                 decrement_gauge!("members", 1.0);
                 self.member_total.fetch_sub(1, Ordering::Relaxed);
             }
