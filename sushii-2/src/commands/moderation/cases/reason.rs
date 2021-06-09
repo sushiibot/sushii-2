@@ -512,7 +512,12 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .expect("Sent confirmation is None!")
         .edit(&ctx, |m| {
             m.embed(|e| {
-                e.description(s);
+                e.title(format!("Finished updating {}", num_cases_str));
+                e.field("Reason", reason, false);
+
+                if !attachments_str.is_empty() {
+                    e.field("Attachments", attachments_str, false);
+                }
 
                 e
             })

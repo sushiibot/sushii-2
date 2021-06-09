@@ -8,7 +8,6 @@ use serenity::{model::prelude::*, prelude::*};
 use std::net::SocketAddr;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
 use crate::SushiiConfig;
 

@@ -1,4 +1,3 @@
-pub mod confirmation;
 pub mod context;
 pub mod metrics;
 pub mod moderation;
@@ -10,6 +9,6 @@ pub mod sushii_config;
 pub use sushii_model::model::sql;
 
 pub use self::{
-    confirmation::Confirmation, context::SushiiContext, metrics::Metrics, pagination::Paginator,
-    sushii_cache::SushiiCache, sushii_config::SushiiConfig,
+    context::SushiiContext, metrics::Metrics, pagination::Paginator, sushii_cache::SushiiCache,
+    sushii_config::SushiiConfig,
 };
