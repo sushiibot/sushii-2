@@ -104,10 +104,31 @@ pub struct LanguageWrapper(#[serde(with = "LanguageType")] Language);
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
+pub enum ConfigOrValue<T> {
+    ConfigKey(String),
+    Value(T),
+}
+
+impl ConfigOrValue<String> {
+    pub fn get<'a>(&'a self, ctx: &'a RuleContext<'_>) -> Result<&'a str> {
+        match self {
+            Self::ConfigKey(key) => ctx
+                .data
+                .rule_config
+                .get(key)
+                .and_then(|v| v.as_str())
+                .ok_or(Error::RuleConfigMissingField(key.clone().into())),
+            Self::Value(val) => Ok(val.as_str()),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
 pub enum StringConstraint {
     /// # Equals
     /// Equals some text
-    Equals(String),
+    Equals(ConfigOrValue<String>),
     /// Does not equal some text
     NotEquals(String),
     /// Contains some text
@@ -169,7 +190,7 @@ impl StringConstraint {
     pub async fn check_string(&self, ctx: &RuleContext<'_>, in_str: &str) -> Result<bool> {
         let res = match self {
             Self::Equals(s) => {
-                in_str == *s
+                in_str == s.get(ctx)?
             }
             Self::NotEquals(s) => {
                 in_str != *s

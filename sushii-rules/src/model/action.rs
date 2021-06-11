@@ -114,7 +114,7 @@ impl Action {
                 let mute_role = ctx
                     .guild_config
                     .mute_role
-                    .ok_or(Error::ConfigMissingField("mute_role"))?;
+                    .ok_or(Error::GuildConfigMissingField("mute_role".into()))?;
 
                 // Start transaction since adding role could fail and we don't
                 // want pending entry sitting around if it does

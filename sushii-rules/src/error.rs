@@ -1,4 +1,5 @@
 use language_api_wrapper::error::Error as LanguageApiError;
+use std::borrow::Cow;
 use std::num::TryFromIntError;
 use std::result::Result as StdResult;
 use sushii_model::Error as SushiiModelError;
@@ -39,8 +40,10 @@ pub enum Error {
     MissingMessageId,
     #[error("Event is missing member data")]
     MissingMember,
+    #[error("Rule config does not have {0:?} set")]
+    RuleConfigMissingField(Cow<'static, str>),
     #[error("Guild config does not have {0:?} set")]
-    ConfigMissingField(&'static str),
+    GuildConfigMissingField(Cow<'static, str>),
     #[error("Unknown data store error")]
     Unknown,
     #[error("Invalid event constraint, {0:?} is not applicable to event {1:?}")]
