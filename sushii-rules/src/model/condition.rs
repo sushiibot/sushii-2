@@ -8,6 +8,12 @@ use crate::model::{Constraint, Event, RuleContext};
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub enum Condition {
+    /// # Condition
+    /// Conditions for the rule to run
+    Condition {
+        #[serde(flatten)]
+        constraint: Constraint,
+    },
     /// # And
     /// Require *all** conditions to pass before running actions
     And { and: Vec<Condition> },
@@ -22,12 +28,6 @@ pub enum Condition {
     AtLeast {
         min_count: usize,
         conditions: Vec<Condition>,
-    },
-    /// # Condition
-    /// Conditions for the rule to run
-    Condition {
-        #[serde(flatten)]
-        constraint: Constraint,
     },
 }
 
