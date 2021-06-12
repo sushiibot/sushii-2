@@ -105,7 +105,11 @@ pub struct LanguageWrapper(#[serde(with = "LanguageType")] Language);
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum ConfigOrValue<T> {
+    /// # Configuration Key
+    /// Key to fetch from the rule configuration
     ConfigKey(String),
+    /// # Value
+    /// Single value to match
     Value(T),
 }
 

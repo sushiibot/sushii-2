@@ -1,4 +1,5 @@
 use anyhow::Result;
+use async_recursion::async_recursion;
 use chrono::Duration;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -11,7 +12,7 @@ use sushii_model::model::sql::{ModLogEntry, Mute, RuleGauge, RuleScope};
 
 use crate::error::Error;
 use crate::model::has_id::*;
-use crate::model::{Event, RuleContext};
+use crate::model::{Condition, Event, RuleContext};
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub enum Action {
@@ -62,10 +63,21 @@ pub enum Action {
         /// Reason for mute
         reason: Option<String>,
     },
+    /// # Conditional Actions
+    /// Run actions based on additional conditions
+    SubCondition {
+        /// Condition to run the actions
+        condition: Condition,
+        /// Actions to run if conditions pass
+        actions: Vec<Action>,
+        /// Actions to run if conditions do **not** pass
+        actions_else: Vec<Action>,
+    },
 }
 
 impl Action {
-    pub async fn execute(&self, event: Arc<Event>, ctx: &mut RuleContext<'_>) -> Result<()> {
+    #[async_recursion]
+    pub async fn execute(&self, event: Arc<Event>, mut ctx: &mut RuleContext<'_>) -> Result<()> {
         match *self {
             Self::Reply { ref content } => {
                 let channel_id = event.channel_id()?;
@@ -226,6 +238,21 @@ impl Action {
                             original_event,
                         })
                         .await?;
+                }
+            }
+            Self::SubCondition {
+                ref condition,
+                ref actions,
+                ref actions_else,
+            } => {
+                if condition.check_event(event.clone(), ctx).await? {
+                    for action in actions {
+                        action.execute(event.clone(), &mut ctx).await?;
+                    }
+                } else {
+                    for action in actions_else {
+                        action.execute(event.clone(), &mut ctx).await?;
+                    }
                 }
             }
             _ => {}
