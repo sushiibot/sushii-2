@@ -1,5 +1,6 @@
 pub mod action;
 pub mod condition;
+pub mod config;
 // pub mod condition_result;
 pub mod cache;
 pub mod constraint;
@@ -15,6 +16,7 @@ pub mod trigger;
 pub use self::{
     action::Action,
     condition::Condition, // condition_result::ConditionResult,
+    config::{ConfigValue, RuleConfig},
     constraint::Constraint,
     engine::RulesEngine,
     event::Event,

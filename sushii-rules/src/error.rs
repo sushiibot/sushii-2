@@ -42,6 +42,8 @@ pub enum Error {
     MissingMember,
     #[error("Rule config does not have {0:?} set")]
     RuleConfigMissingField(Cow<'static, str>),
+    #[error("Rule config field {0:?} is not the correct type {1:?}")]
+    RuleConfigMismatchedType(Cow<'static, str>, Cow<'static, str>),
     #[error("Guild config does not have {0:?} set")]
     GuildConfigMissingField(Cow<'static, str>),
     #[error("Unknown data store error")]

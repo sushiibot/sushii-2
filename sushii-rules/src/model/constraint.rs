@@ -15,7 +15,7 @@ use sushii_model::model::sql::{RuleGauge, RuleScope};
 
 use crate::error::{Error, Result};
 use crate::model::has_id::*;
-use crate::model::{Event, RuleContext};
+use crate::model::{Event, RuleContext, config::{ConfigOrValue, ConfigGet}};
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, JsonSchema)]
 #[serde(rename_all(serialize = "UPPERCASE", deserialize = "UPPERCASE"))]
@@ -101,31 +101,6 @@ pub enum LanguageType {
 // This is needed so that we can use the remote Language struct
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq)]
 pub struct LanguageWrapper(#[serde(with = "LanguageType")] Language);
-
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-pub enum ConfigOrValue<T> {
-    /// # Configuration Key
-    /// Key to fetch from the rule configuration
-    ConfigKey(String),
-    /// # Value
-    /// Single value to match
-    Value(T),
-}
-
-impl ConfigOrValue<String> {
-    pub fn get<'a>(&'a self, ctx: &'a RuleContext<'_>) -> Result<&'a str> {
-        match self {
-            Self::ConfigKey(key) => ctx
-                .data
-                .rule_config
-                .get(key)
-                .and_then(|v| v.as_str())
-                .ok_or(Error::RuleConfigMissingField(key.clone().into())),
-            Self::Value(val) => Ok(val.as_str()),
-        }
-    }
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]

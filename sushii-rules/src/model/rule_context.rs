@@ -3,7 +3,7 @@ use anyhow::Result;
 use dashmap::DashMap;
 use handlebars::Handlebars;
 use serde::Serialize;
-use std::collections::{hash_map::DefaultHasher, HashMap};
+use std::collections::hash_map::DefaultHasher;
 use std::hash::Hasher;
 use std::sync::Arc;
 use tokio::sync::mpsc::Sender;
@@ -13,13 +13,13 @@ use twilight_model::id::GuildId;
 
 use sushii_model::model::sql::GuildConfig;
 
-use crate::model::Event;
+use crate::model::{Event, RuleConfig};
 
 #[derive(Debug, Default, Clone, Serialize)]
 pub struct RuleContextData {
     /// Data from event that triggered this rule
     pub trigger: Option<Arc<Event>>,
-    pub rule_config: HashMap<String, serde_json::Value>,
+    pub rule_config: RuleConfig,
     pub conditions: Option<serde_json::Value>,
     /// Data from each action, in order of execution
     pub actions: Vec<serde_json::Value>,
