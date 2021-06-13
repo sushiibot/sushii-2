@@ -233,18 +233,18 @@ async fn _message_delete(
         writeln!(s, "{}", saved_msg.content)?;
     }
 
-    for (i, attachment_url) in saved_msg
+    for (i, (attachment_name, attachment_url)) in saved_msg
         .msg
         .attachments
         .iter()
-        .map(|a| a.proxy_url.as_str())
+        .map(|a| (a.filename.as_str(), a.proxy_url.as_str()))
         .enumerate()
     {
-        let _ = write!(s, "[Attachment #{}]({})", i + 1, attachment_url);
+        write!(s, "[{}]({})", attachment_name, attachment_url)?;
 
         // Add comma if not last one
         if i < saved_msg.msg.attachments.len() - 1 {
-            let _ = write!(s, ", ");
+            write!(s, ", ")?;
         }
     }
 
@@ -360,26 +360,24 @@ async fn _message_delete_bulk(
     let mut s = String::new();
 
     for saved_msg in saved_msgs {
-        writeln!(s, "<@{}>: {}", saved_msg.author_id, saved_msg.content)?;
+        write!(s, "<@{}>: {}", saved_msg.author_id, saved_msg.content)?;
 
-        if !saved_msg.msg.attachments.is_empty() {
-            write!(s, "> ")?;
-        }
-
-        for (i, attachment_url) in saved_msg
+        for (i, (attachment_name, attachment_url)) in saved_msg
             .msg
             .attachments
             .iter()
-            .map(|a| a.proxy_url.as_str())
+            .map(|a| (a.filename.as_str(), a.proxy_url.as_str()))
             .enumerate()
         {
-            write!(s, "[Attachment #{}]({})", i + 1, attachment_url)?;
+            write!(s, "[{}]({})", attachment_name, attachment_url)?;
 
             // Add comma if not last one
             if i < saved_msg.msg.attachments.len() - 1 {
                 write!(s, ", ")?;
             }
         }
+
+        writeln!(s)?;
     }
 
     let now = Utc::now().naive_utc();
