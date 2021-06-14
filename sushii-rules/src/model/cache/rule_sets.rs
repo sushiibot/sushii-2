@@ -80,7 +80,7 @@ impl RuleSetsCache {
         let mut matching_rules = Vec::new();
 
         // This will be Counter or a Twilight(EventType)
-        let event_type = event.kind();
+        let event_type = event.kind()?;
 
         for set in guild_rule_sets {
             // Skip all rules in rule set if disabled

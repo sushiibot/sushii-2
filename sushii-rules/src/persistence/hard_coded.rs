@@ -31,7 +31,7 @@ impl RuleStore for HardCodedStore {
                 guild_id: 167058919611564043,
                 name: "Language counter".into(),
                 enabled: true,
-                trigger: Trigger::Twilight(EventType::MessageCreate),
+                trigger: Trigger::MessageCreate,
                 conditions: Condition::And {
                     and: vec![
                         Condition::Condition {

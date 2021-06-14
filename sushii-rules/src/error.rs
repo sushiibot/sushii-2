@@ -50,6 +50,8 @@ pub enum Error {
     Unknown,
     #[error("Invalid event constraint, {0:?} is not applicable to event {1:?}")]
     InvalidEventConstraint(&'static str, Trigger),
+    #[error("Unsupported gateway event")]
+    UnsupportedEvent,
     #[error(transparent)]
     LanguageApi(#[from] LanguageApiError),
     #[error("Failed to deserialize event `{0}`, {1}")]

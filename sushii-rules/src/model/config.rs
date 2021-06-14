@@ -10,7 +10,10 @@ use crate::model::{Action, RuleContext};
 pub type RuleConfig = HashMap<String, serde_json::Value>;
 
 // Types in constraints that can be either a user provided hardcoded value or
-// a key for a typed config value
+// a key for a typed config value. These are separate types as to be able to
+// easily determine the data type required when scanning the JSON data. Using
+// generics would reduce repeated code here, but would make it difficult to
+// determine what each var type is in the client side.
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]

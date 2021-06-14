@@ -1,8 +1,10 @@
 use serde::Serialize;
+use std::convert::TryInto;
 use sushii_model::model::sql::RuleGauge;
 use twilight_model::channel::message::Message;
 use twilight_model::gateway::event::DispatchEvent;
 
+use crate::error::Result;
 use crate::model::Trigger;
 
 #[derive(Debug, Clone, Serialize)]
@@ -40,11 +42,11 @@ impl From<DispatchEvent> for Event {
 }
 
 impl Event {
-    pub fn kind(&self) -> Trigger {
+    pub fn kind(&self) -> Result<Trigger> {
         match self {
-            Self::Twilight(event) => event.kind().into(),
-            Self::Counter { .. } => Trigger::Counter,
-            Self::LevelUp { .. } => Trigger::LevelUp,
+            Self::Twilight(event) => event.kind().try_into(),
+            Self::Counter { .. } => Ok(Trigger::Counter),
+            Self::LevelUp { .. } => Ok(Trigger::LevelUp),
         }
     }
 }

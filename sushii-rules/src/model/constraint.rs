@@ -438,7 +438,7 @@ impl MemberConstraint {
                 original_event: DispatchEvent::MessageCreate(msg),
                 ..
             } => msg,
-            _ => return Err(Error::InvalidEventConstraint("Member", event.kind())),
+            _ => return Err(Error::InvalidEventConstraint("Member", event.kind()?)),
         };
 
         let member = msg.member.as_ref().ok_or(Error::MissingMember)?;
@@ -511,7 +511,7 @@ impl MessageConstraint {
                 original_event: DispatchEvent::MessageCreate(msg),
                 ..
             } => msg,
-            _ => return Err(Error::InvalidEventConstraint("Message", event.kind())),
+            _ => return Err(Error::InvalidEventConstraint("Message", event.kind()?)),
         };
 
         let val = match self {

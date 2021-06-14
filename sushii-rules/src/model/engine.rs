@@ -2,6 +2,7 @@ use aho_corasick::AhoCorasick;
 use anyhow::Result;
 use dashmap::DashMap;
 use handlebars::Handlebars;
+use std::convert::TryFrom;
 use std::sync::Arc;
 use std::time::Instant;
 use tokio::sync::mpsc::Sender;
@@ -9,6 +10,7 @@ use tokio::sync::RwLock;
 use twilight_http::client::Client;
 use twilight_model::id::GuildId;
 
+use crate::error::Error;
 use crate::model::has_id::HasGuildId;
 use crate::model::{
     cache::{GuildConfigCache, RuleSetsCache},
@@ -69,6 +71,10 @@ impl RulesEngine {
     /// It provides the original event that triggered this counter
     #[tracing::instrument]
     pub async fn process_event(&self, event: Arc<Event>) -> Result<()> {
+        if let Err(Error::UnsupportedEvent) = event.kind() {
+            return Ok(());
+        }
+
         let matching_rules = self.guild_rules.get_matching_rules(&event)?;
 
         if matching_rules.is_empty() {
