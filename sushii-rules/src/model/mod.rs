@@ -16,7 +16,7 @@ pub mod trigger;
 pub use self::{
     action::Action,
     condition::Condition, // condition_result::ConditionResult,
-    config::{ConfigValue, RuleConfig},
+    config::RuleConfig,
     constraint::Constraint,
     engine::RulesEngine,
     event::Event,

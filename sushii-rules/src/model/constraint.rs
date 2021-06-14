@@ -15,7 +15,10 @@ use sushii_model::model::sql::{RuleGauge, RuleScope};
 
 use crate::error::{Error, Result};
 use crate::model::has_id::*;
-use crate::model::{Event, RuleContext, config::{ConfigOrValue, ConfigGet}};
+use crate::model::{
+    config::{ConfigGet, StringVar, StringVecVar},
+    Event, RuleContext,
+};
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, JsonSchema)]
 #[serde(rename_all(serialize = "UPPERCASE", deserialize = "UPPERCASE"))]
@@ -107,13 +110,13 @@ pub struct LanguageWrapper(#[serde(with = "LanguageType")] Language);
 pub enum StringConstraint {
     /// # Equals
     /// Equals some text
-    Equals(ConfigOrValue<String>),
+    Equals(StringVar),
     /// Does not equal some text
-    NotEquals(String),
+    NotEquals(StringVar),
     /// Contains some text
-    Contains(String),
+    Contains(StringVar),
     /// Contains all of the given texts
-    ContainsAll(Vec<String>),
+    ContainsAll(StringVecVar),
     /// Contains at least one of the given texts
     ContainsAny(Vec<String>),
     /// Does not contain the given text
@@ -172,13 +175,13 @@ impl StringConstraint {
                 in_str == s.get(ctx)?
             }
             Self::NotEquals(s) => {
-                in_str != *s
+                in_str != s.get(ctx)?
             }
             Self::Contains(s) => {
-                in_str.contains(s)
+                in_str.contains(s.get(ctx)?.as_ref())
             }
             Self::ContainsAll(strs) => {
-                strs.iter().all(|s| in_str.contains(s))
+                strs.get(ctx)?.iter().all(|s| in_str.contains(s.as_ref()))
             },
             Self::ContainsAny(strs) => {
                 strs.iter().any(|s| in_str.contains(s))

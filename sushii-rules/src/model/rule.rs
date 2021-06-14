@@ -8,7 +8,9 @@ use crate::model::{Action, Condition, Event, RuleContext, Trigger};
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Rule {
+    #[schemars(skip)]
     pub id: Uuid,
+    #[schemars(skip)]
     pub guild_id: u64,
     /// Name of this rule
     pub name: String,
