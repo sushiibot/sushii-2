@@ -98,14 +98,12 @@ impl ModActionExecutor {
         }
     }
 
-    /*
     pub fn exclude_users<I: IntoIterator<Item = u64>>(mut self, exclude_users: I) -> Self {
         exclude_users.into_iter().for_each(|id| {
             self.exclude_users.insert(id);
         });
         self
     }
-    */
 
     #[allow(clippy::too_many_arguments)]
     async fn execute_user(
