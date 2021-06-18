@@ -143,14 +143,44 @@ async fn ranked_from_id_query(
                    msg_day_total as "msg_day_total: BigInt"
                 FROM (
                     SELECT *,
-                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(DOY FROM last_msg) ORDER BY msg_day DESC) AS msg_day_rank,
-                        COUNT(*) OVER(PARTITION BY EXTRACT(DOY FROM last_msg)) AS msg_day_total,
+                        ROW_NUMBER() OVER(
+                            PARTITION BY EXTRACT(DOY FROM last_msg),
+                                         EXTRACT(YEAR FROM last_msg)
+                                         ORDER BY msg_day DESC
+                        ) AS msg_day_rank,
+                        (
+                            SELECT COUNT(*)
+                              FROM app_public.user_levels
+                             WHERE extract(DOY  from last_msg) = extract(DOY  from now())
+                               AND extract(YEAR from last_msg) = extract(YEAR from now())
+                               AND guild_id = $1
+                        ) AS msg_day_total,
 
-                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(WEEK FROM last_msg) ORDER BY msg_week DESC) AS msg_week_rank,
-                        COUNT(*) OVER(PARTITION BY EXTRACT(WEEK FROM last_msg)) AS msg_week_total,
+                        ROW_NUMBER() OVER(
+                            PARTITION BY EXTRACT(WEEK FROM last_msg),
+                                         EXTRACT(YEAR FROM last_msg)
+                                         ORDER BY msg_week DESC
+                        ) AS msg_week_rank,
+                        (
+                            SELECT COUNT(*)
+                              FROM app_public.user_levels
+                             WHERE extract(WEEK from last_msg) = extract(WEEK from now())
+                               AND extract(YEAR from last_msg) = extract(YEAR from now())
+                               AND guild_id = $1
+                        ) AS msg_week_total,
 
-                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(MONTH FROM last_msg) ORDER BY msg_month DESC) AS msg_month_rank,
-                        COUNT(*) OVER(PARTITION BY EXTRACT(MONTH FROM last_msg)) AS msg_month_total,
+                        ROW_NUMBER() OVER(
+                            PARTITION BY EXTRACT(MONTH FROM last_msg),
+                                         EXTRACT(YEAR FROM last_msg)
+                                         ORDER BY msg_month DESC
+                        ) AS msg_month_rank,
+                        (
+                            SELECT COUNT(*)
+                              FROM app_public.user_levels
+                             WHERE extract(MONTH from last_msg) = extract(MONTH from now())
+                               AND extract(YEAR  from last_msg) = extract(YEAR  from now())
+                               AND guild_id = $1
+                        ) AS msg_month_total,
 
                         ROW_NUMBER() OVER(ORDER BY msg_all_time DESC) AS msg_all_time_rank,
                         COUNT(*) OVER() AS msg_all_time_total

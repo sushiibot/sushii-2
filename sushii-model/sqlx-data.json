@@ -1075,6 +1075,111 @@
       ]
     }
   },
+  "3a3c28c18ce2a016583bccbdaa64de9744ad750dccb33496bddea34884b244ba": {
+    "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"guild_id: BigInt\",\n                   msg_all_time as \"msg_all_time: BigInt\",\n                   msg_month as \"msg_month: BigInt\",\n                   msg_week as \"msg_week: BigInt\",\n                   msg_day as \"msg_day: BigInt\",\n                   last_msg,\n                   msg_all_time_rank as \"msg_all_time_rank: BigInt\",\n                   msg_all_time_total as \"msg_all_time_total: BigInt\",\n                   msg_month_rank as \"msg_month_rank: BigInt\",\n                   msg_month_total as \"msg_month_total: BigInt\",\n                   msg_week_rank as \"msg_week_rank: BigInt\",\n                   msg_week_total as \"msg_week_total: BigInt\",\n                   msg_day_rank as \"msg_day_rank: BigInt\",\n                   msg_day_total as \"msg_day_total: BigInt\"\n                FROM (\n                    SELECT *,\n                        ROW_NUMBER() OVER(\n                            PARTITION BY EXTRACT(DOY FROM last_msg),\n                                         EXTRACT(YEAR FROM last_msg)\n                                         ORDER BY msg_day DESC\n                        ) AS msg_day_rank,\n                        (\n                            SELECT COUNT(*)\n                              FROM app_public.user_levels\n                             WHERE extract(DOY  from last_msg) = extract(DOY  from now())\n                               AND extract(YEAR from last_msg) = extract(YEAR from now())\n                               AND guild_id = $1\n                        ) AS msg_day_total,\n\n                        ROW_NUMBER() OVER(\n                            PARTITION BY EXTRACT(WEEK FROM last_msg),\n                                         EXTRACT(YEAR FROM last_msg)\n                                         ORDER BY msg_week DESC\n                        ) AS msg_week_rank,\n                        (\n                            SELECT COUNT(*)\n                              FROM app_public.user_levels\n                             WHERE extract(WEEK from last_msg) = extract(WEEK from now())\n                               AND extract(YEAR from last_msg) = extract(YEAR from now())\n                               AND guild_id = $1\n                        ) AS msg_week_total,\n\n                        ROW_NUMBER() OVER(\n                            PARTITION BY EXTRACT(MONTH FROM last_msg),\n                                         EXTRACT(YEAR FROM last_msg)\n                                         ORDER BY msg_month DESC\n                        ) AS msg_month_rank,\n                        (\n                            SELECT COUNT(*)\n                              FROM app_public.user_levels\n                             WHERE extract(MONTH from last_msg) = extract(MONTH from now())\n                               AND extract(YEAR  from last_msg) = extract(YEAR  from now())\n                               AND guild_id = $1\n                        ) AS msg_month_total,\n\n                        ROW_NUMBER() OVER(ORDER BY msg_all_time DESC) AS msg_all_time_rank,\n                        COUNT(*) OVER() AS msg_all_time_total\n                    FROM app_public.user_levels WHERE guild_id = $1\n                ) t\n            WHERE t.user_id = $2\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "msg_all_time: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 3,
+          "name": "msg_month: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 4,
+          "name": "msg_week: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 5,
+          "name": "msg_day: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "last_msg",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 7,
+          "name": "msg_all_time_rank: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "msg_all_time_total: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 9,
+          "name": "msg_month_rank: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 10,
+          "name": "msg_month_total: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 11,
+          "name": "msg_week_rank: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 12,
+          "name": "msg_week_total: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 13,
+          "name": "msg_day_rank: BigInt",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 14,
+          "name": "msg_day_total: BigInt",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    }
+  },
   "3e16c3c12001dbe1a3b1704e0b491bc94835a808e3f56d65c92f3acc903fd687": {
     "query": "\n            SELECT *\n              FROM app_public.feed_subscriptions\n             WHERE feed_id = $1\n            ",
     "describe": {
@@ -2943,111 +3048,6 @@
         true,
         true,
         true
-      ]
-    }
-  },
-  "d9ce38754fb44720b478ccfd1936e2b2424fbfd2969c841b521d5153d8d074e9": {
-    "query": "\n            SELECT user_id as \"user_id: BigInt\",\n                   guild_id as \"guild_id: BigInt\",\n                   msg_all_time as \"msg_all_time: BigInt\",\n                   msg_month as \"msg_month: BigInt\",\n                   msg_week as \"msg_week: BigInt\",\n                   msg_day as \"msg_day: BigInt\",\n                   last_msg,\n                   msg_all_time_rank as \"msg_all_time_rank: BigInt\",\n                   msg_all_time_total as \"msg_all_time_total: BigInt\",\n                   msg_month_rank as \"msg_month_rank: BigInt\",\n                   msg_month_total as \"msg_month_total: BigInt\",\n                   msg_week_rank as \"msg_week_rank: BigInt\",\n                   msg_week_total as \"msg_week_total: BigInt\",\n                   msg_day_rank as \"msg_day_rank: BigInt\",\n                   msg_day_total as \"msg_day_total: BigInt\"\n                FROM (\n                    SELECT *,\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(DOY FROM last_msg) ORDER BY msg_day DESC) AS msg_day_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(DOY FROM last_msg)) AS msg_day_total,\n\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(WEEK FROM last_msg) ORDER BY msg_week DESC) AS msg_week_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(WEEK FROM last_msg)) AS msg_week_total,\n\n                        ROW_NUMBER() OVER(PARTITION BY EXTRACT(MONTH FROM last_msg) ORDER BY msg_month DESC) AS msg_month_rank,\n                        COUNT(*) OVER(PARTITION BY EXTRACT(MONTH FROM last_msg)) AS msg_month_total,\n\n                        ROW_NUMBER() OVER(ORDER BY msg_all_time DESC) AS msg_all_time_rank,\n                        COUNT(*) OVER() AS msg_all_time_total\n                    FROM app_public.user_levels WHERE guild_id = $1\n                ) t\n            WHERE t.user_id = $2\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "msg_all_time: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 3,
-          "name": "msg_month: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "msg_week: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 5,
-          "name": "msg_day: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "last_msg",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 7,
-          "name": "msg_all_time_rank: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "msg_all_time_total: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 9,
-          "name": "msg_month_rank: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 10,
-          "name": "msg_month_total: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 11,
-          "name": "msg_week_rank: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 12,
-          "name": "msg_week_total: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 13,
-          "name": "msg_day_rank: BigInt",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 14,
-          "name": "msg_day_total: BigInt",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
       ]
     }
   },
