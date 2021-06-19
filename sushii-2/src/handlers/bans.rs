@@ -28,6 +28,32 @@ async fn _cache_ready(ctx: &Context, guild_ids: &[GuildId]) -> Result<()> {
         sleep(Duration::from_secs(2)).await;
     }
 
+    tracing::debug!("Finished updating all {} guild bans", guild_ids.len());
+
+    Ok(())
+}
+
+pub async fn guild_create(ctx: &Context, guild: &Guild, is_new: bool) {
+    if !is_new {
+        return;
+    }
+
+    if let Err(e) = _guild_create(ctx, guild, is_new).await {
+        tracing::error!("Failed to handle bans cache_ready: {}", e);
+    }
+}
+
+async fn _guild_create(ctx: &Context, guild: &Guild, _is_new: bool) -> Result<()> {
+    let bans = guild.bans(ctx).await?;
+    tracing::debug!(
+        "Fetched new guild ID {} bans, found {} bans",
+        guild.id.0,
+        bans.len()
+    );
+
+    let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
+    GuildBan::update_guild_bans(&pool, guild.id, &bans).await?;
+
     Ok(())
 }
 

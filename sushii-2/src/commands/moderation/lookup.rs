@@ -157,6 +157,7 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             // Global or curr guild AND other guild opted in
             let show_guild_name = show_guild_names_global
                 || (guild_config
+                    .as_ref()
                     .map(|c| c.data.lookup_details_opt_in)
                     .unwrap_or(false)
                     && GuildConfig::from_id(ctx, &GuildId(ban_data.ban.guild_id as u64))
