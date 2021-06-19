@@ -143,6 +143,14 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         CaseRange::LatestCount(count) => ModLogEntry::get_latest(&ctx, guild_id, count).await?,
     };
 
+    if entries.len() > 50 {
+        msg.channel_id
+            .say(&ctx.http, "Error: You can only modify up to 50 cases at once.")
+            .await?;
+
+        return Ok(());
+    }
+
     if entries.is_empty() {
         msg.channel_id
             .say(&ctx.http, "Error: No cases found with given ID")
