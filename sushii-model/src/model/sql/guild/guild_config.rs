@@ -19,7 +19,7 @@ pub struct GuildConfigData {
     /// Prompt user when using ~ban or something once to let them know of lookup
     /// command
     #[serde(default)]
-    pub lookup_prompt: bool,
+    pub lookup_prompted: bool,
 }
 
 #[derive(Deserialize, Default, Serialize, sqlx::FromRow, Clone, Debug)]
@@ -582,6 +582,7 @@ async fn upsert_config_query(conf: &GuildConfig, pool: &sqlx::PgPool) -> Result<
         conf.mute_dm_enabled,
         conf.max_mention,
         conf.disabled_channels.as_deref(),
+        conf.data as _,
     )
     .execute(pool)
     .await

@@ -137,7 +137,7 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let mut total_anon_servers: u64 = 0;
 
     // If in override server
-    let show_guild_names_global = guild_id.0 == 167058919611564043;
+    let show_guild_names_global = guild_id.0 == 167058919611564043 || guild_id.0 == 184790855977009152;
 
     for feature in FEATURE_ORDER.iter() {
         let bans = match guild_groups.get(feature) {

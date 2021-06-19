@@ -1447,6 +1447,44 @@
       "nullable": []
     }
   },
+  "6080ed6595af4196307653809d1dade8710981802d4673ee28e0d41d44d8b2ef": {
+    "query": "INSERT INTO app_public.guild_configs (\n    id,\n    prefix,\n    join_msg,\n    join_msg_enabled,\n    join_react,\n    leave_msg,\n    leave_msg_enabled,\n    msg_channel,\n    role_channel,\n    role_config,\n    role_enabled,\n    invite_guard,\n    log_msg,\n    log_msg_enabled,\n    log_mod,\n    log_mod_enabled,\n    log_member,\n    log_member_enabled,\n    mute_role,\n    mute_duration,\n    warn_dm_text,\n    warn_dm_enabled,\n    mute_dm_text,\n    mute_dm_enabled,\n    max_mention,\n    disabled_channels,\n    data\n  )\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10,\n    $11,\n    $12,\n    $13,\n    $14,\n    $15,\n    $16,\n    $17,\n    $18,\n    $19,\n    $20,\n    $21,\n    $22,\n    $23,\n    $24,\n    $25,\n    $26,\n    $27\n  ) ON CONFLICT (id) DO\nUPDATE\nSET -- id = $1, Don't need to update ID \n  prefix = $2,\n  join_msg = $3,\n  join_msg_enabled = $4,\n  join_react = $5,\n  leave_msg = $6,\n  leave_msg_enabled = $7,\n  msg_channel = $8,\n  role_channel = $9,\n  role_config = $10,\n  role_enabled = $11,\n  invite_guard = $12,\n  log_msg = $13,\n  log_msg_enabled = $14,\n  log_mod = $15,\n  log_mod_enabled = $16,\n  log_member = $17,\n  log_member_enabled = $18,\n  mute_role = $19,\n  mute_duration = $20,\n  warn_dm_text = $21,\n  warn_dm_enabled = $22,\n  mute_dm_text = $23,\n  mute_dm_enabled = $24,\n  max_mention = $25,\n  disabled_channels = $26,\n  data = $27\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
+          "Bool",
+          "Int8",
+          "Int8",
+          "Jsonb",
+          "Bool",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Int8",
+          "Text",
+          "Bool",
+          "Text",
+          "Bool",
+          "Int4",
+          "Int8Array",
+          "Jsonb"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "649e6be8a90d8555db221d365b51468516f4d7d87f12730128d9ab721c2f67ac": {
     "query": "\n            SELECT *\n              FROM app_public.mod_logs\n             WHERE guild_id = $1\n               AND user_id = $2\n        ",
     "describe": {
@@ -2018,43 +2056,6 @@
         false,
         true
       ]
-    }
-  },
-  "9186f262d2510b59ca40c68a3d0a4db441752c2d78e3de2628a50b1f1c0e27d2": {
-    "query": "INSERT INTO app_public.guild_configs (\n    id,\n    prefix,\n    join_msg,\n    join_msg_enabled,\n    join_react,\n    leave_msg,\n    leave_msg_enabled,\n    msg_channel,\n    role_channel,\n    role_config,\n    role_enabled,\n    invite_guard,\n    log_msg,\n    log_msg_enabled,\n    log_mod,\n    log_mod_enabled,\n    log_member,\n    log_member_enabled,\n    mute_role,\n    mute_duration,\n    warn_dm_text,\n    warn_dm_enabled,\n    mute_dm_text,\n    mute_dm_enabled,\n    max_mention,\n    disabled_channels\n  )\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10,\n    $11,\n    $12,\n    $13,\n    $14,\n    $15,\n    $16,\n    $17,\n    $18,\n    $19,\n    $20,\n    $21,\n    $22,\n    $23,\n    $24,\n    $25,\n    $26\n  ) ON CONFLICT (id) DO\nUPDATE\nSET -- id = $1, Don't need to update ID \n  prefix = $2,\n  join_msg = $3,\n  join_msg_enabled = $4,\n  join_react = $5,\n  leave_msg = $6,\n  leave_msg_enabled = $7,\n  msg_channel = $8,\n  role_channel = $9,\n  role_config = $10,\n  role_enabled = $11,\n  invite_guard = $12,\n  log_msg = $13,\n  log_msg_enabled = $14,\n  log_mod = $15,\n  log_mod_enabled = $16,\n  log_member = $17,\n  log_member_enabled = $18,\n  mute_role = $19,\n  mute_duration = $20,\n  warn_dm_text = $21,\n  warn_dm_enabled = $22,\n  mute_dm_text = $23,\n  mute_dm_enabled = $24,\n  max_mention = $25,\n  disabled_channels = $26\n",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Text",
-          "Bool",
-          "Text",
-          "Text",
-          "Bool",
-          "Int8",
-          "Int8",
-          "Jsonb",
-          "Bool",
-          "Bool",
-          "Int8",
-          "Bool",
-          "Int8",
-          "Bool",
-          "Int8",
-          "Bool",
-          "Int8",
-          "Int8",
-          "Text",
-          "Bool",
-          "Text",
-          "Bool",
-          "Int4",
-          "Int8Array"
-        ]
-      },
-      "nullable": []
     }
   },
   "939d7c64600546b8f4a3be096d837c416c02f3182ad478a9db098722dff27906": {

@@ -24,7 +24,8 @@ INSERT INTO app_public.guild_configs (
     mute_dm_text,
     mute_dm_enabled,
     max_mention,
-    disabled_channels
+    disabled_channels,
+    data
   )
 VALUES (
     $1,
@@ -52,7 +53,8 @@ VALUES (
     $23,
     $24,
     $25,
-    $26
+    $26,
+    $27
   ) ON CONFLICT (id) DO
 UPDATE
 SET -- id = $1, Don't need to update ID 
@@ -80,4 +82,5 @@ SET -- id = $1, Don't need to update ID
   mute_dm_text = $23,
   mute_dm_enabled = $24,
   max_mention = $25,
-  disabled_channels = $26
+  disabled_channels = $26,
+  data = $27
