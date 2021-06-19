@@ -92,176 +92,6 @@
       "nullable": []
     }
   },
-  "08f4a3bcc615eaaaf9fd0fc3448848000bf920e2379e5dd643066d24f4660f98": {
-    "query": "\n            SELECT *\n              FROM app_public.guild_configs\n             WHERE id = $1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "prefix",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "join_msg",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "join_msg_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 4,
-          "name": "join_react",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "leave_msg",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "leave_msg_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 7,
-          "name": "msg_channel",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "role_channel",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 9,
-          "name": "role_config",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 10,
-          "name": "role_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 11,
-          "name": "invite_guard",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 12,
-          "name": "log_msg",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 13,
-          "name": "log_msg_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 14,
-          "name": "log_mod",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 15,
-          "name": "log_mod_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 16,
-          "name": "log_member",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 17,
-          "name": "log_member_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 18,
-          "name": "mute_role",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 19,
-          "name": "mute_duration",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 20,
-          "name": "mute_dm_text",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 21,
-          "name": "mute_dm_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 22,
-          "name": "warn_dm_text",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 23,
-          "name": "warn_dm_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 24,
-          "name": "max_mention",
-          "type_info": "Int4"
-        },
-        {
-          "ordinal": 25,
-          "name": "disabled_channels",
-          "type_info": "Int8Array"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        true,
-        true,
-        false,
-        true,
-        true,
-        false,
-        true,
-        true,
-        true,
-        false,
-        false,
-        true,
-        false,
-        true,
-        false,
-        true,
-        false,
-        true,
-        true,
-        true,
-        false,
-        true,
-        false,
-        true,
-        true
-      ]
-    }
-  },
   "09168b8918c9a7011280bb2951e6b3030ace225a64386ab81d898dc5eb820cba": {
     "query": "\n        INSERT INTO app_public.reminders\n             VALUES ($1, $2, $3, $4)\n          RETURNING *\n        ",
     "describe": {
@@ -299,6 +129,44 @@
         false,
         false,
         false,
+        false
+      ]
+    }
+  },
+  "0b7e8efd41e895fd14f0f82ce4ee2d57ae2af53de33e159de0174e35a7b1aeee": {
+    "query": "\n                  SELECT distinct on (guild_id)\n                         bans.guild_id,\n                         bans.user_id,\n                         reason,\n                         action_time as \"action_time: Option<NaiveDateTime>\"\n                    FROM app_public.guild_bans bans\n                         LEFT JOIN app_public.mod_logs logs\n                                ON bans.guild_id = logs.guild_id\n                               AND bans.user_id  = logs.user_id\n                   WHERE bans.user_id = $1\n                     AND (action IS NULL OR action = 'ban')\n                ORDER BY guild_id, action_time desc\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "reason",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "action_time: Option<NaiveDateTime>",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
         false
       ]
     }
@@ -1019,6 +887,19 @@
       ]
     }
   },
+  "2c6d7c86d533fdbbd8eac79d05cad98094bea81c3c0a724e6c5cbf6133d1d6d9": {
+    "query": "\n            DELETE FROM app_public.guild_bans\n                  WHERE guild_id = $1\n                    AND NOT user_id = ANY($2::bigint[])\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8Array"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "39c00d9e72944bb1604d4d901e16d2cdab6965a13dcc3f8d9fee0142a41c077c": {
     "query": "\n                SELECT message_id,\n                       author_id,\n                       channel_id,\n                       guild_id,\n                       created,\n                       content,\n                       msg as \"msg: Json<Message>\"\n                  FROM app_public.messages\n                 WHERE message_id = $1\n            ",
     "describe": {
@@ -1231,6 +1112,182 @@
       "nullable": []
     }
   },
+  "4846d1fa388464d140b49e7ed509eceaeda70dd90bbcb4070c548a2378ccc714": {
+    "query": "\n            SELECT id,\n                   prefix,\n                   join_msg,\n                   join_msg_enabled,\n                   join_react,\n                   leave_msg,\n                   leave_msg_enabled,\n                   msg_channel,\n                   role_channel,\n                   role_config,\n                   role_enabled,\n                   invite_guard,\n                   log_msg,\n                   log_msg_enabled,\n                   log_mod,\n                   log_mod_enabled,\n                   log_member,\n                   log_member_enabled,\n                   mute_role,\n                   mute_duration,\n                   warn_dm_text,\n                   warn_dm_enabled,\n                   mute_dm_text,\n                   mute_dm_enabled,\n                   max_mention,\n                   disabled_channels,\n                   data as \"data!: Json<GuildConfigData>\"\n              FROM app_public.guild_configs\n             WHERE id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "prefix",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "join_msg",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "join_msg_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 4,
+          "name": "join_react",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "leave_msg",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "leave_msg_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 7,
+          "name": "msg_channel",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "role_channel",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 9,
+          "name": "role_config",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 10,
+          "name": "role_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 11,
+          "name": "invite_guard",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 12,
+          "name": "log_msg",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 13,
+          "name": "log_msg_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 14,
+          "name": "log_mod",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 15,
+          "name": "log_mod_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 16,
+          "name": "log_member",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 17,
+          "name": "log_member_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 18,
+          "name": "mute_role",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 19,
+          "name": "mute_duration",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 20,
+          "name": "warn_dm_text",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 21,
+          "name": "warn_dm_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 22,
+          "name": "mute_dm_text",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 23,
+          "name": "mute_dm_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 24,
+          "name": "max_mention",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 25,
+          "name": "disabled_channels",
+          "type_info": "Int8Array"
+        },
+        {
+          "ordinal": 26,
+          "name": "data!: Json<GuildConfigData>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        true,
+        true,
+        false,
+        true,
+        false,
+        true,
+        true,
+        false
+      ]
+    }
+  },
   "4bdace98e85cd7de4b635cba23df42db23a4e661a6c8a22d536ca5903f8be671": {
     "query": "\n            SELECT *\n              FROM app_public.tags\n             WHERE tag_name = $1\n               AND guild_id = $2\n        ",
     "describe": {
@@ -1375,6 +1432,19 @@
         false,
         false
       ]
+    }
+  },
+  "581f369721f602e4c1e741601a6e725e89543563da49a9726de1121ee108e564": {
+    "query": "\n                DELETE FROM app_public.guild_bans\n                      WHERE guild_id = $1\n                        AND user_id = $2\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": []
     }
   },
   "649e6be8a90d8555db221d365b51468516f4d7d87f12730128d9ab721c2f67ac": {
@@ -1860,6 +1930,19 @@
       ]
     }
   },
+  "8d8d590abb16a2655f48fea86af376c27bc2e65460b9ee5cd75911e32502fa07": {
+    "query": "\n            INSERT INTO app_public.guild_bans (guild_id, user_id)\n                 VALUES ($1, $2)\n            ON CONFLICT (guild_id, user_id)\n                        DO NOTHING\n            ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "8e8e15f5bca34125102bd18fecb4310ec8654f0844f96a15e13e3a9cca2e4dbd": {
     "query": "\n              SELECT *\n                FROM app_public.tags\n               WHERE guild_id = $1\n            ORDER BY use_count DESC\n               LIMIT $2\n        ",
     "describe": {
@@ -1968,6 +2051,19 @@
           "Text",
           "Bool",
           "Int4",
+          "Int8Array"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "939d7c64600546b8f4a3be096d837c416c02f3182ad478a9db098722dff27906": {
+    "query": "\n        INSERT INTO app_public.guild_bans (guild_id, user_id)\n             SELECT $1, user_id\n               FROM unnest($2::bigint[]) as ids(user_id)\n        ON CONFLICT (guild_id, user_id)\n                    DO NOTHING\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
           "Int8Array"
         ]
       },
