@@ -135,11 +135,8 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let guild_config = GuildConfig::from_id(ctx, &guild_id).await?;
     let mut s = String::new();
 
-    // If in override server, or if current server has opted in
-    let show_guild_names_global = guild_id.0 == 167058919611564043
-        || guild_config
-            .map(|c| c.data.lookup_details_opt_in)
-            .unwrap_or(false);
+    // If in override server
+    let show_guild_names_global = guild_id.0 == 167058919611564043;
 
     for feature in FEATURE_ORDER.iter() {
         let bans = match guild_groups.get(feature) {
@@ -157,14 +154,22 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
         for ban_data in bans {
             // Check if guild allows viewing
+            // Global or curr guild AND other guild opted in
             let show_guild_name = show_guild_names_global
-                || GuildConfig::from_id(ctx, &GuildId(ban_data.ban.guild_id as u64))
-                    .await?
+                || (guild_config
                     .map(|c| c.data.lookup_details_opt_in)
-                    .unwrap_or(false);
+                    .unwrap_or(false)
+                    && GuildConfig::from_id(ctx, &GuildId(ban_data.ban.guild_id as u64))
+                        .await?
+                        .map(|c| c.data.lookup_details_opt_in)
+                        .unwrap_or(false));
 
             if show_guild_name {
-                write!(s, "> **{}** ({})", ban_data.guild_name, ban_data.ban.guild_id)?;
+                write!(
+                    s,
+                    "> **{}** ({})",
+                    ban_data.guild_name, ban_data.ban.guild_id
+                )?;
 
                 if let Some(ts) = ban_data.ban.action_time {
                     write!(s, " (<t:{}:R>)", ts.timestamp())?;
