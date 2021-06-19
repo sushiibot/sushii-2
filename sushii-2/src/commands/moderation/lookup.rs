@@ -134,6 +134,7 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     let guild_config = GuildConfig::from_id(ctx, &guild_id).await?;
     let mut s = String::new();
+    let mut total_anon_servers: u64 = 0;
 
     // If in override server
     let show_guild_names_global = guild_id.0 == 167058919611564043;
@@ -183,6 +184,7 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 writeln!(s)?;
             } else {
                 anon_guilds += 1;
+                total_anon_servers += 1;
             }
         }
 
@@ -203,6 +205,21 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 });
                 e.description(s);
 
+                if !guild_config.as_ref().map(|c| c.data.lookup_details_opt_in).unwrap_or(false) && !show_guild_names_global {
+                    e.footer(|f| {
+                        f.text("Opted out of server name and reason sharing. \
+                                To show other server name and reasons from other servers, use lookup optin");
+
+                        f
+                    });
+                } else if total_anon_servers > 0 {
+                    e.footer(|f| {
+                        f.text("Anonymous servers have not opted into sharing server name and ban reasons.");
+
+                        f
+                    });
+                }
+
                 e
             });
 
@@ -212,3 +229,50 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     Ok(())
 }
+
+#[command]
+#[only_in("guild")]
+#[required_permissions("BAN_MEMBERS")]
+async fn optin(ctx: &Context, msg: &Message) -> CommandResult {
+    let mut guild_config = GuildConfig::from_msg_or_respond(ctx, &msg).await?;
+
+    if guild_config.data.lookup_details_opt_in {
+        msg.channel_id.say(ctx, "This server is already opted in! \
+                                 Server name and ban reasons will be shared. \
+                                 You can opt out with `lookup optout`.").await?;
+
+        return Ok(());
+    }
+
+    guild_config.data.lookup_details_opt_in = true;
+    guild_config.save(ctx).await?;
+
+    msg.channel_id.say(ctx, "Opted in! Server name and ban reasons will be shared. \
+                             You can opt out with `lookup optout`.").await?;
+
+    Ok(())
+}
+
+#[command]
+#[only_in("guild")]
+#[required_permissions("BAN_MEMBERS")]
+async fn optout(ctx: &Context, msg: &Message) -> CommandResult {
+    let mut guild_config = GuildConfig::from_msg_or_respond(ctx, &msg).await?;
+
+    if !guild_config.data.lookup_details_opt_in {
+        msg.channel_id.say(ctx, "This server is already opted out! \
+                                 Server name and ban reasons will not be shared. \
+                                 You can opt in with `lookup optin`.").await?;
+
+        return Ok(());
+    }
+
+    guild_config.data.lookup_details_opt_in = false;
+    guild_config.save(ctx).await?;
+
+    msg.channel_id.say(ctx, "Opted out! Server name and ban reasons will no longer be shared. \
+                             You can opt in with `lookup optin`.").await?;
+
+    Ok(())
+}
+
