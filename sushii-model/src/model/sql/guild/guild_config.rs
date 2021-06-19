@@ -5,9 +5,22 @@ use serenity::utils::parse_channel;
 use std::convert::TryFrom;
 use std::fmt;
 use std::time::Duration;
+use sqlx::types::Json;
 
 use crate::model::sql::GuildSetting;
 use crate::prelude::*;
+
+#[derive(Deserialize, Default, Serialize, sqlx::FromRow, Clone, Debug)]
+pub struct GuildConfigData {
+    /// Whether or not guild has opted into sharing/seeing other guild names when
+    /// using lookup
+    #[serde(default)]
+    pub lookup_details_opt_in: bool,
+    /// Prompt user when using ~ban or something once to let them know of lookup
+    /// command
+    #[serde(default)]
+    pub lookup_prompt: bool,
+}
 
 #[derive(Deserialize, Default, Serialize, sqlx::FromRow, Clone, Debug)]
 pub struct GuildConfig {
@@ -66,6 +79,9 @@ pub struct GuildConfig {
 
     /// Channels where commands are ignored
     pub disabled_channels: Option<Vec<i64>>,
+
+    /// Additional config data as to not use a lot of columns
+    pub data: Json<GuildConfigData>,
 }
 
 impl GuildConfig {
@@ -499,7 +515,33 @@ async fn get_guild_config_query(pool: &sqlx::PgPool, guild_id: u64) -> Result<Op
     sqlx::query_as!(
         GuildConfig,
         r#"
-            SELECT *
+            SELECT id,
+                   prefix,
+                   join_msg,
+                   join_msg_enabled,
+                   join_react,
+                   leave_msg,
+                   leave_msg_enabled,
+                   msg_channel,
+                   role_channel,
+                   role_config,
+                   role_enabled,
+                   invite_guard,
+                   log_msg,
+                   log_msg_enabled,
+                   log_mod,
+                   log_mod_enabled,
+                   log_member,
+                   log_member_enabled,
+                   mute_role,
+                   mute_duration,
+                   warn_dm_text,
+                   warn_dm_enabled,
+                   mute_dm_text,
+                   mute_dm_enabled,
+                   max_mention,
+                   disabled_channels,
+                   data as "data!: Json<GuildConfigData>"
               FROM app_public.guild_configs
              WHERE id = $1
         "#,

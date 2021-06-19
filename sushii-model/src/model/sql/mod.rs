@@ -13,6 +13,7 @@ pub use self::{
     guild::{
         cached_guild::CachedGuild,
         guild_config::GuildConfig,
+        guild_bans::GuildBan,
         guild_roles::{GuildGroup, GuildRole, GuildRoles},
         guild_setting::{GuildSetting, GuildSettingAction},
         messages::SavedMessage,

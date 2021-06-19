@@ -145,7 +145,10 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     if entries.len() > 50 {
         msg.channel_id
-            .say(&ctx.http, "Error: You can only modify up to 50 cases at once.")
+            .say(
+                &ctx.http,
+                "Error: You can only modify up to 50 cases at once.",
+            )
             .await?;
 
         return Ok(());

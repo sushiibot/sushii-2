@@ -1,6 +1,7 @@
 use crate::tasks;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 
+mod bans;
 mod cache;
 mod join_msg;
 mod member_log;
@@ -23,9 +24,11 @@ impl EventHandler for Handler {
         ctx.set_activity(Activity::playing("sushii.xyz")).await;
     }
 
-    async fn cache_ready(&self, ctx: Context, _: Vec<GuildId>) {
+    async fn cache_ready(&self, ctx: Context, guild_ids: Vec<GuildId>) {
         // Start tasks after cache has guild data
         tasks::start(&ctx).await;
+
+        bans::cache_ready(&ctx, &guild_ids).await;
     }
 
     async fn resume(&self, ctx: Context, _: ResumedEvent) {
@@ -76,10 +79,12 @@ impl EventHandler for Handler {
 
     async fn guild_ban_addition(&self, ctx: Context, guild_id: GuildId, banned_user: User) {
         mod_log::ban::guild_ban_addition(&ctx, &guild_id, &banned_user).await;
+        bans::guild_ban_addition(&ctx, guild_id, &banned_user).await;
     }
 
     async fn guild_ban_removal(&self, ctx: Context, guild_id: GuildId, unbanned_user: User) {
         mod_log::ban::guild_ban_removal(&ctx, &guild_id, &unbanned_user).await;
+        bans::guild_ban_removal(&ctx, guild_id, &unbanned_user).await;
     }
 
     async fn guild_create(&self, ctx: Context, guild: Guild, is_new: bool) {
