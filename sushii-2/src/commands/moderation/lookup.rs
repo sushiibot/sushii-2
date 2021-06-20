@@ -71,6 +71,16 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     };
 
+    let member = if let Some(guild) = msg.guild(ctx).await {
+        if let Ok(member) = guild.member(ctx, target_id).await {
+            Some(member)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
     let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
     let bans = GuildBan::lookup_user_id(&pool, UserId(target_id)).await?;
@@ -112,6 +122,8 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         };
 
         let show_guild_name = show_guild_names_global
+            // Show if in current guild
+            || Some(GuildId(ban.guild_id as u64)) == msg.guild_id
             || (guild_config
                 .as_ref()
                 .map(|c| c.data.lookup_details_opt_in)
@@ -196,6 +208,25 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
                         f
                     });
+                }
+
+                e.field(
+                    "User Info",
+                    format!("Account created at <t:{0}> (<t:{0}:R>)", user.created_at().timestamp()),
+                    false
+                );
+
+                if let Some(member) = member {
+                    if let Some(ref joined_at) = member.joined_at {
+                        e.field(
+                            "Member Info",
+                            format!(
+                                "**Joined at:** <t:{0}> (<t:{0}:R>)",
+                                joined_at.timestamp(),
+                            ),
+                            false
+                        );
+                    }
                 }
 
                 e

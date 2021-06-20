@@ -28,7 +28,7 @@ async fn _cache_ready(ctx: &Context, guild_ids: &[GuildId]) -> Result<()> {
         GuildBan::update_guild_bans(&pool, *guild_id, &bans).await?;
 
         // Wait between each one as to not spam api even though it should be rate limited
-        sleep(Duration::from_secs(2)).await;
+        sleep(Duration::from_secs(1)).await;
     }
 
     tracing::debug!("Finished updating all {} guild bans", guild_ids.len());
