@@ -16,11 +16,14 @@ async fn _cache_ready(ctx: &Context, guild_ids: &[GuildId]) -> Result<()> {
 
     for guild_id in guild_ids {
         let bans = guild_id.bans(ctx).await?;
+
         tracing::debug!(
             "Fetched guild ID {} bans, found {} bans",
             guild_id.0,
             bans.len()
         );
+
+        metrics::increment_gauge!("guild_bans", bans.len() as f64);
 
         GuildBan::update_guild_bans(&pool, *guild_id, &bans).await?;
 
@@ -51,6 +54,8 @@ async fn _guild_create(ctx: &Context, guild: &Guild, _is_new: bool) -> Result<()
         bans.len()
     );
 
+    metrics::increment_gauge!("guild_bans", bans.len() as f64);
+
     let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
     GuildBan::update_guild_bans(&pool, guild.id, &bans).await?;
 
@@ -67,6 +72,7 @@ async fn _guild_ban_addition(ctx: &Context, guild_id: GuildId, banned_user: &Use
     let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
     GuildBan::add_ban(&pool, guild_id, banned_user.id).await?;
+    metrics::increment_gauge!("guild_bans", 1.0);
 
     Ok(())
 }
@@ -81,6 +87,7 @@ async fn _guild_ban_removal(ctx: &Context, guild_id: GuildId, unbanned_user: &Us
     let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
     GuildBan::remove_ban(&pool, guild_id, unbanned_user.id).await?;
+    metrics::decrement_gauge!("guild_bans", 1.0);
 
     Ok(())
 }
