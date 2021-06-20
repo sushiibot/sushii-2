@@ -39,11 +39,21 @@ async fn avatar(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         }
     };
 
+    let member = if let Some(guild) = msg.guild(ctx).await {
+        if let Ok(member) = guild.member(ctx, target_id).await {
+            Some(member)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
     msg.channel_id
         .send_message(ctx, |m| {
             m.embed(|e| {
                 e.author(|a| {
-                    a.name(&user.tag());
+                    a.name(format!("{} avatar", user.tag()));
                     a.url(user.face());
 
                     a
@@ -52,7 +62,26 @@ async fn avatar(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                 e.image(user.face());
 
                 e
-            })
+            });
+
+            if let Some(member) = member {
+                if let Some(avatar_url) = member.avatar_url() {
+                    m.add_embed(|e| {
+                        e.author(|a| {
+                            a.name(format!("{} server avatar", member.display_name()));
+                            a.url(&avatar_url);
+
+                            a
+                        });
+
+                        e.image(&avatar_url);
+
+                        e
+                    });
+                }
+            }
+
+            m
         })
         .await?;
 
