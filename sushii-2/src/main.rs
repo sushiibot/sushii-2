@@ -20,7 +20,7 @@ mod prelude;
 mod tasks;
 
 use crate::error::Result;
-use crate::keys::{RedisPoolContainer, ReqwestContainer, ShardManagerContainer};
+use crate::keys::{ReqwestContainer, ShardManagerContainer};
 use crate::model::{sql::GuildConfig, Metrics, SushiiConfig};
 use sushii_model::keys::{DbPool, SushiiCache};
 
@@ -55,16 +55,6 @@ async fn main() -> Result<()> {
         .max_connections(32)
         .connect(&sushii_conf.database_url)
         .await?;
-
-    /*
-    // Disabled for now
-    let redis_pool = sushii_conf
-        .redis
-        .create_pool()
-        .expect("Failed to create redis pool");
-    */
-
-    // sqlx::migrate!("./migrations").run(&pool).await?;
 
     let metrics = Arc::new(Metrics::new(&sushii_conf).await);
 
@@ -160,7 +150,6 @@ async fn main() -> Result<()> {
         data.insert::<SushiiConfig>(Arc::clone(&sushii_conf));
         data.insert::<SushiiCache>(SushiiCache::default());
         data.insert::<DbPool>(pool.clone());
-        // data.insert::<RedisPoolContainer>(redis_pool.clone());
         data.insert::<Metrics>(Arc::clone(&metrics));
         data.insert::<ReqwestContainer>(reqwest::Client::new());
     }

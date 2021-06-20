@@ -12,7 +12,6 @@ struct BanData {
     ban: GuildBan,
     guild_name: String,
     member_count: u64,
-    features: Vec<String>,
     highest_feature: (u64, Option<&'static str>),
 }
 
@@ -113,7 +112,6 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             ban,
             guild_name,
             member_count,
-            features,
             highest_feature,
         });
     }

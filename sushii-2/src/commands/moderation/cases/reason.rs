@@ -3,7 +3,7 @@ use regex::Regex;
 use serenity::builder::CreateEmbed;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::interactions::{
-    ButtonStyle, Component, InteractionData, InteractionResponseType, MessageComponent,
+    ButtonStyle, InteractionData, InteractionResponseType, MessageComponent,
 };
 use serenity::model::prelude::*;
 use serenity::prelude::*;
@@ -21,20 +21,6 @@ enum CaseRange {
     Latest,
     /// The latest number of cases
     LatestCount(u64),
-}
-
-fn disable_buttons_in_component(component: &mut Component) {
-    match component {
-        Component::ActionRow(row) => {
-            for component in &mut row.components {
-                disable_buttons_in_component(component);
-            }
-        }
-        Component::Button(button) => {
-            button.disabled = true;
-        }
-        _ => {}
-    }
 }
 
 #[command]
