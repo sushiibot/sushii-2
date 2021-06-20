@@ -52,12 +52,8 @@ async fn avatar(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     msg.channel_id
         .send_message(ctx, |m| {
             m.embed(|e| {
-                e.author(|a| {
-                    a.name(format!("{} avatar", user.tag()));
-                    a.url(user.face());
-
-                    a
-                });
+                e.title(format!("{} avatar", user.tag()));
+                e.url(user.face());
 
                 e.image(user.face());
 
@@ -67,12 +63,8 @@ async fn avatar(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             if let Some(member) = member {
                 if let Some(avatar_url) = member.avatar_url() {
                     m.add_embed(|e| {
-                        e.author(|a| {
-                            a.name(format!("{} server avatar", member.display_name()));
-                            a.url(&avatar_url);
-
-                            a
-                        });
+                        e.title(format!("{} server avatar", member.display_name()));
+                        e.url(&avatar_url);
 
                         e.image(&avatar_url);
 
