@@ -3,8 +3,8 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 use std::time::Duration;
 
-use sushii_model::model::sql::GuildConfig;
 use crate::model::moderation::{ModActionExecutor, ModActionType};
+use sushii_model::model::sql::GuildConfig;
 
 #[command]
 #[only_in("guild")]
@@ -120,7 +120,7 @@ async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                             msg
                         })
                         .await?;
-                    
+
                     return Ok(());
                 }
                 "opt_out" => {
@@ -150,7 +150,7 @@ async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                             msg
                         })
                         .await?;
-                    
+
                     return Ok(());
                 }
                 _ => {
