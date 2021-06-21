@@ -133,6 +133,7 @@ impl SavedMessage {
                                    WHERE channel_id = $1
                                 ORDER BY created DESC
                                    LIMIT 100
+                                   FOR UPDATE
                             )
             "#,
             i64::from(channel_id),
