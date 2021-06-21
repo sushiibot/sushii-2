@@ -33,11 +33,11 @@ impl FishyType {
     fn fishy_range(&self) -> Range<u64> {
         match self {
             Self::Rotten => 1..10,
-            Self::Sardine => 8..14,
-            Self::Eel | Self::Tilapia | Self::Albacore | Self::Catfish | Self::Salmon => 8..20,
-            Self::Trout => 10..26,
-            Self::Carp => 10..25,
-            Self::Herring => 8..21,
+            Self::Sardine => 14..24,
+            Self::Eel | Self::Tilapia | Self::Albacore | Self::Catfish | Self::Salmon => 14..26,
+            Self::Trout => 16..26,
+            Self::Carp => 16..25,
+            Self::Herring => 16..21,
             Self::Bream => 12..31,
             Self::Tuna => 12..61,
             // Patron fishies
