@@ -105,6 +105,7 @@ async fn main() -> Result<()> {
                 })
                 .prefix("")
                 .on_mention(Some(bot_id))
+                .case_insensitivity(true)
         })
         .before(hooks::before)
         .after(hooks::after)
