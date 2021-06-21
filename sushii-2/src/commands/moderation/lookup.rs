@@ -108,7 +108,7 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                             e.field(
                                 "Member Info",
                                 format!(
-                                    "**Joined at:** <t:{0}> (<t:{0}:R>)",
+                                    "Joined server at <t:{0}> (<t:{0}:R>)",
                                     joined_at.timestamp(),
                                 ),
                                 false
@@ -246,7 +246,7 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                         e.field(
                             "Member Info",
                             format!(
-                                "**Joined at:** <t:{0}> (<t:{0}:R>)",
+                                "Joined server at <t:{0}> (<t:{0}:R>)",
                                 joined_at.timestamp(),
                             ),
                             false
@@ -275,8 +275,8 @@ async fn optin(ctx: &Context, msg: &Message) -> CommandResult {
             .say(
                 ctx,
                 "This server is already opted in! \
-                                 Server name and ban reasons will be shared. \
-                                 You can opt out with `lookup optout`.",
+                 Server name and ban reasons will be shared. \
+                 You can opt out with `lookup optout`.",
             )
             .await?;
 
@@ -290,7 +290,7 @@ async fn optin(ctx: &Context, msg: &Message) -> CommandResult {
         .say(
             ctx,
             "Opted in! Server name and ban reasons will be shared. \
-                             You can opt out with `lookup optout`.",
+             You can opt out with `lookup optout`.",
         )
         .await?;
 
@@ -308,8 +308,8 @@ async fn optout(ctx: &Context, msg: &Message) -> CommandResult {
             .say(
                 ctx,
                 "This server is already opted out! \
-                                 Server name and ban reasons will not be shared. \
-                                 You can opt in with `lookup optin`.",
+                 Server name and ban reasons will not be shared. \
+                 You can opt in with `lookup optin`.",
             )
             .await?;
 
@@ -323,7 +323,7 @@ async fn optout(ctx: &Context, msg: &Message) -> CommandResult {
         .say(
             ctx,
             "Opted out! Server name and ban reasons will no longer be shared. \
-                             You can opt in with `lookup optin`.",
+             You can opt in with `lookup optin`.",
         )
         .await?;
 
