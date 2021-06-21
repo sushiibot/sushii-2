@@ -89,7 +89,32 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         msg.channel_id
             .send_message(ctx, |m| {
                 m.embed(|e| {
+                    e.author(|a| {
+                        a.name(user.tag());
+                        a.icon_url(user.face());
+
+                        a
+                    });
                     e.title("No bans were found for user.");
+
+                    e.field(
+                        "User Info",
+                        format!("Account created at <t:{0}> (<t:{0}:R>)", user.created_at().timestamp()),
+                        false
+                    );
+
+                    if let Some(member) = member {
+                        if let Some(ref joined_at) = member.joined_at {
+                            e.field(
+                                "Member Info",
+                                format!(
+                                    "**Joined at:** <t:{0}> (<t:{0}:R>)",
+                                    joined_at.timestamp(),
+                                ),
+                                false
+                            );
+                        }
+                    }
 
                     e
                 });
