@@ -24,6 +24,7 @@ pub struct ModLogEntry {
     pub executor_id: Option<i64>,
     pub reason: Option<String>,
     pub msg_id: Option<i64>,
+    pub attachments: Vec<String>,
 }
 
 impl ModLogEntry {
@@ -41,6 +42,7 @@ impl ModLogEntry {
             executor_id: None,
             reason: None,
             msg_id: None,
+            attachments: Vec::new(),
         }
     }
 
@@ -300,7 +302,7 @@ async fn add_mod_action_query<'a, E: sqlx::Executor<'a, Database = sqlx::Postgre
                             SELECT COALESCE(MAX(case_id) + 1, 1)
                               FROM app_public.mod_logs
                              WHERE guild_id = $1
-                        ), $2, $3, $4, $5, $6, $7, $8, $9)
+                        ), $2, $3, $4, $5, $6, $7, $8, $9, $10)
               RETURNING *
         "#,
         entry.guild_id,
@@ -313,7 +315,8 @@ async fn add_mod_action_query<'a, E: sqlx::Executor<'a, Database = sqlx::Postgre
         entry.user_tag,
         entry.executor_id,
         entry.reason,
-        entry.msg_id
+        entry.msg_id,
+        &entry.attachments,
     )
     .fetch_one(pool)
     .await
@@ -337,7 +340,8 @@ async fn update_mod_action_query<'a, E: sqlx::Executor<'a, Database = sqlx::Post
                    user_tag = $7,
                    executor_id = $8,
                    reason = $9,
-                   msg_id = $10
+                   msg_id = $10,
+                   attachments = $11
              WHERE guild_id = $1
                AND case_id = $2
             RETURNING *
@@ -351,7 +355,8 @@ async fn update_mod_action_query<'a, E: sqlx::Executor<'a, Database = sqlx::Post
         entry.user_tag,
         entry.executor_id,
         entry.reason,
-        entry.msg_id
+        entry.msg_id,
+        &entry.attachments,
     )
     .fetch_one(pool)
     .await

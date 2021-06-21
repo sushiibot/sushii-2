@@ -277,89 +277,6 @@
       ]
     }
   },
-  "0eeb05364e90fd6d13cfe015df7ce6ae11e8fca623598d7878ee6cfafbadd601": {
-    "query": "\n            UPDATE app_public.mod_logs\n               SET guild_id = $1,\n                   case_id = $2,\n                   action = $3,\n                   action_time = $4,\n                   pending = $5,\n                   user_id = $6,\n                   user_tag = $7,\n                   executor_id = $8,\n                   reason = $9,\n                   msg_id = $10\n             WHERE guild_id = $1\n               AND case_id = $2\n            RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "case_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "action",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "action_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "pending",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "user_tag",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "executor_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "reason",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 9,
-          "name": "msg_id",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Text",
-          "Timestamp",
-          "Bool",
-          "Int8",
-          "Text",
-          "Int8",
-          "Text",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true
-      ]
-    }
-  },
   "107ae4183cc201bb20d1fbafd9ce75f81f2f09b10115412000c0c35b07d9efe3": {
     "query": "\n            INSERT INTO app_public.feeds\n                 VALUES ($1, $2)\n            ON CONFLICT (feed_id)\n              DO UPDATE\n                    SET metadata = $2\n            ",
     "describe": {
@@ -445,88 +362,6 @@
         false,
         false,
         false
-      ]
-    }
-  },
-  "13fc6cafdab3fe2ac2b30b0e0653d619ac79eac33e1cf515e9a617eae835e983": {
-    "query": "\n            INSERT INTO app_public.mod_logs\n                 VALUES ($1, (\n                            SELECT COALESCE(MAX(case_id) + 1, 1)\n                              FROM app_public.mod_logs\n                             WHERE guild_id = $1\n                        ), $2, $3, $4, $5, $6, $7, $8, $9)\n              RETURNING *\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "case_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "action",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "action_time",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 4,
-          "name": "pending",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 5,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 6,
-          "name": "user_tag",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 7,
-          "name": "executor_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "reason",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 9,
-          "name": "msg_id",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Timestamp",
-          "Bool",
-          "Int8",
-          "Text",
-          "Int8",
-          "Text",
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        true
       ]
     }
   },
@@ -773,6 +608,11 @@
           "ordinal": 9,
           "name": "msg_id",
           "type_info": "Int8"
+        },
+        {
+          "ordinal": 10,
+          "name": "attachments",
+          "type_info": "TextArray"
         }
       ],
       "parameters": {
@@ -792,7 +632,8 @@
         false,
         true,
         true,
-        true
+        true,
+        false
       ]
     }
   },
@@ -1447,6 +1288,185 @@
       "nullable": []
     }
   },
+  "5a5b2cf60da18edb46bda7b2e91082938e698cbb93e5244cb05b0e00c855fb38": {
+    "query": "\n            INSERT INTO app_public.mod_logs\n                 VALUES ($1, (\n                            SELECT COALESCE(MAX(case_id) + 1, 1)\n                              FROM app_public.mod_logs\n                             WHERE guild_id = $1\n                        ), $2, $3, $4, $5, $6, $7, $8, $9, $10)\n              RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "case_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "action",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "action_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "user_tag",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "executor_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "reason",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "msg_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 10,
+          "name": "attachments",
+          "type_info": "TextArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Timestamp",
+          "Bool",
+          "Int8",
+          "Text",
+          "Int8",
+          "Text",
+          "Int8",
+          "TextArray"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        false
+      ]
+    }
+  },
+  "5b38476aebfb91813e4b0ddd4f279f1a7df2fd4b01e41d754ffcae31f93801f3": {
+    "query": "\n            UPDATE app_public.mod_logs\n               SET guild_id = $1,\n                   case_id = $2,\n                   action = $3,\n                   action_time = $4,\n                   pending = $5,\n                   user_id = $6,\n                   user_tag = $7,\n                   executor_id = $8,\n                   reason = $9,\n                   msg_id = $10,\n                   attachments = $11\n             WHERE guild_id = $1\n               AND case_id = $2\n            RETURNING *\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "case_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "action",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "action_time",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 4,
+          "name": "pending",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 5,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 6,
+          "name": "user_tag",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 7,
+          "name": "executor_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "reason",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 9,
+          "name": "msg_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 10,
+          "name": "attachments",
+          "type_info": "TextArray"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Text",
+          "Timestamp",
+          "Bool",
+          "Int8",
+          "Text",
+          "Int8",
+          "Text",
+          "Int8",
+          "TextArray"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        false
+      ]
+    }
+  },
   "6080ed6595af4196307653809d1dade8710981802d4673ee28e0d41d44d8b2ef": {
     "query": "INSERT INTO app_public.guild_configs (\n    id,\n    prefix,\n    join_msg,\n    join_msg_enabled,\n    join_react,\n    leave_msg,\n    leave_msg_enabled,\n    msg_channel,\n    role_channel,\n    role_config,\n    role_enabled,\n    invite_guard,\n    log_msg,\n    log_msg_enabled,\n    log_mod,\n    log_mod_enabled,\n    log_member,\n    log_member_enabled,\n    mute_role,\n    mute_duration,\n    warn_dm_text,\n    warn_dm_enabled,\n    mute_dm_text,\n    mute_dm_enabled,\n    max_mention,\n    disabled_channels,\n    data\n  )\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10,\n    $11,\n    $12,\n    $13,\n    $14,\n    $15,\n    $16,\n    $17,\n    $18,\n    $19,\n    $20,\n    $21,\n    $22,\n    $23,\n    $24,\n    $25,\n    $26,\n    $27\n  ) ON CONFLICT (id) DO\nUPDATE\nSET -- id = $1, Don't need to update ID \n  prefix = $2,\n  join_msg = $3,\n  join_msg_enabled = $4,\n  join_react = $5,\n  leave_msg = $6,\n  leave_msg_enabled = $7,\n  msg_channel = $8,\n  role_channel = $9,\n  role_config = $10,\n  role_enabled = $11,\n  invite_guard = $12,\n  log_msg = $13,\n  log_msg_enabled = $14,\n  log_mod = $15,\n  log_mod_enabled = $16,\n  log_member = $17,\n  log_member_enabled = $18,\n  mute_role = $19,\n  mute_duration = $20,\n  warn_dm_text = $21,\n  warn_dm_enabled = $22,\n  mute_dm_text = $23,\n  mute_dm_enabled = $24,\n  max_mention = $25,\n  disabled_channels = $26,\n  data = $27\n",
     "describe": {
@@ -1538,6 +1558,11 @@
           "ordinal": 9,
           "name": "msg_id",
           "type_info": "Int8"
+        },
+        {
+          "ordinal": 10,
+          "name": "attachments",
+          "type_info": "TextArray"
         }
       ],
       "parameters": {
@@ -1556,7 +1581,8 @@
         false,
         true,
         true,
-        true
+        true,
+        false
       ]
     }
   },
@@ -2794,6 +2820,11 @@
           "ordinal": 9,
           "name": "msg_id",
           "type_info": "Int8"
+        },
+        {
+          "ordinal": 10,
+          "name": "attachments",
+          "type_info": "TextArray"
         }
       ],
       "parameters": {
@@ -2812,7 +2843,8 @@
         false,
         true,
         true,
-        true
+        true,
+        false
       ]
     }
   },
@@ -2869,6 +2901,11 @@
           "ordinal": 9,
           "name": "msg_id",
           "type_info": "Int8"
+        },
+        {
+          "ordinal": 10,
+          "name": "attachments",
+          "type_info": "TextArray"
         }
       ],
       "parameters": {
@@ -2888,7 +2925,8 @@
         false,
         true,
         true,
-        true
+        true,
+        false
       ]
     }
   },
@@ -2945,6 +2983,11 @@
           "ordinal": 9,
           "name": "msg_id",
           "type_info": "Int8"
+        },
+        {
+          "ordinal": 10,
+          "name": "attachments",
+          "type_info": "TextArray"
         }
       ],
       "parameters": {
@@ -2963,7 +3006,8 @@
         false,
         true,
         true,
-        true
+        true,
+        false
       ]
     }
   },

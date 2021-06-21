@@ -484,6 +484,7 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
 
         entry.reason.replace(reason.to_string());
+        entry.attachments = msg.attachments.iter().map(|a| a.url.clone()).collect();
         entry.executor_id.replace(msg.author.id.0 as i64);
 
         if let Err(e) = entry.save(&ctx).await {

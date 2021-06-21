@@ -99,8 +99,11 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
                     e.field(
                         "User Info",
-                        format!("Account created at <t:{0}> (<t:{0}:R>)", user.created_at().timestamp()),
-                        false
+                        format!(
+                            "Account created at <t:{0}> (<t:{0}:R>)",
+                            user.created_at().timestamp()
+                        ),
+                        false,
                     );
 
                     if let Some(member) = member {
@@ -111,7 +114,7 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                                     "Joined server at <t:{0}> (<t:{0}:R>)",
                                     joined_at.timestamp(),
                                 ),
-                                false
+                                false,
                             );
                         }
                     }
