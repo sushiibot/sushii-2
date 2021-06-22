@@ -249,6 +249,7 @@ services:
         environment:
             - TWILIGHT_API_PROXY_URL=twilight-http-proxy:80
             - TOP_GG_AUTH=${TOP_GG_AUTH}
+            - PUBLIC_LOG_CHANNEL=${PUBLIC_LOG_CHANNEL}
         networks:
             - sushii_net
             - web
