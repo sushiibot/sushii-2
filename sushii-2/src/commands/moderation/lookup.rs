@@ -181,7 +181,11 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         // Check if guild allows viewing
         // Global or curr guild AND other guild opted in
 
-        write!(s, "{} ", get_server_emojis(&ban_data.features).join(" "))?;
+        let server_emojis = get_server_emojis(&ban_data.features);
+
+        if !server_emojis.is_empty() {
+            write!(s, "{}", server_emojis.join(" "))?;
+        }
 
         if ban_data.anonymous {
             write!(s, "`anonymous`")?;
