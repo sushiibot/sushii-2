@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.26] - 2021-06-21
+
+### Added
+
+- Support per-server avatars with `avatar`
+
+### Fixed
+
+- Exclude existing bans when banning users
+- Use correct day/week/month rank on `rank` (exclude users from previous years
+  on the same timeframe)
+
+### Changed
+
+- Show attachment name in message log
+- Limit `reason` to update max 50 cases at once
+- Make commands case insensitive
+- Common fishies buffed
+
 ## [0.2.22] - 2021-05-28
 
 ### Added
