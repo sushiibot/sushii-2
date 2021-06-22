@@ -15,7 +15,13 @@ async fn _cache_ready(ctx: &Context, guild_ids: &[GuildId]) -> Result<()> {
     let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
     for guild_id in guild_ids {
-        let bans = guild_id.bans(ctx).await?;
+        let bans = match guild_id.bans(ctx).await {
+            Ok(b) => b,
+            Err(e) => {
+                tracing::warn!("Failed to fetch guild bans: {}", e);
+                continue;
+            }
+        };
 
         tracing::debug!(
             "Fetched guild ID {} bans, found {} bans",
@@ -25,7 +31,10 @@ async fn _cache_ready(ctx: &Context, guild_ids: &[GuildId]) -> Result<()> {
 
         metrics::increment_gauge!("guild_bans", bans.len() as f64);
 
-        GuildBan::update_guild_bans(&pool, *guild_id, &bans).await?;
+        if let Err(e) = GuildBan::update_guild_bans(&pool, *guild_id, &bans).await {
+            tracing::error!("Failed to update guild bans: {}", e);
+            continue;
+        };
 
         // Wait between each one as to not spam api even though it should be rate limited
         sleep(Duration::from_secs(1)).await;
