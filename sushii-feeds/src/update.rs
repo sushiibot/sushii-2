@@ -18,7 +18,9 @@ pub async fn update_vlive(ctx: &Context, newer_than: DateTime<Utc>) -> Result<()
     // Only return Err() if fatal errors
     let new_vlives = get_new_vlive_items(ctx, newer_than).await?;
 
-    if !new_vlives.is_empty() {
+    if new_vlives.is_empty() {
+        return Ok(());
+    } else {
         tracing::debug!(?new_vlives, "New videos found");
     }
 
