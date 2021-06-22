@@ -51,6 +51,10 @@ impl FishyType {
     fn common_fishies() -> &'static [FishyType] {
         &[
             Self::Sardine,
+            Self::Eel,
+            Self::Tilapia,
+            Self::Albacore,
+            Self::Catfish,
             Self::Salmon,
             Self::Carp,
             Self::Herring,
