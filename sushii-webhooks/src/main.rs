@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use tracing_subscriber::filter::{EnvFilter, LevelFilter};
 use twilight_http::Client;
+use twilight_model::channel::message::allowed_mentions::AllowedMentions;
 use twilight_model::id::UserId;
 use warp::http::StatusCode;
 use warp::Filter;
@@ -9,11 +10,12 @@ use warp::Filter;
 mod error;
 use error::Error;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct Config {
     pub listen_addr: SocketAddr,
     pub top_gg_auth: String,
     pub twilight_api_proxy_url: String,
+    pub public_log_channel: u64,
 }
 
 impl Config {
@@ -48,19 +50,33 @@ fn with_twilight_http(
     warp::any().map(move || http.clone())
 }
 
-async fn _send_message(user_id: u64, http: Client) -> Result<(), Error> {
-    let channel = http.create_private_channel(UserId(user_id)).await?;
+fn with_config(
+    config: Config,
+) -> impl Filter<Extract = (Config,), Error = std::convert::Infallible> + Clone {
+    warp::any().map(move || config.clone())
+}
 
+async fn _send_messages(user_id: u64, http: Client, config: Config) -> Result<(), Error> {
+    let channel = http.create_private_channel(UserId(user_id)).await?;
     http.create_message(channel.id)
         .content("Thanks for voting on top.gg!")?
+        .await?;
+
+    http.create_message(config.public_log_channel.into())
+        .content(format!(
+            "<@{}> voted on top.gg! <a:sushiiSpin:828894443309367306>",
+            user_id
+        ))?
+        .allowed_mentions(AllowedMentions::builder().build())
         .await?;
 
     Ok(())
 }
 
-async fn send_message(
+async fn send_messages(
     vote: TopGgBotVote,
     http: Client,
+    config: Config,
 ) -> Result<impl warp::Reply, warp::Rejection> {
     let user_id = vote
         .user
@@ -69,8 +85,8 @@ async fn send_message(
 
     // Don't want this to block response, if DM fails then that's fine whatever too
     tokio::spawn(async move {
-        if let Err(e) = _send_message(user_id, http).await {
-            tracing::warn!(user_id, "Failed to send DM to user: {}", e);
+        if let Err(e) = _send_messages(user_id, http, config).await {
+            tracing::warn!(user_id, "Failed to send messages: {}", e);
         }
     });
 
@@ -89,14 +105,17 @@ async fn main() {
     let cfg = Config::from_env().expect("Failed to create config");
 
     let http = Client::builder()
-        .proxy(cfg.twilight_api_proxy_url, true)
+        .proxy(cfg.twilight_api_proxy_url.clone(), true)
         .ratelimiter(None)
         .build();
 
     // Warp stuff
     let logger = warp::log("sushii_webhooks");
     // https://github.com/seanmonstar/warp/issues/503
-    let top_gg_auth = warp::header::exact("Authorization", Box::leak(Box::new(cfg.top_gg_auth)));
+    let top_gg_auth = warp::header::exact(
+        "Authorization",
+        Box::leak(Box::new(cfg.top_gg_auth.clone())),
+    );
 
     // POST /webhook/topgg
     let topgg_webhook = warp::post()
@@ -106,7 +125,8 @@ async fn main() {
         .and(warp::body::content_length_limit(1024 * 16))
         .and(warp::body::json())
         .and(with_twilight_http(http))
-        .and_then(send_message)
+        .and(with_config(cfg.clone()))
+        .and_then(send_messages)
         .with(logger);
 
     tracing::info!("Listening on {}", cfg.listen_addr);

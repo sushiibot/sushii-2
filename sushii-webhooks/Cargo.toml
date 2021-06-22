@@ -5,13 +5,13 @@ authors = ["drklee3 <derrick@dlee.dev>"]
 edition = "2018"
 
 [dependencies]
+config = "0.11.0"
+dotenv = "0.15.0"
+serde = "1.0.125"
+thiserror = "1.0.24"
+tokio = { version = "1", features = ["full"] }
 tracing = "0.1.25"
 tracing-subscriber = "0.2.17"
-config = "0.11.0"
-tokio = { version = "1", features = ["full"] }
+twilight-http = "0.5.0"
+twilight-model = "0.5.0"
 warp = "0.3.1"
-twilight-http = "0.3.7"
-serde = "1.0.125"
-dotenv = "0.15.0"
-twilight-model = "0.3.6"
-thiserror = "1.0.24"
