@@ -206,6 +206,63 @@ services:
             - sushii_net
         labels:
             - "traefik.enable=false"
+    twilight-dispatch:
+        image: chamburr/twilight-dispatch:latest
+        restart: unless-stopped
+        expose:
+            - "8005" # prometheus
+        environment:
+            - RUST_LOG=info
+            - BOT_TOKEN=$DISCORD_TOKEN
+            - SHARDS_START=0
+            - SHARDS_END=0
+            - SHARDS_TOTAL=1
+            - SHARDS_CONCURRENCY=1
+            - SHARDS_WAIT=6
+            - CLUSTERS=1
+            - DEFAULT_QUEUE=true
+            - RESUME=true
+            - INTENTS=13831
+            - LARGE_THRESHOLD=250
+            - STATUS=online
+            - ACTIVITY_TYPE=0
+            - ACTIVITY_NAME=meow
+            # Discord channel logs
+            - LOG_CHANNEL=749822555019280434
+            - LOG_GUILD_CHANNEL=749822555019280434
+            - STATE_ENABLED=true
+            - STATE_MEMBER=true
+            - STATE_MEMBER_TTL=60000
+            - STATE_MESSAGE=true
+            - STATE_MESSAGE_TTL=60000
+            - STATE_PRESENCE=false
+            - RABBIT_HOST=rabbitmq
+            - RABBIT_PORT=5672
+            - RABBIT_USERNAME=guest
+            - RABBIT_PASSWORD=guest
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+            - PROMETHEUS_HOST=127.0.0.1
+            - PROMETHEUS_PORT=8005
+        networks:
+            - sushii_net
+        labels:
+            - "traefik.enable=false"
+    rabbitmq:
+        image: rabbitmq:3-management
+        container_name: rabbitmq
+        restart: unless-stopped
+        expose:
+            - "5672"
+            - "15672"
+        networks:
+            - sushii_net
+        labels:
+            - "traefik.docker.network=sushii-2_web"
+            - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
+            - "traefik.http.routers.rabbitmq.rule=Host(`rabbit.sushii.xyz`)"
+            - "traefik.http.routers.rabbitmq.entrypoints=secure"
+            - "traefik.http.routers.rabbitmq.tls.certresolver=acme"
     redis:
         image: redis:6
         container_name: sushii-redis
