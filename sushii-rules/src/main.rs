@@ -2,7 +2,7 @@ use dotenv::dotenv;
 use futures::pin_mut;
 use metrics_exporter_prometheus::PrometheusBuilder;
 use metrics_util::layers::{Layer, PrefixLayer};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::pin::Pin;
 use std::sync::Arc;
 use tokio::sync::mpsc;
@@ -18,7 +18,7 @@ use sushii_rules::{
 
 mod gateway;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct RabbitMq {
     pub host: String,
     pub port: u64,
@@ -26,13 +26,8 @@ pub struct RabbitMq {
     pub password: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 pub struct Config {
-    /// Each worker is assigned to a cluster of shards as to prevent events
-    /// being sent to multiple different workers. This isn't actually useful now
-    /// since it's just a single cluster.
-    pub cluster_id: u64,
-
     pub twilight_api_proxy_url: String,
     pub language_api_endpoint: String,
 
@@ -47,7 +42,7 @@ pub struct Config {
 impl Config {
     pub fn from_env() -> Result<Self> {
         let mut cfg = config::Config::new();
-        cfg.merge(config::Environment::new().separator("_"))?;
+        cfg.merge(config::Environment::new())?;
         Ok(cfg.try_into()?)
     }
 }
@@ -92,9 +87,6 @@ async fn main() -> Result<()> {
         .expect("Failed to create redis pool");
 
     let _conn = pool.get().await.unwrap();
-    let key = format!("events:{}", cfg.cluster_id);
-
-    tracing::info!("Watching events on list `{}`", &key);
 
     let http = Client::builder()
         .proxy(cfg.twilight_api_proxy_url.clone(), true)
