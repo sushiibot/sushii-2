@@ -1,7 +1,6 @@
 use lingua::Language;
 use sqlx::types::Uuid;
 use std::collections::HashMap;
-use twilight_model::gateway::event::EventType;
 
 use sushii_model::model::sql::RuleScope;
 

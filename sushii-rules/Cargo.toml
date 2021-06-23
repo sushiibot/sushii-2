@@ -52,6 +52,7 @@ uuid = { version = "0.8", features = ["serde"] }
 futures-util = "0.3.14"
 async-stream = "0.3.1"
 tokio-stream = "0.1.5"
+lapin = "1.7.1"
 
 [dependencies.sushii-model]
 path = "../sushii-model"

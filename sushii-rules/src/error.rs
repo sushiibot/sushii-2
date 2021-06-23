@@ -1,4 +1,5 @@
 use language_api_wrapper::error::Error as LanguageApiError;
+use lapin::Error as LapinError;
 use std::borrow::Cow;
 use std::num::TryFromIntError;
 use std::result::Result as StdResult;
@@ -62,4 +63,12 @@ pub enum Error {
     TryFromInt(#[from] TryFromIntError),
     #[error("Failed to parse DateTime {0}")]
     DateTimeParse(#[from] chrono::ParseError),
+    #[error(transparent)]
+    Lapin(#[from] LapinError),
+    #[error(transparent)]
+    SerdeJson(#[from] serde_json::Error),
+    #[error(transparent)]
+    Config(#[from] config::ConfigError),
+    #[error(transparent)]
+    Sqlx(#[from] sqlx::Error),
 }

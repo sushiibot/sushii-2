@@ -1,11 +1,10 @@
-use chrono::{DateTime, Utc};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::collections::HashMap;
 
 use crate::error::{Error, Result};
-use crate::model::{Action, RuleContext};
+use crate::model::RuleContext;
 
 pub type RuleConfig = HashMap<String, serde_json::Value>;
 

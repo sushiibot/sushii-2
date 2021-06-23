@@ -2,7 +2,7 @@ use aho_corasick::AhoCorasick;
 use anyhow::Result;
 use dashmap::DashMap;
 use handlebars::Handlebars;
-use std::convert::TryFrom;
+
 use std::sync::Arc;
 use std::time::Instant;
 use tokio::sync::mpsc::Sender;

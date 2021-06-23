@@ -1,5 +1,5 @@
-use anyhow::Result;
 use dotenv::dotenv;
+use futures::pin_mut;
 use metrics_exporter_prometheus::PrometheusBuilder;
 use metrics_util::layers::{Layer, PrefixLayer};
 use redis::AsyncCommands;
@@ -15,13 +15,23 @@ use twilight_model::gateway::event::DispatchEvent;
 use twilight_model::gateway::event::DispatchEventWithTypeDeserializer;
 
 use sushii_rules::{
-    error::Error,
+    error::{Error, Result},
     model::{Event, RulesEngine},
     persistence::HardCodedStore,
 };
 
+mod gateway;
+
 #[derive(Debug, Deserialize)]
-struct Config {
+pub struct RabbitMq {
+    pub host: String,
+    pub port: u64,
+    pub username: String,
+    pub password: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Config {
     /// Each worker is assigned to a cluster of shards as to prevent events
     /// being sent to multiple different workers. This isn't actually useful now
     /// since it's just a single cluster.
@@ -32,6 +42,8 @@ struct Config {
 
     pub database_url: String,
 
+    pub rabbit: RabbitMq,
+
     #[serde(default)]
     pub redis: deadpool_redis::Config,
 }
@@ -39,36 +51,9 @@ struct Config {
 impl Config {
     pub fn from_env() -> Result<Self> {
         let mut cfg = config::Config::new();
-        cfg.merge(config::Environment::new())?;
+        cfg.merge(config::Environment::new().separator("_"))?;
         Ok(cfg.try_into()?)
     }
-}
-
-#[derive(Serialize, Deserialize)]
-struct RedisEvent {
-    pub name: String,
-    pub payload: String,
-}
-
-async fn get_event(
-    conn: &mut deadpool_redis::ConnectionWrapper,
-    key: &str,
-) -> Result<DispatchEvent> {
-    let popped: Vec<String> = conn.blpop::<&str, Vec<String>>(&key, 0).await?;
-    // https://redis.io/commands/blpop
-    // A two-element multi-bulk with the first element being the name of the key
-    // where an element was popped and the second element being the value of the
-    // popped element.
-    let event: RedisEvent = serde_json::from_str(&popped[1])?;
-
-    let mut json_deserializer = Deserializer::from_str(&event.payload);
-
-    let de = DispatchEventWithTypeDeserializer::new(&event.name);
-    let gateway_event = de
-        .deserialize(&mut json_deserializer)
-        .map_err(|e| Error::EventDeserialize(event.name, e))?;
-
-    Ok(gateway_event)
 }
 
 fn start_metrics() {
@@ -116,7 +101,7 @@ async fn main() -> Result<()> {
     tracing::info!("Watching events on list `{}`", &key);
 
     let http = Client::builder()
-        .proxy(cfg.twilight_api_proxy_url, true)
+        .proxy(cfg.twilight_api_proxy_url.clone(), true)
         .ratelimiter(None)
         .build();
 
@@ -142,28 +127,27 @@ async fn main() -> Result<()> {
         channel_tx,
     );
 
-    let redis_stream = Box::pin(async_stream::stream! {
-        loop {
-            match get_event(&mut conn, &key).await {
-                Ok(e) => yield Event::Twilight(e),
-                Err(e) => {
-                    tracing::error!("Failed get_event: {}", e);
-                    continue;
-                }
-            }
-        }
-    }) as Pin<Box<dyn Stream<Item = Event> + Send>>;
+    let rabbit_stream = gateway::get_events(&cfg).await?;
+    pin_mut!(rabbit_stream);
 
     let trigger_stream = Box::pin(async_stream::stream! {
         while let Some(event) = channel_rx.recv().await {
-            yield event;
+            yield Ok(event);
         }
-    }) as Pin<Box<dyn Stream<Item = Event> + Send>>;
+    }) as Pin<Box<dyn Stream<Item = Result<Event>> + Send>>;
 
     // Merge both redis events and triggered events
-    let mut rx = redis_stream.merge(trigger_stream);
+    let mut rx = rabbit_stream.merge(trigger_stream);
 
     while let Some(event) = rx.next().await {
+        let event = match event {
+            Ok(e) => e,
+            Err(e) => {
+                tracing::error!("Error in event: {}", e);
+                continue;
+            }
+        };
+
         if let Err(e) = engine.process_event(Arc::new(event)).await {
             tracing::error!("Failed to process event: {}", e);
         }
