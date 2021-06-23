@@ -107,7 +107,7 @@ async fn _message_update(
     }
 
     let s = format!(
-        "**Message edited in <#{}>**
+        "**Message edited in <#{}>**\
         **Before:** {}\n\
         **+After:** {}",
         saved_msg.channel_id as u64, saved_msg.content, new_content,
