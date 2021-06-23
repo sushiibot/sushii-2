@@ -2,27 +2,23 @@ use dotenv::dotenv;
 use futures::pin_mut;
 use metrics_exporter_prometheus::PrometheusBuilder;
 use metrics_util::layers::{Layer, PrefixLayer};
-use redis::AsyncCommands;
-use serde::{de::DeserializeSeed, Deserialize, Serialize};
-use serde_json::Deserializer;
+use serde::{Deserialize, Serialize};
 use std::pin::Pin;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio_stream::{Stream, StreamExt};
 use tracing_subscriber::EnvFilter;
 use twilight_http::Client;
-use twilight_model::gateway::event::DispatchEvent;
-use twilight_model::gateway::event::DispatchEventWithTypeDeserializer;
 
 use sushii_rules::{
-    error::{Error, Result},
+    error::Result,
     model::{Event, RulesEngine},
     persistence::HardCodedStore,
 };
 
 mod gateway;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct RabbitMq {
     pub host: String,
     pub port: u64,
@@ -30,7 +26,7 @@ pub struct RabbitMq {
     pub password: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Config {
     /// Each worker is assigned to a cluster of shards as to prevent events
     /// being sent to multiple different workers. This isn't actually useful now
@@ -95,7 +91,7 @@ async fn main() -> Result<()> {
         .create_pool()
         .expect("Failed to create redis pool");
 
-    let mut conn = pool.get().await.unwrap();
+    let _conn = pool.get().await.unwrap();
     let key = format!("events:{}", cfg.cluster_id);
 
     tracing::info!("Watching events on list `{}`", &key);

@@ -1,20 +1,16 @@
-use crate::Config;
 use lapin::{
-    options::{BasicAckOptions, BasicConsumeOptions, BasicPublishOptions, ExchangeDeclareOptions},
+    options::{BasicAckOptions, BasicConsumeOptions, ExchangeDeclareOptions},
     types::FieldTable,
-    BasicProperties, Channel, ExchangeKind,
+    ExchangeKind,
 };
 use serde::{de::DeserializeSeed, Deserialize, Serialize};
-use serde_json::Deserializer;
 use serde_json::Value;
-use std::pin::Pin;
-use sushii_rules::{
-    error::{Error, Result},
-    model::Event,
-};
+use sushii_rules::{error::Result, model::Event};
 use tokio_stream::{Stream, StreamExt};
 use twilight_model::gateway::event::DispatchEventWithTypeDeserializer;
 use twilight_model::gateway::OpCode;
+
+use crate::Config;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct PayloadInfo {
