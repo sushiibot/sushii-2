@@ -63,10 +63,30 @@ impl Rule {
 
         Ok(true)
     }
+
+    pub async fn from_set_id(pool: &sqlx::PgPool, set_id: Uuid) -> Result<Vec<Rule>> {
+        let db_rules = RuleDb::from_set_id(pool, set_id).await?;
+
+        let mut rules = Vec::new();
+
+        for rule in db_rules {
+            rules.push(Rule {
+                id: rule.id,
+                guild_id: rule.guild_id as u64,
+                name: rule.name,
+                enabled: rule.enabled,
+                trigger: rule.trigger.0,
+                conditions: rule.conditions.0,
+                actions: rule.actions.0
+            });
+        }
+
+        Ok(rules)
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
-pub struct RuleDb {
+struct RuleDb {
     pub id: Uuid,
     pub guild_id: i64,
     /// Name of this rule
@@ -82,7 +102,7 @@ pub struct RuleDb {
 }
 
 impl RuleDb {
-    pub async fn from_set_id(&self, pool: &sqlx::PgPool, set_id: Uuid) -> Result<Vec<RuleDb>> {
+    pub async fn from_set_id(pool: &sqlx::PgPool, set_id: Uuid) -> Result<Vec<RuleDb>> {
          sqlx::query_as!(
             RuleDb,
             r#"select id,

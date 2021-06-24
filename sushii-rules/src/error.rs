@@ -71,4 +71,8 @@ pub enum Error {
     Config(#[from] config::ConfigError),
     #[error(transparent)]
     Sqlx(#[from] sqlx::Error),
+    #[error(transparent)]
+    RedisPool(#[from] deadpool_redis::PoolError),
+    #[error(transparent)]
+    Redis(#[from] redis::RedisError),
 }
