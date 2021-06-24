@@ -106,7 +106,7 @@ impl RuleStore for HardCodedStore {
             description: Some("Auto mutes users speaking non-English languages".into()),
             enabled: true,
             editable: true,
-            author: 150443906511667200,
+            author: None,
             category: Some("Auto-moderator".into()),
             config: HashMap::new(),
             rules,

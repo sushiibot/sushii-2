@@ -81,12 +81,10 @@ async fn main() -> Result<()> {
 
     let pg_pool = sqlx::PgPool::connect(&cfg.database_url).await?;
 
-    let pool = cfg
+    let redis_pool = cfg
         .redis
         .create_pool()
         .expect("Failed to create redis pool");
-
-    let _conn = pool.get().await.unwrap();
 
     let http = Client::builder()
         .proxy(cfg.twilight_api_proxy_url.clone(), true)
@@ -110,6 +108,7 @@ async fn main() -> Result<()> {
     let engine = RulesEngine::new(
         http,
         pg_pool,
+        redis_pool,
         Box::new(HardCodedStore::new()),
         &cfg.language_api_endpoint,
         channel_tx,

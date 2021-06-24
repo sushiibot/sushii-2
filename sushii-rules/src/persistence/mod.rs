@@ -3,7 +3,7 @@ use crate::model::RuleSet;
 use std::fmt;
 
 pub mod hard_coded;
-pub mod postgres;
+// pub mod postgres;
 
 pub use hard_coded::HardCodedStore;
 

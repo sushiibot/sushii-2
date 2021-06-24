@@ -18,7 +18,6 @@ use crate::model::{
 };
 use crate::persistence::RuleStore;
 
-#[derive(Debug)]
 pub struct RulesEngine {
     /// Cached guild rulesets backed by file or database
     pub guild_rules: RuleSetsCache,
@@ -29,6 +28,8 @@ pub struct RulesEngine {
     pub handlebars_templates: Arc<RwLock<Handlebars<'static>>>,
     /// Postgres database pool
     pub pg_pool: sqlx::PgPool,
+    /// Redis connection pool
+    pub redis_pool: deadpool_redis::Pool,
     /// Guild specific word lists
     pub word_lists: Arc<DashMap<GuildId, DashMap<String, AhoCorasick>>>,
     /// Twilight HTTP client
@@ -45,6 +46,7 @@ impl RulesEngine {
     pub fn new(
         http: Client,
         pg_pool: sqlx::PgPool,
+        redis_pool: deadpool_redis::Pool,
         rules_store: Box<dyn RuleStore>,
         language_api_endpoint: &str,
         channel_tx: Sender<Event>,
@@ -56,6 +58,7 @@ impl RulesEngine {
             guild_configs: GuildConfigCache::new(),
             handlebars_templates: Arc::new(RwLock::new(Handlebars::new())),
             pg_pool,
+            redis_pool,
             word_lists: Arc::new(DashMap::new()),
             http,
             reqwest: reqwest.clone(),
@@ -69,7 +72,7 @@ impl RulesEngine {
 
     /// Events that modify counters also trigger this to process the counter.
     /// It provides the original event that triggered this counter
-    #[tracing::instrument]
+    #[tracing::instrument(skip(self))]
     pub async fn process_event(&self, event: Arc<Event>) -> Result<()> {
         if let Err(Error::UnsupportedEvent) = event.kind() {
             return Ok(());
