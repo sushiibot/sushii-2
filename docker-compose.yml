@@ -215,8 +215,8 @@ services:
             - RUST_LOG=info
             - BOT_TOKEN=$DISCORD_TOKEN
             - SHARDS_START=0
-            - SHARDS_END=0
-            - SHARDS_TOTAL=1
+            - SHARDS_END=2
+            - SHARDS_TOTAL=3
             - SHARDS_CONCURRENCY=1
             - SHARDS_WAIT=6
             - CLUSTERS=1
@@ -263,6 +263,7 @@ services:
             - "traefik.http.routers.rabbitmq.rule=Host(`rabbit.sushii.xyz`)"
             - "traefik.http.routers.rabbitmq.entrypoints=secure"
             - "traefik.http.routers.rabbitmq.tls.certresolver=acme"
+            - "traefik.http.routers.rabbitmq.middlewares=auth@file"
     redis:
         image: redis:6
         container_name: sushii-redis
