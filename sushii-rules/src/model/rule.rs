@@ -1,10 +1,10 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use sqlx::types::Json;
 use sqlx::types::Uuid;
 use std::error::Error;
-use std::sync::Arc;
-use sqlx::types::Json;
 use std::result::Result as StdResult;
+use std::sync::Arc;
 
 use crate::error::Result;
 use crate::model::{Action, Condition, Event, RuleContext, Trigger};
@@ -77,7 +77,7 @@ impl Rule {
                 enabled: rule.enabled,
                 trigger: rule.trigger.0,
                 conditions: rule.conditions.0,
-                actions: rule.actions.0
+                actions: rule.actions.0,
             });
         }
 
@@ -103,7 +103,7 @@ struct RuleDb {
 
 impl RuleDb {
     pub async fn from_set_id(pool: &sqlx::PgPool, set_id: Uuid) -> Result<Vec<RuleDb>> {
-         sqlx::query_as!(
+        sqlx::query_as!(
             RuleDb,
             r#"select id,
                       guild_id,

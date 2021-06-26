@@ -1,10 +1,10 @@
+use redis::AsyncCommands;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use sqlx::types::Json;
 use sqlx::types::Uuid;
 use std::collections::HashMap;
-use sqlx::types::Json;
-use redis::AsyncCommands;
 
 use crate::error::Result;
 use crate::model::Rule;
@@ -16,7 +16,7 @@ const RULE_SET_TIMEOUT_SECS: usize = 30;
 pub struct RuleSet {
     pub id: Uuid,
     /// Guild ID this rule set belongs to
-    pub guild_id: i64,
+    pub guild_id: Option<i64>,
     /// Name of this rule set, should be the feature name
     pub name: String,
     /// Description of rule set
@@ -41,7 +41,11 @@ impl RuleSet {
         format!("guild_rule_sets:{}", guild_id)
     }
 
-    pub async fn sets_from_guild_id(redis_pool: deadpool_redis::Pool, pool: &sqlx::PgPool, guild_id: u64) -> Result<Vec<RuleSet>> {
+    pub async fn sets_from_guild_id(
+        redis_pool: deadpool_redis::Pool,
+        pool: &sqlx::PgPool,
+        guild_id: u64,
+    ) -> Result<Vec<RuleSet>> {
         let mut conn = redis_pool.get().await?;
         let redis_key = Self::key(guild_id);
         let cached_sets_str: Option<String> = conn.get(&redis_key).await?;
@@ -53,14 +57,20 @@ impl RuleSet {
         }
 
         let db_sets = RuleSetDb::sets_from_guild_id(pool, guild_id).await?;
-        let db_sets_str = serde_json::to_string(&db_sets)?;
-        // Cache in redis
-        conn.set_ex(&redis_key, db_sets_str, RULE_SET_TIMEOUT_SECS).await?;
+        let sets = Self::from_rule_sets_db(pool, db_sets).await?;
 
-        Self::from_rule_sets_db(pool, db_sets).await
+        let sets_str = serde_json::to_string(&sets)?;
+        // Cache in redis
+        conn.set_ex(&redis_key, sets_str, RULE_SET_TIMEOUT_SECS)
+            .await?;
+
+        Ok(sets)
     }
 
-    async fn from_rule_sets_db(pool: &sqlx::PgPool, rule_sets_db: Vec<RuleSetDb>) -> Result<Vec<Self>> {
+    async fn from_rule_sets_db(
+        pool: &sqlx::PgPool,
+        rule_sets_db: Vec<RuleSetDb>,
+    ) -> Result<Vec<Self>> {
         let mut rule_sets = Vec::new();
 
         for set in rule_sets_db {
@@ -89,7 +99,7 @@ impl RuleSet {
 struct RuleSetDb {
     pub id: Uuid,
     /// Guild ID this rule set belongs to
-    pub guild_id: i64,
+    pub guild_id: Option<i64>,
     /// Name of this rule set, should be the feature name
     pub name: String,
     /// Description of rule set
@@ -108,20 +118,25 @@ struct RuleSetDb {
 }
 
 impl RuleSetDb {
+    /// Returns enabled rule sets from guild_id, **including** global rule sets
     pub async fn sets_from_guild_id(pool: &sqlx::PgPool, guild_id: u64) -> Result<Vec<RuleSetDb>> {
+        // only query sets where a config is added *and* enabled
         sqlx::query_as!(
             RuleSetDb,
-            r#"select id,
-                    guild_id,
-                    name,
-                    description,
-                    enabled,
-                    editable,
-                    author,
-                    category,
-                    config as "config!: Json<HashMap<String, Value>>"
-               from app_public.guild_rule_sets
-              where guild_id = $1
+            r#"select id as "id!: Uuid",
+                      s.guild_id,
+                      name as "name!: String",
+                      description,
+                      c.enabled as "enabled!: bool",
+                      editable as "editable!: bool",
+                      author,
+                      category,
+                      config as "config!: Json<HashMap<String, Value>>"
+               from app_public.guild_rule_sets s
+                    inner join app_public.guild_rule_set_configs c
+                               on s.id = c.set_id
+              where (s.enabled = true and c.enabled = true)
+                and (s.guild_id = $1 or s.guild_id is null)
             "#,
             guild_id as i64,
         )

@@ -101,7 +101,7 @@ impl RuleStore for HardCodedStore {
 
         let rule_set = RuleSet {
             id: Uuid::nil(),
-            guild_id: 167058919611564043,
+            guild_id: Some(167058919611564043),
             name: "Language auto-mod".into(),
             description: Some("Auto mutes users speaking non-English languages".into()),
             enabled: true,

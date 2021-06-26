@@ -1,5 +1,8 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use sqlx::types::Json;
+use sqlx::types::Uuid;
 use std::borrow::Cow;
 use std::collections::HashMap;
 
@@ -7,6 +10,18 @@ use crate::error::{Error, Result};
 use crate::model::RuleContext;
 
 pub type RuleConfig = HashMap<String, serde_json::Value>;
+
+/// Rule set from database
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
+struct RuleConfigDb {
+    pub set_id: Uuid,
+    /// Guild ID this rule set belongs to
+    pub guild_id: i64,
+    /// Whether or not the associated rule set is enabled
+    pub enabled: bool,
+    /// Rule set configuration, map of json values
+    pub config: Json<HashMap<String, Value>>,
+}
 
 // Types in constraints that can be either a user provided hardcoded value or
 // a key for a typed config value. These are separate types as to be able to
