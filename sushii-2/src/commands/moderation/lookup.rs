@@ -7,6 +7,8 @@ use sushii_model::keys::DbPool;
 use sushii_model::model::sql::GuildBan;
 use sushii_model::model::sql::GuildConfig;
 
+use crate::utils::user::parse_id;
+
 struct BanData {
     ban: GuildBan,
     guild_name: String,
@@ -46,18 +48,16 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     };
 
-    let target_id = match args.single::<u64>() {
-        Ok(n) => n,
-        Err(_) => {
-            msg.channel_id
-                .say(&ctx.http, "Error: Invalid user ID")
-                .await?;
+    let target_id = match args.single::<String>().ok().and_then(parse_id) {
+        Some(id) => UserId(id),
+        None => {
+            msg.channel_id.say(&ctx, "Error: Invalid user ID").await?;
 
             return Ok(());
         }
     };
 
-    let user = match UserId(target_id).to_user(ctx).await {
+    let user = match target_id.to_user(ctx).await {
         Ok(u) => u,
         Err(_) => {
             msg.channel_id
@@ -83,7 +83,7 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
-    let bans = GuildBan::lookup_user_id(&pool, UserId(target_id)).await?;
+    let bans = GuildBan::lookup_user_id(&pool, target_id).await?;
 
     if bans.is_empty() {
         msg.channel_id
