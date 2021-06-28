@@ -36,5 +36,5 @@ features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "of
 
 [dependencies.serenity]
 git = "https://github.com/serenity-rs/serenity"
-rev = "537753bbcf2a96a148a0d4f5975967bd3bd4c8c2"
+rev = "4f488f86ff38b59a9f38cc8b22711a081260add3"
 features = ["collector", "unstable_discord_api"]
