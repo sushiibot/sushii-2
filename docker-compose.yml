@@ -185,6 +185,7 @@ services:
         env_file:
             - .env
         environment:
+            - RUST_LOG=sushii_feeds=debug,info
             # different from sushii, should not include http://
             - TWILIGHT_API_PROXY_URL=twilight-http-proxy:80
         networks:
