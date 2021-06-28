@@ -148,6 +148,8 @@ pub async fn get_new_vlive_items(
 ) -> Result<Vec<(VliveRecentVideo, VlivePostDetail)>> {
     let videos = ctx.client.get_recent_videos(12, 1).await?;
 
+    tracing::debug!(?videos, "Fetched recent videos");
+
     let mut new_items: Vec<(VliveRecentVideo, VlivePostDetail)> = Vec::new();
 
     for video in videos {

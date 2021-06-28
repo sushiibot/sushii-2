@@ -29,11 +29,14 @@ async fn run(ctx: Context) {
         // Now before update_feeds runs since there might be new items that are
         // created during the update
         let now = Utc::now();
+        tracing::debug!(?now, "Tick");
 
         // Actually update the feeds and send Discord feed messages
         if let Err(e) = update::update_vlive(&ctx, newer_than).await {
             tracing::error!("Failed to update vlive feeds: {}", e);
         }
+
+        tracing::debug!("Finished update");
 
         // Set new time after the update
         newer_than = now;
