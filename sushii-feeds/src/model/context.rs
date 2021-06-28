@@ -1,6 +1,7 @@
 use anyhow::Result;
 use reqwest::{Client, ClientBuilder};
 use sqlx::PgPool;
+use std::time::Duration;
 use twilight_http::Client as TwilightClient;
 
 #[derive(Clone, Debug)]
@@ -21,6 +22,7 @@ impl Context {
                     "/",
                     env!("CARGO_PKG_VERSION")
                 ))
+                .timeout(Duration::from_secs(30))
                 .build()?,
         };
 
