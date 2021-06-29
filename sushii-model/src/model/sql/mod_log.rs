@@ -235,6 +235,7 @@ async fn get_user_entries_query(
               FROM app_public.mod_logs
              WHERE guild_id = $1
                AND user_id = $2
+                   ORDER BY action_time ASC
         "#,
         guild_id as i64,
         user_id as i64,
