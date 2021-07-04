@@ -1,10 +1,8 @@
-use chrono::Utc;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use std::fmt::Write;
 
-use crate::utils::duration::format_duration;
 use crate::utils::user::parse_id;
 
 #[command]
@@ -52,11 +50,9 @@ async fn userinfo(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     };
 
     let member = guild_id.member(ctx, target_id).await;
-    let now = Utc::now();
 
     let mut user_str = String::new();
 
-    write!(user_str, "**User Tag:** {}", user.tag())?;
     if user.bot {
         writeln!(user_str, "(Bot)")?;
     } else {
@@ -66,9 +62,8 @@ async fn userinfo(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     writeln!(user_str, "**ID:** {}", user.id.0)?;
     writeln!(
         user_str,
-        "**Created at:** {} ({} ago)",
-        user.created_at().format("%Y-%m-%d %H:%M:%S"),
-        format_duration(&now, &user.created_at())
+        "**Account created:** <t:{0}> (<t:{0}:R>)",
+        user.created_at().timestamp()
     )?;
 
     let mut colour = None;
@@ -84,9 +79,8 @@ async fn userinfo(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         if let Some(ref joined_at) = member.joined_at {
             writeln!(
                 user_str,
-                "**Joined at:** {} ({} ago)",
-                joined_at.format("%Y-%m-%d %H:%M:%S"),
-                format_duration(&now, joined_at)
+                "**Joined server:** <t:{0}> (<t:{0}:R>)",
+                joined_at.timestamp(),
             )?;
         }
 

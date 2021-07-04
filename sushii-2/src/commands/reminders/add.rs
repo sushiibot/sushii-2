@@ -1,3 +1,4 @@
+use chrono::Utc;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
@@ -29,11 +30,24 @@ async fn add(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let dm_msg = msg
         .author
         .dm(ctx, |m| {
-            m.content(format!(
-                "Ok! I'll remind you in {} (`{}` UTC)",
-                reminder.get_human_duration(),
-                reminder.expire_at.format("%Y-%m-%d %H:%M:%S")
-            ))
+            m.embed(|e| {
+                e.title("Reminder set!");
+                e.description(format!(
+                    "Ok! I'll remind you <t:{0}:R> (<t:{0}>)",
+                    reminder.expire_at.timestamp(),
+                ));
+
+                e.field("Description", reminder.description, false);
+
+                e.footer(|f| {
+                    f.text("Reminder set at")
+                });
+                e.timestamp(Utc::now().to_rfc3339());
+
+                e
+            });
+
+            m
         })
         .await;
 
