@@ -91,10 +91,11 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 m.embed(|e| {
                     e.author(|a| {
                         a.name(user.tag());
-                        a.icon_url(user.face());
+                        a.url(user.face());
 
                         a
                     });
+                    e.thumbnail(user.face());
                     e.title("No bans were found for user.");
 
                     e.field(
@@ -221,10 +222,11 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 e.title(format!("{} bans found", ban_data.len()));
                 e.author(|a| {
                     a.name(user.tag());
-                    a.icon_url(user.face());
+                    a.url(user.face());
 
                     a
                 });
+                e.thumbnail(user.face());
                 e.description(s);
 
                 if !guild_config.as_ref().map(|c| c.data.lookup_details_opt_in).unwrap_or(false) && !show_guild_names_global {
