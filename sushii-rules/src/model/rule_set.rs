@@ -14,8 +14,10 @@ const RULE_SET_TIMEOUT_SECS: usize = 30;
 /// Rule set used in engine and front end schema
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct RuleSet {
-    pub id: Uuid,
+    #[schemars(skip)]
+    pub id: i64,
     /// Guild ID this rule set belongs to
+    #[schemars(skip)]
     pub guild_id: Option<i64>,
     /// Name of this rule set, should be the feature name
     pub name: String,
@@ -31,8 +33,10 @@ pub struct RuleSet {
     /// Rule set category, e.g. moderation, fun, etc.
     pub category: Option<String>,
     /// Rule set configuration, map of json values
+    #[schemars(skip)]
     pub config: HashMap<String, Value>,
     /// List of rules in this rule set
+    #[schemars(skip)]
     pub rules: Vec<Rule>,
 }
 
@@ -41,6 +45,7 @@ impl RuleSet {
         format!("guild_rule_sets:{}", guild_id)
     }
 
+    /// Returns enabled rule sets from guild_id, **including** global rule sets
     pub async fn sets_from_guild_id(
         redis_pool: deadpool_redis::Pool,
         pool: &sqlx::PgPool,
@@ -97,7 +102,7 @@ impl RuleSet {
 /// Rule set from database
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
 struct RuleSetDb {
-    pub id: Uuid,
+    pub id: i64,
     /// Guild ID this rule set belongs to
     pub guild_id: Option<i64>,
     /// Name of this rule set, should be the feature name
@@ -123,7 +128,7 @@ impl RuleSetDb {
         // only query sets where a config is added *and* enabled
         sqlx::query_as!(
             RuleSetDb,
-            r#"select id as "id!: Uuid",
+            r#"select id as "id!: i64",
                       s.guild_id,
                       name as "name!: String",
                       description,

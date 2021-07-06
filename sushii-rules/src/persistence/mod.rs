@@ -2,10 +2,10 @@ use crate::error::Result;
 use crate::model::RuleSet;
 use std::fmt;
 
-pub mod hard_coded;
+// pub mod hard_coded;
 // pub mod postgres;
 
-pub use hard_coded::HardCodedStore;
+// pub use hard_coded::HardCodedStore;
 
 pub trait RuleStore: RuleStoreClone + fmt::Debug {
     /// Fetches all rules in a guild

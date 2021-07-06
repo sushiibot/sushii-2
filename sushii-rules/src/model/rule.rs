@@ -12,9 +12,7 @@ use crate::model::{Action, Condition, Event, RuleContext, Trigger};
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Rule {
     #[schemars(skip)]
-    pub id: Uuid,
-    #[schemars(skip)]
-    pub guild_id: u64,
+    pub id: i64,
     /// Name of this rule
     pub name: String,
     /// If this rule is enabled or not
@@ -64,7 +62,7 @@ impl Rule {
         Ok(true)
     }
 
-    pub async fn from_set_id(pool: &sqlx::PgPool, set_id: Uuid) -> Result<Vec<Rule>> {
+    pub async fn from_set_id(pool: &sqlx::PgPool, set_id: i64) -> Result<Vec<Rule>> {
         let db_rules = RuleDb::from_set_id(pool, set_id).await?;
 
         let mut rules = Vec::new();
@@ -72,7 +70,6 @@ impl Rule {
         for rule in db_rules {
             rules.push(Rule {
                 id: rule.id,
-                guild_id: rule.guild_id as u64,
                 name: rule.name,
                 enabled: rule.enabled,
                 trigger: rule.trigger.0,
@@ -87,8 +84,7 @@ impl Rule {
 
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
 struct RuleDb {
-    pub id: Uuid,
-    pub guild_id: i64,
+    pub id: i64,
     /// Name of this rule
     pub name: String,
     /// If this rule is enabled or not
@@ -102,11 +98,10 @@ struct RuleDb {
 }
 
 impl RuleDb {
-    pub async fn from_set_id(pool: &sqlx::PgPool, set_id: Uuid) -> Result<Vec<RuleDb>> {
+    pub async fn from_set_id(pool: &sqlx::PgPool, set_id: i64) -> Result<Vec<RuleDb>> {
         sqlx::query_as!(
             RuleDb,
             r#"select id,
-                      guild_id,
                       name,
                       enabled,
                       trigger as "trigger!: Json<Trigger>",

@@ -109,7 +109,6 @@ async fn main() -> Result<()> {
         http,
         pg_pool,
         redis_pool,
-        Box::new(HardCodedStore::new()),
         &cfg.language_api_endpoint,
         channel_tx,
     );

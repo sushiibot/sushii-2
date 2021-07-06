@@ -1,9 +1,10 @@
-use anyhow::Result;
 use dashmap::DashMap;
 use std::sync::Arc;
 
 use sushii_model::model::sql::GuildConfig;
 use twilight_model::id::GuildId;
+
+use crate::error::Result;
 
 type GuildConfigMap = DashMap<GuildId, Arc<GuildConfig>>;
 
