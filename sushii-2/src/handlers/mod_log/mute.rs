@@ -185,8 +185,6 @@ async fn _guild_member_update(
     if action == "mute" {
         if let Some(ref reason) = entry.reason {
             writeln!(s, "Reason: {}", reason)?;
-        } else {
-            writeln!(s, "Reason: No reason given")?;
         }
     }
 
