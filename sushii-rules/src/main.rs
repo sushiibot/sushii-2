@@ -13,7 +13,6 @@ use twilight_http::Client;
 use sushii_rules::{
     error::Result,
     model::{Event, RulesEngine},
-    persistence::HardCodedStore,
 };
 
 mod gateway;

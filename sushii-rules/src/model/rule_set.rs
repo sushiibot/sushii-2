@@ -56,18 +56,22 @@ impl RuleSet {
         let cached_sets_str: Option<String> = conn.get(&redis_key).await?;
 
         if let Some(cached_sets_str) = cached_sets_str {
+            tracing::debug!("Found cached rule set: {}", redis_key);
             let cached_sets = serde_json::from_str(&cached_sets_str)?;
 
             return Ok(cached_sets);
         }
 
+        tracing::debug!("Rule set not cached: {}", redis_key);
         let db_sets = RuleSetDb::sets_from_guild_id(pool, guild_id).await?;
         let sets = Self::from_rule_sets_db(pool, db_sets).await?;
+        tracing::debug!("Fetched {} rule sets from guild {}", sets.len(), guild_id);
 
         let sets_str = serde_json::to_string(&sets)?;
         // Cache in redis
         conn.set_ex(&redis_key, sets_str, RULE_SET_TIMEOUT_SECS)
             .await?;
+        tracing::debug!("Cached rule set: {}", redis_key);
 
         Ok(sets)
     }
@@ -88,7 +92,7 @@ impl RuleSet {
                 editable: set.editable,
                 author: set.author,
                 category: set.category,
-                config: set.config.0,
+                config: set.config.map_or_else(|| HashMap::new(), |c| c.0),
                 rules: Rule::from_set_id(pool, set.id).await?,
             };
 
@@ -119,7 +123,7 @@ struct RuleSetDb {
     /// Rule set category, e.g. moderation, fun, etc.
     pub category: Option<String>,
     /// Rule set configuration, map of json values
-    pub config: Json<HashMap<String, Value>>,
+    pub config: Option<Json<HashMap<String, Value>>>,
 }
 
 impl RuleSetDb {
@@ -132,15 +136,15 @@ impl RuleSetDb {
                       s.guild_id,
                       name as "name!: String",
                       description,
-                      c.enabled as "enabled!: bool",
+                      s.enabled as "enabled!: bool",
                       editable as "editable!: bool",
                       author,
                       category,
-                      config as "config!: Json<HashMap<String, Value>>"
+                      config as "config: Json<HashMap<String, Value>>"
                from app_public.guild_rule_sets s
-                    inner join app_public.guild_rule_set_configs c
-                               on s.id = c.set_id
-              where (s.enabled = true and c.enabled = true)
+                    left join app_public.guild_rule_set_configs c
+                           on s.id = c.set_id
+              where (s.enabled = true and (c.enabled is null or c.enabled = true))
                 and (s.guild_id = $1 or s.guild_id is null)
             "#,
             guild_id as i64,

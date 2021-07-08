@@ -76,7 +76,10 @@ impl RulesEngine {
         };
 
         // Only process guild events
-        let guild_id = event.guild_id()?;
+        let guild_id = match event.guild_id() {
+            Ok(id) => id,
+            Err(_) => return Ok(()),
+        };
 
         // Fetch guild rule sets
         let guild_rule_sets =
