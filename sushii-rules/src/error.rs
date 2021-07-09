@@ -49,6 +49,10 @@ pub enum Error {
     GuildConfigMissingField(Cow<'static, str>),
     #[error("Unknown data store error")]
     Unknown,
+    #[error("Unknown word list {0:?}")]
+    UnknownWordList(Cow<'static, str>),
+    #[error("There are no word lists added")]
+    NoWordLists,
     #[error("Invalid event constraint, {0:?} is not applicable to event {1:?}")]
     InvalidEventConstraint(&'static str, Trigger),
     #[error("Unsupported gateway event")]

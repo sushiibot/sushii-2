@@ -1,9 +1,9 @@
 use aho_corasick::AhoCorasick;
 use anyhow::Result;
-use dashmap::DashMap;
 use handlebars::Handlebars;
 use serde::Serialize;
 use std::collections::hash_map::DefaultHasher;
+use std::collections::HashMap;
 use std::hash::Hasher;
 use std::sync::Arc;
 use tokio::sync::mpsc::Sender;
@@ -25,7 +25,8 @@ pub struct RuleContextData {
     pub actions: Vec<serde_json::Value>,
 }
 
-type WordList = Arc<DashMap<GuildId, DashMap<String, AhoCorasick>>>;
+// Word list only in a single guild
+type GuildWordList = Arc<RwLock<HashMap<String, AhoCorasick>>>;
 
 /// This is shared to be accessed in the rules parsing.
 /// Created each time an event fires.
@@ -37,7 +38,7 @@ pub struct RuleContext<'a> {
     pub reqwest: reqwest::Client,
     pub language_client: language_api_wrapper::LanguageApiClient,
     pub handlebars_templates: Arc<RwLock<Handlebars<'a>>>,
-    pub word_lists: WordList,
+    pub word_lists: Option<GuildWordList>,
     pub data: RuleContextData,
     pub channel_tx: Sender<Event>,
 }
@@ -50,7 +51,7 @@ impl<'a> RuleContext<'a> {
         reqwest: reqwest::Client,
         language_client: language_api_wrapper::LanguageApiClient,
         handlebars_templates: Arc<RwLock<Handlebars<'a>>>,
-        word_lists: WordList,
+        word_lists: Option<GuildWordList>,
         channel_tx: Sender<Event>,
     ) -> Self {
         Self {

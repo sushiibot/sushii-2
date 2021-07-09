@@ -1,6 +1,6 @@
 use aho_corasick::AhoCorasick;
-use dashmap::DashMap;
 use handlebars::Handlebars;
+use std::collections::HashMap;
 
 use std::sync::Arc;
 use std::time::Instant;
@@ -28,7 +28,7 @@ pub struct RulesEngine {
     /// Redis connection pool
     pub redis_pool: deadpool_redis::Pool,
     /// Guild specific word lists
-    pub word_lists: Arc<DashMap<GuildId, DashMap<String, AhoCorasick>>>,
+    pub word_lists: Arc<RwLock<HashMap<GuildId, Arc<RwLock<HashMap<String, AhoCorasick>>>>>>,
     /// Twilight HTTP client
     pub http: Client,
     pub reqwest: reqwest::Client,
@@ -54,7 +54,7 @@ impl RulesEngine {
             handlebars_templates: Arc::new(RwLock::new(Handlebars::new())),
             pg_pool,
             redis_pool,
-            word_lists: Arc::new(DashMap::new()),
+            word_lists: Arc::new(RwLock::new(HashMap::new())),
             http,
             reqwest: reqwest.clone(),
             language_client: language_api_wrapper::LanguageApiClient::new(
@@ -113,7 +113,7 @@ impl RulesEngine {
                     self.reqwest.clone(),
                     self.language_client.clone(),
                     self.handlebars_templates.clone(),
-                    self.word_lists.clone(),
+                    self.word_lists.read().await.get(&guild_id).cloned(),
                     self.channel_tx.clone(),
                 );
 

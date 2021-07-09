@@ -19,8 +19,10 @@ pub struct Rule {
     pub enabled: bool,
     /// Event that triggers this rule
     pub trigger: Trigger,
+    /// # Conditions
     /// Conditions that need to pass before running actions
     pub conditions: Condition,
+    /// # Actions
     /// Actions are executed sequentially if condition passes
     pub actions: Vec<Action>,
 }

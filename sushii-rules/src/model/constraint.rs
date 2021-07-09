@@ -111,35 +111,57 @@ pub enum StringConstraint {
     /// # Equals
     /// Equals some text
     Equals(StringVar),
+    /// # Not Equals
     /// Does not equal some text
     NotEquals(StringVar),
+    /// # Contains
     /// Contains some text
     Contains(StringVar),
+    /// # Contains All
     /// Contains all of the given texts
     ContainsAll(StringVecVar),
+    /// # Contains Any
     /// Contains at least one of the given texts
     ContainsAny(Vec<String>),
+    /// # Does Not Contain
     /// Does not contain the given text
     DoesNotContain(String),
+    /// # Does Not Contain Any
     /// Does not contain any of the given texts
     DoesNotContainAny(Vec<String>),
+    /// # In Texts
     /// Is any of the of given texts
     In(Vec<String>),
+    /// # Not In Texts
     /// Is not any of the given texts
     NotIn(Vec<String>),
+    /// # In Word List
+    /// Is any of the of given texts
+    InWordList(String),
+    /// # Not In Word List
+    /// Is not any of the given texts
+    NotInWordList(String),
+    /// # Starts With
     /// Starts with given text
     StartsWith(String),
+    /// # Does Not Starts With
     /// Does not start with given text
     DoesNotStartsWith(String),
+    /// # Ends With
     /// Ends with given text
     EndsWith(String),
+    /// # Does Not Ends With
     /// Does not end with given text
     DoesNotEndsWith(String),
+    /// # Length
     /// Length of some text
     Length(IntegerConstraint),
+    /// # Is Uppercase
     /// Is all uppercase characters
-    IsUppercase,
-    IsLowercase,
+    IsUppercase(),
+    /// # Is Lowercase
+    /// Is all lowercase characters
+    IsLowercase(),
     // Expensive constraints, rules should short circuit with these last
     // TODO: Implement Ord on these so that language constraints are last, then
     // sort the rule constraints so that these are last
@@ -198,6 +220,26 @@ impl StringConstraint {
             Self::NotIn(strs) => {
                 !strs.iter().all(|s| s.contains(&in_str))
             }
+            Self::InWordList(word_list_name) => {
+                ctx.word_lists
+                    .as_ref()
+                    .ok_or(Error::NoWordLists)?
+                    .read()
+                    .await
+                    .get(word_list_name)
+                    .ok_or(Error::UnknownWordList(word_list_name.clone().into()))?
+                    .is_match(&in_str)
+            }
+            Self::NotInWordList(word_list_name) => {
+                !ctx.word_lists
+                    .as_ref()
+                    .ok_or(Error::NoWordLists)?
+                    .read()
+                    .await
+                    .get(word_list_name)
+                    .ok_or(Error::UnknownWordList(word_list_name.clone().into()))?
+                    .is_match(&in_str)
+            }
             Self::StartsWith(s) => {
                 in_str.starts_with(s)
             }
@@ -213,10 +255,10 @@ impl StringConstraint {
             Self::Length(int_constraint) => {
                 int_constraint.check_integer(ctx, in_str.len() as u64).await?
             }
-            Self::IsUppercase => {
+            Self::IsUppercase() => {
                 in_str == in_str.to_uppercase()
             }
-            Self::IsLowercase => {
+            Self::IsLowercase() => {
                 in_str == in_str.to_lowercase()
             }
             Self::IsLanguage(lang) => {
