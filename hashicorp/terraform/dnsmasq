@@ -1,0 +1,7 @@
+# https://learn.hashicorp.com/tutorials/consul/dns-forwarding#dnsmasq-setup
+
+# Enable forward lookup of the 'consul' domain:
+server=/consul/127.0.0.1#8600
+
+server=1.1.1.1
+server=1.0.0.1
