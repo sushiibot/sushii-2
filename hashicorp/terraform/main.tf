@@ -92,7 +92,7 @@ resource "hcloud_server" "hashi_node" {
   ]
 }
 
-resource "hcloud_server" "web_server" {
+resource "hcloud_server" "sushii_web" {
   name        = "node2-web"
   server_type = "cx11"
   image       = "ubuntu-20.04"
