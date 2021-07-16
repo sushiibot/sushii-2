@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Fixed
+
+- Correctly show per-server avatars with `avatar` for members who update avatars
+  after being cached
+- Sort `history` cases by time
+
 ## [0.2.26] - 2021-06-21
 
 ### Added

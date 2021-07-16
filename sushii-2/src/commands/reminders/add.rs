@@ -39,9 +39,7 @@ async fn add(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
                 e.field("Description", reminder.description, false);
 
-                e.footer(|f| {
-                    f.text("Reminder set at")
-                });
+                e.footer(|f| f.text("Reminder set at"));
                 e.timestamp(Utc::now().to_rfc3339());
 
                 e
