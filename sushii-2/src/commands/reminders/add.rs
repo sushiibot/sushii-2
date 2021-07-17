@@ -37,7 +37,9 @@ async fn add(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                     reminder.expire_at.timestamp(),
                 ));
 
-                e.field("Description", reminder.description, false);
+                if !reminder.description.is_empty() {
+                    e.field("Description", reminder.description, false);
+                }
 
                 e.footer(|f| f.text("Reminder set at"));
                 e.timestamp(Utc::now().to_rfc3339());
