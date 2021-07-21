@@ -6,6 +6,7 @@ use std::fmt::Write;
 
 use crate::error::Result;
 use crate::model::sql::*;
+use crate::utils::text::split_embed_messages;
 
 pub async fn message(ctx: &Context, msg: &Message) {
     if let Err(e) = _message(ctx, msg).await {
@@ -107,7 +108,7 @@ async fn _message_update(
     }
 
     let s = format!(
-        "**Message edited in <#{}>**\
+        "**Message edited in <#{}>**\n\
         **Before:** {}\n\
         **+After:** {}",
         saved_msg.channel_id as u64, saved_msg.content, new_content,
@@ -231,6 +232,11 @@ async fn _message_delete(
 
     if !saved_msg.content.is_empty() {
         writeln!(s, "{}", saved_msg.content)?;
+    }
+
+    // Add newline if there are attachments
+    if !saved_msg.msg.attachments.is_empty() {
+        writeln!(s)?;
     }
 
     for (i, (attachment_name, attachment_url)) in saved_msg
@@ -383,30 +389,40 @@ async fn _message_delete_bulk(
     let now = Utc::now().naive_utc();
 
     let channel = ctx.cache.channel(channel_id).await;
+    let channel_name = channel
+        .and_then(|c| c.guild())
+        .map(|c| c.name)
+        .unwrap_or_else(|| channel_id.to_string());
+
+    // Multiple descriptions if exceeds message limit
+    let descriptions = split_embed_messages(&s);
 
     let res = ChannelId(log_msg_channel as u64)
         .send_message(ctx, |m| {
-            m.embed(|e| {
-                e.title(format!(
-                    "Multiple messages deleted in #{}",
-                    channel
-                        .and_then(|c| c.guild())
-                        .map(|c| c.name)
-                        .unwrap_or_else(|| channel_id.to_string())
-                ));
-                e.description(s);
+            // max 10 embeds
+            for (i, desc) in descriptions.iter().take(10).enumerate() {
+                m.add_embed(|e| {
+                    // Show user in first embed
+                    if i == 0 {
+                        e.title(format!("Multiple messages deleted in #{}", channel_name));
+                    } else {
+                        e.title("(continued)");
+                    }
 
-                e.footer(|f| {
-                    f.text("Deleted at");
+                    e.description(desc);
 
-                    f
+                    e.footer(|f| {
+                        f.text("Deleted at");
+
+                        f
+                    });
+
+                    e.timestamp(now.format("%Y-%m-%dT%H:%M:%S").to_string());
+                    e.colour(0xe74c3c);
+
+                    e
                 });
-
-                e.timestamp(now.format("%Y-%m-%dT%H:%M:%S").to_string());
-                e.colour(0xe74c3c);
-
-                e
-            });
+            }
 
             m
         })
