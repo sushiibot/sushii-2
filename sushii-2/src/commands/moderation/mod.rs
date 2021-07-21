@@ -6,7 +6,7 @@ mod chat;
 mod lookup;
 
 use self::{
-    cases::{ban::*, delete::*, history::*, kick::*, mute::*, reason::*, warn::*},
+    cases::{ban::*, delete::*, history::*, kick::*, mute::*, note::*, reason::*, warn::*},
     channel::*,
     chat::*,
     lookup::*,
@@ -14,7 +14,8 @@ use self::{
 
 #[group]
 #[commands(
-    prune, history, ban, unban, kick, mute, listmutes, reason, unmute, warn, slowmode, deletecase
+    prune, history, ban, unban, kick, mute, listmutes, reason, unmute, warn, slowmode, deletecase,
+    note
 )]
 #[only_in("guild")]
 #[sub_groups(Lookup)]

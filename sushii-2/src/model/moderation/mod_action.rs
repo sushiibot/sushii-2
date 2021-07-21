@@ -23,6 +23,7 @@ pub enum ModActionType {
     Mute,
     Unmute,
     Warn,
+    Note,
 }
 
 impl fmt::Display for ModActionType {
@@ -37,13 +38,26 @@ impl fmt::Display for ModActionType {
                 ModActionType::Mute => "mute",
                 ModActionType::Unmute => "unmute",
                 ModActionType::Warn => "warn",
+                ModActionType::Note => "note",
             }
         )
     }
 }
 
 impl ModActionType {
-    pub fn to_past_tense(&self) -> String {
+    pub fn to_present_tense(&self) -> &'static str {
+        match self {
+            ModActionType::Ban => "ban",
+            ModActionType::Unban => "unban",
+            ModActionType::Kick => "kick",
+            ModActionType::Mute => "mute",
+            ModActionType::Unmute => "unmute",
+            ModActionType::Warn => "warn",
+            ModActionType::Note => "add note to",
+        }
+    }
+
+    pub fn to_past_tense(&self) -> &'static str {
         match self {
             ModActionType::Ban => "banned",
             ModActionType::Unban => "unbanned",
@@ -51,11 +65,11 @@ impl ModActionType {
             ModActionType::Mute => "muted",
             ModActionType::Unmute => "unmuted",
             ModActionType::Warn => "warned",
+            ModActionType::Note => "note added",
         }
-        .into()
     }
 
-    pub fn to_emoji(&self) -> String {
+    pub fn to_emoji(&self) -> &'static str {
         match self {
             ModActionType::Ban => ":hammer:",
             ModActionType::Unban => ":hammer:",
@@ -63,8 +77,8 @@ impl ModActionType {
             ModActionType::Mute => ":mute:",
             ModActionType::Unmute => ":speaker:",
             ModActionType::Warn => ":warning:",
+            ModActionType::Note => ":pencil:",
         }
-        .into()
     }
 }
 
@@ -242,6 +256,11 @@ impl ModActionExecutor {
                     ));
                 }
             }
+            ModActionType::Note => {
+                ModLogReporter::new(guild_id, user, "note")
+                    .execute(&ctx)
+                    .await?;
+            }
         }
 
         Ok(None)
@@ -293,7 +312,7 @@ impl ModActionExecutor {
                 &ctx,
                 format!(
                     "Attempting to {} {} users...",
-                    action_str,
+                    self.action.to_present_tense(),
                     &self.target_users.len()
                 ),
             )
@@ -398,7 +417,7 @@ impl ModActionExecutor {
                 m.embed(|e| {
                     e.title(format!(
                         "Attempted to {} {} users",
-                        action_str,
+                        self.action.to_present_tense(),
                         &self.target_users.len()
                     ));
                     e.description(&s);
