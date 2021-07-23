@@ -3116,18 +3116,6 @@
       ]
     }
   },
-  "d3edf27531389b5401ea8de222821b7706cf2cdd18dee0123cdbac1332618e3f": {
-    "query": "\n                DELETE FROM app_public.messages\n                      WHERE channel_id = $1\n                            AND ctid NOT IN (\n                                  SELECT ctid\n                                    FROM app_public.messages\n                                   WHERE channel_id = $1\n                                ORDER BY created DESC\n                                   LIMIT 100\n                                   FOR UPDATE\n                            )\n            ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "d63bf5a86a4df8d5fc1bace10171ee73fd32a24abd98f3d13d0d4642e49a96f8": {
     "query": "\n        INSERT INTO app_public.users (id, is_patron, patron_emoji, rep, fishies, last_rep, last_fishies, profile_data, lastfm_username)\n             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET is_patron = $2,\n                    patron_emoji = $3,\n                    rep = $4,\n                    fishies = $5,\n                    last_rep = $6,\n                    last_fishies = $7,\n                    profile_data = $8,\n                    lastfm_username = $9\n         RETURNING id,\n                   is_patron,\n                   patron_emoji,\n                   rep,\n                   fishies,\n                   last_rep,\n                   last_fishies,\n                   lastfm_username,\n                   profile_data as \"profile_data: Json<UserProfileData>\"\n        ",
     "describe": {

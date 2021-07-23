@@ -50,9 +50,6 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
     // Save message to db
     saved_msg.save(ctx).await?;
 
-    // Delete old messages past max # (100) to save per channel
-    SavedMessage::prune_old(ctx, msg.channel_id).await?;
-
     Ok(())
 }
 

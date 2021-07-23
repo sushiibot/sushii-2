@@ -118,29 +118,4 @@ impl SavedMessage {
         .await
         .map_err(Into::into)
     }
-
-    pub async fn prune_old(ctx: &Context, channel_id: ChannelId) -> Result<()> {
-        let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
-
-        // Only keep last 100 messages
-        sqlx::query!(
-            r#"
-                DELETE FROM app_public.messages
-                      WHERE channel_id = $1
-                            AND ctid NOT IN (
-                                  SELECT ctid
-                                    FROM app_public.messages
-                                   WHERE channel_id = $1
-                                ORDER BY created DESC
-                                   LIMIT 100
-                                   FOR UPDATE
-                            )
-            "#,
-            i64::from(channel_id),
-        )
-        .execute(&pool)
-        .await?;
-
-        Ok(())
-    }
 }
