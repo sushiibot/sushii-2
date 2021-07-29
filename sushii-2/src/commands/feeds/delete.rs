@@ -71,7 +71,7 @@ async fn delete(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     };
 
     match guild_channels.get(&ChannelId(channel_id)) {
-        Some(c) if c.kind != ChannelType::Text => {
+        Some(Channel::Guild(c)) if c.kind != ChannelType::Text => {
             msg.channel_id
                 .say(
                     ctx,

@@ -258,7 +258,7 @@ impl UserOption<FeedOptions> for DiscordChannel {
             .ok_or_else(|| "Couldn't find channel. Give a channel.".to_string())?;
 
         match guild_channels.get(&ChannelId(channel_id)) {
-            Some(c) => {
+            Some(Channel::Guild(c)) => {
                 if c.kind != ChannelType::Text {
                     return Err("Channel is not a text channel. Try a different one.".into());
                 }
@@ -267,7 +267,7 @@ impl UserOption<FeedOptions> for DiscordChannel {
 
                 return Ok(format!("Updates will be sent to <#{}>", c.id.0));
             }
-            None => {
+            _ => {
                 return Err("Channel is not found in this guild. Try again?".into());
             }
         }

@@ -63,11 +63,16 @@ async fn serverinfo(ctx: &Context, msg: &Message) -> CommandResult {
     }
 
     let (text_channels, voice_channels) = guild.channels.values().fold((0, 0), |mut acc, chan| {
-        if chan.kind == ChannelType::Text {
-            acc.0 += 1;
-        } else if chan.kind == ChannelType::Voice {
-            acc.1 += 1;
-        };
+        match chan {
+            Channel::Guild(c) => {
+                if c.kind == ChannelType::Text {
+                    acc.0 += 1;
+                } else if c.kind == ChannelType::Voice {
+                    acc.1 += 1;
+                };
+            }
+            _ => {}
+        }
 
         acc
     });
