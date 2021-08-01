@@ -15,8 +15,9 @@ pub mod roles;
 pub mod settings;
 pub mod tags;
 pub mod users;
+pub mod stickerinfo;
 
-use self::{help::*, meta::*, owner::*, prefix::*};
+use self::{help::*, meta::*, owner::*, prefix::*, stickerinfo::*};
 
 #[group]
 #[commands(quit, say, listservers)]
@@ -25,3 +26,7 @@ pub struct Owner;
 #[group]
 #[commands(prefix, ping, patreon, invite, about, help)]
 pub struct Meta;
+
+#[group]
+#[commands(stickerinfo)]
+pub struct General;
