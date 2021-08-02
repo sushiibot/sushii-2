@@ -6,3 +6,8 @@ consul {
   address = "127.0.0.1:8500"
   tags = ["traefik.enable=true"]
 }
+
+vault {
+  enabled = true
+  address = "http://active.vault.service.consul:8200"
+}

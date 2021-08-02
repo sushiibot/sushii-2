@@ -4,10 +4,6 @@ terraform {
       source = "hetznercloud/hcloud"
       version = "1.26.0"
     }
-    nomad = {
-      source = "hashicorp/nomad"
-      version = "1.4.14"
-    }
   }
 }
 
@@ -21,6 +17,10 @@ variable "ssh_priv_key" {
 variable "ssh_pub_key" {
   type    = string
   default = "~/.ssh/id_rsa.pub"
+}
+variable "cloud_init_script" {
+  type    = string
+  default = "cloud-init.yaml"
 }
 
 ########################################
@@ -47,40 +47,22 @@ resource "hcloud_network_subnet" "network-subnet" {
   ip_range     = "10.0.1.0/24"
 }
 
+# cloud-init script
+data "template_file" "user_data" {
+  template = file(var.cloud_init_script)
+}
+
 resource "hcloud_server" "hashi_node" {
   name        = "node1-hashi"
   server_type = "cx11"
   image       = "ubuntu-20.04"
   location    = "nbg1"
   ssh_keys    = [hcloud_ssh_key.default.id]
+  user_data   = data.template_file.user_data
 
   network {
     network_id = hcloud_network.network.id
     ip         = "10.0.1.1"
-  }
-
-  connection {
-    type  = "ssh"
-    user  = "root"
-    agent = true
-    host  = self.ipv4_address
-  }
-
-  provisioner "file" {
-    source      = var.ssh_pub_key
-    destination = "/tmp/id_rsa.pub"
-  }
-
-  provisioner "file" {
-    source      = "setup.sh"
-    destination = "/tmp/setup.sh"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/setup.sh",
-      "/tmp/setup.sh",
-    ]
   }
 
   # **Note**: the depends_on is important when directly attaching the
@@ -102,30 +84,6 @@ resource "hcloud_server" "sushii_web" {
   network {
     network_id = hcloud_network.network.id
     ip         = "10.0.1.2"
-  }
-
-  connection {
-    type  = "ssh"
-    user  = "root"
-    agent = true
-    host  = self.ipv4_address
-  }
-
-  provisioner "file" {
-    source      = var.ssh_pub_key
-    destination = "/tmp/id_rsa.pub"
-  }
-
-  provisioner "file" {
-    source      = "setup.sh"
-    destination = "/tmp/setup.sh"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/setup.sh",
-      "/tmp/setup.sh",
-    ]
   }
 
   depends_on = [
