@@ -111,7 +111,6 @@ async fn main() -> Result<()> {
         .after(hooks::after)
         .on_dispatch_error(hooks::dispatch_error)
         .group(&commands::META_GROUP)
-        .group(&commands::GENERAL_GROUP)
         .group(&commands::tags::TAGS_GROUP)
         .group(&commands::feeds::FEEDS_GROUP)
         .group(&commands::guild::GUILD_GROUP)
