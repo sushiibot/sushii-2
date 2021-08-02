@@ -1,5 +1,4 @@
 use serenity::framework::standard::{macros::command, Args, CommandResult};
-use serenity::model::interactions::message_component::ButtonStyle;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use std::time::Duration;
@@ -84,25 +83,28 @@ async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         })
         .await?;
 
-    if let Some(component_interaction) = opt_in_msg
+    if let Some(interaction) = opt_in_msg
         .await_component_interaction(&ctx)
         .timeout(Duration::from_secs(120))
         .author_id(msg.author.id)
         .await
     {
-        match component_interaction.data.custom_id.as_str() {
-            "opt_in" => {
-                component_interaction
-                    .create_interaction_response(&ctx.http, |res| {
-                        res.kind(InteractionResponseType::DeferredUpdateMessage)
-                    })
-                    .await?;
+        if let InteractionData::MessageComponent(MessageComponent { custom_id, .. }) =
+            interaction.data.as_ref().unwrap()
+        {
+            match custom_id.as_str() {
+                "opt_in" => {
+                    interaction
+                        .create_interaction_response(&ctx.http, |res| {
+                            res.kind(InteractionResponseType::DeferredUpdateMessage)
+                        })
+                        .await?;
 
-                guild_config.data.lookup_details_opt_in = true;
-                guild_config.data.lookup_prompted = true;
-                guild_config.save(ctx).await?;
+                    guild_config.data.lookup_details_opt_in = true;
+                    guild_config.data.lookup_prompted = true;
+                    guild_config.save(ctx).await?;
 
-                opt_in_msg
+                    opt_in_msg
                         .edit(&ctx.http, move |msg| {
                             msg.embed(|e| {
                                 e.title("Opted In!");
@@ -119,19 +121,19 @@ async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                         })
                         .await?;
 
-                return Ok(());
-            }
-            "opt_out" => {
-                component_interaction
-                    .create_interaction_response(&ctx.http, |res| {
-                        res.kind(InteractionResponseType::DeferredUpdateMessage)
-                    })
-                    .await?;
+                    return Ok(());
+                }
+                "opt_out" => {
+                    interaction
+                        .create_interaction_response(&ctx.http, |res| {
+                            res.kind(InteractionResponseType::DeferredUpdateMessage)
+                        })
+                        .await?;
 
-                guild_config.data.lookup_prompted = true;
-                guild_config.save(ctx).await?;
+                    guild_config.data.lookup_prompted = true;
+                    guild_config.save(ctx).await?;
 
-                opt_in_msg
+                    opt_in_msg
                         .edit(&ctx.http, move |msg| {
                             msg.embed(|e| {
                                 e.title("Opted Out!");
@@ -149,11 +151,12 @@ async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                         })
                         .await?;
 
-                return Ok(());
-            }
-            _ => {
-                tracing::error!("Unhandled reason interaction: {:?}", component_interaction);
-                return Ok(());
+                    return Ok(());
+                }
+                _ => {
+                    tracing::error!("Unhandled reason interaction: {:?}", interaction);
+                    return Ok(());
+                }
             }
         }
     }

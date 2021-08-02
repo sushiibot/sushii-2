@@ -43,7 +43,7 @@ pub async fn before(ctx: &Context, msg: &Message, cmd_name: &str) -> bool {
 }
 
 #[hook]
-pub async fn dispatch_error(ctx: &Context, msg: &Message, error: DispatchError, _cmd_name: &str) {
+pub async fn dispatch_error(ctx: &Context, msg: &Message, error: DispatchError) {
     match error {
         DispatchError::NotEnoughArguments { min, given } => {
             let s = format!("This command needs {} arguments, only got {}.", min, given);
