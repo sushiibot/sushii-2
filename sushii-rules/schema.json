@@ -27,6 +27,7 @@
       ]
     },
     "conditions": {
+      "title": "Conditions",
       "description": "Conditions that need to pass before running actions",
       "allOf": [
         {
@@ -35,6 +36,7 @@
       ]
     },
     "actions": {
+      "title": "Actions",
       "description": "Actions are executed sequentially if condition passes",
       "type": "array",
       "items": {
@@ -444,6 +446,7 @@
           "additionalProperties": false
         },
         {
+          "title": "NotEquals",
           "description": "Does not equal some text",
           "type": "object",
           "required": [
@@ -457,6 +460,7 @@
           "additionalProperties": false
         },
         {
+          "title": "Contains",
           "description": "Contains some text",
           "type": "object",
           "required": [
@@ -470,6 +474,7 @@
           "additionalProperties": false
         },
         {
+          "title": "ContainsAll",
           "description": "Contains all of the given texts",
           "type": "object",
           "required": [
@@ -483,6 +488,7 @@
           "additionalProperties": false
         },
         {
+          "title": "ContainsAny",
           "description": "Contains at least one of the given texts",
           "type": "object",
           "required": [
@@ -499,6 +505,7 @@
           "additionalProperties": false
         },
         {
+          "title": "DoesNotContain",
           "description": "Does not contain the given text",
           "type": "object",
           "required": [
@@ -512,6 +519,7 @@
           "additionalProperties": false
         },
         {
+          "title": "DoesNotContainAny",
           "description": "Does not contain any of the given texts",
           "type": "object",
           "required": [
@@ -528,6 +536,7 @@
           "additionalProperties": false
         },
         {
+          "title": "InTexts",
           "description": "Is any of the of given texts",
           "type": "object",
           "required": [
@@ -544,6 +553,7 @@
           "additionalProperties": false
         },
         {
+          "title": "NotInTexts",
           "description": "Is not any of the given texts",
           "type": "object",
           "required": [
@@ -560,6 +570,7 @@
           "additionalProperties": false
         },
         {
+          "title": "StartsWith",
           "description": "Starts with given text",
           "type": "object",
           "required": [
@@ -573,6 +584,7 @@
           "additionalProperties": false
         },
         {
+          "title": "DoesNotStartsWith",
           "description": "Does not start with given text",
           "type": "object",
           "required": [
@@ -586,6 +598,7 @@
           "additionalProperties": false
         },
         {
+          "title": "EndsWith",
           "description": "Ends with given text",
           "type": "object",
           "required": [
@@ -599,6 +612,7 @@
           "additionalProperties": false
         },
         {
+          "title": "DoesNotEndsWith",
           "description": "Does not end with given text",
           "type": "object",
           "required": [
@@ -612,6 +626,7 @@
           "additionalProperties": false
         },
         {
+          "title": "Length",
           "description": "Length of some text",
           "type": "object",
           "required": [
