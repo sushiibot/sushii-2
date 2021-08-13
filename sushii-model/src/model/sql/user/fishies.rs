@@ -25,7 +25,7 @@ pub enum FishyType {
     Joshy,
     Crazy,
     Wawa,
-    Tzuwy, // Alonzo's fishy
+    Minty, // Alonzo's fishy
     Golden,
 }
 
@@ -43,7 +43,7 @@ impl FishyType {
             // Patron fishies
             Self::Dan | Self::Jae | Self::Joshy | Self::Crazy => 15..25,
             Self::Wawa => 20..30,
-            Self::Tzuwy => 25..50,
+            Self::Minty => 25..50,
             Self::Golden => 100..180,
         }
     }
@@ -70,7 +70,7 @@ impl FishyType {
             Self::Joshy,
             Self::Crazy,
             Self::Wawa,
-            Self::Tzuwy,
+            Self::Minty,
         ]
     }
 
@@ -96,7 +96,7 @@ impl FishyType {
             | Self::Herring
             | Self::Bream
             | Self::Tuna => "<:fishy:418504956169945089>",
-            Self::Dan | Self::Jae | Self::Joshy | Self::Crazy | Self::Tzuwy => {
+            Self::Dan | Self::Jae | Self::Joshy | Self::Crazy | Self::Minty => {
                 "<:fishy:418504956169945089><:fishy:418504956169945089>"
             }
             Self::Wawa => "🍉",
