@@ -499,6 +499,40 @@
       ]
     }
   },
+  "1e5e9b98915eabc3bc27b0d5278a7e7931881b74195f98274ca7b71c269b393a": {
+    "query": "\n            SELECT *\n              FROM app_public.notifications\n             WHERE user_id = $1\n               AND guild_id = $2\n               AND keyword = LOWER($3)\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "user_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "guild_id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 2,
+          "name": "keyword",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "29a3a6d19f6dd9d95a87bf66efeb845c62716583f5b381e1bf70ee6ac74a97b8": {
     "query": "\n                SELECT message_id as \"message_id!: i64\",\n                       author_id as \"author_id!: i64\",\n                       channel_id as \"channel_id!: i64\",\n                       guild_id as \"guild_id!: i64\",\n                       created as \"created!: NaiveDateTime\",\n                       content as \"content!: String\",\n                       msg as \"msg!: Json<Message>\"\n                  FROM app_public.messages\n                  JOIN unnest($1::bigint[]) as ids(message_id)\n                       USING (message_id)\n              ORDER BY created ASC\n            ",
     "describe": {
@@ -946,6 +980,20 @@
       "columns": [],
       "parameters": {
         "Left": [
+          "Int8",
+          "Text"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "46b589b43f83f39e1b3a4453a9074ea549d3dec1803b52bdc2e9a53875d73c3c": {
+    "query": "\n        DELETE FROM app_public.notifications\n              WHERE user_id = $1\n                AND guild_id = $2\n                AND keyword = LOWER($3)\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
           "Int8",
           "Text"
         ]
@@ -2097,20 +2145,6 @@
       "nullable": []
     }
   },
-  "943c9aa58c4321df536f04f80ce94c686e0a2ba1bd3bfd1c533a8191048e729a": {
-    "query": "\n        DELETE FROM app_public.notifications\n              WHERE user_id = $1\n                AND guild_id = $2\n                AND keyword = $3\n        ",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "994732f174f005cad45732ba8b348e068f5505c9b1639b5b7b1c030429658dbd": {
     "query": "\n              SELECT COUNT(*) as \"count!\"\n                FROM app_public.tags\n               WHERE guild_id = $1\n                 AND tag_name ILIKE '%' || $2 || '%'\n        ",
     "describe": {
@@ -2660,40 +2694,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "c5f7dd16daf1b94421ff2948ab58c24fcec0f5adc5b6e5f1c8f168b92cc5b562": {
-    "query": "\n            SELECT *\n              FROM app_public.notifications\n             WHERE user_id = $1\n               AND guild_id = $2\n               AND keyword = $3\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "user_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "keyword",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false
-      ]
     }
   },
   "cbcd859e9c2a7467e3acec8f20724f1b5c3fc1f8a8c9d18c4e7fb29d3e23c01c": {
