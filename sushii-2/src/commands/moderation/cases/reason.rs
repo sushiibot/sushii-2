@@ -2,9 +2,8 @@ use lazy_static::lazy_static;
 use regex::Regex;
 use serenity::builder::CreateEmbed;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
-use serenity::model::interactions::{
-    ButtonStyle, InteractionData, InteractionResponseType, MessageComponent,
-};
+use serenity::model::interactions::message_component::ButtonStyle;
+use serenity::model::interactions::InteractionResponseType;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use std::fmt::Write;
@@ -250,61 +249,57 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             })
             .await?;
 
-        if let Some(interaction) = conf_msg
+        if let Some(component_interaction) = conf_msg
             .await_component_interaction(&ctx)
             .timeout(Duration::from_secs(120))
             .author_id(msg.author.id)
             .await
         {
-            tracing::debug!(?interaction, "Received interaction");
+            tracing::debug!(?component_interaction, "Received interaction");
 
-            if let InteractionData::MessageComponent(MessageComponent { custom_id, .. }) =
-                interaction.data.as_ref().unwrap()
-            {
-                match custom_id.as_str() {
-                    "overwrite_all" => {
-                        interaction
-                            .create_interaction_response(&ctx.http, |res| {
-                                res.kind(InteractionResponseType::DeferredUpdateMessage)
-                            })
-                            .await?;
-                    }
-                    "without_reason" => {
-                        interaction
-                            .create_interaction_response(&ctx.http, |res| {
-                                res.kind(InteractionResponseType::DeferredUpdateMessage)
-                            })
-                            .await?;
+            match component_interaction.data.custom_id.as_str() {
+                "overwrite_all" => {
+                    component_interaction
+                        .create_interaction_response(&ctx.http, |res| {
+                            res.kind(InteractionResponseType::DeferredUpdateMessage)
+                        })
+                        .await?;
+                }
+                "without_reason" => {
+                    component_interaction
+                        .create_interaction_response(&ctx.http, |res| {
+                            res.kind(InteractionResponseType::DeferredUpdateMessage)
+                        })
+                        .await?;
 
-                        entries = entries.into_iter().filter(|e| e.reason.is_none()).collect();
-                    }
-                    "cancel" => {
-                        interaction
-                            .create_interaction_response(&ctx.http, |res| {
-                                res.kind(InteractionResponseType::DeferredUpdateMessage)
-                            })
-                            .await?;
+                    entries = entries.into_iter().filter(|e| e.reason.is_none()).collect();
+                }
+                "cancel" => {
+                    component_interaction
+                        .create_interaction_response(&ctx.http, |res| {
+                            res.kind(InteractionResponseType::DeferredUpdateMessage)
+                        })
+                        .await?;
 
-                        conf_msg
-                            .edit(&ctx.http, move |msg| {
-                                msg.embed(|e| {
-                                    e.description("Cancelled, no case reasons were updated.")
-                                });
+                    conf_msg
+                        .edit(&ctx.http, move |msg| {
+                            msg.embed(|e| {
+                                e.description("Cancelled, no case reasons were updated.")
+                            });
 
-                                msg.components(|comps| {
-                                    comps.set_action_rows(Vec::new());
-                                    comps
-                                });
-                                msg
-                            })
-                            .await?;
+                            msg.components(|comps| {
+                                comps.set_action_rows(Vec::new());
+                                comps
+                            });
+                            msg
+                        })
+                        .await?;
 
-                        return Ok(());
-                    }
-                    _ => {
-                        tracing::error!("Unhandled reason interaction: {:?}", interaction);
-                        return Ok(());
-                    }
+                    return Ok(());
+                }
+                _ => {
+                    tracing::error!("Unhandled reason interaction: {:?}", component_interaction);
+                    return Ok(());
                 }
             }
         } else {

@@ -123,7 +123,14 @@ async fn userinfo(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
                 e.thumbnail(user.face());
                 e.description(user_str);
-                e.footer(|f| f.text("Times in UTC"));
+
+                if let Some(banner_url) = user.banner_url() {
+                    e.image(banner_url);
+                }
+
+                if let Some(accent_color) = user.accent_color {
+                    e.footer(|f| f.text(format!("Accent colour #{}", accent_color.hex())));
+                }
 
                 e
             })
