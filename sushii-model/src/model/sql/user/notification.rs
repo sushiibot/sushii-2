@@ -79,7 +79,7 @@ async fn user_notification_query(
               FROM app_public.notifications
              WHERE user_id = $1
                AND guild_id = $2
-               AND keyword = $3
+               AND keyword = LOWER($3)
         "#,
         i64::from(user_id),
         i64::from(guild_id),
@@ -157,7 +157,7 @@ async fn delete_query(pool: &sqlx::PgPool, notification: &Notification) -> Resul
         DELETE FROM app_public.notifications
               WHERE user_id = $1
                 AND guild_id = $2
-                AND keyword = $3
+                AND keyword = LOWER($3)
         "#,
         notification.user_id,
         notification.guild_id,
