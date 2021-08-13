@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.30] - 2021-08-13
+
+### Added
+
+- `banner` command to get a user's banner
+- Moderator `note` command to add notes to a user
+
 ### Fixed
 
 - Correctly show per-server avatars with `avatar` for members who update avatars
