@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 use sushii_model::model::sql::{Feed, FeedSubscription};
 use twilight_http::api_error::{ApiError, ErrorCode};
-use twilight_http::error::Error as TwilightHttpError;
+use twilight_http::error::ErrorType;
 use twilight_model::channel::embed::Embed;
 use twilight_model::id::ChannelId;
 use vlive::{
@@ -83,17 +83,26 @@ pub async fn update_vlive(ctx: &Context, newer_than: DateTime<Utc>) -> Result<()
 }
 
 async fn send_msg(ctx: &Context, subscription: &FeedSubscription, embed: Embed) -> Result<()> {
+    let embeds = [embed];
+
     let mut msg = ctx
         .http
         .create_message(ChannelId(subscription.channel_id as u64))
-        .embed(embed)?;
+        .embeds(&embeds)?;
 
-    if let Some(role) = subscription.mention_role {
-        msg = msg.content(format!("<@&{}>", role as u64))?;
+    let content = if let Some(role) = subscription.mention_role {
+        format!("<@&{}>", role as u64)
+    } else {
+        "".into()
+    };
+
+    if subscription.mention_role.is_some() {
+        msg = msg.content(&content)?;
     }
 
     // Send message
-    let res = msg.await;
+    let res = msg.exec().await;
+
     tracing::info!(
         "Sent vlive update to #{} in {}",
         subscription.channel_id as u64,
@@ -101,19 +110,20 @@ async fn send_msg(ctx: &Context, subscription: &FeedSubscription, embed: Embed) 
     );
 
     match res {
-        Err(TwilightHttpError::Response {
-            error: ApiError::General(e),
-            ..
-        }) => {
-            tracing::warn!("Failed to send vlive update: {}", e);
-
-            if e.code == ErrorCode::UnknownChannel || e.code == ErrorCode::Missingaccess {
-                tracing::warn!(?subscription, "Deleting feed subscription");
-                subscription.delete_pool(&ctx.db_pool).await?;
-            }
-        }
         Err(e) => {
-            return Err(e.into());
+            if let ErrorType::Response {
+                error: ApiError::General(e),
+                ..
+            } = e.kind() {
+                tracing::warn!("Failed to send vlive update: {}", e);
+
+                if e.code == ErrorCode::UnknownChannel || e.code == ErrorCode::Missingaccess {
+                    tracing::warn!(?subscription, "Deleting feed subscription");
+                    subscription.delete_pool(&ctx.db_pool).await?;
+                }
+            } else {
+                return Err(e.into());
+            }
         }
         Ok(_) => {}
     }

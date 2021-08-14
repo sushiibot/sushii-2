@@ -1,6 +1,6 @@
 [package]
 name = "sushii-feeds"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["drklee3 <derrick@dlee.dev>"]
 edition = "2018"
 
@@ -20,10 +20,21 @@ strfmt = "0.1.6"
 tracing = "0.1.22"
 tracing-subscriber = "0.2.15"
 humantime = "2.1.0"
-twilight-http = "0.3.6"
 thiserror = "1.0.24"
-twilight-embed-builder = "0.3.0"
-twilight-model = "0.3.5"
+
+[dependencies.twilight-http]
+git = "https://github.com/twilight-rs/twilight"
+branch = "feature/threads"
+default-features = false
+features = ["rustls-webpki-roots"]
+
+[dependencies.twilight-embed-builder]
+git = "https://github.com/twilight-rs/twilight"
+branch = "feature/threads"
+
+[dependencies.twilight-model]
+git = "https://github.com/twilight-rs/twilight"
+branch = "feature/threads"
 
 [dependencies.tokio]
 version = "1.0"

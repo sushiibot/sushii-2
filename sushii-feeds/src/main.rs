@@ -68,7 +68,7 @@ async fn main() -> Result<()> {
         .ratelimiter(None)
         .build();
 
-    let current_user = http.current_user().await?;
+    let current_user = http.current_user().exec().await?.model().await?;
     tracing::info!(
         "Connected as {}#{:0>4}",
         current_user.name,

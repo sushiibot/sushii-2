@@ -32,20 +32,20 @@ impl Embeddable for (VliveRecentVideo, VlivePostDetail) {
         });
 
         let author = EmbedAuthorBuilder::new()
-            .name(&self.0.channel_name)?
+            .name(&self.0.channel_name)
             .icon_url(ImageSource::url(author_icon)?)
             .url(self.0.channel_url())
             .build();
 
         let mut embed = EmbedBuilder::new()
             .author(author)
-            .title(title)?
+            .title(title)
             .url(self.0.video_url())
-            .color(0x1ecfff)?
+            .color(0x1ecfff)
             .image(ImageSource::url(self.0.thumbnail_url())?);
 
         if let Some(desc) = description {
-            embed = embed.description(desc)?;
+            embed = embed.description(desc);
         }
 
         Ok(embed.build()?)
