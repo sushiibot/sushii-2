@@ -58,8 +58,8 @@ pub async fn remind_user(ctx: &Context, reminder: &Reminder) -> Result<()> {
         .send_message(ctx, |m| {
             m.embed(|e| {
                 e.title(format!(
-                    "Reminder expired from {} ago",
-                    reminder.get_human_duration()
+                    "Reminder expired from <t:{}:R>",
+                    reminder.expire_at.timestamp(),
                 ));
                 e.description(&reminder.description);
 

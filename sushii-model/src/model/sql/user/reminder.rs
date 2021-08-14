@@ -58,16 +58,6 @@ impl Reminder {
         )
     }
 
-    /// Gets human readable formatted duration string of total mute duration
-    pub fn get_human_duration(&self) -> String {
-        humantime::format_duration(self.get_duration().to_std().unwrap()).to_string()
-    }
-
-    /// Gets human readable formatted duration string of remaining time
-    pub fn get_human_duration_remaining(&self) -> String {
-        humantime::format_duration(self.get_duration_remaining().to_std().unwrap()).to_string()
-    }
-
     /// Gets all of a user's reminders
     pub async fn user_reminders(ctx: &Context, user_id: UserId) -> Result<Vec<Self>> {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();

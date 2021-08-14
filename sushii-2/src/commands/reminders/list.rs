@@ -27,9 +27,9 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
     for reminder in &reminders {
         writeln!(
             s,
-            "`{}` | `{}` | {}",
-            reminder.expire_at.format("%Y-%m-%d %H:%M:%S"),
-            reminder.get_human_duration_remaining(),
+            "<t:{}> | <t:{}:R> | {}",
+            reminder.expire_at.timestamp(),
+            reminder.expire_at.timestamp(),
             reminder.description
         )?;
     }
