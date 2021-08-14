@@ -36,7 +36,7 @@ async fn userinfo(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         }
     };
 
-    let user = match target_id.to_user(&ctx).await {
+    let user = match target_id.to_user(&ctx.http).await {
         Ok(u) => u,
         Err(_) => {
             msg.reply(
