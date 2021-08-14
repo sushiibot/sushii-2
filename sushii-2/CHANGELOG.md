@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [0.2.31] - 2021-08-14
+
+### Fixed
+
+- `banner` and `userinfo` actually shows user banners
+- Prevent panic on reminders, use native timestamps
+
 ## [0.2.30] - 2021-08-13
 
 ### Added
