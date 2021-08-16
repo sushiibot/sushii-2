@@ -22,13 +22,21 @@ impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, ready: Ready) {
         tracing::info!("Connected as {}", ready.user.name);
         ctx.set_activity(Activity::playing("sushii.xyz")).await;
+
+        // Start tasks and ban fetching
+        // These both only run once even if ready is called multiple times
+        // This is here instead of cache_ready as a single unavailable guild will
+        // prevent any of it from starting
+        tasks::start(&ctx).await;
+        bans::start(
+            &ctx,
+            ready.guilds.iter().map(|g| g.id()).collect::<Vec<_>>(),
+        )
+        .await;
     }
 
-    async fn cache_ready(&self, ctx: Context, guild_ids: Vec<GuildId>) {
-        // Start tasks after cache has guild data
-        tasks::start(&ctx).await;
-
-        bans::cache_ready(&ctx, &guild_ids).await;
+    async fn cache_ready(&self, _ctx: Context, _guild_ids: Vec<GuildId>) {
+        tracing::info!("Cache ready!");
     }
 
     async fn resume(&self, ctx: Context, _: ResumedEvent) {

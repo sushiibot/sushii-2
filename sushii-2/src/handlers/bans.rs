@@ -1,12 +1,23 @@
 use serenity::{model::prelude::*, prelude::*};
+use std::sync::Once;
+use tokio::task;
+
 use tokio::time::{sleep, Duration};
 
 use crate::error::Result;
 use sushii_model::keys::DbPool;
 use sushii_model::model::sql::GuildBan;
 
-pub async fn cache_ready(ctx: &Context, guild_ids: &[GuildId]) {
-    if let Err(e) = _cache_ready(ctx, guild_ids).await {
+static START: Once = Once::new();
+
+pub async fn start(ctx: &Context, guild_ids: Vec<GuildId>) {
+    START.call_once(|| {
+        task::spawn(cache_ready(ctx.clone(), guild_ids));
+    });
+}
+
+pub async fn cache_ready(ctx: Context, guild_ids: Vec<GuildId>) {
+    if let Err(e) = _cache_ready(&ctx, &guild_ids).await {
         tracing::error!("Failed to handle bans cache_ready: {}", e);
     }
 }
