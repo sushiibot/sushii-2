@@ -134,7 +134,9 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     // If in override server
     let show_guild_names_global =
-        guild_id.0 == 167058919611564043 || guild_id.0 == 184790855977009152;
+        guild_id.0 == 167058919611564043
+        || guild_id.0 == 184790855977009152
+        || guild_id.0 == 187450744427773963;
 
     let mut ban_data = Vec::new();
 
@@ -173,12 +175,18 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     // Largest server first
     ban_data.sort_by(|a, b| b.member_count.cmp(&a.member_count));
+    // Filter out small servers with less than 250 members
+    let filtered_ban_data: Vec<&BanData> = ban_data
+        .iter()
+        .filter(|d| d.member_count > 250)
+        .collect();
+
+    let filtered_bans_count = ban_data.len() - filtered_ban_data.len();
 
     let mut s = String::new();
-
     let mut has_anon_servers = false;
 
-    for ban_data in &ban_data {
+    for ban_data in &filtered_ban_data {
         // Check if guild allows viewing
         // Global or curr guild AND other guild opted in
 
@@ -214,6 +222,11 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
 
         writeln!(s)?;
+    }
+
+    if filtered_bans_count > 0 {
+        writeln!(s)?;
+        writeln!(s, "{} ban(s) in small servers not shown", filtered_bans_count)?;
     }
 
     msg.channel_id
