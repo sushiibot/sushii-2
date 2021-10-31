@@ -24,8 +24,7 @@ async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         .execute(&ctx, &msg, &guild_id)
         .await?;
 
-    // lookup opt in prompt is TEMP disabled for initial testing. then rolled out later
-    return Ok(());
+    // Prompt user for lookup optin
 
     let mut guild_config = match GuildConfig::from_msg(ctx, &msg).await? {
         Some(c) => c,
