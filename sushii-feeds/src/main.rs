@@ -5,6 +5,7 @@ use std::env;
 use tokio::time::{self, Duration};
 use tracing_subscriber::filter::EnvFilter;
 use twilight_http::Client;
+use std::sync::Arc;
 
 mod embeddable;
 mod model;
@@ -63,10 +64,10 @@ async fn main() -> Result<()> {
         .expect("Failed to connect to database");
 
     // Twilight http client
-    let http = Client::builder()
+    let http = Arc::new(Client::builder()
         .proxy(proxy_url, true)
         .ratelimiter(None)
-        .build();
+        .build());
 
     let current_user = http.current_user().exec().await?.model().await?;
     tracing::info!(

@@ -23,18 +23,15 @@ humantime = "2.1.0"
 thiserror = "1.0.24"
 
 [dependencies.twilight-http]
-git = "https://github.com/twilight-rs/twilight"
-branch = "feature/threads"
+version = "0.7"
 default-features = false
 features = ["rustls-webpki-roots"]
 
 [dependencies.twilight-embed-builder]
-git = "https://github.com/twilight-rs/twilight"
-branch = "feature/threads"
+version = "0.7"
 
 [dependencies.twilight-model]
-git = "https://github.com/twilight-rs/twilight"
-branch = "feature/threads"
+version = "0.7"
 
 [dependencies.tokio]
 version = "1.0"

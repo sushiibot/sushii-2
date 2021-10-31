@@ -6,10 +6,12 @@ use twilight_http::api_error::{ApiError, ErrorCode};
 use twilight_http::error::ErrorType;
 use twilight_model::channel::embed::Embed;
 use twilight_model::id::ChannelId;
+use std::convert::TryFrom;
 use vlive::{
     model::{recent_video::RecentVideo as VliveRecentVideo, video::PostDetail as VlivePostDetail},
     VLiveRequester,
 };
+use std::num::NonZeroU64;
 
 use crate::embeddable::Embeddable;
 use crate::model::context::Context;
@@ -87,7 +89,7 @@ async fn send_msg(ctx: &Context, subscription: &FeedSubscription, embed: Embed) 
 
     let mut msg = ctx
         .http
-        .create_message(ChannelId(subscription.channel_id as u64))
+        .create_message(ChannelId(NonZeroU64::try_from(subscription.channel_id as u64).unwrap()))
         .embeds(&embeds)?;
 
     let content = if let Some(role) = subscription.mention_role {
