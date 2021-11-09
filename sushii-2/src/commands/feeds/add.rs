@@ -259,7 +259,7 @@ impl UserOption<FeedOptions> for DiscordChannel {
 
         match guild_channels.get(&ChannelId(channel_id)) {
             Some(c) => {
-                if c.kind != ChannelType::Text {
+                if c.kind != ChannelType::Text && c.kind != ChannelType::News {
                     return Err("Channel is not a text channel. Try a different one.".into());
                 }
 
