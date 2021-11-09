@@ -353,6 +353,8 @@ services:
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
             - ~/docker/portainer_data:/data
+        networks:
+            - web
         labels:
             # Frontend
             - "traefik.enable=true"
