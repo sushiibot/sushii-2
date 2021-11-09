@@ -345,6 +345,34 @@ services:
             - sushii_net
         labels:
             - "traefik.enable=false"
+    portainer:
+        image: portainer/portainer-ce:2.0.0
+        container_name: portainer
+        command: -H unix:///var/run/docker.sock
+        restart: always
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ~/docker/portainer_data:/data
+        labels:
+            # Frontend
+            - "traefik.enable=true"
+            - "traefik.http.routers.frontend.rule=Host(`portainer.sushii.xyz`)"
+            - "traefik.http.routers.frontend.entrypoints=secure"
+            - "traefik.http.services.frontend.loadbalancer.server.port=9000"
+            - "traefik.http.routers.frontend.service=frontend"
+            - "traefik.http.routers.frontend.tls.certresolver=acme"
+            # Edge
+            - "traefik.http.routers.edge.rule=Host(`edge.sushii.xyz`)"
+            - "traefik.http.routers.edge.entrypoints=secure"
+            - "traefik.http.services.edge.loadbalancer.server.port=8000"
+            - "traefik.http.routers.edge.service=edge"
+            - "traefik.http.routers.edge.tls.certresolver=acme"
+    portainer_agent:
+        image: portainer/agent
+        container_name: portainer_agent
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - /var/lib/docker/volumes:/var/lib/docker/volumes
 networks:
     web:
         internal: false
