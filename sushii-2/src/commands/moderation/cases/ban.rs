@@ -31,7 +31,8 @@ async fn ban(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         None => return Ok(()),
     };
 
-    if guild_config.data.lookup_prompted {
+    // If guild already opted in directly with optin command
+    if guild_config.data.lookup_prompted || !guild_config.data.lookup_details_opt_in {
         return Ok(());
     }
 
