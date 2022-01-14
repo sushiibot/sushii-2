@@ -12,15 +12,15 @@ pub use self::{
     feeds::{Feed, FeedItem, FeedMetadata, FeedSubscription},
     guild::{
         cached_guild::CachedGuild,
-        guild_config::GuildConfig,
         guild_bans::GuildBan,
+        guild_config::GuildConfig,
         guild_roles::{GuildGroup, GuildRole, GuildRoles},
         guild_setting::{GuildSetting, GuildSettingAction},
         messages::SavedMessage,
         tags::Tag,
     },
     mod_log::ModLogEntry,
-    mute::{delete_mute, Mute},
+    mute::{delete_mute, Mute, MuteAction},
     rules::gauge::{RuleGauge, RuleScope},
     stats::BotStat,
     user::{

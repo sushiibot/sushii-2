@@ -12,7 +12,7 @@ pub struct ModLogReporter<'a> {
     action: &'a str,
     duration: Option<Duration>,
 
-    /// Mute entry if this is an unmute
+    /// DEPRECATED: Mute entry if this is an unmute
     initial_entry: Option<ModLogEntry>,
     placeholder_reason: Option<String>,
 }
@@ -32,11 +32,6 @@ impl<'a> ModLogReporter<'a> {
 
     pub fn mute_duration(mut self, duration: Option<Duration>) -> Self {
         self.duration = duration;
-        self
-    }
-
-    pub fn initial_entry(mut self, initial_entry: Option<ModLogEntry>) -> Self {
-        self.initial_entry = initial_entry;
         self
     }
 

@@ -54,8 +54,8 @@ async fn banner(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
                 e.image(&banner_url);
 
-                if let Some(accent_color) = user.accent_color {
-                    e.footer(|f| f.text(format!("Accent color #{}", accent_color.hex())));
+                if let Some(accent_colour) = user.accent_colour {
+                    e.footer(|f| f.text(format!("Accent color #{}", accent_colour.hex())));
                 }
 
                 e
