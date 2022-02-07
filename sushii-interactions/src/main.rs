@@ -48,7 +48,7 @@ fn start_metrics() {
         .build_with_exporter()
         .expect("Failed to build metrics recorder");
 
-    let prefix = PrefixLayer::new("sushiirules_");
+    let prefix = PrefixLayer::new("sushii_interactions_");
     let layered = prefix.layer(recorder);
     metrics::set_boxed_recorder(Box::new(layered)).expect("Failed to install recorder");
 
