@@ -3,6 +3,8 @@ use std::borrow::Cow;
 use std::num::TryFromIntError;
 use std::result::Result as StdResult;
 use thiserror::Error as ThisError;
+use twilight_http::error::Error as TwilightHttpError;
+use twilight_http::response::DeserializeBodyError;
 
 pub type Result<T> = StdResult<T, Error>;
 
@@ -44,4 +46,8 @@ pub enum Error {
     SerdeJson(#[from] serde_json::Error),
     #[error(transparent)]
     Config(#[from] config::ConfigError),
+    #[error(transparent)]
+    TwilightHttp(#[from] TwilightHttpError),
+    #[error(transparent)]
+    TwilightDeserializeBodyError(#[from] DeserializeBodyError),
 }

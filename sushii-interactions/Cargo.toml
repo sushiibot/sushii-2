@@ -15,8 +15,8 @@ path = "src/main.rs"
 
 [dependencies]
 lapin = "1.7.1"
-twilight-model = "0.5.3"
-twilight-http = "0.5.5"
+twilight-model = "0.9"
+twilight-http = "0.9"
 twilight-interactions = "0.9"
 dotenv = "0.15.0"
 tokio = "1.8.2"
