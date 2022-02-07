@@ -88,6 +88,9 @@ async fn main() -> Result<()> {
 
     let current_user = http
         .current_user()
+        .exec()
+        .await?
+        .model()
         .await
         .expect("Failed to fetch Discord current user, proxy API may be down");
 
