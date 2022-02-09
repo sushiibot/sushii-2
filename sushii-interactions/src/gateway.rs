@@ -53,7 +53,7 @@ pub async fn get_events(config: &Config) -> Result<impl Stream<Item = Result<Dis
     let mut consumer = channel
         .basic_consume(
             "gateway.recv",
-            "",
+            "sushii_interactions",
             BasicConsumeOptions::default(),
             FieldTable::default(),
         )

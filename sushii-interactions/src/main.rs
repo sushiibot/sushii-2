@@ -3,13 +3,19 @@ use futures::pin_mut;
 use metrics_exporter_prometheus::PrometheusBuilder;
 use metrics_util::layers::{Layer, PrefixLayer};
 use serde::Deserialize;
+use std::env;
 use std::pin::Pin;
 use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio_stream::{Stream, StreamExt};
 use tracing_subscriber::EnvFilter;
 use twilight_http::Client;
+use twilight_model::gateway::event::DispatchEvent;
+use twilight_model::id::marker::ApplicationMarker;
+use twilight_model::id::Id;
 
+use sushii_interactions::commands::handler;
+use sushii_interactions::commands::register;
 use sushii_interactions::error::Result;
 
 mod gateway;
@@ -24,6 +30,9 @@ pub struct RabbitMq {
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
+    pub discord_token: String,
+    pub application_id: Id<ApplicationMarker>,
+
     pub twilight_api_proxy_url: String,
     pub language_api_endpoint: String,
 
@@ -84,6 +93,7 @@ async fn main() -> Result<()> {
     let http = Client::builder()
         .proxy(cfg.twilight_api_proxy_url.clone(), true)
         .ratelimiter(None)
+        .token(cfg.discord_token.clone())
         .build();
 
     let current_user = http
@@ -100,6 +110,10 @@ async fn main() -> Result<()> {
         current_user.discriminator
     );
 
+    register::register_commands(&http, cfg.application_id)
+        .await
+        .expect("failed to register commands");
+
     let rx = gateway::get_events(&cfg).await?;
     pin_mut!(rx);
 
@@ -112,7 +126,14 @@ async fn main() -> Result<()> {
             }
         };
 
-        println!("{:?}", event);
+        match event {
+            DispatchEvent::InteractionCreate(interaction) => {
+                handler::handle_interaction(interaction.0, &http).await;
+            }
+            _ => {
+                tracing::info!("Unhandled event: {:?}", event.kind());
+            }
+        }
     }
 
     Ok(())
