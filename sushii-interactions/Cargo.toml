@@ -35,3 +35,5 @@ metrics-util = "0.10.0"
 metrics = "0.17.0"
 async-stream = "0.3.2"
 async-trait = "0.1.50"
+twilight-embed-builder = "0.9.0"
+twilight-util = {version = "0.9.0", features = ["builder"]}

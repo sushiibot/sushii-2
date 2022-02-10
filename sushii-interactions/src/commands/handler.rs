@@ -6,6 +6,7 @@ use crate::error::Result;
 
 use super::context::CommandContext;
 use super::help::HelpCommand;
+use super::user::userinfo::UserinfoCommand;
 use super::ExecuteApplicationCommand;
 
 pub async fn handle_interaction(interaction: Interaction, client: &Client) {
@@ -26,8 +27,14 @@ pub async fn handle_command(command: ApplicationCommand, client: &Client) -> Res
 
     match interaction_name.as_str() {
         "help" => {
-            let help_cmd: HelpCommand = HelpCommand::from_interaction(command.data.clone().into())?;
-            help_cmd.execute_cmd(ctx, command).await
+            HelpCommand::from_interaction(command.data.clone().into())?
+                .execute_cmd(ctx, command)
+                .await
+        }
+        "userinfo" => {
+            UserinfoCommand::from_interaction(command.data.clone().into())?
+                .execute_cmd(ctx, command)
+                .await
         }
         _ => Ok(()),
     }

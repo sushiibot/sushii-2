@@ -3,6 +3,7 @@ use std::borrow::Cow;
 use std::num::TryFromIntError;
 use std::result::Result as StdResult;
 use thiserror::Error as ThisError;
+use twilight_embed_builder::image_source::ImageSourceAttachmentError as TwilightImageSourceAttachmentError;
 use twilight_http::error::Error as TwilightHttpError;
 use twilight_http::response::DeserializeBodyError;
 use twilight_interactions::error::ParseError as TwilightInteractionsParseError;
@@ -57,4 +58,8 @@ pub enum Error {
     TwilightDeserializeBody(#[from] DeserializeBodyError),
     #[error(transparent)]
     TwilightInteractionsParse(#[from] TwilightInteractionsParseError),
+    #[error(transparent)]
+    TwilightImageSourceAttachment(#[from] TwilightImageSourceAttachmentError),
+    #[error(transparent)]
+    TwilightEmbedBuilder(#[from] twilight_embed_builder::EmbedError),
 }

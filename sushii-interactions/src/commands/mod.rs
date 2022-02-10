@@ -9,6 +9,7 @@ pub mod context;
 pub mod handler;
 pub mod help;
 pub mod register;
+pub mod user;
 
 #[async_trait]
 pub trait ExecuteApplicationCommand {

@@ -5971,7 +5971,7 @@ dependencies = [
  "tokio 1.16.1",
  "tracing",
  "tracing-subscriber",
- "twilight-embed-builder",
+ "twilight-embed-builder 0.7.1",
  "twilight-http 0.7.1",
  "twilight-model 0.7.1",
  "vlive",
@@ -5998,9 +5998,11 @@ dependencies = [
  "tokio-stream",
  "tracing",
  "tracing-subscriber",
+ "twilight-embed-builder 0.9.0",
  "twilight-http 0.9.0",
  "twilight-interactions",
  "twilight-model 0.9.0",
+ "twilight-util",
  "twilight-validate",
 ]
 
@@ -6597,6 +6599,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "twilight-embed-builder"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a292d0a203b67060b1ec5e8183438f2bf97c9804a4a8eb153e7f8d23ae548760"
+dependencies = [
+ "twilight-model 0.9.0",
+]
+
+[[package]]
 name = "twilight-http"
 version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6752,6 +6763,15 @@ dependencies = [
  "serde_repr",
  "time 0.3.7",
  "tracing",
+]
+
+[[package]]
+name = "twilight-util"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "60289e602d8d4008ab0f9b512109e03358ee9a3f44c59a711e35c03120b808e7"
+dependencies = [
+ "twilight-model 0.9.0",
 ]
 
 [[package]]

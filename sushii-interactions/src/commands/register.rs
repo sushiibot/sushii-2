@@ -4,6 +4,7 @@ use twilight_interactions::command::CreateCommand;
 use twilight_model::id::marker::{ApplicationMarker, GuildMarker};
 use twilight_model::id::Id;
 
+use crate::commands::user::userinfo::UserinfoCommand;
 use crate::error::Result;
 
 pub async fn register_commands(
@@ -14,7 +15,13 @@ pub async fn register_commands(
     let guild_id = Id::<GuildMarker>::new(167058919611564043);
 
     let commands = interaction_client
-        .set_guild_commands(guild_id, &[HelpCommand::create_command().into()])
+        .set_guild_commands(
+            guild_id,
+            &[
+                HelpCommand::create_command().into(),
+                UserinfoCommand::create_command().into(),
+            ],
+        )
         .exec()
         .await?
         .models()
