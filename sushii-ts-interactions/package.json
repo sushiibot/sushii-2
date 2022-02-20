@@ -1,0 +1,28 @@
+{
+    "name": "sushii-ts-interactions",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "AGPL-3.0-or-later",
+    "scripts": {
+        "test": "jest",
+        "build": "tsc --skipLibCheck",
+        "start": "ts-node src/index.ts | yarn pino-pretty -c -t"
+    },
+    "dependencies": {
+        "@discordjs/rest": "^0.3.0",
+        "discord-api-types": "^0.27.2",
+        "discord.js": "^13.6.0",
+        "dotenv": "^16.0.0",
+        "pino": "^7.8.0"
+    },
+    "devDependencies": {
+        "@types/node": "^17.0.18",
+        "pino-pretty": "^7.5.1",
+        "ts-node": "^10.5.0",
+        "typescript": "^4.5.5"
+    },
+    "resolutions": {
+        "discord-api-types": "0.27.2",
+        "form-data": "4.0.0"
+    }
+}
