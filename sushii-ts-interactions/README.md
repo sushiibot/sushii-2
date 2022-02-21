@@ -1,4 +1,3 @@
 # sushii-interactions
 
-Deno + Discord.js
-
+TypeScript + Discord.js
