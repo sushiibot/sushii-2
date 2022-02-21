@@ -507,22 +507,21 @@ dir-glob@^3.0.1:
   dependencies:
     path-type "^4.0.0"
 
-discord-api-types@0.27.2, discord-api-types@^0.26.0, discord-api-types@^0.26.1, discord-api-types@^0.27.2:
+discord-api-types@0.27.2, discord-api-types@^0.26.0, discord-api-types@^0.26.1, discord-api-types@^0.27.1, discord-api-types@^0.27.2:
   version "0.27.2"
   resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.27.2.tgz#a9d3cbce6af41786e0b1abee02c90702be60b08b"
   integrity sha512-70Uy283dXKpphwuVQIhQJCBAMIxLwCywdyjTKAjjrzFONZZIRQr9oupj3K1rS+hGnI6cp6y7eStRQvTbeSC+Zw==
 
-discord.js@^13.6.0:
+discord.js@monbrey/discord.js#modals:
   version "13.6.0"
-  resolved "https://registry.npmjs.org/discord.js/-/discord.js-13.6.0.tgz"
-  integrity sha512-tXNR8zgsEPxPBvGk3AQjJ9ljIIC6/LOPjzKwpwz8Y1Q2X66Vi3ZqFgRHYwnHKC0jC0F+l4LzxlhmOJsBZDNg9g==
+  resolved "https://codeload.github.com/monbrey/discord.js/tar.gz/fcb26ad46b9ce5fc0033dba211ec7c0bd2a5f6d2"
   dependencies:
     "@discordjs/builders" "^0.11.0"
     "@discordjs/collection" "^0.4.0"
     "@sapphire/async-queue" "^1.1.9"
     "@types/node-fetch" "^2.5.12"
     "@types/ws" "^8.2.2"
-    discord-api-types "^0.26.0"
+    discord-api-types "^0.27.1"
     form-data "^4.0.0"
     node-fetch "^2.6.1"
     ws "^8.4.0"

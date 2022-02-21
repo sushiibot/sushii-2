@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, Embed } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
+import { Context } from "../../context";
 import { SlashCommand } from "../command";
 
 const cmd: SlashCommand = {
@@ -14,7 +15,7 @@ const cmd: SlashCommand = {
         )
     )
     .toJSON(),
-  handler: async (ctx: any, interaction: CommandInteraction) => {
+  handler: async (ctx: Context, interaction: CommandInteraction) => {
     const target = interaction.options.getUser("user") || interaction.user;
     const member = await interaction.guild?.members.fetch(target.id);
 

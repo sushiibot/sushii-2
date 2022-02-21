@@ -5,7 +5,11 @@ import {
   APIApplicationCommand,
   RESTPostAPIApplicationCommandsJSONBody,
 } from "discord-api-types/v9";
-import { Interaction } from "discord.js";
+import {
+  CommandInteraction,
+  Interaction,
+  ModalSubmitInteraction,
+} from "discord.js";
 import { ConfigI } from "../config";
 import { Context } from "../context";
 import log from "../logger";
@@ -33,11 +37,20 @@ export class CommandClient {
     this.commands.set(command.command.name, command);
   }
 
+  /**
+   *
+   * @returns array of commands to register
+   */
   private getCommandsArray(): RESTPostAPIApplicationCommandsJSONBody[] {
     return Array.from(this.commands.values()).map((c) => c.command);
   }
 
-  public async register(): Promise<undefined> {
+  /**
+   * Register all slash commands via REST api
+   *
+   * @returns
+   */
+  public async register(): Promise<void> {
     log.info("registering %s guild commands", this.commands.size);
 
     // Actual global commands
@@ -63,24 +76,65 @@ export class CommandClient {
     log.info("registered %s guild commands", this.commands.size, res);
   }
 
+  /**
+   * Handle any interaction, eg slash commands
+   *
+   * @param interaction interaction from gateway
+   * @returns
+   */
   public async handleInteraction(interaction: Interaction): Promise<void> {
-    if (!interaction.isCommand()) {
-      return;
+    if (interaction.isCommand()) {
+      this.handleInteractionCommand(interaction);
     }
 
+    if (interaction.isModalSubmit()) {
+      this.handleModalSubmit(interaction);
+    }
+  }
+
+  /**
+   * Handle a slash command
+   *
+   * @param interaction slash command interaction
+   * @returns
+   */
+  private async handleInteractionCommand(
+    interaction: CommandInteraction
+  ): Promise<void> {
     const command = this.commands.get(interaction.commandName);
 
     if (!command) {
-      log.warn(`received unknown command: ${interaction.commandName}`);
+      log.error(`received unknown command: ${interaction.commandName}`);
       return;
     }
 
     log.info("received %s command", interaction.commandName);
+
     try {
+      // Pre-check
+      if (command.check) {
+        const checkRes = await command.check(this.context, interaction);
+
+        if (!checkRes.pass) {
+          await interaction.reply(checkRes.message);
+
+          log.info(
+            "command %s failed check: %s",
+            interaction.commandName,
+            checkRes.message
+          );
+          return;
+        }
+      }
+
       await command.handler(this.context, interaction);
     } catch (e) {
-      log.error("error running command %s", interaction.commandName, e);
-      interaction.reply("Uh oh something broke");
+      log.error("error running command %s: %o", interaction.commandName, e);
+      await interaction.reply("Uh oh something broke");
     }
   }
+
+  private async handleModalSubmit(
+    interaction: ModalSubmitInteraction
+  ): Promise<void> {}
 }

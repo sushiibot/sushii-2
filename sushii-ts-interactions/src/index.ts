@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import log from "./logger";
 import { CommandClient } from "./commands/client";
 import UserinfoCommand from "./commands/user/userinfo";
+import formCommand from "./commands/form/form";
 import { Config } from "./config";
 
 async function main() {
@@ -15,6 +16,7 @@ async function main() {
 
   const cmdClient = new CommandClient(rest, config);
   cmdClient.addCommand(UserinfoCommand);
+  cmdClient.addCommand(formCommand);
 
   await cmdClient.register();
 
