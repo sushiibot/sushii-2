@@ -6,7 +6,7 @@
     "scripts": {
         "test": "jest",
         "build": "tsc --skipLibCheck",
-        "start": "ts-node src/index.ts | yarn pino-pretty -c -t"
+        "start": "ts-node src/index.ts | pino-pretty -c -t"
     },
     "dependencies": {
         "@discordjs/rest": "^0.3.0",

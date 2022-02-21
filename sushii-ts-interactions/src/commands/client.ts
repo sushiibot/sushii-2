@@ -1,6 +1,10 @@
 import Collection from "@discordjs/collection";
 import { REST } from "@discordjs/rest";
-import { Routes, APIApplicationCommand } from "discord-api-types/v9";
+import {
+    Routes,
+    APIApplicationCommand,
+    RESTPostAPIApplicationCommandsJSONBody,
+} from "discord-api-types/v9";
 import { Interaction } from "discord.js";
 import { ConfigI } from "../config";
 import { Context } from "../context";
@@ -20,34 +24,43 @@ export class CommandClient {
         this.commands = new Collection();
     }
 
+    /**
+     * Add a new command to register and handle
+     *
+     * @param command SlashCommand to add
+     */
     public addCommand(command: SlashCommand): void {
         this.commands.set(command.command.name, command);
     }
 
+    private getCommandsArray(): RESTPostAPIApplicationCommandsJSONBody[] {
+        return Array.from(this.commands.values()).map((c) => c.command);
+    }
+
     public async register(): Promise<undefined> {
-        log.info(`registering {} guild commands`, this.commands.size);
+        log.info("registering %s guild commands", this.commands.size);
 
         // Actual global commands
         if (this.config.guildId === undefined) {
             await this.rest.put(
-                Routes.applicationCommands(this.config.clientId),
-                { body: this.commands }
+                Routes.applicationCommands(this.config.applicationId),
+                { body: this.getCommandsArray() }
             );
 
-            log.info(`registered {} global commands`, this.commands.size);
+            log.info("registered %s global commands", this.commands.size);
             return;
         }
 
         // Guild only commands for testing
-        await this.rest.put(
+        const res = await this.rest.put(
             Routes.applicationGuildCommands(
-                this.config.clientId,
+                this.config.applicationId,
                 this.config.guildId
             ),
-            { body: this.commands }
+            { body: this.getCommandsArray() }
         );
 
-        log.info(`registered {} guild commands`, this.commands.size);
+        log.info("registered %s guild commands", this.commands.size, res);
     }
 
     public async handleInteraction(interaction: Interaction): Promise<void> {
@@ -62,6 +75,12 @@ export class CommandClient {
             return;
         }
 
-        await command.handler(this.context, interaction);
+        log.info("received %s command", interaction.commandName);
+        try {
+            await command.handler(this.context, interaction);
+        } catch (e) {
+            log.error("error running command %s", interaction.commandName, e);
+            interaction.reply("Uh oh something broke");
+        }
     }
 }

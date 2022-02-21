@@ -18,10 +18,20 @@ async function main() {
 
     await cmdClient.register();
 
-    client.on("interactionCreate", cmdClient.handleInteraction);
+    client.on("interactionCreate", (interaction) =>
+        cmdClient.handleInteraction(interaction)
+    );
 
     log.info("starting client");
     client.login(config.token);
+
+    process.on("SIGINT", () => {
+        log.info("cleaning up");
+
+        client.destroy();
+        log.info("bye");
+        process.exit();
+    });
 }
 
 main().catch((e) => {
