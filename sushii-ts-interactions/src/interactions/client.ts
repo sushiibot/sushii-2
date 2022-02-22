@@ -5,6 +5,7 @@ import {
   RESTPostAPIApplicationCommandsJSONBody,
 } from "discord-api-types/v9";
 import {
+  ButtonInteraction,
   CommandInteraction,
   Interaction,
   ModalSubmitInteraction,
@@ -12,6 +13,7 @@ import {
 import { ConfigI } from "../config";
 import Context from "../context";
 import log from "../logger";
+import ButtonHandler from "./buttonHandler";
 import { SlashCommand } from "./command";
 import ModalHandler from "./modalHandler";
 
@@ -41,14 +43,20 @@ export default class InteractionClient {
    * side effects or logic, they should be handled in the command handler with
    * await modals.
    */
-  private modals: Collection<string, ModalHandler>;
+  private modalHandlers: Collection<string, ModalHandler>;
+
+  /**
+   * Button handlers
+   */
+  private buttonHandlers: Collection<string, ButtonHandler>;
 
   constructor(rest: REST, config: ConfigI) {
     this.rest = rest;
     this.config = config;
     this.context = new Context();
     this.commands = new Collection();
-    this.modals = new Collection();
+    this.modalHandlers = new Collection();
+    this.buttonHandlers = new Collection();
   }
 
   /**
@@ -66,7 +74,16 @@ export default class InteractionClient {
    * @param modalHandler ModalHandler to add
    */
   public addModal(modalHandler: ModalHandler): void {
-    this.modals.set(modalHandler.id, modalHandler);
+    this.modalHandlers.set(modalHandler.id, modalHandler);
+  }
+
+  /**
+   * Add a pure button handler
+   *
+   * @param buttonHandler ButtonHandler to add
+   */
+  public addButton(buttonHandler: ButtonHandler): void {
+    this.buttonHandlers.set(buttonHandler.id, buttonHandler);
   }
 
   /**
@@ -122,6 +139,10 @@ export default class InteractionClient {
     if (interaction.isModalSubmit()) {
       this.handleModalSubmit(interaction);
     }
+
+    if (interaction.isButton()) {
+      this.handleButtonSubmit(interaction);
+    }
   }
 
   /**
@@ -174,7 +195,7 @@ export default class InteractionClient {
   private async handleModalSubmit(
     interaction: ModalSubmitInteraction
   ): Promise<void> {
-    const modalHandler = this.modals.get(interaction.customId);
+    const modalHandler = this.modalHandlers.get(interaction.customId);
 
     if (!modalHandler) {
       log.error(
@@ -190,7 +211,35 @@ export default class InteractionClient {
     try {
       await modalHandler.handleSubmit(this.context, interaction);
     } catch (e) {
-      log.error("error handling modal %s: %o", interaction.id, e);
+      log.error("error handling modal %s: %s", interaction.id, e);
+    }
+  }
+
+  /**
+   * Handle a pure button interaction
+   *
+   * @param interaction button interaction
+   */
+  private async handleButtonSubmit(
+    interaction: ButtonInteraction
+  ): Promise<void> {
+    const buttonHandler = this.buttonHandlers.get(interaction.customId);
+
+    if (!buttonHandler) {
+      log.error(
+        "received unknown button interaction: %s",
+        interaction.customId
+      );
+
+      return;
+    }
+
+    log.info("received %s button", interaction.customId);
+
+    try {
+      await buttonHandler.handleButton(this.context, interaction);
+    } catch (e) {
+      log.error("error handling button %s: %o", interaction.id, e);
     }
   }
 }

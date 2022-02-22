@@ -4,7 +4,11 @@ import dotenv from "dotenv";
 import log from "./logger";
 import InteractionClient from "./interactions/client";
 import UserInfoCommand from "./interactions/user/userinfo";
-import { formModalHandler, formSlashCommand } from "./interactions/form/form";
+import {
+  formModalHandler,
+  formSlashCommand,
+  formButtonHandler,
+} from "./interactions/form/form";
 import { Config } from "./config";
 
 async function main() {
@@ -18,6 +22,7 @@ async function main() {
   interactionClient.addCommand(UserInfoCommand);
   interactionClient.addCommand(formSlashCommand);
   interactionClient.addModal(formModalHandler);
+  interactionClient.addButton(formButtonHandler);
 
   await interactionClient.register();
 

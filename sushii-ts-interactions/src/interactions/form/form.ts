@@ -1,17 +1,23 @@
-import { SlashCommandBuilder, Embed } from "@discordjs/builders";
 import {
+  SlashCommandBuilder,
+  Embed,
+  ButtonComponent,
+} from "@discordjs/builders";
+import {
+  ButtonInteraction,
   CommandInteraction,
   MessageActionRow,
   Modal,
-  ModalSubmitFieldsResolver,
   ModalSubmitInteraction,
   TextInputComponent,
 } from "discord.js";
-import dayjs from "dayjs";
+import { ButtonStyle } from "discord-api-types/v9";
 import Context from "../../context";
 import { SlashCommand } from "../command";
 import ModalHandler from "../modalHandler";
+import ButtonHandler from "../buttonHandler";
 
+const APPLY_BUTTON_ID = "button:apply";
 const MODAL_ID = "form:";
 
 const AGE_CUSTOM_ID = "ageTextInput";
@@ -22,8 +28,51 @@ export const formSlashCommand: SlashCommand = {
   command: new SlashCommandBuilder()
     .setName("modapply")
     .setDescription("Apply for moderator")
+    .addStringOption((o) =>
+      o.setName("message").setDescription("Message to send").setRequired(true)
+    )
+    .addChannelOption((o) =>
+      o
+        .setName("channel")
+        .setDescription(
+          "Channel to send this button to, defaults to the current channel"
+        )
+    )
     .toJSON(),
   handler: async (ctx: Context, interaction: CommandInteraction) => {
+    const targetChannel =
+      interaction.options.getChannel("channel") || interaction.channel;
+
+    if (targetChannel?.type !== "GUILD_TEXT") {
+      await interaction.reply("Invalid channel type, must be a text channel");
+      return;
+    }
+
+    const button = new ButtonComponent()
+      .setLabel("Apply")
+      .setCustomId(APPLY_BUTTON_ID)
+      .setStyle(ButtonStyle.Primary)
+      .setEmoji({
+        name: "📋",
+      });
+
+    const buttonRow = new MessageActionRow().addComponents(button);
+
+    await targetChannel.send({
+      content: interaction.options.getString("message"),
+      components: [buttonRow],
+    });
+
+    await interaction.reply({
+      content: "Form created!",
+      ephemeral: true,
+    });
+  },
+};
+
+export const formButtonHandler: ButtonHandler = {
+  id: APPLY_BUTTON_ID,
+  handleButton: async (ctx: Context, interaction: ButtonInteraction) => {
     const ageTextInput = new TextInputComponent()
       .setStyle("SHORT")
       .setCustomId(AGE_CUSTOM_ID)
@@ -62,11 +111,9 @@ export const formSlashCommand: SlashCommand = {
 export const formModalHandler: ModalHandler = {
   id: MODAL_ID,
   handleSubmit: async (ctx: Context, interaction: ModalSubmitInteraction) => {
-    const resolver = new ModalSubmitFieldsResolver(interaction.components);
-
-    const age = resolver.getTextInputValue(AGE_CUSTOM_ID);
-    const tz = resolver.getTextInputValue(TIMEZONE_CUSTOM_ID);
-    const otherMod = resolver.getTextInputValue(OTHER_MOD_CUSTOM_ID);
+    const age = interaction.fields.getTextInputValue(AGE_CUSTOM_ID);
+    const tz = interaction.fields.getTextInputValue(TIMEZONE_CUSTOM_ID);
+    const otherMod = interaction.fields.getTextInputValue(OTHER_MOD_CUSTOM_ID);
 
     let embed = new Embed()
       .setTitle("Moderator Application")
@@ -74,6 +121,7 @@ export const formModalHandler: ModalHandler = {
         name: interaction.user.tag,
         iconURL: interaction.user.displayAvatarURL({ dynamic: true }),
       })
+      .setDescription("Application received!")
       .addField({
         name: "Age",
         value: age,
@@ -87,12 +135,12 @@ export const formModalHandler: ModalHandler = {
         value: otherMod,
       });
 
-    if (interaction.inRawGuild()) {
-      const ts = dayjs(interaction.member.joined_at).unix();
-
+    if (interaction.inCachedGuild() && interaction.member.joinedTimestamp) {
       embed = embed.addField({
         name: "Member",
-        value: `Joined <t:${ts}:R>`,
+        value: `Joined <t:${Math.floor(
+          interaction.member.joinedTimestamp / 1000
+        )}:R>`,
       });
     }
 
