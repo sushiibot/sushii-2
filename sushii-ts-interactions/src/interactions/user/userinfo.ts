@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, Embed } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
-import { Context } from "../../context";
+import Context from "../../context";
 import { SlashCommand } from "../command";
 
 const cmd: SlashCommand = {

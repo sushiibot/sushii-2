@@ -2,7 +2,6 @@ import Collection from "@discordjs/collection";
 import { REST } from "@discordjs/rest";
 import {
   Routes,
-  APIApplicationCommand,
   RESTPostAPIApplicationCommandsJSONBody,
 } from "discord-api-types/v9";
 import {
@@ -11,21 +10,45 @@ import {
   ModalSubmitInteraction,
 } from "discord.js";
 import { ConfigI } from "../config";
-import { Context } from "../context";
+import Context from "../context";
 import log from "../logger";
 import { SlashCommand } from "./command";
+import ModalHandler from "./modalHandler";
 
-export class CommandClient {
+export default class InteractionClient {
+  /**
+   * Discord REST client
+   */
   private rest: REST;
+
+  /**
+   * Bot configuration
+   */
   private config: ConfigI;
+
+  /**
+   * Command context for shared stuff like database connections, API clients, etc.
+   */
   private context: Context;
+
+  /**
+   * Command handlers
+   */
   private commands: Collection<string, SlashCommand>;
+
+  /**
+   * Modal handlers. This is only for *pure* handlers, if modals require some
+   * side effects or logic, they should be handled in the command handler with
+   * await modals.
+   */
+  private modals: Collection<string, ModalHandler>;
 
   constructor(rest: REST, config: ConfigI) {
     this.rest = rest;
     this.config = config;
     this.context = new Context();
     this.commands = new Collection();
+    this.modals = new Collection();
   }
 
   /**
@@ -35,6 +58,15 @@ export class CommandClient {
    */
   public addCommand(command: SlashCommand): void {
     this.commands.set(command.command.name, command);
+  }
+
+  /**
+   * Add a pure modal handler
+   *
+   * @param modalHandler ModalHandler to add
+   */
+  public addModal(modalHandler: ModalHandler): void {
+    this.modals.set(modalHandler.id, modalHandler);
   }
 
   /**
@@ -134,7 +166,31 @@ export class CommandClient {
     }
   }
 
+  /**
+   * Handle a pure modal submit interaction
+   *
+   * @param interaction modal submit interaction
+   */
   private async handleModalSubmit(
     interaction: ModalSubmitInteraction
-  ): Promise<void> {}
+  ): Promise<void> {
+    const modalHandler = this.modals.get(interaction.customId);
+
+    if (!modalHandler) {
+      log.error(
+        "received unknown modal submit interaction: %s",
+        interaction.customId
+      );
+
+      return;
+    }
+
+    log.info("received %s modal submit", interaction.customId);
+
+    try {
+      await modalHandler.handleSubmit(this.context, interaction);
+    } catch (e) {
+      log.error("error handling modal %s: %o", interaction.id, e);
+    }
+  }
 }

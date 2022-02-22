@@ -7,12 +7,12 @@ import {
   ModalSubmitInteraction,
   Permissions,
 } from "discord.js";
-import { Context } from "../context";
+import Context from "../context";
 
 /**
  * Response of a command check, a message will only exist on pass = false
  */
-type CheckResponse =
+export type CheckResponse =
   | {
       pass: true;
     }
