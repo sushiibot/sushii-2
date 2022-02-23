@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package sushii.guild.config;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/field_mask.proto";
+
+service GuildConfigService {
+  rpc Get(GetGuildConfigRequest) returns (GetGuildConfigResponse);
+  rpc Update(UpdateGuildConfigRequest) returns (UpdateGuildConfigResponse);
+  rpc Create(CreateGuildConfigRequest) returns (CreateGuildConfigResponse);
+}
+
+message GetGuildConfigRequest { uint64 id = 1; }
+
+message GetGuildConfigResponse {
+  uint64 id = 1;
+  google.protobuf.StringValue prefix = 2;
+  google.protobuf.StringValue join_msg = 3;
+  bool join_msg_enabled = 4;
+
+  google.protobuf.StringValue join_react = 5;
+  google.protobuf.StringValue leave_msg = 6;
+  bool leave_msg_enabled = 7;
+
+  google.protobuf.UInt64Value msg_channel = 8;
+  google.protobuf.UInt64Value role_channel = 9;
+
+  optional google.protobuf.Struct role_config = 10;
+
+  bool role_enabled = 11;
+  bool invite_guard = 12;
+
+  google.protobuf.UInt64Value log_msg = 13;
+  bool log_msg_enabled = 14;
+
+  google.protobuf.UInt64Value log_mod = 15;
+  bool log_mod_enabled = 16;
+
+  google.protobuf.UInt64Value log_member = 17;
+  bool log_member_enabled = 18;
+
+  google.protobuf.UInt64Value mute_role = 19;
+  google.protobuf.UInt64Value mute_duration = 20;
+
+  google.protobuf.StringValue warn_dm_text = 21;
+  bool warn_dm_enabled = 22;
+
+  google.protobuf.StringValue mute_dm_text = 23;
+  bool mute_dm_enabled = 24;
+
+  google.protobuf.UInt64Value max_mention = 25;
+  repeated uint64 disabled_channels = 26;
+
+  google.protobuf.Struct data = 27;
+}
+
+message UpdateGuildConfigRequest {
+  GetGuildConfigResponse guild = 1;
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+message UpdateGuildConfigResponse {}
+
+message CreateGuildConfigRequest { uint64 id = 1; }
+
+message CreateGuildConfigResponse {}
