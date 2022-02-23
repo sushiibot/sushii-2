@@ -18,7 +18,7 @@ describe('GuildConfigController', () => {
 
   describe('get', () => {
     it('should return with id 1234', () => {
-      expect(guildConfigController.get({ id: 11 }, null, null)).toStrictEqual({
+      expect(guildConfigController.get({ id: '11' })).toStrictEqual({
         id: '123',
       });
     });
