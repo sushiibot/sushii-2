@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
 import { PrismaService } from 'src/prisma.service';
-import { GetGuildConfigResponse } from 'src/generated/src/proto/guild/config';
+import { GetGuildConfigResponse } from 'src/proto/guild/config';
 
 @Injectable()
 export class GuildConfigService {
