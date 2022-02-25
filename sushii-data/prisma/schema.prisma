@@ -91,33 +91,33 @@ model GuildBan {
 }
 
 model GuildConfig {
-  id                 BigInt   @id
-  prefix             String?
-  join_msg           String?
-  join_msg_enabled   Boolean  @default(true)
-  join_react         String?
-  leave_msg          String?
-  leave_msg_enabled  Boolean  @default(true)
-  msg_channel        BigInt?
-  role_channel       BigInt?
-  role_config        Json?
-  role_enabled       Boolean  @default(true)
-  invite_guard       Boolean  @default(false)
-  log_msg            BigInt?
-  log_msg_enabled    Boolean  @default(true)
-  log_mod            BigInt?
-  log_mod_enabled    Boolean  @default(true)
-  log_member         BigInt?
-  log_member_enabled Boolean  @default(true)
-  mute_role          BigInt?
-  mute_duration      BigInt?
-  mute_dm_text       String?
-  mute_dm_enabled    Boolean  @default(true)
-  warn_dm_text       String?
-  warn_dm_enabled    Boolean  @default(true)
-  max_mention        Int?
-  disabled_channels  BigInt[]
-  data               Json     @default("{}")
+  id               BigInt   @id
+  prefix           String?
+  joinMsg          String?  @map("join_msg")
+  joinMsgEnabled   Boolean  @default(true) @map("join_msg_enabled")
+  joinReact        String?  @map("join_react")
+  leaveMsg         String?  @map("leave_msg")
+  leaveMsgEnabled  Boolean  @default(true) @map("leave_msg_enabled")
+  msgChannel       BigInt?  @map("msg_channel")
+  roleChannel      BigInt?  @map("role_channel")
+  roleConfig       Json?    @map("role_config")
+  roleEnabled      Boolean  @default(true) @map("role_enabled")
+  inviteGuard      Boolean  @default(false) @map("invite_guard")
+  logMsg           BigInt?  @map("log_msg")
+  logMsgEnabled    Boolean  @default(true) @map("log_msg_enabled")
+  logMod           BigInt?  @map("log_mod")
+  logModEnabled    Boolean  @default(true) @map("log_mod_enabled")
+  logMember        BigInt?  @map("log_member")
+  logMemberEnabled Boolean  @default(true) @map("log_member_enabled")
+  muteRole         BigInt?  @map("mute_role")
+  muteDuration     BigInt?  @map("mute_duration")
+  muteDmText       String?  @map("mute_dm_text")
+  muteDmEnabled    Boolean  @default(true) @map("mute_dm_enabled")
+  warnDmText       String?  @map("warn_dm_text")
+  warnDmEnabled    Boolean  @default(true) @map("warn_dm_enabled")
+  maxMention       Int?     @map("max_mention")
+  disabledChannels BigInt[] @map("disabled_channels")
+  data             Json     @default("{}")
 
   @@map("guild_configs")
 }

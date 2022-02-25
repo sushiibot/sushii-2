@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { status } from '@grpc/grpc-js';
-import { PrismaService } from 'src/prisma.service';
-import { GetGuildConfigResponse } from 'src/proto/guild/config';
+import { PrismaService } from '../prisma.service';
+import { GetGuildConfigResponse } from '../proto/guild/config';
+import { guildConfigToResponse } from './config.translate';
 
 @Injectable()
 export class GuildConfigService {
   constructor(private prisma: PrismaService) {}
 
-  get(guildId: string): GetGuildConfigResponse {
+  async get(guildId: string): Promise<GetGuildConfigResponse> {
     if (guildId === '') {
       throw new RpcException({
         code: status.INVALID_ARGUMENT,
@@ -16,34 +17,17 @@ export class GuildConfigService {
       });
     }
 
-    return {
-      id: '123',
-      prefix: undefined,
-      joinMsg: undefined,
-      joinMsgEnabled: false,
-      joinReact: undefined,
-      leaveMsg: undefined,
-      leaveMsgEnabled: false,
-      msgChannel: undefined,
-      roleChannel: undefined,
-      roleConfig: undefined,
-      roleEnabled: false,
-      inviteGuard: false,
-      logMsg: undefined,
-      logMsgEnabled: false,
-      logMod: undefined,
-      logModEnabled: false,
-      logMember: undefined,
-      logMemberEnabled: false,
-      muteRole: undefined,
-      muteDuration: undefined,
-      warnDmText: undefined,
-      warnDmEnabled: false,
-      muteDmText: undefined,
-      muteDmEnabled: false,
-      maxMention: undefined,
-      disabledChannels: [],
-      data: undefined,
-    };
+    const conf = await this.prisma.guildConfig.findUnique({
+      where: { id: BigInt(guildId) },
+    });
+
+    if (!conf) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: 'Guild not found',
+      });
+    }
+
+    return guildConfigToResponse(conf);
   }
 }

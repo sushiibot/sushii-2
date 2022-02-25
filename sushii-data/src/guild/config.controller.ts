@@ -8,7 +8,7 @@ import {
   GuildConfigServiceControllerMethods,
   UpdateGuildConfigRequest,
   UpdateGuildConfigResponse,
-} from 'src/proto/guild/config';
+} from '../proto/guild/config';
 import { GuildConfigService } from './config.service';
 
 @Controller('sushii.guild.config')

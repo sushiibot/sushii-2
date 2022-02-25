@@ -13,32 +13,32 @@ export interface GetGuildConfigRequest {
 
 export interface GetGuildConfigResponse {
   id: string;
-  prefix: string | undefined;
-  joinMsg: string | undefined;
+  prefix?: string | undefined;
+  joinMsg?: string | undefined;
   joinMsgEnabled: boolean;
-  joinReact: string | undefined;
-  leaveMsg: string | undefined;
+  joinReact?: string | undefined;
+  leaveMsg?: string | undefined;
   leaveMsgEnabled: boolean;
-  msgChannel: string | undefined;
-  roleChannel: string | undefined;
-  roleConfig?: { [key: string]: any } | undefined;
+  msgChannel?: string | undefined;
+  roleChannel?: string | undefined;
+  roleConfig?: any | undefined;
   roleEnabled: boolean;
   inviteGuard: boolean;
-  logMsg: string | undefined;
+  logMsg?: string | undefined;
   logMsgEnabled: boolean;
-  logMod: string | undefined;
+  logMod?: string | undefined;
   logModEnabled: boolean;
-  logMember: string | undefined;
+  logMember?: string | undefined;
   logMemberEnabled: boolean;
-  muteRole: string | undefined;
-  muteDuration: string | undefined;
-  warnDmText: string | undefined;
+  muteRole?: string | undefined;
+  muteDuration?: string | undefined;
+  warnDmText?: string | undefined;
   warnDmEnabled: boolean;
-  muteDmText: string | undefined;
+  muteDmText?: string | undefined;
   muteDmEnabled: boolean;
-  maxMention: string | undefined;
+  maxMention?: string | undefined;
   disabledChannels: string[];
-  data: { [key: string]: any } | undefined;
+  data: any | undefined;
 }
 
 export interface UpdateGuildConfigRequest {

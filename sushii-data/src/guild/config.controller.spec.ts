@@ -1,26 +1,63 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { PrismaService } from '../prisma.service';
 import { GuildConfigController } from './config.controller';
 import { GuildConfigService } from './config.service';
 
 describe('GuildConfigController', () => {
   let guildConfigController: GuildConfigController;
+  let guildConfigService: GuildConfigService;
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [GuildConfigController],
-      providers: [GuildConfigService],
+      providers: [GuildConfigService, PrismaService],
     }).compile();
 
     guildConfigController = app.get<GuildConfigController>(
       GuildConfigController,
     );
+    guildConfigService = app.get<GuildConfigService>(GuildConfigService);
   });
 
   describe('get', () => {
     it('should return with id 1234', () => {
-      expect(guildConfigController.get({ id: '11' })).toStrictEqual({
+      const result = {
         id: '123',
-      });
+        prefix: undefined,
+        joinMsg: undefined,
+        joinMsgEnabled: false,
+        joinReact: undefined,
+        leaveMsg: undefined,
+        leaveMsgEnabled: false,
+        msgChannel: undefined,
+        roleChannel: undefined,
+        roleConfig: undefined,
+        roleEnabled: false,
+        inviteGuard: false,
+        logMsg: undefined,
+        logMsgEnabled: false,
+        logMod: undefined,
+        logModEnabled: false,
+        logMember: undefined,
+        logMemberEnabled: false,
+        muteRole: undefined,
+        muteDuration: undefined,
+        warnDmText: undefined,
+        warnDmEnabled: false,
+        muteDmText: undefined,
+        muteDmEnabled: false,
+        maxMention: undefined,
+        disabledChannels: [],
+        data: undefined,
+      };
+
+      jest
+        .spyOn(guildConfigService, 'get')
+        .mockImplementation(async () => result);
+
+      expect(guildConfigController.get({ id: '11' })).resolves.toStrictEqual(
+        result,
+      );
     });
   });
 });
