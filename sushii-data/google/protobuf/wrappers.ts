@@ -31,7 +31,7 @@ export interface FloatValue {
  */
 export interface Int64Value {
   /** The int64 value. */
-  value: string;
+  value: Long;
 }
 
 /**
@@ -41,7 +41,7 @@ export interface Int64Value {
  */
 export interface UInt64Value {
   /** The uint64 value. */
-  value: string;
+  value: Long;
 }
 
 /**

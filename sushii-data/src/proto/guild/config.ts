@@ -7,11 +7,31 @@ import { FieldMask } from '../../../google/protobuf/field_mask';
 
 export const protobufPackage = 'sushii.guild.config';
 
+/** Get */
 export interface GetGuildConfigRequest {
   id: string;
 }
 
 export interface GetGuildConfigResponse {
+  config: GuildConfig | undefined;
+}
+
+/** Update() */
+export interface UpdateGuildConfigRequest {
+  guild: GuildConfig | undefined;
+  updateMask: FieldMask | undefined;
+}
+
+export interface UpdateGuildConfigResponse {}
+
+/** Create() */
+export interface CreateGuildConfigRequest {
+  id: string;
+}
+
+export interface CreateGuildConfigResponse {}
+
+export interface GuildConfig {
   id: string;
   prefix?: string | undefined;
   joinMsg?: string | undefined;
@@ -20,9 +40,6 @@ export interface GetGuildConfigResponse {
   leaveMsg?: string | undefined;
   leaveMsgEnabled: boolean;
   msgChannel?: string | undefined;
-  roleChannel?: string | undefined;
-  roleConfig?: any | undefined;
-  roleEnabled: boolean;
   inviteGuard: boolean;
   logMsg?: string | undefined;
   logMsgEnabled: boolean;
@@ -38,21 +55,7 @@ export interface GetGuildConfigResponse {
   muteDmEnabled: boolean;
   maxMention?: string | undefined;
   disabledChannels: string[];
-  data: any | undefined;
 }
-
-export interface UpdateGuildConfigRequest {
-  guild: GetGuildConfigResponse | undefined;
-  updateMask: FieldMask | undefined;
-}
-
-export interface UpdateGuildConfigResponse {}
-
-export interface CreateGuildConfigRequest {
-  id: string;
-}
-
-export interface CreateGuildConfigResponse {}
 
 export const SUSHII_GUILD_CONFIG_PACKAGE_NAME = 'sushii.guild.config';
 

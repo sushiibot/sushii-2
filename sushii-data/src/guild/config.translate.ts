@@ -1,9 +1,10 @@
-import { GuildConfig } from '@prisma/client';
-import { GetGuildConfigResponse } from '../proto/guild/config';
+import { GuildConfig as PrismaGuildConfig, Prisma } from '@prisma/client';
+import { FieldMask } from '../../google/protobuf/field_mask';
+import { GuildConfig as ProtoGuildConfig } from '../proto/guild/config';
 
-export function guildConfigToResponse(
-  prismaConfig: GuildConfig,
-): GetGuildConfigResponse {
+export function prismaGuildConfigToProto(
+  prismaConfig: PrismaGuildConfig,
+): ProtoGuildConfig {
   return {
     id: prismaConfig.id.toString(),
     prefix: prismaConfig.prefix || undefined,
@@ -13,9 +14,6 @@ export function guildConfigToResponse(
     leaveMsg: prismaConfig.leaveMsg || undefined,
     leaveMsgEnabled: prismaConfig.leaveMsgEnabled,
     msgChannel: prismaConfig.msgChannel?.toString(),
-    roleChannel: prismaConfig.roleChannel?.toString(),
-    roleConfig: prismaConfig.roleConfig,
-    roleEnabled: prismaConfig.roleEnabled,
     inviteGuard: prismaConfig.inviteGuard,
     logMsg: prismaConfig.logMsg?.toString(),
     logMsgEnabled: prismaConfig.logMsgEnabled,
@@ -31,6 +29,35 @@ export function guildConfigToResponse(
     muteDmEnabled: prismaConfig.muteDmEnabled,
     maxMention: prismaConfig.maxMention?.toString(),
     disabledChannels: prismaConfig.disabledChannels.map(BigInt.toString),
-    data: prismaConfig.data,
+  };
+}
+
+export function protoToPrismaGuildConfig(
+  conf: ProtoGuildConfig,
+): PrismaGuildConfig {
+  return {
+    id: BigInt(conf.id),
+    prefix: conf.prefix || null,
+    joinMsg: conf.joinMsg || null,
+    joinMsgEnabled: conf.joinMsgEnabled,
+    joinReact: conf.joinReact || null,
+    leaveMsg: conf.leaveMsg || null,
+    leaveMsgEnabled: conf.leaveMsgEnabled,
+    msgChannel: conf.msgChannel ? BigInt(conf.msgChannel) : null,
+    inviteGuard: conf.inviteGuard,
+    logMsg: conf.logMsg ? BigInt(conf.logMsg) : null,
+    logMsgEnabled: conf.logMsgEnabled,
+    logMod: conf.logMod ? BigInt(conf.logMod) : null,
+    logModEnabled: conf.logModEnabled,
+    logMember: conf.logMember ? BigInt(conf.logMember) : null,
+    logMemberEnabled: conf.logMemberEnabled,
+    muteRole: conf.muteRole ? BigInt(conf.muteRole) : null,
+    muteDuration: conf.muteDuration ? BigInt(conf.muteDuration) : null,
+    warnDmText: conf.warnDmText || null,
+    warnDmEnabled: conf.warnDmEnabled,
+    muteDmText: conf.muteDmText || null,
+    muteDmEnabled: conf.muteDmEnabled,
+    maxMention: conf.maxMention ? parseInt(conf.maxMention, 10) : null,
+    disabledChannels: conf.disabledChannels.map(BigInt),
   };
 }

@@ -30,9 +30,6 @@ describe('GuildConfigController', () => {
         leaveMsg: undefined,
         leaveMsgEnabled: false,
         msgChannel: undefined,
-        roleChannel: undefined,
-        roleConfig: undefined,
-        roleEnabled: false,
         inviteGuard: false,
         logMsg: undefined,
         logMsgEnabled: false,
@@ -48,16 +45,17 @@ describe('GuildConfigController', () => {
         muteDmEnabled: false,
         maxMention: undefined,
         disabledChannels: [],
-        data: undefined,
       };
 
-      jest
+      const spy = jest
         .spyOn(guildConfigService, 'get')
-        .mockImplementation(async () => result);
+        .mockImplementation(async () => ({ config: result }));
 
-      expect(guildConfigController.get({ id: '11' })).resolves.toStrictEqual(
-        result,
-      );
+      expect(guildConfigController.get({ id: '11' })).resolves.toStrictEqual({
+        config: result,
+      });
+
+      expect(spy).toHaveBeenCalledWith('11');
     });
   });
 });

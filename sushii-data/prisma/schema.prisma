@@ -99,9 +99,6 @@ model GuildConfig {
   leaveMsg         String?  @map("leave_msg")
   leaveMsgEnabled  Boolean  @default(true) @map("leave_msg_enabled")
   msgChannel       BigInt?  @map("msg_channel")
-  roleChannel      BigInt?  @map("role_channel")
-  roleConfig       Json?    @map("role_config")
-  roleEnabled      Boolean  @default(true) @map("role_enabled")
   inviteGuard      Boolean  @default(false) @map("invite_guard")
   logMsg           BigInt?  @map("log_msg")
   logMsgEnabled    Boolean  @default(true) @map("log_msg_enabled")
@@ -117,7 +114,6 @@ model GuildConfig {
   warnDmEnabled    Boolean  @default(true) @map("warn_dm_enabled")
   maxMention       Int?     @map("max_mention")
   disabledChannels BigInt[] @map("disabled_channels")
-  data             Json     @default("{}")
 
   @@map("guild_configs")
 }
