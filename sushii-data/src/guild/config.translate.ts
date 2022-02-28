@@ -1,5 +1,4 @@
 import { GuildConfig as PrismaGuildConfig, Prisma } from '@prisma/client';
-import { FieldMask } from '../../google/protobuf/field_mask';
 import { GuildConfig as ProtoGuildConfig } from '../proto/guild/config';
 
 export function prismaGuildConfigToProto(
@@ -29,6 +28,36 @@ export function prismaGuildConfigToProto(
     muteDmEnabled: prismaConfig.muteDmEnabled,
     maxMention: prismaConfig.maxMention?.toString(),
     disabledChannels: prismaConfig.disabledChannels.map(BigInt.toString),
+  };
+}
+
+export function protoToPrismaUpdateGuildConfig(
+  conf: ProtoGuildConfig,
+): Prisma.GuildConfigUpdateInput {
+  return {
+    id: BigInt(conf.id),
+    prefix: conf.prefix,
+    joinMsg: conf.joinMsg,
+    joinMsgEnabled: conf.joinMsgEnabled,
+    joinReact: conf.joinReact,
+    leaveMsg: conf.leaveMsg,
+    leaveMsgEnabled: conf.leaveMsgEnabled,
+    msgChannel: conf.msgChannel ? BigInt(conf.msgChannel) : undefined,
+    inviteGuard: conf.inviteGuard,
+    logMsg: conf.logMsg ? BigInt(conf.logMsg) : undefined,
+    logMsgEnabled: conf.logMsgEnabled,
+    logMod: conf.logMod ? BigInt(conf.logMod) : undefined,
+    logModEnabled: conf.logModEnabled,
+    logMember: conf.logMember ? BigInt(conf.logMember) : undefined,
+    logMemberEnabled: conf.logMemberEnabled,
+    muteRole: conf.muteRole ? BigInt(conf.muteRole) : undefined,
+    muteDuration: conf.muteDuration ? BigInt(conf.muteDuration) : undefined,
+    warnDmText: conf.warnDmText,
+    warnDmEnabled: conf.warnDmEnabled,
+    muteDmText: conf.muteDmText,
+    muteDmEnabled: conf.muteDmEnabled,
+    maxMention: conf.maxMention ? parseInt(conf.maxMention, 10) : undefined,
+    disabledChannels: conf.disabledChannels.map(BigInt),
   };
 }
 

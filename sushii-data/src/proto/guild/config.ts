@@ -3,7 +3,6 @@ import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices';
 import { util, configure } from 'protobufjs/minimal';
 import * as Long from 'long';
 import { Observable } from 'rxjs';
-import { FieldMask } from '../../../google/protobuf/field_mask';
 
 export const protobufPackage = 'sushii.guild.config';
 
@@ -19,7 +18,6 @@ export interface GetGuildConfigResponse {
 /** Update() */
 export interface UpdateGuildConfigRequest {
   guild: GuildConfig | undefined;
-  updateMask: FieldMask | undefined;
 }
 
 export interface UpdateGuildConfigResponse {}

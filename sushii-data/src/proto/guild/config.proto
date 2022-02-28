@@ -17,10 +17,7 @@ message GetGuildConfigRequest { string id = 1; }
 message GetGuildConfigResponse { GuildConfig config = 1; }
 
 // Update()
-message UpdateGuildConfigRequest {
-  GuildConfig guild = 1;
-  google.protobuf.FieldMask update_mask = 2;
-}
+message UpdateGuildConfigRequest { GuildConfig guild = 1; }
 message UpdateGuildConfigResponse {}
 
 // Create()

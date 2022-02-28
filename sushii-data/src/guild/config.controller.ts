@@ -24,7 +24,7 @@ export class GuildConfigController implements GuildConfigServiceController {
   async update(
     request: UpdateGuildConfigRequest,
   ): Promise<UpdateGuildConfigResponse> {
-    return this.configService.update(request.guild, request.updateMask);
+    return this.configService.update(request.guild);
   }
 
   async create(
