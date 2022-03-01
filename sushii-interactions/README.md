@@ -1,3 +1,3 @@
 # sushii-interactions
 
-Slash commands and stuff I guess. I don't know how to structure this bot anymore
+We've come full circle and now we're back to Discord.js

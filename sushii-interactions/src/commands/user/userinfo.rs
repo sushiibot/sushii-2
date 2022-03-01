@@ -10,6 +10,7 @@ use twilight_model::user::PremiumType;
 use twilight_model::user::User;
 use twilight_util::builder::CallbackDataBuilder;
 
+use crate::cdn::{Extension, ImageSize, UserImage};
 use crate::commands::{context::CommandContext, ExecuteApplicationCommand};
 use crate::error::Result;
 
@@ -53,8 +54,12 @@ impl ExecuteApplicationCommand for UserinfoCommand {
 
         let mut embed_builder = EmbedBuilder::new()
             .title("User info")
-            .field(EmbedFieldBuilder::new("Username", target.name.clone()));
-        // .thumbnail(ImageSource::attachment(target.avatar)?);
+            .field(EmbedFieldBuilder::new("Username", target.name.clone()))
+            .thumbnail(ImageSource::url(
+                target
+                    .avatar(Extension::PNG, false, ImageSize::Large)
+                    .to_string(),
+            )?);
 
         match target.premium_type {
             Some(PremiumType::NitroClassic) => {
