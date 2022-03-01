@@ -1,0 +1,39 @@
+{
+  "name": "@sushiibot/sushii-interactions",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "AGPL-3.0-or-later",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc --skipLibCheck",
+    "start": "ts-node src/index.ts | pino-pretty -c -t"
+  },
+  "dependencies": {
+    "@discordjs/builders": "^0.12.0",
+    "@discordjs/collection": "^0.5.0",
+    "@discordjs/rest": "^0.3.0",
+    "dayjs": "^1.10.7",
+    "discord-api-types": "^0.27.2",
+    "discord.js": "monbrey/discord.js#modals",
+    "dotenv": "^16.0.0",
+    "pino": "^7.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.18",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
+    "eslint": "^8.9.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^16.1.0",
+    "eslint-config-prettier": "^8.4.0",
+    "eslint-plugin-import": "^2.25.4",
+    "pino-pretty": "^7.5.1",
+    "prettier": "^2.5.1",
+    "ts-node": "^10.5.0",
+    "typescript": "^4.5.5"
+  },
+  "resolutions": {
+    "discord-api-types": "0.27.2",
+    "form-data": "4.0.0"
+  }
+}
