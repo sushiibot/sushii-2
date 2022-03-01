@@ -8,7 +8,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
-    "build:proto": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=nestJs=true --ts_proto_opt=forceLong=long --ts_proto_out=. ./src/proto/**/*.proto",
+    "build:proto": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=nestJs=true --ts_proto_opt=outputServices=grpc-js --ts_proto_opt=forceLong=long --ts_proto_out=. ./src/proto/**/*.proto",
     "build:prisma": "prisma generate",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

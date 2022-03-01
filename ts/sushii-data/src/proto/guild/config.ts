@@ -123,6 +123,14 @@ export function GuildConfigServiceControllerMethods() {
 
 export const GUILD_CONFIG_SERVICE_NAME = 'GuildConfigService';
 
+interface Rpc {
+  request(
+    service: string,
+    method: string,
+    data: Uint8Array,
+  ): Promise<Uint8Array>;
+}
+
 // If you get a compile-error about 'Constructor<Long> and ... have no overlap',
 // add '--ts_proto_opt=esModuleInterop=true' as a flag when calling 'protoc'.
 if (util.Long !== Long) {
