@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 // GuildConfig model with bigints as strings. This is used for transport and by
 // clients.
-export const StringGuildConfigModel = GuildConfigModel.extend({
+export const transportGuildConfigModel = GuildConfigModel.extend({
   id: z.bigint().transform((x) => x.toString()),
   prefix: z.string().nullish(),
   joinMsg: z.string().nullish(),
@@ -50,8 +50,12 @@ export const StringGuildConfigModel = GuildConfigModel.extend({
     .array(),
 });
 
+export type TransportGuildConfigModel = z.infer<
+  typeof transportGuildConfigModel
+>;
+
 // Conversion from StringGuildConfigModel to GuildConfigModel.
-export const StrictGuildConfigModel = GuildConfigModel.extend({
+export const StoredGuildConfigModel = GuildConfigModel.extend({
   id: z.string().transform(BigInt),
   prefix: z.string().nullish(),
   joinMsg: z.string().nullish(),
@@ -76,3 +80,22 @@ export const StrictGuildConfigModel = GuildConfigModel.extend({
   maxMention: z.number().int().nullish(),
   disabledChannels: z.bigint().transform(BigInt).array(),
 });
+
+export type StoredGuildConfigModel = z.infer<typeof StoredGuildConfigModel>;
+
+export function getDefaultTransportGuildConfig(
+  id: string,
+): TransportGuildConfigModel {
+  return {
+    id,
+    joinMsgEnabled: true,
+    leaveMsgEnabled: true,
+    inviteGuard: true,
+    logMsgEnabled: true,
+    logModEnabled: true,
+    logMemberEnabled: true,
+    muteDmEnabled: true,
+    warnDmEnabled: true,
+    disabledChannels: [],
+  };
+}
