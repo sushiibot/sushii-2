@@ -11,7 +11,6 @@ import {
 import { ApiCreatedResponse } from '@nestjs/swagger';
 import { ZodValidationPipe } from '@anatine/zod-nestjs';
 import { GuildConfigsService } from './guild-configs.service';
-import { CreateGuildConfigDto } from './dto/create-guild-config.dto';
 import { UpdateGuildConfigDto } from './dto/update-guild-config.dto';
 import { GetGuildConfigResponseDto } from './dto/get-guild-config.dto';
 
@@ -19,11 +18,6 @@ import { GetGuildConfigResponseDto } from './dto/get-guild-config.dto';
 @UsePipes(ZodValidationPipe)
 export class GuildConfigsController {
   constructor(private readonly guildConfigsService: GuildConfigsService) {}
-
-  @Post()
-  create(@Body() createGuildConfigDto: CreateGuildConfigDto) {
-    return this.guildConfigsService.create(createGuildConfigDto);
-  }
 
   @Get(':id')
   @ApiCreatedResponse({
@@ -37,12 +31,12 @@ export class GuildConfigsController {
   update(
     @Param('id') id: string,
     @Body() updateGuildConfigDto: UpdateGuildConfigDto,
-  ) {
+  ): Promise<void> {
     return this.guildConfigsService.update(id, updateGuildConfigDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string): void {
     return this.guildConfigsService.remove(id);
   }
 }

@@ -5,6 +5,7 @@ import { GuildConfigsService } from './guild-configs.service';
 
 describe('GuildConfigsService', () => {
   let service: GuildConfigsService;
+  let prismaService: PrismaService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -12,6 +13,7 @@ describe('GuildConfigsService', () => {
     }).compile();
 
     service = module.get<GuildConfigsService>(GuildConfigsService);
+    prismaService = module.get<PrismaService>(PrismaService);
   });
 
   describe('get', () => {
