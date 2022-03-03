@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { getDefaultTransportGuildConfig } from './entities/guild-config.entity';
 import { GuildConfigsService } from './guild-configs.service';
 

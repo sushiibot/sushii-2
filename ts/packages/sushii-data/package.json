@@ -5,13 +5,21 @@
   "author": "",
   "private": true,
   "license": "AGPL-3.0-or-later",
+  "main": "dist/client.js",
+  "types": "dist/client.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "directory": "dist"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
     "build:proto": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=nestJs=true --ts_proto_opt=outputServices=grpc-js --ts_proto_opt=forceLong=long --ts_proto_out=. ./src/proto/**/*.proto",
     "build:prisma": "prisma generate",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
+    "start": "nest start | pino-pretty -c -t",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -34,6 +42,7 @@
     "@nestjs/swagger": "^5.2.0",
     "@prisma/client": "^3.10.0",
     "nestjs-pino": "^2.5.0",
+    "pino": "^7.8.0",
     "pino-http": "^6.6.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
@@ -54,6 +63,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^27.2.5",
+    "pino-pretty": "^7.5.2",
     "prettier": "^2.3.2",
     "prisma": "^3.10.0",
     "source-map-support": "^0.5.20",

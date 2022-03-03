@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { UpdateGuildConfigDto } from './dto/update-guild-config.dto';
 import {
   getDefaultTransportGuildConfig,

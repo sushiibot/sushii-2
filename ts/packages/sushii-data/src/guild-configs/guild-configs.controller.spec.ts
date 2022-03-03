@@ -5,7 +5,7 @@ import {
   StoredGuildConfigModel,
   transportGuildConfigModel,
 } from '../guild-configs/entities/guild-config.entity';
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 describe('GuildConfigsController', () => {
   let controller: GuildConfigsController;
