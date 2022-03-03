@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GuildConfigsController } from './guild-configs.controller';
 import { GuildConfigsService } from './guild-configs.service';
 import {
-  StoredGuildConfigModel,
-  transportGuildConfigModel,
+  fromTransportGuildConfigModel,
+  fromStoredGuildConfigModel,
 } from '../guild-configs/entities/guild-config.entity';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -27,7 +27,7 @@ describe('GuildConfigsController', () => {
 
   describe('update', () => {
     it('should update non-undefined fields', async () => {
-      const conf = transportGuildConfigModel.parse({
+      const conf = fromStoredGuildConfigModel.parse({
         id: BigInt(1234),
         prefix: undefined,
         joinMsg: undefined,
@@ -61,7 +61,7 @@ describe('GuildConfigsController', () => {
       // Nothing returned
       await expect(controller.update('1234', conf)).resolves.not.toThrow();
 
-      const prismaConf = StoredGuildConfigModel.parse(conf);
+      const prismaConf = fromTransportGuildConfigModel.parse(conf);
       expect(spy).toHaveBeenCalledWith({
         where: { id: BigInt('1234') },
         data: prismaConf,
@@ -69,7 +69,7 @@ describe('GuildConfigsController', () => {
     });
 
     it('should disallow updating id', async () => {
-      const conf = transportGuildConfigModel.parse({
+      const conf = fromStoredGuildConfigModel.parse({
         id: BigInt(1),
         prefix: undefined,
         joinMsg: undefined,

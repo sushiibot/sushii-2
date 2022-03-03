@@ -3,9 +3,9 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UpdateGuildConfigDto } from './dto/update-guild-config.dto';
 import {
   getDefaultTransportGuildConfig,
-  StoredGuildConfigModel,
+  fromTransportGuildConfigModel,
   TransportGuildConfigModel,
-  transportGuildConfigModel,
+  fromStoredGuildConfigModel,
 } from './entities/guild-config.entity';
 
 @Injectable()
@@ -22,7 +22,7 @@ export class GuildConfigsService {
     }
 
     // Converts prisma config to a string config
-    return transportGuildConfigModel.parse(conf);
+    return fromStoredGuildConfigModel.parse(conf);
   }
 
   async update(
@@ -35,7 +35,7 @@ export class GuildConfigsService {
 
     // Converts string config to prisma config
     const updatedConfStrict =
-      StoredGuildConfigModel.safeParse(updateGuildConfigDto);
+      fromTransportGuildConfigModel.safeParse(updateGuildConfigDto);
 
     if (!updatedConfStrict.success) {
       throw new HttpException('Invalid config', HttpStatus.BAD_REQUEST);

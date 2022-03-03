@@ -3,7 +3,7 @@ import ApiClient from "./client";
 describe("Client", () => {
   let client: ApiClient;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     client = new ApiClient("http://localhost:3000");
   });
 
