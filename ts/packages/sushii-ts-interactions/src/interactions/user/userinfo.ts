@@ -1,10 +1,11 @@
 import { SlashCommandBuilder, Embed } from "@discordjs/builders";
-import { CommandInteraction } from "discord.js";
+import { CacheType, CommandInteraction } from "discord.js";
 import Context from "../../context";
-import { SlashCommand } from "../command";
+import SlashCommandHandler from "../command";
 
-const cmd: SlashCommand = {
-  command: new SlashCommandBuilder()
+export default class UserinfoHandler extends SlashCommandHandler {
+  serverOnly = false;
+  command = new SlashCommandBuilder()
     .setName("userinfo")
     .setDescription("Get information about a user")
     .addUserOption((o) =>
@@ -14,8 +15,12 @@ const cmd: SlashCommand = {
           "The user to get information about, yourself if not provided"
         )
     )
-    .toJSON(),
-  handler: async (ctx: Context, interaction: CommandInteraction) => {
+    .toJSON();
+
+  async handler(
+    ctx: Context,
+    interaction: CommandInteraction<CacheType>
+  ): Promise<void> {
     const target = interaction.options.getUser("user") || interaction.user;
     const member = await interaction.guild?.members.fetch(target.id);
 
@@ -86,7 +91,5 @@ const cmd: SlashCommand = {
     await interaction.reply({
       embeds: [embed],
     });
-  },
-};
-
-export default cmd;
+  }
+}

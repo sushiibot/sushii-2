@@ -13,68 +13,32 @@ export type CheckResponse =
       message: string;
     };
 
-export default class InteractionHandler {
+export default abstract class InteractionHandler {
   /**
    * Required permissions for the **bot** to run the command, ie. ban members
    */
-  requiredBotPermissions?: Permissions;
+  readonly requiredBotPermissions?: Permissions;
 
   /**
    * Required permissions for the **user** to run the command
    */
-  requiredUserPermissions?: Permissions;
+  readonly requiredUserPermissions?: Permissions;
 
   /**
    * If the interaction should only be run in a server
    */
-  serverOnly: boolean;
+  readonly serverOnly: boolean = false;
 
   /**
    * Check function that will run before a command to see if it should be run.
+   * By default, this always passes.
    */
-  check: () => Promise<CheckResponse>;
+  async check(): Promise<CheckResponse> {
+    return { pass: true };
+  }
 
   /**
-   * Field for the actual handler function
+   * Interaction handler
    */
-  handler: (ctx: Context, interaction: Interaction) => Promise<void>;
-
-  constructor() {
-    this.serverOnly = false;
-    // Default to always pass check
-    this.check = async () => ({ pass: true });
-    this.handler = async () => {};
-  }
-
-  public setServerOnly(serverOnly: boolean): this {
-    this.serverOnly = serverOnly;
-
-    return this;
-  }
-
-  public setRequiredBotPermission(permissions: Permissions): this {
-    this.requiredBotPermissions = permissions;
-
-    return this;
-  }
-
-  public setRequiredUserPermission(permissions: Permissions): this {
-    this.requiredUserPermissions = permissions;
-
-    return this;
-  }
-
-  public setCheck(check: () => Promise<CheckResponse>): this {
-    this.check = check;
-
-    return this;
-  }
-
-  public setHandler(
-    handler: (ctx: Context, interaction: Interaction) => Promise<void>
-  ): this {
-    this.handler = handler;
-
-    return this;
-  }
+  abstract handler(ctx: Context, interaction: Interaction): Promise<void>;
 }

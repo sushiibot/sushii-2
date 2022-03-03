@@ -16,9 +16,11 @@
     "discord-api-types": "^0.27.2",
     "discord.js": "monbrey/discord.js#modals",
     "dotenv": "^16.0.0",
+    "node-fetch": "^3.2.1",
     "pino": "^7.8.0"
   },
   "devDependencies": {
+    "@sushiibot/sushii-data": "workspace:*",
     "@types/node": "^17.0.18",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.12.0",

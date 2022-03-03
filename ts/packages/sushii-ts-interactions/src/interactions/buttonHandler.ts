@@ -1,10 +1,13 @@
 import { ButtonInteraction } from "discord.js";
 import Context from "../context";
 
-export default interface ButtonHandler {
-  id: string;
+export default abstract class ButtonHandler {
+  abstract readonly buttonId: string;
   /**
    * Button submit handler function
    */
-  handleButton: (ctx: Context, interaction: ButtonInteraction) => Promise<void>;
+  abstract handleButton(
+    ctx: Context,
+    interaction: ButtonInteraction
+  ): Promise<void>;
 }

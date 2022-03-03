@@ -1,12 +1,12 @@
 import { ModalSubmitInteraction } from "discord.js";
 import Context from "../context";
 
-export default interface ModalHandler {
-  id: string;
+export default abstract class ModalHandler {
+  abstract readonly modalId: string;
   /**
    * Modal submit handler function
    */
-  handleSubmit: (
+  abstract handleModalSubmit: (
     ctx: Context,
     interaction: ModalSubmitInteraction
   ) => Promise<void>;
