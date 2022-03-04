@@ -17,7 +17,17 @@ export const fromStoredUserModel = UserModel.extend({
     .nullish(),
 });
 
-export type TransportUserModel = z.infer<typeof fromStoredUserModel>;
+export const TransportUser = UserModel.extend({
+  id: z.string(),
+  isPatron: z.boolean(),
+  patronEmoji: z.string().nullish(),
+  rep: z.string(),
+  fishies: z.string(),
+  lastRep: z.number().nullish(),
+  lastFishies: z.number().nullish(),
+});
+
+export type TransportUserModel = z.infer<typeof TransportUser>;
 
 export const fromTransportUserModel = UserModel.extend({
   id: z.bigint(),
