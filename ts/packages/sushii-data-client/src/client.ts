@@ -1,6 +1,8 @@
 import {
   TransportGuildConfig,
   TransportGuildConfigModel,
+  TransportUser,
+  TransportUserModel,
 } from "@sushiibot/sushii-data/src/client";
 import { Agent, AgentOptions } from "http";
 import fetch, { RequestInit, Response } from "node-fetch";
@@ -63,5 +65,16 @@ export default class ApiClient {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(config),
     });
+  }
+
+  /**
+   * Gets a user
+   *
+   * @param userId
+   * @returns {Promise<TransportUserModel>}
+   */
+  public async getUser(userId: string): Promise<TransportUserModel> {
+    const response = await this.fetch(`/users/${userId}`);
+    return TransportUser.parse(await response.json());
   }
 }
