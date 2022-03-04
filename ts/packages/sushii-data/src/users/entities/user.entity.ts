@@ -37,3 +37,13 @@ export const fromTransportUserModel = UserModel.extend({
 });
 
 export type StoredUserModel = z.infer<typeof fromTransportUserModel>;
+
+export function getDefaultTransportUserModel(id: string): TransportUserModel {
+  return {
+    id,
+    isPatron: false,
+    rep: '0',
+    fishies: '0',
+    profileData: {},
+  };
+}

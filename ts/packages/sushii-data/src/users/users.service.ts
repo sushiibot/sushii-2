@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import {
   fromStoredUserModel,
   fromTransportUserModel,
+  getDefaultTransportUserModel,
   TransportUserModel,
 } from './entities/user.entity';
 
@@ -17,7 +18,7 @@ export class UsersService {
     });
 
     if (!user) {
-      // return default user data
+      return getDefaultTransportUserModel(id);
     }
 
     return fromStoredUserModel.parse(user);
