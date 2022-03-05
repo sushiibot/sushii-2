@@ -13,9 +13,12 @@ import {
 import { ConfigI } from "../config";
 import Context from "../context";
 import log from "../logger";
-import ButtonHandler from "./buttonHandler";
-import { SlashCommand } from "./command";
-import ModalHandler from "./modalHandler";
+import {
+  ButtonHandler,
+  SlashCommandHandler,
+  InteractionHandler,
+  ModalHandler,
+} from "./handlers";
 
 export default class InteractionClient {
   /**
@@ -36,7 +39,7 @@ export default class InteractionClient {
   /**
    * Command handlers
    */
-  private commands: Collection<string, SlashCommand>;
+  private commands: Collection<string, SlashCommandHandler>;
 
   /**
    * Modal handlers. This is only for *pure* handlers, if modals require some
@@ -53,7 +56,7 @@ export default class InteractionClient {
   constructor(rest: REST, config: ConfigI) {
     this.rest = rest;
     this.config = config;
-    this.context = new Context();
+    this.context = new Context(config.dataApiURL);
     this.commands = new Collection();
     this.modalHandlers = new Collection();
     this.buttonHandlers = new Collection();
@@ -64,7 +67,7 @@ export default class InteractionClient {
    *
    * @param command SlashCommand to add
    */
-  public addCommand(command: SlashCommand): void {
+  public addCommand(command: SlashCommandHandler): void {
     this.commands.set(command.command.name, command);
   }
 
@@ -74,7 +77,7 @@ export default class InteractionClient {
    * @param modalHandler ModalHandler to add
    */
   public addModal(modalHandler: ModalHandler): void {
-    this.modalHandlers.set(modalHandler.id, modalHandler);
+    this.modalHandlers.set(modalHandler.modalId, modalHandler);
   }
 
   /**
@@ -83,7 +86,7 @@ export default class InteractionClient {
    * @param buttonHandler ButtonHandler to add
    */
   public addButton(buttonHandler: ButtonHandler): void {
-    this.buttonHandlers.set(buttonHandler.id, buttonHandler);
+    this.buttonHandlers.set(buttonHandler.buttonId, buttonHandler);
   }
 
   /**
@@ -209,7 +212,7 @@ export default class InteractionClient {
     log.info("received %s modal submit", interaction.customId);
 
     try {
-      await modalHandler.handleSubmit(this.context, interaction);
+      await modalHandler.handleModalSubmit(this.context, interaction);
     } catch (e) {
       log.error("error handling modal %s: %s", interaction.id, e);
     }

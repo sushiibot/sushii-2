@@ -19,7 +19,7 @@ async function main() {
   const rest = new REST({ version: "9" }).setToken(config.token);
 
   const interactionClient = new InteractionClient(rest, config);
-  interactionClient.addCommand(UserInfoCommand);
+  interactionClient.addCommand(new UserInfoCommand());
   interactionClient.addCommand(formSlashCommand);
   interactionClient.addModal(formModalHandler);
   interactionClient.addButton(formButtonHandler);

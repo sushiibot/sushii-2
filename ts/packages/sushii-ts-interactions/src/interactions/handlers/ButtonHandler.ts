@@ -1,5 +1,5 @@
 import { ButtonInteraction } from "discord.js";
-import Context from "../context";
+import Context from "../../context";
 
 export default abstract class ButtonHandler {
   abstract readonly buttonId: string;

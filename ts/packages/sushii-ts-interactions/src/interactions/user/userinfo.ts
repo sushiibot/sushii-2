@@ -1,7 +1,8 @@
 import { SlashCommandBuilder, Embed } from "@discordjs/builders";
 import { CacheType, CommandInteraction } from "discord.js";
 import Context from "../../context";
-import SlashCommandHandler from "../command";
+import { SlashCommandHandler } from "../handlers";
+import { getUserinfoEmbed } from "./userinfo.service";
 
 export default class UserinfoHandler extends SlashCommandHandler {
   serverOnly = false;
@@ -32,61 +33,7 @@ export default class UserinfoHandler extends SlashCommandHandler {
     // Force fetch to get banner
     await target.fetch(true);
 
-    let embed = new Embed()
-      .setAuthor({
-        name: authorName,
-        iconURL: target.displayAvatarURL({
-          dynamic: true,
-          size: 128,
-        }),
-        url: target.displayAvatarURL({
-          dynamic: true,
-          size: 4096,
-        }),
-      })
-      .setThumbnail(target.displayAvatarURL())
-      .setImage(
-        target.bannerURL({
-          dynamic: true,
-          size: 512,
-        })
-      )
-      .setFooter({
-        text: `ID: ${target.id}`,
-      });
-
-    // Creation times
-    embed = embed.addField({
-      name: "Account Created",
-      value: `<t:${target.createdTimestamp / 1000}:F> (<t:${
-        target.createdTimestamp / 1000
-      }:R>)`,
-    });
-
-    if (member) {
-      embed = embed.addField({
-        name: "Roles",
-        value: member.roles.cache.map((r) => `<@&${r.id}>`).join(" "),
-      });
-
-      if (member.joinedTimestamp) {
-        embed = embed.setColor(member.displayColor).addField({
-          name: "Joined Server",
-          value: `<t:${member.joinedTimestamp / 1000}:F> (<t:${
-            member.joinedTimestamp / 1000
-          }:R>)`,
-        });
-      }
-
-      if (member.premiumSinceTimestamp) {
-        embed = embed.addField({
-          name: "Boosting Since",
-          value: `<t:${member.premiumSinceTimestamp / 1000}:F> (<t:${
-            member.premiumSinceTimestamp / 1000
-          }:R>)`,
-        });
-      }
-    }
+    const embed = await getUserinfoEmbed(ctx, interaction, target, member);
 
     await interaction.reply({
       embeds: [embed],

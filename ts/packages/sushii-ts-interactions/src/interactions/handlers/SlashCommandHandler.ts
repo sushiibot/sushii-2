@@ -3,8 +3,8 @@ import {
   RESTPostAPIApplicationCommandsJSONBody,
 } from "discord-api-types/v9";
 import { CommandInteraction } from "discord.js";
-import Context from "../context";
-import InteractionHandler from "./interaction";
+import Context from "../../context";
+import InteractionHandler from "./InteractionHandler";
 
 export default abstract class SlashCommandHandler extends InteractionHandler {
   /**

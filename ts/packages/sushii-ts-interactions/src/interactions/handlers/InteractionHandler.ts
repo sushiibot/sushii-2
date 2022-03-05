@@ -1,5 +1,5 @@
 import { Interaction, Permissions } from "discord.js";
-import Context from "../context";
+import Context from "../../context";
 
 /**
  * Response of a command check, a message will only exist on pass = false
@@ -33,7 +33,10 @@ export default abstract class InteractionHandler {
    * Check function that will run before a command to see if it should be run.
    * By default, this always passes.
    */
-  async check(): Promise<CheckResponse> {
+  async check(
+    _ctx: Context,
+    _interaction: Interaction
+  ): Promise<CheckResponse> {
     return { pass: true };
   }
 
