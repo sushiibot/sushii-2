@@ -1,3 +1,11 @@
+/**
+ * Derived from discordjs/discord.js
+ *
+ * https://github.com/discordjs/discord.js/blob/stable/src/structures/CommandInteractionOptionResolver.js#L8
+ *
+ * License: https://github.com/discordjs/discord.js/blob/main/packages/discord.js/LICENSE
+ */
+
 import {
   APIApplicationCommandInteractionDataOption,
   APIChatInputApplicationCommandInteractionDataResolved,
@@ -5,24 +13,21 @@ import {
   APIApplicationCommandInteractionDataBasicOption,
   APIUser,
   APIAttachment,
-  APIChannel,
   APIRole,
-  APIGuildMember,
   APIInteractionDataResolvedChannel,
   APIInteractionDataResolvedGuildMember,
+  APIGuildMember,
+  APIChannel,
 } from "discord-api-types/v9";
 
 /**
  * A resolver for command interaction options.
  */
 export default class CommandInteractionOptionResolver {
-  private group: string | null;
-
-  private subcommand: string | null;
-
-  private hoistedOptions: APIApplicationCommandInteractionDataOption[];
-
-  private resolved: APIChatInputApplicationCommandInteractionDataResolved;
+  private readonly group: string | null;
+  private readonly subcommand: string | null;
+  private readonly hoistedOptions: APIApplicationCommandInteractionDataOption[];
+  private readonly resolved: APIChatInputApplicationCommandInteractionDataResolved;
 
   constructor(
     options: APIApplicationCommandInteractionDataOption[],
@@ -65,21 +70,6 @@ export default class CommandInteractionOptionResolver {
       this.subcommand = this.hoistedOptions[0].name;
       this.hoistedOptions = this.hoistedOptions[0].options ?? [];
     }
-
-    /**
-     * The interaction options array.
-     * @name CommandInteractionOptionResolver#data
-     * @type {ReadonlyArray<CommandInteractionOption>}
-     * @readonly
-     */
-    Object.defineProperty(this, "data", { value: Object.freeze([...options]) });
-
-    /**
-     * The interaction resolved data
-     * @name CommandInteractionOptionResolver#resolved
-     * @type {Readonly<CommandInteractionResolvedData>}
-     */
-    Object.defineProperty(this, "resolved", { value: Object.freeze(resolved) });
 
     this.resolved = resolved;
   }
@@ -177,31 +167,25 @@ export default class CommandInteractionOptionResolver {
   /**
    * Gets the selected subcommand.
    * @param {boolean} [required=true] Whether to throw an error if there is no subcommand.
-   * @returns {?string} The name of the selected subcommand, or null if not set and not required.
+   * @returns The name of the selected subcommand, or null if not set and not required.
    */
-  getSubcommand(required = true) {
-    if (required && !this.subcommand) {
-      throw new TypeError("COMMAND_INTERACTION_OPTION_NO_SUB_COMMAND");
-    }
+  getSubcommand(): string | null {
     return this.subcommand;
   }
 
   /**
    * Gets the selected subcommand group.
    * @param {boolean} [required=true] Whether to throw an error if there is no subcommand group.
-   * @returns {?string} The name of the selected subcommand group, or null if not set and not required.
+   * @returns The name of the selected subcommand group, or null if not set and not required.
    */
-  getSubcommandGroup(required = true) {
-    if (required && !this.group) {
-      throw new TypeError("COMMAND_INTERACTION_OPTION_NO_SUB_COMMANDgroup");
-    }
+  getSubcommandGroup(): string | null {
     return this.group;
   }
 
   /**
    * Gets a boolean option.
    * @param {string} name The name of the option.
-   * @returns {?boolean} The value of the option, or null if not set and not required.
+   * @returns The value of the option, or null if not set and not required.
    */
   getBoolean(name: string): boolean | undefined {
     return this.getTypedOptionValue(name, ApplicationCommandOptionType.Boolean);
@@ -210,44 +194,43 @@ export default class CommandInteractionOptionResolver {
   /**
    * Gets a channel option.
    * @param {string} name The name of the option.
-   * @returns {?(GuildChannel|ThreadChannel|APIChannel)}
-   * The value of the option, or null if not set and not required.
+   * @returns The value of the option, or null if not set and not required.
    */
-  getChannel(name: string) {
+  getChannel(name: string): APIInteractionDataResolvedChannel | undefined {
     return this.getTypedOptionValue(name, ApplicationCommandOptionType.Channel);
   }
 
   /**
    * Gets a string option.
    * @param {string} name The name of the option.
-   * @returns {?string} The value of the option, or null if not set and not required.
+   * @returns The value of the option, or null if not set and not required.
    */
-  getString(name: string) {
+  getString(name: string): string | undefined {
     return this.getTypedOptionValue(name, ApplicationCommandOptionType.String);
   }
 
   /**
    * Gets an integer option.
    * @param {string} name The name of the option.
-   * @returns {?number} The value of the option, or null if not set and not required.
+   * @returns The value of the option, or null if not set and not required.
    */
-  getInteger(name: string) {
+  getInteger(name: string): number | undefined {
     return this.getTypedOptionValue(name, ApplicationCommandOptionType.Integer);
   }
 
   /**
    * Gets a number option.
    * @param {string} name The name of the option.
-   * @returns {?number} The value of the option, or null if not set and not required.
+   * @returns The value of the option, or null if not set and not required.
    */
-  getNumber(name: string) {
+  getNumber(name: string): number | undefined {
     return this.getTypedOptionValue(name, ApplicationCommandOptionType.Number);
   }
 
   /**
    * Gets a user option.
    * @param {string} name The name of the option.
-   * @returns {?User} The value of the option, or null if not set and not required.
+   * @returns The value of the option, or null if not set and not required.
    */
   getUser(name: string): APIUser | undefined {
     return this.getTypedOptionValue(name, ApplicationCommandOptionType.User);
@@ -255,30 +238,40 @@ export default class CommandInteractionOptionResolver {
 
   /**
    * Gets a member option.
-   * @param {string} name The name of the option.
-   * @returns {?(GuildMember|APIGuildMember)}
-   * The value of the option, or null if not set and not required.
+   * @param name The name of the option.
+   * @returns The value of the option, or null if not set and not required.
    */
-  getMember(name: string) {
-    return this.getTypedOptionValue(name, ApplicationCommandOptionType.User);
+  getMember(name: string): APIInteractionDataResolvedGuildMember | undefined {
+    const user = this.getTypedOptionValue(
+      name,
+      ApplicationCommandOptionType.User
+    );
+
+    if (!user) {
+      return;
+    }
+
+    return this.resolved.members?.[user.id];
   }
 
   /**
    * Gets a role option.
-   * @param {string} name The name of the option.
-   * @returns {?(Role|APIRole)} The value of the option, or null if not set and not required.
+   * @param name The name of the option.
+   * @returns The value of the option, or null if not set and not required.
    */
-  getRole(name: string) {
+  getRole(name: string): APIRole | undefined {
     return this.getTypedOptionValue(name, ApplicationCommandOptionType.Role);
   }
 
   /**
    * Gets a mentionable option.
-   * @param {string} name The name of the option.
-   * @returns {?(User|GuildMember|APIGuildMember|Role|APIRole)}
+   * @param  name The name of the option.
+   * @returns
    * The value of the option, or null if not set and not required.
    */
-  getMentionable(name: string) {
+  getMentionable(
+    name: string
+  ): APIUser | APIRole | APIInteractionDataResolvedGuildMember | undefined {
     return this.getTypedOptionValue(
       name,
       ApplicationCommandOptionType.Mentionable
@@ -291,9 +284,10 @@ export default class CommandInteractionOptionResolver {
    * @returns {?(Message|APIMessage)}
    * The value of the option, or null if not set and not required.
    */
-  getMessage(name: string) {
-    return this.getTypedOptionValue(name, "_MESSAGE");
-  }
+  //TODO: support message interactions
+  // getMessage(name: string) {
+  //   return this.getTypedOptionValue(name, "_MESSAGE");
+  // }
 
   /**
    * Gets the focused option.
