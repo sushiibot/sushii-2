@@ -3,6 +3,7 @@
 **/.htpasswd*
 **/acme
 **/docker
+**/.yarn
 
 **/sqlx-data.*.json
 
