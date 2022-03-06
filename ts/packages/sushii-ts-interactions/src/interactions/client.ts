@@ -3,10 +3,21 @@ import { REST } from "@discordjs/rest";
 import {
   Routes,
   RESTPostAPIApplicationCommandsJSONBody,
+  GatewayInteractionCreateDispatch,
+  InteractionType,
+  GatewayDispatchEvents,
+  GatewayOpcodes,
+  APIInteraction,
+  APIChatInputApplicationCommandInteractionData,
+  APIApplicationCommandInteraction,
+  ApplicationCommandType,
+  APIChatInputApplicationCommandInteraction,
 } from "discord-api-types/v9";
 import {
   ButtonInteraction,
   CommandInteraction,
+  CommandInteractionOptionResolver,
+  IntegrationApplication,
   Interaction,
   ModalSubmitInteraction,
 } from "discord.js";
@@ -19,6 +30,7 @@ import {
   InteractionHandler,
   ModalHandler,
 } from "./handlers";
+import { AMQPMessage } from "@cloudamqp/amqp-client";
 
 export default class InteractionClient {
   /**
@@ -245,4 +257,53 @@ export default class InteractionClient {
       log.error("error handling button %s: %o", interaction.id, e);
     }
   }
+
+  /**
+   * Handles a raw gateway interaction from AMQP
+   *
+   * @param msg AMQP message
+   * @returns
+   */
+  public async handleAMQPMessage(msg: AMQPMessage): Promise<void> {
+    const msgString = msg.bodyToString();
+    if (!msgString) {
+      log.error("received empty AMQP message");
+      return;
+    }
+
+    const interaction = JSON.parse(msgString);
+    if (!isGatewayInteractionCreateDispatch(interaction)) {
+      log.debug("received non-interaction AMQP message");
+      return;
+    }
+
+    this.handleAPIInteraction(interaction.d);
+  }
+
+  private async handleAPIInteraction(interaction: APIInteraction) {
+    if (interaction.type === InteractionType.ApplicationCommand) {
+      // Slash commands
+      if (interaction.data.type === ApplicationCommandType.ChatInput) {
+        return this.handleCommandInteraction(interaction);
+      }
+
+      // TODO: Handle user / message command types
+    }
+  }
+
+  private async handleCommandInteraction(
+    interaction: APIChatInputApplicationCommandInteraction
+  ) {
+    const commandName = interaction.data.name;
+  }
+}
+
+function isGatewayInteractionCreateDispatch(
+  msg: any
+): msg is GatewayInteractionCreateDispatch {
+  return (
+    msg &&
+    msg.op === GatewayOpcodes.Dispatch &&
+    msg.t === GatewayDispatchEvents.InteractionCreate
+  );
 }

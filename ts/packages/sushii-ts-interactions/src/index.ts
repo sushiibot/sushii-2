@@ -12,6 +12,9 @@ import {
 import { Config } from "./config";
 import i18next from "i18next";
 import Backend from "i18next-fs-backend";
+import FishyCommand from "./interactions/user/fishy";
+import AmqpGateway from "./gateway/amqp";
+import { AMQPClient } from "@cloudamqp/amqp-client";
 
 async function main() {
   dotenv.config();
@@ -26,33 +29,31 @@ async function main() {
   });
 
   const config = new Config();
-  const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+  const amqpClient = new AMQPClient(config.amqpUrl);
+  const rabbitGatewayClient = new AmqpGateway(amqpClient, config);
   const rest = new REST({ version: "9" }).setToken(config.token);
 
   const interactionClient = new InteractionClient(rest, config);
   interactionClient.addCommand(new UserInfoCommand());
   interactionClient.addCommand(new FormSlashCommand());
+  interactionClient.addCommand(new FishyCommand());
   interactionClient.addModal(formModalHandler);
   interactionClient.addButton(formButtonHandler);
 
   await interactionClient.register();
 
-  client.on("interactionCreate", (interaction) =>
-    interactionClient.handleInteraction(interaction)
-  );
-
-  log.info("starting client");
-  client.login(config.token);
+  log.info("connecting to rabbitmq for gateway events");
+  rabbitGatewayClient.connect(interactionClient.handleAMQPMessage);
 
   process.on("SIGINT", () => {
     log.info("cleaning up");
 
-    client.destroy();
+    rabbitGatewayClient.stop();
     log.info("bye");
     process.exit();
   });
 }
 
 main().catch((e) => {
-  log.error("fatal error: %o", e);
+  log.error(e, "fatal error rip");
 });

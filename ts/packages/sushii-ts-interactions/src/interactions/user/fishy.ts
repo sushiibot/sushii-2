@@ -5,7 +5,7 @@ import { SlashCommandHandler } from "../handlers";
 import { fishyForUser } from "./fishy.service";
 import i18next from "i18next";
 
-export default class FishyHandler extends SlashCommandHandler {
+export default class FishyCommand extends SlashCommandHandler {
   serverOnly = true;
   command = new SlashCommandBuilder()
     .setName("fishy")
