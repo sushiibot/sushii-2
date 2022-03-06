@@ -13,9 +13,7 @@ import {
 } from "discord.js";
 import { ButtonStyle } from "discord-api-types/v9";
 import Context from "../../context";
-import { SlashCommand } from "../command";
-import ModalHandler from "../modalHandler";
-import ButtonHandler from "../buttonHandler";
+import { SlashCommandHandler, ModalHandler, ButtonHandler } from "../handlers";
 
 const APPLY_BUTTON_ID = "button:apply";
 const MODAL_ID = "form:";
@@ -24,8 +22,8 @@ const AGE_CUSTOM_ID = "ageTextInput";
 const TIMEZONE_CUSTOM_ID = "timezoneTextInput";
 const OTHER_MOD_CUSTOM_ID = "modTextInput";
 
-export const formSlashCommand: SlashCommand = {
-  command: new SlashCommandBuilder()
+export class FormSlashCommand extends SlashCommandHandler {
+  command = new SlashCommandBuilder()
     .setName("modapply")
     .setDescription("Apply for moderator")
     .addStringOption((o) =>
@@ -38,8 +36,9 @@ export const formSlashCommand: SlashCommand = {
           "Channel to send this button to, defaults to the current channel"
         )
     )
-    .toJSON(),
-  handler: async (ctx: Context, interaction: CommandInteraction) => {
+    .toJSON();
+
+  async handler(ctx: Context, interaction: CommandInteraction): Promise<void> {
     const targetChannel =
       interaction.options.getChannel("channel") || interaction.channel;
 
@@ -67,11 +66,11 @@ export const formSlashCommand: SlashCommand = {
       content: "Form created!",
       ephemeral: true,
     });
-  },
-};
+  }
+}
 
 export const formButtonHandler: ButtonHandler = {
-  id: APPLY_BUTTON_ID,
+  buttonId: APPLY_BUTTON_ID,
   handleButton: async (ctx: Context, interaction: ButtonInteraction) => {
     const ageTextInput = new TextInputComponent()
       .setStyle("SHORT")
@@ -109,8 +108,11 @@ export const formButtonHandler: ButtonHandler = {
 };
 
 export const formModalHandler: ModalHandler = {
-  id: MODAL_ID,
-  handleSubmit: async (ctx: Context, interaction: ModalSubmitInteraction) => {
+  modalId: MODAL_ID,
+  handleModalSubmit: async (
+    ctx: Context,
+    interaction: ModalSubmitInteraction
+  ) => {
     const age = interaction.fields.getTextInputValue(AGE_CUSTOM_ID);
     const tz = interaction.fields.getTextInputValue(TIMEZONE_CUSTOM_ID);
     const otherMod = interaction.fields.getTextInputValue(OTHER_MOD_CUSTOM_ID);

@@ -1,0 +1,5 @@
+{
+  "fishy": {
+    "caught": "You caught a {{caughtType}} for {{username}} worth {{caughtAmount}} fishies!"
+  }
+}

@@ -6,13 +6,24 @@ import InteractionClient from "./interactions/client";
 import UserInfoCommand from "./interactions/user/userinfo";
 import {
   formModalHandler,
-  formSlashCommand,
+  FormSlashCommand,
   formButtonHandler,
 } from "./interactions/form/form";
 import { Config } from "./config";
+import i18next from "i18next";
+import Backend from "i18next-fs-backend";
 
 async function main() {
   dotenv.config();
+
+  await i18next.use(Backend).init({
+    fallbackLng: "en",
+    ns: ["commands"],
+    defaultNS: "commands",
+    backend: {
+      loadPath: "/locales/{{lng}}/{{ns}}.json",
+    },
+  });
 
   const config = new Config();
   const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
@@ -20,7 +31,7 @@ async function main() {
 
   const interactionClient = new InteractionClient(rest, config);
   interactionClient.addCommand(new UserInfoCommand());
-  interactionClient.addCommand(formSlashCommand);
+  interactionClient.addCommand(new FormSlashCommand());
   interactionClient.addModal(formModalHandler);
   interactionClient.addButton(formButtonHandler);
 

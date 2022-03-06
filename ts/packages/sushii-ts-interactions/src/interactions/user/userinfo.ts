@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, Embed } from "@discordjs/builders";
+import { SlashCommandBuilder } from "@discordjs/builders";
 import { CacheType, CommandInteraction } from "discord.js";
 import Context from "../../context";
 import { SlashCommandHandler } from "../handlers";
