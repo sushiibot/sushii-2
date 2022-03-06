@@ -2,7 +2,14 @@
   "name": "@sushiibot/sushii-data-client",
   "packageManager": "yarn@3.2.0",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/lib.js",
+  "types": "dist/lib.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "directory": "dist"
+  },
   "license": "AGPL-3.0-or-later",
   "scripts": {
     "test": "jest",
