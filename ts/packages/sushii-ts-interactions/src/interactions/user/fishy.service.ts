@@ -16,7 +16,7 @@ export async function fishyForUser(
   _interaction: CommandInteraction<CacheType>,
   user: User
 ): Promise<FishyResponse> {
-  const dbUser = await ctx.api.getUser(user.id);
+  const dbUser = await ctx.sushiiAPI.getUser(user.id);
 
   // Get new fishy count
   const caughtType = getRandomCatchable();

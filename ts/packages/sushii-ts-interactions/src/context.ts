@@ -1,9 +1,16 @@
 import { ApiClient } from "@sushiibot/sushii-data-client";
+import CDNClient from "./cdn";
+import { ConfigI } from "./config";
+import RESTClient from "./rest";
 
 export default class Context {
-  api: ApiClient;
+  public readonly sushiiAPI: ApiClient;
+  public readonly REST: RESTClient;
+  public readonly CDN: CDNClient;
 
-  constructor(endpoint: string) {
-    this.api = new ApiClient(endpoint);
+  constructor(config: ConfigI) {
+    this.sushiiAPI = new ApiClient(config.dataApiURL);
+    this.REST = new RESTClient(config);
+    this.CDN = new CDNClient();
   }
 }

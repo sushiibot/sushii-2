@@ -1,7 +1,17 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
+import {
+  isDMInteraction,
+  isGuildInteraction,
+} from "discord-api-types/utils/v9";
+import {
+  APIChatInputApplicationCommandDMInteraction,
+  APIChatInputApplicationCommandGuildInteraction,
+  APIChatInputApplicationCommandInteraction,
+} from "discord-api-types/v9";
 import { CacheType, CommandInteraction } from "discord.js";
 import Context from "../../context";
 import { SlashCommandHandler } from "../handlers";
+import CommandInteractionOptionResolver from "../resolver";
 import { getUserinfoEmbed } from "./userinfo.service";
 
 export default class UserinfoHandler extends SlashCommandHandler {
@@ -20,22 +30,35 @@ export default class UserinfoHandler extends SlashCommandHandler {
 
   async handler(
     ctx: Context,
-    interaction: CommandInteraction<CacheType>
+    interaction: APIChatInputApplicationCommandInteraction
   ): Promise<void> {
-    const target = interaction.options.getUser("user") || interaction.user;
-    const member = await interaction.guild?.members.fetch(target.id);
+    const options = new CommandInteractionOptionResolver(
+      interaction.data.options,
+      interaction.data.resolved
+    );
 
-    let authorName = target.username;
-    if (member?.nickname) {
-      authorName = `${target.username} ~ ${member.nickname}`;
+    let target = options.getUser("user");
+    let member;
+
+    if (isGuildInteraction(interaction)) {
+      if (!target) {
+        target = interaction.member.user;
+      }
+
+      member = await ctx.REST.getMember(interaction.guild_id, target.id);
+    } else if (isDMInteraction(interaction)) {
+      if (!target) {
+        target = interaction.user;
+      }
     }
 
-    // Force fetch to get banner
-    await target.fetch(true);
+    if (!target) {
+      throw new Error("No target set, should be unreachable");
+    }
 
     const embed = await getUserinfoEmbed(ctx, interaction, target, member);
 
-    await interaction.reply({
+    await ctx.REST.interactionReplyMsg(interaction.id, interaction.token, {
       embeds: [embed],
     });
   }

@@ -30,8 +30,8 @@ export default class CommandInteractionOptionResolver {
   private readonly resolved: APIChatInputApplicationCommandInteractionDataResolved;
 
   constructor(
-    options: APIApplicationCommandInteractionDataOption[],
-    resolved: APIChatInputApplicationCommandInteractionDataResolved
+    options: APIApplicationCommandInteractionDataOption[] = [],
+    resolved: APIChatInputApplicationCommandInteractionDataResolved = {}
   ) {
     /**
      * The name of the subcommand group.

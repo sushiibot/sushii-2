@@ -31,6 +31,10 @@ import {
   ModalHandler,
 } from "./handlers";
 import { AMQPMessage } from "@cloudamqp/amqp-client";
+import {
+  isAPIChatInputApplicationCommandInteraction,
+  isGatewayInteractionCreateDispatch,
+} from "../utils/interactionTypeGuards";
 
 export default class InteractionClient {
   /**
@@ -68,7 +72,7 @@ export default class InteractionClient {
   constructor(rest: REST, config: ConfigI) {
     this.rest = rest;
     this.config = config;
-    this.context = new Context(config.dataApiURL);
+    this.context = new Context(config);
     this.commands = new Collection();
     this.modalHandlers = new Collection();
     this.buttonHandlers = new Collection();
@@ -281,11 +285,8 @@ export default class InteractionClient {
   }
 
   private async handleAPIInteraction(interaction: APIInteraction) {
-    if (interaction.type === InteractionType.ApplicationCommand) {
-      // Slash commands
-      if (interaction.data.type === ApplicationCommandType.ChatInput) {
-        return this.handleCommandInteraction(interaction);
-      }
+    if (isAPIChatInputApplicationCommandInteraction(interaction)) {
+      return this.handleCommandInteraction(interaction);
 
       // TODO: Handle user / message command types
     }
@@ -293,17 +294,5 @@ export default class InteractionClient {
 
   private async handleCommandInteraction(
     interaction: APIChatInputApplicationCommandInteraction
-  ) {
-    const commandName = interaction.data.name;
-  }
-}
-
-function isGatewayInteractionCreateDispatch(
-  msg: any
-): msg is GatewayInteractionCreateDispatch {
-  return (
-    msg &&
-    msg.op === GatewayOpcodes.Dispatch &&
-    msg.t === GatewayDispatchEvents.InteractionCreate
-  );
+  ) {}
 }

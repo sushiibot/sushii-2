@@ -4,6 +4,8 @@ import {
   RESTPostAPIInteractionCallbackJSONBody,
   APIInteractionResponseCallbackData,
   InteractionResponseType,
+  RESTGetAPIUserResult,
+  RESTGetAPIGuildMemberResult,
 } from "discord-api-types/v9";
 import { ConfigI } from "./config";
 
@@ -16,19 +18,38 @@ export default class RESTClient {
     });
   }
 
-  public async interactionReplyMsg(msg: APIInteractionResponseCallbackData) {
-    await this.interactionCallback({
+  public async interactionReplyMsg(
+    interactionId: string,
+    interactionToken: string,
+    msg: APIInteractionResponseCallbackData
+  ) {
+    await this.interactionCallback(interactionId, interactionToken, {
       type: InteractionResponseType.ChannelMessageWithSource,
       data: msg,
     });
   }
 
   public async interactionCallback(
+    interactionId: string,
+    interactionToken: string,
     payload: RESTPostAPIInteractionCallbackJSONBody
   ) {
     await this.rest.post(
-      Routes.applicationCommands(this.config.applicationId),
+      Routes.interactionCallback(interactionId, interactionToken),
       { body: payload }
     );
+  }
+
+  public getUser(userId: string): Promise<RESTGetAPIUserResult> {
+    return this.rest.get(Routes.user(userId)) as Promise<RESTGetAPIUserResult>;
+  }
+
+  public getMember(
+    guildId: string,
+    userId: string
+  ): Promise<RESTGetAPIGuildMemberResult> {
+    return this.rest.get(
+      Routes.guildMember(guildId, userId)
+    ) as Promise<RESTGetAPIGuildMemberResult>;
   }
 }

@@ -1,4 +1,4 @@
-import { Interaction, Permissions } from "discord.js";
+import { APIInteraction, Permissions } from "discord-api-types/v9";
 import Context from "../../context";
 
 /**
@@ -35,7 +35,7 @@ export default abstract class InteractionHandler {
    */
   async check(
     _ctx: Context,
-    _interaction: Interaction
+    _interaction: APIInteraction
   ): Promise<CheckResponse> {
     return { pass: true };
   }
@@ -43,5 +43,5 @@ export default abstract class InteractionHandler {
   /**
    * Interaction handler
    */
-  abstract handler(ctx: Context, interaction: Interaction): Promise<void>;
+  abstract handler(ctx: Context, interaction: APIInteraction): Promise<void>;
 }

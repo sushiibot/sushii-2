@@ -1,73 +1,66 @@
 import { Embed } from "@discordjs/builders";
-import { CacheType, CommandInteraction, GuildMember, User } from "discord.js";
+import {
+  APIChatInputApplicationCommandInteraction,
+  APIGuildMember,
+  APIUser,
+} from "discord-api-types/v9";
 import Context from "../../context";
+import { getCreatedTimestampSeconds } from "../../utils/snowflake";
 
 export async function getUserinfoEmbed(
   ctx: Context,
-  interaction: CommandInteraction<CacheType>,
-  user: User,
-  member: GuildMember | undefined
+  _interaction: APIChatInputApplicationCommandInteraction,
+  user: APIUser,
+  member: APIGuildMember | undefined
 ): Promise<Embed> {
   let authorName = user.username;
-  if (member?.nickname) {
-    authorName = `${user.username} ~ ${member.nickname}`;
+  if (member?.nick) {
+    authorName = `${user.username} ~ ${member.nick}`;
   }
-
-  // Force fetch to get banner
-  await user.fetch(true);
 
   let embed = new Embed()
     .setAuthor({
       name: authorName,
-      iconURL: user.displayAvatarURL({
-        dynamic: true,
-        size: 128,
-      }),
-      url: user.displayAvatarURL({
-        dynamic: true,
-        size: 4096,
-      }),
+      iconURL: ctx.CDN.userFaceURL(user),
+      url: ctx.CDN.userFaceURL(user),
     })
-    .setThumbnail(user.displayAvatarURL())
-    .setImage(
-      user.bannerURL({
-        dynamic: true,
-        size: 512,
-      })
-    )
+    .setThumbnail(ctx.CDN.userFaceURL(user))
+    // Fine if they don't have banner
+    .setImage(ctx.CDN.userBannerURL(user))
     .setFooter({
       text: `ID: ${user.id}`,
     });
 
+  const createdTimestamp = getCreatedTimestampSeconds(user.id);
+
   // Creation times
   embed = embed.addField({
     name: "Account Created",
-    value: `<t:${user.createdTimestamp / 1000}:F> (<t:${
-      user.createdTimestamp / 1000
-    }:R>)`,
+    value: `<t:${createdTimestamp}:F> (<t:${createdTimestamp}:R>)`,
   });
 
   if (member) {
-    embed = embed.addField({
-      name: "Roles",
-      value: member.roles.cache.map((r) => `<@&${r.id}>`).join(" "),
-    });
-
-    if (member.joinedTimestamp) {
-      embed = embed.setColor(member.displayColor).addField({
+    const joinedTimestamp = getCreatedTimestampSeconds(member.joined_at);
+    embed = embed
+      .addField({
+        name: "Roles",
+        value: member.roles.map((id) => `<@&${id}>`).join(" "),
+      })
+      // TODO: Display colour requires guild roles to be cached
+      // .setColor(member.displayColor)
+      .addField({
         name: "Joined Server",
-        value: `<t:${member.joinedTimestamp / 1000}:F> (<t:${
-          member.joinedTimestamp / 1000
-        }:R>)`,
+        value: `<t:${joinedTimestamp}:F> (<t:${joinedTimestamp}:R>)`,
       });
-    }
 
-    if (member.premiumSinceTimestamp) {
+    if (member.premium_since) {
+      const premiumSinceTimestamp = getCreatedTimestampSeconds(
+        member.premium_since
+      );
+
       embed = embed.addField({
         name: "Boosting Since",
-        value: `<t:${member.premiumSinceTimestamp / 1000}:F> (<t:${
-          member.premiumSinceTimestamp / 1000
-        }:R>)`,
+        value: `<t:${premiumSinceTimestamp}:F> (<t:${premiumSinceTimestamp}:R>)`,
       });
     }
   }
