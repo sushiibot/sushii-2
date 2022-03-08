@@ -18,6 +18,7 @@ import {
   APIInteractionDataResolvedGuildMember,
   APIGuildMember,
   APIChannel,
+  ApplicationCommandType,
 } from "discord-api-types/v9";
 
 /**
@@ -83,41 +84,6 @@ export default class CommandInteractionOptionResolver {
     return this.hoistedOptions.find((opt) => opt.name === name);
   }
 
-  private getTypedOptionValue(
-    name: string,
-    type: ApplicationCommandOptionType.Boolean
-  ): boolean | undefined;
-  private getTypedOptionValue(
-    name: string,
-    type: ApplicationCommandOptionType.User
-  ): APIUser | undefined;
-  private getTypedOptionValue(
-    name: string,
-    type: ApplicationCommandOptionType.Attachment
-  ): APIAttachment | undefined;
-  private getTypedOptionValue(
-    name: string,
-    type: ApplicationCommandOptionType.Channel
-  ): APIInteractionDataResolvedChannel | undefined;
-  private getTypedOptionValue(
-    name: string,
-    type: ApplicationCommandOptionType.Mentionable
-  ): APIUser | APIRole | APIInteractionDataResolvedGuildMember | undefined;
-  private getTypedOptionValue(
-    name: string,
-    type: ApplicationCommandOptionType.Role
-  ): APIRole | undefined;
-  private getTypedOptionValue(
-    name: string,
-    type: ApplicationCommandOptionType.String
-  ): string | undefined;
-  private getTypedOptionValue(
-    name: string,
-    type:
-      | ApplicationCommandOptionType.Integer
-      | ApplicationCommandOptionType.Number
-  ): number | undefined;
-
   /**
    * Gets an option by name and property and checks its type.
    * @param {string} name The name of the option.
@@ -127,10 +93,10 @@ export default class CommandInteractionOptionResolver {
    * @returns {?CommandInteractionOption} The option, if found.
    * @private
    */
-  private getTypedOptionValue(
+  private getTypedOptionValue<T extends ApplicationCommandOptionType>(
     name: string,
-    type: ApplicationCommandOptionType
-  ) {
+    type: T
+  ): OptionValue<T> | undefined {
     const option = this.get(name);
     if (!option) {
       return;
@@ -146,22 +112,20 @@ export default class CommandInteractionOptionResolver {
 
     switch (option.type) {
       case ApplicationCommandOptionType.User:
-        return this.resolved.users?.[option.value];
+        return this.resolved.users?.[option.value] as OptionValue<T>;
       case ApplicationCommandOptionType.Role:
-        return this.resolved.roles?.[option.value];
+        return this.resolved.roles?.[option.value] as OptionValue<T>;
       case ApplicationCommandOptionType.Channel:
-        return this.resolved.channels?.[option.value];
+        return this.resolved.channels?.[option.value] as OptionValue<T>;
       case ApplicationCommandOptionType.Mentionable:
-        return (
-          this.resolved.members?.[option.value] ||
+        return (this.resolved.members?.[option.value] ||
           this.resolved.users?.[option.value] ||
-          this.resolved.roles?.[option.value]
-        );
+          this.resolved.roles?.[option.value]) as OptionValue<T>;
       case ApplicationCommandOptionType.Attachment:
-        return this.resolved.attachments?.[option.value];
+        return this.resolved.attachments?.[option.value] as OptionValue<T>;
     }
 
-    return option.value;
+    return option.value as OptionValue<T>;
   }
 
   /**
@@ -312,3 +276,24 @@ function isDataBasicOption(
     option.type !== ApplicationCommandOptionType.SubcommandGroup
   );
 }
+
+type OptionValue<T extends ApplicationCommandOptionType> =
+  T extends ApplicationCommandOptionType.Boolean
+    ? boolean
+    : T extends ApplicationCommandOptionType.Channel
+    ? APIInteractionDataResolvedChannel
+    : T extends
+        | ApplicationCommandOptionType.Integer
+        | ApplicationCommandOptionType.Number
+    ? number
+    : T extends ApplicationCommandOptionType.Role
+    ? APIRole
+    : T extends ApplicationCommandOptionType.User
+    ? APIUser
+    : T extends ApplicationCommandOptionType.String
+    ? string
+    : T extends ApplicationCommandOptionType.Mentionable
+    ? APIUser | APIRole | APIInteractionDataResolvedGuildMember
+    : T extends ApplicationCommandOptionType.Attachment
+    ? APIAttachment
+    : never;
