@@ -1,0 +1,19 @@
+---
+- name: get cni plugins archive
+  become: no
+  get_url:
+    url: https://github.com/containernetworking/plugins/releases/download/v1.1.0/cni-plugins-linux-amd64-v1.1.0.tgz
+    dest: ~/cni-plugins.tgz
+
+- name: ensure /opt/cni/bin/ directory exists
+  become: yes
+  file:
+    path: /opt/cni/bin/
+    state: directory
+    owner: root
+
+- name: extract cni
+  become: yes
+  shell: tar -C /opt/cni/bin -xzf cni-plugins.tgz
+  args:
+    creates: /opt/cni/bin/cni-plugins

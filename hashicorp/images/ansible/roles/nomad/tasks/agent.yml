@@ -1,0 +1,21 @@
+---
+
+- name: nomad service definition 
+  become: yes
+  copy:
+    src: nomad.service
+    dest: /etc/systemd/system/nomad.service
+    mode: '0640'
+    
+- name: ensure /etc/nomad.d/ directory exists
+  become: yes
+  file:
+    path: /etc/nomad.d/
+    state: directory
+
+- name: enable nomad service
+  systemd:
+    state: restarted
+    enabled: yes
+    name: nomad
+    daemon_reload: yes

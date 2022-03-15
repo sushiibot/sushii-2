@@ -1,0 +1,9 @@
+---
+- name: Install consul
+  import_tasks: install.yml
+
+- name: Setup consul agent
+  import_tasks: agent.yml
+
+- name: Add consul DNS
+  import_tasks: dnsmasq.yml
