@@ -3,41 +3,29 @@ import { REST } from "@discordjs/rest";
 import {
   Routes,
   RESTPostAPIApplicationCommandsJSONBody,
-  GatewayInteractionCreateDispatch,
-  InteractionType,
-  GatewayDispatchEvents,
-  GatewayOpcodes,
   APIInteraction,
-  APIChatInputApplicationCommandInteractionData,
-  APIApplicationCommandInteraction,
-  ApplicationCommandType,
   APIChatInputApplicationCommandInteraction,
-  APIMessageButtonInteractionData,
   APIModalSubmitInteraction,
   APIMessageComponentInteraction,
+  InteractionType,
+  ApplicationCommandType,
 } from "discord-api-types/v9";
-import {
-  ButtonInteraction,
-  CommandInteraction,
-  CommandInteractionOptionResolver,
-  IntegrationApplication,
-  Interaction,
-  ModalSubmitInteraction,
-} from "discord.js";
 import { ConfigI } from "../config";
 import Context from "../context";
 import log from "../logger";
-import {
-  ButtonHandler,
-  SlashCommandHandler,
-  InteractionHandler,
-  ModalHandler,
-} from "./handlers";
+import { ButtonHandler, SlashCommandHandler, ModalHandler } from "./handlers";
 import { AMQPMessage } from "@cloudamqp/amqp-client";
 import {
   isAPIChatInputApplicationCommandInteraction,
   isGatewayInteractionCreateDispatch,
 } from "../utils/interactionTypeGuards";
+import {
+  isChatInputApplicationCommandInteraction,
+  isContextMenuApplicationCommandInteraction,
+  isInteractionButton,
+  isMessageComponentButtonInteraction,
+  isMessageComponentInteraction,
+} from "discord-api-types/utils/v9";
 
 export default class InteractionClient {
   /**
@@ -281,12 +269,28 @@ export default class InteractionClient {
   }
 
   private async handleAPIInteraction(interaction: APIInteraction) {
-    if (isAPIChatInputApplicationCommandInteraction(interaction)) {
-      return this.handleInteractionCommand(interaction);
+    if (interaction.type === InteractionType.ApplicationCommand) {
+      if (isChatInputApplicationCommandInteraction(interaction)) {
+        return this.handleInteractionCommand(interaction);
+      }
 
-      // TODO: Handle user / message command types
+      if (interaction.data.type === ApplicationCommandType.User) {
+        // TODO: Handle user commands
+      }
+
+      if (interaction.data.type === ApplicationCommandType.Message) {
+        // TODO: Handle message commands
+      }
     }
 
-    // TODO: Handle modal, buttons
+    if (interaction.type === InteractionType.MessageComponent) {
+      if (isMessageComponentButtonInteraction(interaction)) {
+        return this.handleButtonSubmit(interaction);
+      }
+    }
+
+    if (interaction.type === InteractionType.ModalSubmit) {
+      return this.handleModalSubmit(interaction);
+    }
   }
 }
