@@ -1,4 +1,4 @@
-import { ModalSubmitInteraction } from "discord.js";
+import { APIModalSubmitInteraction } from "discord-api-types/v9";
 import Context from "../../context";
 
 export default abstract class ModalHandler {
@@ -8,6 +8,6 @@ export default abstract class ModalHandler {
    */
   abstract handleModalSubmit: (
     ctx: Context,
-    interaction: ModalSubmitInteraction
+    interaction: APIModalSubmitInteraction
   ) => Promise<void>;
 }

@@ -12,6 +12,9 @@ import {
   APIApplicationCommandInteraction,
   ApplicationCommandType,
   APIChatInputApplicationCommandInteraction,
+  APIMessageButtonInteractionData,
+  APIModalSubmitInteraction,
+  APIMessageComponentInteraction,
 } from "discord-api-types/v9";
 import {
   ButtonInteraction,
@@ -145,42 +148,22 @@ export default class InteractionClient {
   }
 
   /**
-   * Handle any interaction, eg slash commands
-   *
-   * @param interaction interaction from gateway
-   * @returns
-   */
-  public async handleInteraction(interaction: Interaction): Promise<void> {
-    if (interaction.isCommand()) {
-      this.handleInteractionCommand(interaction);
-    }
-
-    if (interaction.isModalSubmit()) {
-      this.handleModalSubmit(interaction);
-    }
-
-    if (interaction.isButton()) {
-      this.handleButtonSubmit(interaction);
-    }
-  }
-
-  /**
    * Handle a slash command
    *
    * @param interaction slash command interaction
    * @returns
    */
   private async handleInteractionCommand(
-    interaction: CommandInteraction
+    interaction: APIChatInputApplicationCommandInteraction
   ): Promise<void> {
-    const command = this.commands.get(interaction.commandName);
+    const command = this.commands.get(interaction.data.name);
 
     if (!command) {
-      log.error(`received unknown command: ${interaction.commandName}`);
+      log.error(`received unknown command: ${interaction.data.name}`);
       return;
     }
 
-    log.info("received %s command", interaction.commandName);
+    log.info("received %s command", interaction.data.name);
 
     try {
       // Pre-check
@@ -188,11 +171,17 @@ export default class InteractionClient {
         const checkRes = await command.check(this.context, interaction);
 
         if (!checkRes.pass) {
-          await interaction.reply(checkRes.message);
+          await this.context.REST.interactionReplyMsg(
+            interaction.id,
+            interaction.token,
+            {
+              content: checkRes.message,
+            }
+          );
 
           log.info(
             "command %s failed check: %s",
-            interaction.commandName,
+            interaction.data.name,
             checkRes.message
           );
           return;
@@ -201,8 +190,15 @@ export default class InteractionClient {
 
       await command.handler(this.context, interaction);
     } catch (e) {
-      log.error("error running command %s: %o", interaction.commandName, e);
-      await interaction.reply("Uh oh something broke");
+      log.error("error running command %s: %o", interaction.data.name, e);
+
+      await this.context.REST.interactionReplyMsg(
+        interaction.id,
+        interaction.token,
+        {
+          content: "uh oh something broke",
+        }
+      );
     }
   }
 
@@ -212,20 +208,20 @@ export default class InteractionClient {
    * @param interaction modal submit interaction
    */
   private async handleModalSubmit(
-    interaction: ModalSubmitInteraction
+    interaction: APIModalSubmitInteraction
   ): Promise<void> {
-    const modalHandler = this.modalHandlers.get(interaction.customId);
+    const modalHandler = this.modalHandlers.get(interaction.data.custom_id);
 
     if (!modalHandler) {
       log.error(
         "received unknown modal submit interaction: %s",
-        interaction.customId
+        interaction.data.custom_id
       );
 
       return;
     }
 
-    log.info("received %s modal submit", interaction.customId);
+    log.info("received %s modal submit", interaction.data.custom_id);
 
     try {
       await modalHandler.handleModalSubmit(this.context, interaction);
@@ -240,20 +236,20 @@ export default class InteractionClient {
    * @param interaction button interaction
    */
   private async handleButtonSubmit(
-    interaction: ButtonInteraction
+    interaction: APIMessageComponentInteraction
   ): Promise<void> {
-    const buttonHandler = this.buttonHandlers.get(interaction.customId);
+    const buttonHandler = this.buttonHandlers.get(interaction.data.custom_id);
 
     if (!buttonHandler) {
       log.error(
         "received unknown button interaction: %s",
-        interaction.customId
+        interaction.data.custom_id
       );
 
       return;
     }
 
-    log.info("received %s button", interaction.customId);
+    log.info("received %s button", interaction.data.custom_id);
 
     try {
       await buttonHandler.handleButton(this.context, interaction);
@@ -286,13 +282,11 @@ export default class InteractionClient {
 
   private async handleAPIInteraction(interaction: APIInteraction) {
     if (isAPIChatInputApplicationCommandInteraction(interaction)) {
-      return this.handleCommandInteraction(interaction);
+      return this.handleInteractionCommand(interaction);
 
       // TODO: Handle user / message command types
     }
-  }
 
-  private async handleCommandInteraction(
-    interaction: APIChatInputApplicationCommandInteraction
-  ) {}
+    // TODO: Handle modal, buttons
+  }
 }

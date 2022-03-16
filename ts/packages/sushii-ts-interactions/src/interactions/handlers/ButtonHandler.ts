@@ -1,4 +1,4 @@
-import { ButtonInteraction } from "discord.js";
+import { APIMessageComponentInteraction } from "discord-api-types/v9";
 import Context from "../../context";
 
 export default abstract class ButtonHandler {
@@ -8,6 +8,6 @@ export default abstract class ButtonHandler {
    */
   abstract handleButton(
     ctx: Context,
-    interaction: ButtonInteraction
+    interaction: APIMessageComponentInteraction
   ): Promise<void>;
 }

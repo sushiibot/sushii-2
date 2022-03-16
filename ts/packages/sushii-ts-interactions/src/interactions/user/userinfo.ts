@@ -8,7 +8,6 @@ import {
   APIChatInputApplicationCommandGuildInteraction,
   APIChatInputApplicationCommandInteraction,
 } from "discord-api-types/v9";
-import { CacheType, CommandInteraction } from "discord.js";
 import Context from "../../context";
 import { SlashCommandHandler } from "../handlers";
 import CommandInteractionOptionResolver from "../resolver";
