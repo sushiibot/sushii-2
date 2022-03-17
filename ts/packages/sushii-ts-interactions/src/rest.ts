@@ -22,7 +22,7 @@ export default class RESTClient {
     interactionId: string,
     interactionToken: string,
     msg: APIInteractionResponseCallbackData
-  ) {
+  ): Promise<void> {
     await this.interactionCallback(interactionId, interactionToken, {
       type: InteractionResponseType.ChannelMessageWithSource,
       data: msg,
@@ -33,7 +33,7 @@ export default class RESTClient {
     interactionId: string,
     interactionToken: string,
     payload: RESTPostAPIInteractionCallbackJSONBody
-  ) {
+  ): Promise<void> {
     await this.rest.post(
       Routes.interactionCallback(interactionId, interactionToken),
       { body: payload }

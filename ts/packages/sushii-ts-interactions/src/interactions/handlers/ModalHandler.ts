@@ -3,6 +3,7 @@ import Context from "../../context";
 
 export default abstract class ModalHandler {
   abstract readonly modalId: string;
+
   /**
    * Modal submit handler function
    */

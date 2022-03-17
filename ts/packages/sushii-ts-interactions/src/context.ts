@@ -5,7 +5,9 @@ import RESTClient from "./rest";
 
 export default class Context {
   public readonly sushiiAPI: ApiClient;
+
   public readonly REST: RESTClient;
+
   public readonly CDN: CDNClient;
 
   constructor(config: ConfigI) {

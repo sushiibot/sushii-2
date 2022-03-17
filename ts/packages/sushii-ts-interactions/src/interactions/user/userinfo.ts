@@ -3,18 +3,15 @@ import {
   isDMInteraction,
   isGuildInteraction,
 } from "discord-api-types/utils/v9";
-import {
-  APIChatInputApplicationCommandDMInteraction,
-  APIChatInputApplicationCommandGuildInteraction,
-  APIChatInputApplicationCommandInteraction,
-} from "discord-api-types/v9";
+import { APIChatInputApplicationCommandInteraction } from "discord-api-types/v9";
 import Context from "../../context";
 import { SlashCommandHandler } from "../handlers";
 import CommandInteractionOptionResolver from "../resolver";
-import { getUserinfoEmbed } from "./userinfo.service";
+import getUserinfoEmbed from "./userinfo.service";
 
 export default class UserinfoHandler extends SlashCommandHandler {
   serverOnly = false;
+
   command = new SlashCommandBuilder()
     .setName("userinfo")
     .setDescription("Get information about a user")
@@ -27,6 +24,7 @@ export default class UserinfoHandler extends SlashCommandHandler {
     )
     .toJSON();
 
+  // eslint-disable-next-line class-methods-use-this
   async handler(
     ctx: Context,
     interaction: APIChatInputApplicationCommandInteraction

@@ -10,22 +10,16 @@ import {
   InteractionType,
   ApplicationCommandType,
 } from "discord-api-types/v9";
+import { AMQPMessage } from "@cloudamqp/amqp-client";
+import {
+  isChatInputApplicationCommandInteraction,
+  isMessageComponentButtonInteraction,
+} from "discord-api-types/utils/v9";
 import { ConfigI } from "../config";
 import Context from "../context";
 import log from "../logger";
 import { ButtonHandler, SlashCommandHandler, ModalHandler } from "./handlers";
-import { AMQPMessage } from "@cloudamqp/amqp-client";
-import {
-  isAPIChatInputApplicationCommandInteraction,
-  isGatewayInteractionCreateDispatch,
-} from "../utils/interactionTypeGuards";
-import {
-  isChatInputApplicationCommandInteraction,
-  isContextMenuApplicationCommandInteraction,
-  isInteractionButton,
-  isMessageComponentButtonInteraction,
-  isMessageComponentInteraction,
-} from "discord-api-types/utils/v9";
+import { isGatewayInteractionCreateDispatch } from "../utils/interactionTypeGuards";
 
 export default class InteractionClient {
   /**
@@ -268,7 +262,9 @@ export default class InteractionClient {
     this.handleAPIInteraction(interaction.d);
   }
 
-  private async handleAPIInteraction(interaction: APIInteraction) {
+  private async handleAPIInteraction(
+    interaction: APIInteraction
+  ): Promise<void> {
     if (interaction.type === InteractionType.ApplicationCommand) {
       if (isChatInputApplicationCommandInteraction(interaction)) {
         return this.handleInteractionCommand(interaction);
@@ -292,5 +288,7 @@ export default class InteractionClient {
     if (interaction.type === InteractionType.ModalSubmit) {
       return this.handleModalSubmit(interaction);
     }
+
+    return undefined;
   }
 }

@@ -1,49 +1,58 @@
-import { Embed } from "@discordjs/builders";
-import { CacheType, CommandInteraction, GuildMember, User } from "discord.js";
+import {
+  APIChatInputApplicationCommandInteraction,
+  APIUser,
+} from "discord-api-types/v9";
 import Context from "../../context";
 
 /**
- * Response value of caught fishy
+ * Get inclusive random number between min and max
+ *
+ * @param min
+ * @param max
+ * @returns
  */
-export interface FishyResponse {
-  caughtAmount: number;
-  caughtType: CatchableType;
-  newAmount: string;
+function getRandomInt(min: number, max: number): number {
+  const ceilMin = Math.ceil(min);
+  const floorMax = Math.floor(max);
+  return Math.floor(Math.random() * (floorMax - ceilMin + 1)) + ceilMin;
 }
 
-export async function fishyForUser(
-  ctx: Context,
-  _interaction: CommandInteraction<CacheType>,
-  user: User
-): Promise<FishyResponse> {
-  const dbUser = await ctx.sushiiAPI.getUser(user.id);
+/**
+ * Get a random number from a normal distribution
+ * Derived from https://stackoverflow.com/a/49434653
+ *
+ * @param min Minimum value
+ * @param max Maximum value
+ * @param skew Skew of distribution, 1 for normal distribution, < 1 to skew
+ * left, > 1 to skew right
+ * @returns number
+ */
+function randDistNumber(min: number, max: number, skew: number): number {
+  let u = 0;
+  let v = 0;
 
-  // Get new fishy count
-  const caughtType = getRandomCatchable();
-  const valueRange = getFishyValueRange(caughtType);
-  const caughtNum = randDistNumber(
-    valueRange.min,
-    valueRange.max,
-    valueRange.skew
-  );
+  // Convert [0,1) to (0,1)
+  while (u === 0) {
+    u = Math.random();
+  }
+  while (v === 0) {
+    v = Math.random();
+  }
 
-  const newFishies = BigInt(dbUser.fishies) + BigInt(caughtNum);
+  let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 
-  // Update fishies in data
-  dbUser.fishies = newFishies.toString();
+  num = num / 10.0 + 0.5; // Translate to 0 -> 1
+  if (num > 1 || num < 0) {
+    num = randDistNumber(min, max, skew);
+  } else {
+    // resample between 0 and 1 if out of range
+    num **= skew; // Skew
+    num *= max - min; // Stretch to fill range
+    num += min; // offset to min
+  }
 
-  // Update user api
-  // await ctx.api.updateUser(dbUser);
-
-  return {
-    caughtAmount: caughtNum,
-    newAmount: newFishies.toString(),
-    caughtType,
-  };
+  return num;
 }
-
-//------------------------------------------------------------------------------
-// Fishy generator - fishy printer go brrrrrrr
 
 /**
  * Fishy types, lower index fishies are more common and should be worth less
@@ -122,6 +131,8 @@ export interface FishyValueRange {
 }
 
 function getFishyValueRange(catchable: CatchableType): FishyValueRange {
+  // Exhaustive switch statement
+  // eslint-disable-next-line default-case
   switch (catchable) {
     case CatchableType.Anchovy:
       return { min: 5, max: 10, skew: 3 };
@@ -161,51 +172,41 @@ function getFishyValueRange(catchable: CatchableType): FishyValueRange {
 }
 
 /**
- * Get inclusive random number between min and max
- *
- * @param min
- * @param max
- * @returns
+ * Response value of caught fishy
  */
-function getRandomInt(min: number, max: number): number {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+export interface FishyResponse {
+  caughtAmount: number;
+  caughtType: CatchableType;
+  newAmount: string;
 }
 
-/**
- * Get a random number from a normal distribution
- * Derived from https://stackoverflow.com/a/49434653
- *
- * @param min Minimum value
- * @param max Maximum value
- * @param skew Skew of distribution, 1 for normal distribution, < 1 to skew
- * left, > 1 to skew right
- * @returns number
- */
-function randDistNumber(min: number, max: number, skew: number): number {
-  let u = 0;
-  let v = 0;
+export async function fishyForUser(
+  ctx: Context,
+  _interaction: APIChatInputApplicationCommandInteraction,
+  user: APIUser
+): Promise<FishyResponse> {
+  const dbUser = await ctx.sushiiAPI.getUser(user.id);
 
-  // Convert [0,1) to (0,1)
-  while (u === 0) {
-    u = Math.random();
-  }
-  while (v === 0) {
-    v = Math.random();
-  }
+  // Get new fishy count
+  const caughtType = getRandomCatchable();
+  const valueRange = getFishyValueRange(caughtType);
+  const caughtNum = randDistNumber(
+    valueRange.min,
+    valueRange.max,
+    valueRange.skew
+  );
 
-  let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  const newFishies = BigInt(dbUser.fishies) + BigInt(caughtNum);
 
-  num = num / 10.0 + 0.5; // Translate to 0 -> 1
-  if (num > 1 || num < 0) {
-    num = randDistNumber(min, max, skew);
-  } else {
-    // resample between 0 and 1 if out of range
-    num = Math.pow(num, skew); // Skew
-    num *= max - min; // Stretch to fill range
-    num += min; // offset to min
-  }
+  // Update fishies in data
+  dbUser.fishies = newFishies.toString();
 
-  return num;
+  // Update user api
+  // await ctx.api.updateUser(dbUser);
+
+  return {
+    caughtAmount: caughtNum,
+    newAmount: newFishies.toString(),
+    caughtType,
+  };
 }

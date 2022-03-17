@@ -1,12 +1,14 @@
 import { SlashCommandBuilder, Embed } from "@discordjs/builders";
-import { CacheType, CommandInteraction } from "discord.js";
+import { APIChatInputApplicationCommandInteraction } from "discord-api-types/v9";
+import i18next from "i18next";
 import Context from "../../context";
 import { SlashCommandHandler } from "../handlers";
+import CommandInteractionOptionResolver from "../resolver";
 import { fishyForUser } from "./fishy.service";
-import i18next from "i18next";
 
 export default class FishyCommand extends SlashCommandHandler {
   serverOnly = true;
+
   command = new SlashCommandBuilder()
     .setName("fishy")
     .setDescription("Catch some fish!")
@@ -18,13 +20,23 @@ export default class FishyCommand extends SlashCommandHandler {
     )
     .toJSON();
 
+  // eslint-disable-next-line class-methods-use-this
   async handler(
     ctx: Context,
-    interaction: CommandInteraction<CacheType>
+    interaction: APIChatInputApplicationCommandInteraction
   ): Promise<void> {
-    const target = interaction.options.getUser("user");
+    const options = new CommandInteractionOptionResolver(
+      interaction.data.options,
+      interaction.data.resolved
+    );
+
+    const target = options.getUser("user");
     if (!target) {
-      return interaction.reply("You need to provide a user to fishy for!");
+      await ctx.REST.interactionReplyMsg(interaction.id, interaction.token, {
+        content: "You need to provide a user to fishy for!",
+      });
+
+      return;
     }
 
     const res = await fishyForUser(ctx, interaction, target);
@@ -38,7 +50,7 @@ export default class FishyCommand extends SlashCommandHandler {
       })
     );
 
-    await interaction.reply({
+    await ctx.REST.interactionReplyMsg(interaction.id, interaction.token, {
       embeds: [embed],
     });
   }

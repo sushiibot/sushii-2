@@ -12,13 +12,16 @@ module.exports = {
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
-    project: './sushii-ts-interactions/tsconfig.json'
+    tsconfigRootDir: __dirname,
+    project: './../../tsconfig.json'
   },
   plugins: [
     "@typescript-eslint",
   ],
   rules: {
     "quotes": ["error", "double"],
+    "consistent-return": "off",
+    "@typescript-eslint/explicit-function-return-type": "error",
   },
   settings: {
     "import/resolver": {
@@ -35,6 +38,6 @@ module.exports = {
         "ts": "never",
         "tsx": "never"
       }
-    ]
+    ],
   },
 };

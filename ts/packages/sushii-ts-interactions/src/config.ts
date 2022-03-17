@@ -25,9 +25,11 @@ export class Config implements ConfigI {
   public applicationId: string;
 
   public guildId: string | undefined;
+
   public dataApiURL: string;
 
   public amqpUrl: string;
+
   public amqpQueueName: string;
 
   public proxyUrl: string;

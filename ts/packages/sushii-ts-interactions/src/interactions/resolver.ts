@@ -16,18 +16,48 @@ import {
   APIRole,
   APIInteractionDataResolvedChannel,
   APIInteractionDataResolvedGuildMember,
-  APIGuildMember,
-  APIChannel,
-  ApplicationCommandType,
 } from "discord-api-types/v9";
+
+function isDataBasicOption(
+  option: APIApplicationCommandInteractionDataOption
+): option is APIApplicationCommandInteractionDataBasicOption {
+  return (
+    option.type !== ApplicationCommandOptionType.Subcommand &&
+    option.type !== ApplicationCommandOptionType.SubcommandGroup
+  );
+}
+
+type OptionValue<T extends ApplicationCommandOptionType> =
+  T extends ApplicationCommandOptionType.Boolean
+    ? boolean
+    : T extends ApplicationCommandOptionType.Channel
+    ? APIInteractionDataResolvedChannel
+    : T extends
+        | ApplicationCommandOptionType.Integer
+        | ApplicationCommandOptionType.Number
+    ? number
+    : T extends ApplicationCommandOptionType.Role
+    ? APIRole
+    : T extends ApplicationCommandOptionType.User
+    ? APIUser
+    : T extends ApplicationCommandOptionType.String
+    ? string
+    : T extends ApplicationCommandOptionType.Mentionable
+    ? APIUser | APIRole | APIInteractionDataResolvedGuildMember
+    : T extends ApplicationCommandOptionType.Attachment
+    ? APIAttachment
+    : never;
 
 /**
  * A resolver for command interaction options.
  */
 export default class CommandInteractionOptionResolver {
   private readonly group: string | null;
+
   private readonly subcommand: string | null;
+
   private readonly hoistedOptions: APIApplicationCommandInteractionDataOption[];
+
   private readonly resolved: APIChatInputApplicationCommandInteractionDataResolved;
 
   constructor(
@@ -110,6 +140,7 @@ export default class CommandInteractionOptionResolver {
       throw new TypeError("Option does not match input type");
     }
 
+    // eslint-disable-next-line default-case
     switch (option.type) {
       case ApplicationCommandOptionType.User:
         return this.resolved.users?.[option.value] as OptionValue<T>;
@@ -248,7 +279,7 @@ export default class CommandInteractionOptionResolver {
    * @returns {?(Message|APIMessage)}
    * The value of the option, or null if not set and not required.
    */
-  //TODO: support message interactions
+  // TODO: support message interactions
   // getMessage(name: string) {
   //   return this.getTypedOptionValue(name, "_MESSAGE");
   // }
@@ -267,33 +298,3 @@ export default class CommandInteractionOptionResolver {
     );
   }
 }
-
-function isDataBasicOption(
-  option: APIApplicationCommandInteractionDataOption
-): option is APIApplicationCommandInteractionDataBasicOption {
-  return (
-    option.type !== ApplicationCommandOptionType.Subcommand &&
-    option.type !== ApplicationCommandOptionType.SubcommandGroup
-  );
-}
-
-type OptionValue<T extends ApplicationCommandOptionType> =
-  T extends ApplicationCommandOptionType.Boolean
-    ? boolean
-    : T extends ApplicationCommandOptionType.Channel
-    ? APIInteractionDataResolvedChannel
-    : T extends
-        | ApplicationCommandOptionType.Integer
-        | ApplicationCommandOptionType.Number
-    ? number
-    : T extends ApplicationCommandOptionType.Role
-    ? APIRole
-    : T extends ApplicationCommandOptionType.User
-    ? APIUser
-    : T extends ApplicationCommandOptionType.String
-    ? string
-    : T extends ApplicationCommandOptionType.Mentionable
-    ? APIUser | APIRole | APIInteractionDataResolvedGuildMember
-    : T extends ApplicationCommandOptionType.Attachment
-    ? APIAttachment
-    : never;

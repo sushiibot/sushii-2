@@ -3,9 +3,7 @@ import {
   APIChatInputApplicationCommandGuildInteraction,
   APIChatInputApplicationCommandInteraction,
   APIInteraction,
-  APIMessageComponentInteraction,
   ApplicationCommandType,
-  ComponentType,
   GatewayDispatchEvents,
   GatewayInteractionCreateDispatch,
   GatewayOpcodes,
@@ -49,18 +47,4 @@ export function isAPIChatInputApplicationCommandInteraction(
     interaction.type === InteractionType.ApplicationCommand &&
     interaction.data.type === ApplicationCommandType.ChatInput
   );
-}
-
-export function isAPIMessageComponentInteraction(
-  interaction: APIInteraction
-): interaction is APIMessageComponentInteraction {
-  return interaction.type === InteractionType.MessageComponent;
-}
-
-export function isAPIButtonInteraction(
-  interaction: APIMessageComponentInteraction
-) {
-  interaction.data.component_type === ComponentType.Button;
-
-  return interaction.type === InteractionType.MessageComponent;
 }

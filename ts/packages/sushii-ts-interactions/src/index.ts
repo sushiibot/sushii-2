@@ -1,22 +1,16 @@
 import { REST } from "@discordjs/rest";
-import { Client, Intents } from "discord.js";
 import dotenv from "dotenv";
+import i18next from "i18next";
+import Backend from "i18next-fs-backend";
+import { AMQPClient } from "@cloudamqp/amqp-client";
 import log from "./logger";
 import InteractionClient from "./interactions/client";
 import UserInfoCommand from "./interactions/user/userinfo";
-import {
-  formModalHandler,
-  FormSlashCommand,
-  formButtonHandler,
-} from "./interactions/form/form";
 import { Config } from "./config";
-import i18next from "i18next";
-import Backend from "i18next-fs-backend";
 import FishyCommand from "./interactions/user/fishy";
 import AmqpGateway from "./gateway/amqp";
-import { AMQPClient } from "@cloudamqp/amqp-client";
 
-async function main() {
+async function main(): Promise<void> {
   dotenv.config();
 
   await i18next.use(Backend).init({
@@ -35,10 +29,7 @@ async function main() {
 
   const interactionClient = new InteractionClient(rest, config);
   interactionClient.addCommand(new UserInfoCommand());
-  interactionClient.addCommand(new FormSlashCommand());
   interactionClient.addCommand(new FishyCommand());
-  interactionClient.addModal(formModalHandler);
-  interactionClient.addButton(formButtonHandler);
 
   await interactionClient.register();
 

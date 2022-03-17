@@ -7,7 +7,7 @@ import {
 import Context from "../../context";
 import { getCreatedTimestampSeconds } from "../../utils/snowflake";
 
-export async function getUserinfoEmbed(
+export default async function getUserinfoEmbed(
   ctx: Context,
   _interaction: APIChatInputApplicationCommandInteraction,
   user: APIUser,

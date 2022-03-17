@@ -33,8 +33,11 @@ export default abstract class InteractionHandler {
    * Check function that will run before a command to see if it should be run.
    * By default, this always passes.
    */
+  // eslint-disable-next-line class-methods-use-this
   async check(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _ctx: Context,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _interaction: APIInteraction
   ): Promise<CheckResponse> {
     return { pass: true };
