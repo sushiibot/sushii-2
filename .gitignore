@@ -2,7 +2,7 @@
 **/*.env*
 **/.htpasswd*
 **/acme
-**/docker
+/docker
 **/.yarn
 
 **/sqlx-data.*.json
