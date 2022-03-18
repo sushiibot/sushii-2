@@ -6,6 +6,10 @@ listen-address=127.0.0.1
 # Enable forward lookup of the 'consul' domain:
 server=/consul/127.0.0.1#8600
 
+# Add CloudFlare DNS
+server=1.1.1.1
+server=1.0.0.1
+
 # Uncomment and modify as appropriate to enable reverse DNS lookups for
 # common netblocks found in RFC 1918, 5735, and 6598:
 #rev-server=0.0.0.0/8,127.0.0.1#8600
