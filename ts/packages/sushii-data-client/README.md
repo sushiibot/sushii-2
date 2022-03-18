@@ -1,1 +1,0 @@
-# sushii-data-client
