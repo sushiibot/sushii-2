@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Logger } from '@nestjs/common';
 import {
   fromStoredUserModel,
   fromTransportUserModel,
@@ -10,6 +11,8 @@ import {
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async findOne(id: string): Promise<TransportUserModel> {
@@ -33,12 +36,18 @@ export class UsersService {
     const updatedUserStrict = fromTransportUserModel.safeParse(updateUserDto);
 
     if (!updatedUserStrict.success) {
-      throw new HttpException('Invalid user', HttpStatus.BAD_REQUEST);
+      this.logger.warn(updatedUserStrict.error, 'failed to parse user');
+
+      throw new HttpException(
+        'Invalid user update data',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
-    await this.prisma.user.update({
+    await this.prisma.user.upsert({
       where: { id: updatedUserStrict.data.id },
-      data: updatedUserStrict.data,
+      update: updatedUserStrict.data,
+      create: updatedUserStrict.data,
     });
   }
 

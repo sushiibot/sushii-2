@@ -1,7 +1,5 @@
 import { REST } from "@discordjs/rest";
 import dotenv from "dotenv";
-import i18next from "i18next";
-import Backend from "i18next-fs-backend";
 import { AMQPClient } from "@cloudamqp/amqp-client";
 import log from "./logger";
 import InteractionClient from "./interactions/client";
@@ -9,18 +7,12 @@ import UserInfoCommand from "./interactions/user/userinfo";
 import { Config } from "./config";
 import FishyCommand from "./interactions/user/fishy";
 import AmqpGateway from "./gateway/amqp";
+import initI18next from "./i18next";
 
 async function main(): Promise<void> {
   dotenv.config();
 
-  await i18next.use(Backend).init({
-    fallbackLng: "en",
-    ns: ["commands"],
-    defaultNS: "commands",
-    backend: {
-      loadPath: "/locales/{{lng}}/{{ns}}.json",
-    },
-  });
+  await initI18next();
 
   const config = new Config();
   const amqpClient = new AMQPClient(config.amqpUrl);
@@ -34,7 +26,9 @@ async function main(): Promise<void> {
   await interactionClient.register();
 
   log.info("connecting to rabbitmq for gateway events");
-  rabbitGatewayClient.connect(interactionClient.handleAMQPMessage);
+  rabbitGatewayClient.connect((msg) =>
+    interactionClient.handleAMQPMessage(msg)
+  );
 
   process.on("SIGINT", () => {
     log.info("cleaning up");

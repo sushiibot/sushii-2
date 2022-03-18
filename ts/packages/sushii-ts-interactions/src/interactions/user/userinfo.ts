@@ -5,6 +5,7 @@ import {
 } from "discord-api-types/utils/v9";
 import { APIChatInputApplicationCommandInteraction } from "discord-api-types/v9";
 import Context from "../../context";
+import logger from "../../logger";
 import { SlashCommandHandler } from "../handlers";
 import CommandInteractionOptionResolver from "../resolver";
 import getUserinfoEmbed from "./userinfo.service";
@@ -34,8 +35,12 @@ export default class UserinfoHandler extends SlashCommandHandler {
       interaction.data.resolved
     );
 
+    logger.debug("userinfo options: %o", options);
+
     let target = options.getUser("user");
     let member;
+
+    logger.debug("userinfo option target user: %o", target);
 
     if (isGuildInteraction(interaction)) {
       if (!target) {
@@ -43,6 +48,8 @@ export default class UserinfoHandler extends SlashCommandHandler {
       }
 
       member = await ctx.REST.getMember(interaction.guild_id, target.id);
+
+      logger.debug("userinfo option target member: %o", member);
     } else if (isDMInteraction(interaction)) {
       if (!target) {
         target = interaction.user;
@@ -54,6 +61,7 @@ export default class UserinfoHandler extends SlashCommandHandler {
     }
 
     const embed = await getUserinfoEmbed(ctx, interaction, target, member);
+    logger.debug("userinfo embed: %o", embed);
 
     await ctx.REST.interactionReplyMsg(interaction.id, interaction.token, {
       embeds: [embed],

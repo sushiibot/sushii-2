@@ -47,6 +47,8 @@ export default class FishyCommand extends SlashCommandHandler {
         caughtType: res.caughtType,
         username: target.username,
         caughtAmount: res.caughtAmount,
+        oldAmount: res.oldAmount,
+        newAmount: res.newAmount,
       })
     );
 

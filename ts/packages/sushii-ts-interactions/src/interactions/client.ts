@@ -172,7 +172,7 @@ export default class InteractionClient {
 
       await command.handler(this.context, interaction);
     } catch (e) {
-      log.error("error running command %s: %o", interaction.data.name, e);
+      log.error(e, "error running command %s", interaction.data.name);
 
       await this.context.REST.interactionReplyMsg(
         interaction.id,
@@ -208,7 +208,7 @@ export default class InteractionClient {
     try {
       await modalHandler.handleModalSubmit(this.context, interaction);
     } catch (e) {
-      log.error("error handling modal %s: %s", interaction.id, e);
+      log.error(e, "error handling modal %s: %s", interaction.id);
     }
   }
 
@@ -236,30 +236,8 @@ export default class InteractionClient {
     try {
       await buttonHandler.handleButton(this.context, interaction);
     } catch (e) {
-      log.error("error handling button %s: %o", interaction.id, e);
+      log.error(e, "error handling button %s: %o", interaction.id);
     }
-  }
-
-  /**
-   * Handles a raw gateway interaction from AMQP
-   *
-   * @param msg AMQP message
-   * @returns
-   */
-  public async handleAMQPMessage(msg: AMQPMessage): Promise<void> {
-    const msgString = msg.bodyToString();
-    if (!msgString) {
-      log.error("received empty AMQP message");
-      return;
-    }
-
-    const interaction = JSON.parse(msgString);
-    if (!isGatewayInteractionCreateDispatch(interaction)) {
-      log.debug("received non-interaction AMQP message");
-      return;
-    }
-
-    this.handleAPIInteraction(interaction.d);
   }
 
   private async handleAPIInteraction(
@@ -290,5 +268,27 @@ export default class InteractionClient {
     }
 
     return undefined;
+  }
+
+  /**
+   * Handles a raw gateway interaction from AMQP
+   *
+   * @param msg AMQP message
+   * @returns
+   */
+  public async handleAMQPMessage(msg: AMQPMessage): Promise<void> {
+    const msgString = msg.bodyToString();
+    if (!msgString) {
+      log.error("received empty AMQP message");
+      return;
+    }
+
+    const interaction = JSON.parse(msgString);
+    if (!isGatewayInteractionCreateDispatch(interaction)) {
+      log.debug("received non-interaction AMQP message %s", interaction.t);
+      return;
+    }
+
+    this.handleAPIInteraction(interaction.d);
   }
 }

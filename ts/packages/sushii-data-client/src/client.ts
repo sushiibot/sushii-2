@@ -46,8 +46,10 @@ export default class ApiClient {
   public async getGuildConfig(
     guildId: string
   ): Promise<TransportGuildConfigModel> {
-    const response = await this.fetch(`/guild-configs/${guildId}`);
-    return TransportGuildConfig.parse(await response.json());
+    const res = await this.fetch(`/guild-configs/${guildId}`);
+    await checkErr(res);
+
+    return TransportGuildConfig.parse(await res.json());
   }
 
   /**
@@ -60,11 +62,13 @@ export default class ApiClient {
     guildId: string,
     config: TransportGuildConfigModel
   ): Promise<void> {
-    await this.fetch(`/guild-configs/${guildId}`, {
+    const res = await this.fetch(`/guild-configs/${guildId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(config),
     });
+
+    await checkErr(res);
   }
 
   /**
@@ -74,7 +78,32 @@ export default class ApiClient {
    * @returns {Promise<TransportUserModel>}
    */
   public async getUser(userId: string): Promise<TransportUserModel> {
-    const response = await this.fetch(`/users/${userId}`);
-    return TransportUser.parse(await response.json());
+    const res = await this.fetch(`/users/${userId}`);
+    await checkErr(res);
+    return TransportUser.parse(await res.json());
+  }
+
+  /**
+   * Updates a user
+   *
+   * @param userId
+   * @returns {Promise<TransportUserModel>}
+   */
+  public async updateUser(user: TransportUserModel): Promise<void> {
+    const res = await this.fetch(`/users/${user.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(user),
+    });
+
+    await checkErr(res);
+  }
+}
+
+async function checkErr(res: Response) {
+  if (!res.ok) {
+    const jsonErr = await res.json();
+
+    throw new Error(`${res.status} ${res.statusText}: ${jsonErr.message}`);
   }
 }

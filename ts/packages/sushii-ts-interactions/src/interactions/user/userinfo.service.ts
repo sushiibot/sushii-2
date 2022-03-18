@@ -1,4 +1,5 @@
 import { Embed } from "@discordjs/builders";
+import dayjs from "dayjs";
 import {
   APIChatInputApplicationCommandInteraction,
   APIGuildMember,
@@ -40,7 +41,7 @@ export default async function getUserinfoEmbed(
   });
 
   if (member) {
-    const joinedTimestamp = getCreatedTimestampSeconds(member.joined_at);
+    const joinedTimestamp = dayjs(member.joined_at);
     embed = embed
       .addField({
         name: "Roles",
@@ -50,17 +51,15 @@ export default async function getUserinfoEmbed(
       // .setColor(member.displayColor)
       .addField({
         name: "Joined Server",
-        value: `<t:${joinedTimestamp}:F> (<t:${joinedTimestamp}:R>)`,
+        value: `<t:${joinedTimestamp.unix()}:F> (<t:${joinedTimestamp.unix()}:R>)`,
       });
 
     if (member.premium_since) {
-      const premiumSinceTimestamp = getCreatedTimestampSeconds(
-        member.premium_since
-      );
+      const premiumSinceTimestamp = dayjs(member.premium_since);
 
       embed = embed.addField({
         name: "Boosting Since",
-        value: `<t:${premiumSinceTimestamp}:F> (<t:${premiumSinceTimestamp}:R>)`,
+        value: `<t:${premiumSinceTimestamp.unix()}:F> (<t:${premiumSinceTimestamp.unix()}:R>)`,
       });
     }
   }

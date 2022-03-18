@@ -3,6 +3,7 @@ import {
   APIUser,
 } from "discord-api-types/v9";
 import Context from "../../context";
+import logger from "../../logger";
 
 /**
  * Get inclusive random number between min and max
@@ -177,6 +178,7 @@ function getFishyValueRange(catchable: CatchableType): FishyValueRange {
 export interface FishyResponse {
   caughtAmount: number;
   caughtType: CatchableType;
+  oldAmount: string;
   newAmount: string;
 }
 
@@ -186,26 +188,32 @@ export async function fishyForUser(
   user: APIUser
 ): Promise<FishyResponse> {
   const dbUser = await ctx.sushiiAPI.getUser(user.id);
+  logger.debug(dbUser, "before");
 
   // Get new fishy count
   const caughtType = getRandomCatchable();
   const valueRange = getFishyValueRange(caughtType);
-  const caughtNum = randDistNumber(
-    valueRange.min,
-    valueRange.max,
-    valueRange.skew
+  const caughtNum = Math.floor(
+    randDistNumber(valueRange.min, valueRange.max, valueRange.skew)
   );
+
+  const oldAmount = dbUser.fishies;
 
   const newFishies = BigInt(dbUser.fishies) + BigInt(caughtNum);
 
   // Update fishies in data
   dbUser.fishies = newFishies.toString();
 
+  logger.debug(dbUser, "after");
+
   // Update user api
   // await ctx.api.updateUser(dbUser);
 
+  await ctx.sushiiAPI.updateUser(dbUser);
+
   return {
     caughtAmount: caughtNum,
+    oldAmount,
     newAmount: newFishies.toString(),
     caughtType,
   };

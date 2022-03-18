@@ -1,5 +1,5 @@
 {
   "fishy": {
-    "caught": "You caught a {{caughtType}} for {{username}} worth {{caughtAmount}} fishies!"
+    "success": "You caught a {{caughtType}} for {{username}} worth {{caughtAmount}} fishies! ({{oldAmount}} → {{newAmount}} total fishies)"
   }
 }

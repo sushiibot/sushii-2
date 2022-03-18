@@ -15,7 +15,7 @@ export default class RESTClient {
   constructor(private readonly config: ConfigI) {
     this.rest = new REST({
       api: this.config.proxyUrl,
-    });
+    }).setToken(config.token);
   }
 
   public async interactionReplyMsg(

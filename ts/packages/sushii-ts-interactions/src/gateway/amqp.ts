@@ -6,7 +6,7 @@ export default class AmqpGateway {
 
   constructor(private amqp: AMQPClient, private config: ConfigI) {}
 
-  async connect(handler: (msg: AMQPMessage) => Promise<void>) {
+  async connect(handler: (msg: AMQPMessage) => Promise<void>): Promise<void> {
     const conn = await this.amqp.connect();
     const channel = await conn.channel();
     const queue = await channel.queue(this.config.amqpQueueName);
@@ -18,7 +18,7 @@ export default class AmqpGateway {
     this.consumer = await queue.subscribe({ noAck: true }, handler);
   }
 
-  async stop() {
+  async stop(): Promise<void> {
     await this.consumer?.cancel();
     await this.amqp.close();
   }

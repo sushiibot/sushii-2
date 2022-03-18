@@ -30,7 +30,7 @@ export const TransportUser = UserModel.extend({
 export type TransportUserModel = z.infer<typeof TransportUser>;
 
 export const fromTransportUserModel = UserModel.extend({
-  id: z.bigint(),
+  id: z.string().transform(BigInt),
   isPatron: z.boolean(),
   patronEmoji: z.string().nullish(),
   rep: z.string().transform(BigInt),
