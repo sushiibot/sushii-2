@@ -100,7 +100,7 @@ services:
         labels:
             - "traefik.enable=false"
     postgres:
-        image: timescale/timescaledb:latest-pg12
+        image: ghcr.io/sushiibot/postgres-timescale-pg_graphql:2.6.1-0.2.0-pg12
         container_name: postgres
         restart: unless-stopped
         command: postgres -c 'config_file=/etc/postgresql/data/postgresql.conf'
