@@ -7,6 +7,7 @@ use crate::prelude::*;
 
 #[derive(Deserialize, Serialize, sqlx::FromRow, Debug)]
 pub struct Tag {
+    pub attachment: Option<String>,
     pub owner_id: i64,
     pub guild_id: i64,
     pub tag_name: String,
@@ -25,6 +26,7 @@ impl Tag {
         let created = Utc::now().naive_utc();
 
         Self {
+            attachment: None,
             owner_id: i64::from(owner_id),
             guild_id: i64::from(guild_id),
             tag_name: tag_name.into(),
