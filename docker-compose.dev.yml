@@ -3,6 +3,9 @@ services:
     postgres:
         ports:
             - "5432:5432"
+    postgres_14:
+        ports:
+            - "5432:5432"
     twilight-http-proxy:
         ports:
             - "3001:80"
