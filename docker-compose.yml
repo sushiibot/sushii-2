@@ -115,6 +115,22 @@ services:
             - sushii_net
         labels:
             - traefik.enable=false
+    postgres_14:
+        image: ghcr.io/sushiibot/postgres-timescale-pg_graphql:2.6.1-0.2.0-pg14
+        container_name: postgres_14
+        restart: unless-stopped
+        command: postgres -c 'config_file=/etc/postgresql/data/postgresql.conf'
+        shm_size: 512mb
+        env_file:
+            - .env
+        volumes:
+            - ~/docker/postgres/14:/var/lib/postgresql/data
+            - ./postgres.conf:/etc/postgresql/data/postgresql.conf
+            - ~/docker/postgres_root:/root
+        networks:
+            - sushii_net
+        labels:
+            - traefik.enable=false
     postgres_backups:
         image: prodrigestivill/postgres-backup-local
         restart: unless-stopped
