@@ -38,7 +38,7 @@ async fn slowmode(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
         }
     };
 
-    let guild = match msg.guild(ctx) {
+    let guild = match msg.guild(ctx).await {
         Some(g) => g,
         None => {
             msg.reply(ctx, "No guild found").await?;
@@ -69,7 +69,7 @@ async fn slowmode(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
     }
 
     target_channel
-        .edit(ctx, |c| c.rate_limit_per_user(slowmode_rate))
+        .edit(ctx, |c| c.slow_mode_rate(slowmode_rate))
         .await?;
 
     msg.channel_id

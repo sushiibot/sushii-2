@@ -88,9 +88,9 @@ async fn userinfo(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             write!(user_str, "**Roles:** ")?;
         }
 
-        colour = member.colour(ctx);
+        colour = member.colour(ctx).await;
 
-        let roles = match member.roles(ctx) {
+        let roles = match member.roles(ctx).await {
             Some(mut roles) => {
                 roles.sort_by(|a, b| b.position.cmp(&a.position));
                 roles.into_iter().map(|r| r.id).collect::<Vec<RoleId>>()

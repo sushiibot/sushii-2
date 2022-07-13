@@ -8,7 +8,7 @@ use std::fmt::Write;
 #[aliases("guildinfo")]
 #[only_in("guild")]
 async fn serverinfo(ctx: &Context, msg: &Message) -> CommandResult {
-    let guild = match msg.guild(ctx) {
+    let guild = match msg.guild(ctx).await {
         Some(id) => id,
         None => {
             msg.channel_id.say(&ctx.http, "No guild found").await?;

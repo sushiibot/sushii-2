@@ -35,7 +35,7 @@ async fn _guild_member_addition(ctx: &Context, guild_id: &GuildId, member: &Memb
         None => return Ok(()),
     };
 
-    let member_number = match guild_id.to_guild_cached(&ctx) {
+    let member_number = match guild_id.to_guild_cached(&ctx).await {
         Some(g) => g.member_count,
         None => 0,
     };
@@ -49,7 +49,7 @@ async fn _guild_member_addition(ctx: &Context, guild_id: &GuildId, member: &Memb
         )
         .replace(
             "<server>",
-            &guild_id.name(&ctx).unwrap_or_else(|| "".into()),
+            &guild_id.name(&ctx).await.unwrap_or_else(|| "".into()),
         );
 
     let msg = msg_channel.say(&ctx, join_msg_replaced).await?;

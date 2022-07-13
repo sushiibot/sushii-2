@@ -118,11 +118,11 @@ async fn about(ctx: &Context, msg: &Message) -> CommandResult {
     let total_mem = memory::memory().await?.total();
 
     // Discord stats
-    let guild_count = ctx.cache.guild_count();
-    let channel_count = ctx.cache.guild_channel_count();
-    let user_count = ctx.cache.user_count();
+    let guild_count = ctx.cache.guild_count().await;
+    let channel_count = ctx.cache.guild_channel_count().await;
+    let user_count = ctx.cache.user_count().await;
 
-    let shard_count = ctx.cache.shard_count();
+    let shard_count = ctx.cache.shard_count().await;
     let shard_id = msg.guild_id.map(|id| shard_id(id, shard_count));
 
     let _ = msg

@@ -188,6 +188,7 @@ async fn _guild_member_update(
     let guild_name = new_member
         .guild_id
         .to_guild_cached(&ctx)
+        .await
         .as_ref()
         .map(|g| g.name.clone())
         .unwrap_or_else(|| format!("Unknown Guild (ID: {})", new_member.guild_id.0));

@@ -25,7 +25,7 @@ async fn mute(ctx: &Context, msg: &Message) -> CommandResult {
 #[description("Sets the mute role")]
 #[usage("[role mention, ID, or name]")]
 async fn role(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    let guild = match msg.guild(&ctx.cache) {
+    let guild = match msg.guild(&ctx.cache).await {
         Some(g) => g,
         None => {
             let _ = msg.channel_id.say(&ctx.http, "No guild found").await?;

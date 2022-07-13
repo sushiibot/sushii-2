@@ -54,6 +54,7 @@ async fn add(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let guild_name = ctx
         .cache
         .guild_field(guild_id, |g| g.name.clone())
+        .await
         .unwrap_or_else(|| "Unknown guild".into());
 
     // Keyword is converted to lowercase

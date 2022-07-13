@@ -135,7 +135,7 @@ impl<T> OptionsCollector<T> {
                 .author_id(msg.author.id)
                 .channel_id(msg.channel_id)
                 .timeout(Duration::from_secs(120))
-                .build();
+                .await;
 
             'inner: while let Some(reply) = replies.next().await {
                 match reply.content.as_str() {
@@ -254,10 +254,11 @@ impl UserOption<FeedOptions> for DiscordChannel {
 
         let guild_channels = msg
             .guild_field(ctx, |g| g.channels.clone())
+            .await
             .ok_or_else(|| "Couldn't find channel. Give a channel.".to_string())?;
 
         match guild_channels.get(&ChannelId(channel_id)) {
-            Some(Channel::Guild(c)) => {
+            Some(c) => {
                 if c.kind != ChannelType::Text && c.kind != ChannelType::News {
                     return Err("Channel is not a text channel. Try a different one.".into());
                 }
@@ -266,7 +267,7 @@ impl UserOption<FeedOptions> for DiscordChannel {
 
                 return Ok(format!("Updates will be sent to <#{}>", c.id.0));
             }
-            _ => {
+            None => {
                 return Err("Channel is not found in this guild. Try again?".into());
             }
         }
@@ -302,6 +303,7 @@ impl UserOption<FeedOptions> for DiscordRole {
         // TODO: actually handle this, not an accurate error
         let guild_roles = msg
             .guild_field(ctx, |g| g.roles.clone())
+            .await
             .ok_or_else(|| "Couldn't find role. Give a role.".to_string())?;
 
         let mention_role = parse_role(&msg.content)
@@ -324,7 +326,7 @@ impl UserOption<FeedOptions> for DiscordRole {
 #[only_in("guild")]
 #[required_permissions("MANAGE_GUILD")]
 async fn add(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
-    let guild = match msg.guild(ctx) {
+    let guild = match msg.guild(ctx).await {
         Some(g) => g,
         None => {
             msg.reply(&ctx, "Error: No guild").await?;
@@ -499,7 +501,8 @@ async fn add_vlive(
         .channel_id
         .await_replies(ctx)
         .author_id(msg.author.id)
-        .channel_id(msg.channel_id);
+        .channel_id(msg.channel_id)
+        .await;
 
     let mut options_collector =
         OptionsCollector::new(VliveOptions::new()).add_option(VliveChannelStep);

@@ -81,7 +81,7 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
         .author_id(msg.author.id)
         .filter(|r| ["⬅️", "➡️"].iter().any(|u| r.emoji.unicode_eq(u)))
         .timeout(Duration::from_secs(45))
-        .build()
+        .await
         .next()
         .await
     {

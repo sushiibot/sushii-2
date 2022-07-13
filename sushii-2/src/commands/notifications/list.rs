@@ -51,6 +51,7 @@ async fn list(ctx: &Context, msg: &Message) -> CommandResult {
             let name = ctx
                 .cache
                 .guild_field(noti.guild_id as u64, |g| g.name.clone())
+                .await
                 .unwrap_or_else(|| "Unknown guild".into());
 
             if i != 0 {

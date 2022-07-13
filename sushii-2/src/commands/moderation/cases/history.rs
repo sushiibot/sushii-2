@@ -2,7 +2,7 @@ use chrono::Utc;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use serenity::utils::parse_username;
+use serenity::utils::parse_mention;
 use std::collections::HashMap;
 use std::fmt::Write;
 
@@ -36,7 +36,7 @@ async fn history(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
     let user_id = match user_id_str
         .parse::<u64>()
         .ok()
-        .or_else(|| parse_username(user_id_str))
+        .or_else(|| parse_mention(user_id_str))
     {
         Some(id) => id,
         None => {

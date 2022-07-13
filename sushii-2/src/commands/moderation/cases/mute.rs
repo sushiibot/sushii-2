@@ -1,9 +1,8 @@
 use chrono::{DateTime, Utc};
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
-use serenity::model::Timestamp;
 use serenity::prelude::*;
-use serenity::utils::parse_username;
+use serenity::utils::parse_mention;
 use std::fmt::Write;
 
 use crate::model::moderation::{ModActionExecutor, ModActionType};
@@ -99,7 +98,7 @@ async fn modify_duration(
     let user_id = match user_id_str
         .parse::<u64>()
         .ok()
-        .or_else(|| parse_username(user_id_str))
+        .or_else(|| parse_mention(user_id_str))
     {
         Some(id) => id,
         None => {
@@ -217,9 +216,7 @@ async fn modify_duration(
     member
         .disable_communication_until_datetime(
             ctx,
-            Timestamp::from_unix_timestamp(
-                DateTime::<Utc>::from_utc(mute.end_time.unwrap(), Utc).timestamp(),
-            )?,
+            DateTime::<Utc>::from_utc(mute.end_time.unwrap(), Utc),
         )
         .await?;
 
@@ -251,7 +248,7 @@ async fn addduration(ctx: &Context, msg: &Message, args: Args) -> CommandResult 
 #[aliases("listmute", "mutelist", "muteslist")]
 #[only_in("guild")]
 async fn listmutes(ctx: &Context, msg: &Message) -> CommandResult {
-    let guild = match msg.guild(&ctx.cache) {
+    let guild = match msg.guild(&ctx.cache).await {
         Some(g) => g,
         None => {
             msg.channel_id.say(&ctx.http, "No guild found").await?;

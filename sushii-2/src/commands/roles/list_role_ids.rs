@@ -6,7 +6,7 @@ use std::fmt::Write;
 #[command]
 #[required_permissions("MANAGE_GUILD")]
 async fn listids(ctx: &Context, msg: &Message) -> CommandResult {
-    let guild = match msg.guild(&ctx.cache) {
+    let guild = match msg.guild(&ctx.cache).await {
         Some(g) => g,
         None => {
             msg.channel_id.say(&ctx.http, "No guild found").await?;
