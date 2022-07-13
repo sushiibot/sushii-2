@@ -1,9 +1,9 @@
-use serenity::utils::parse_mention;
+use serenity::utils::parse_username;
 use serenity::{model::prelude::*, prelude::Context};
 
 pub async fn get_user(ctx: &Context, id: u64) -> Option<User> {
     // First check cache then try http
-    let cached_user = ctx.cache.user(id as u64).await;
+    let cached_user = ctx.cache.user(id as u64);
 
     if cached_user.is_some() {
         return cached_user;
@@ -15,7 +15,7 @@ pub async fn get_user(ctx: &Context, id: u64) -> Option<User> {
 
 // Parses a string to ID, either a raw ID or a mention
 pub fn parse_id<S: AsRef<str>>(s: S) -> Option<u64> {
-    parse_mention(s.as_ref()).or_else(|| s.as_ref().parse::<u64>().ok())
+    parse_username(s.as_ref()).or_else(|| s.as_ref().parse::<u64>().ok())
 }
 
 #[cfg(test)]

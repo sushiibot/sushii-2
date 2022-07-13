@@ -431,7 +431,7 @@ fn format_response(role_config: &GuildRoles, calc_roles: &CalculatedRoles) -> St
 
 pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
     // ignore self
-    if msg.is_own(&ctx).await {
+    if msg.is_own(&ctx) {
         return Ok(None);
     }
 
@@ -442,7 +442,7 @@ pub async fn _message(ctx: &Context, msg: &Message) -> Result<Option<String>> {
         return Ok(None);
     }
 
-    let guild = match msg.guild(&ctx.cache).await {
+    let guild = match msg.guild(&ctx.cache) {
         Some(g) => g,
         None => {
             return Ok(None);

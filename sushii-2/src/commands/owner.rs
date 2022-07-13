@@ -57,13 +57,12 @@ async fn say(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 #[command]
 #[owners_only]
 async fn listservers(ctx: &Context, msg: &Message) -> CommandResult {
-    let mut s = format!("{} total guilds cached\n", ctx.cache.guild_count().await);
+    let mut s = format!("{} total guilds cached\n", ctx.cache.guild_count());
 
-    for guild_id in ctx.cache.guilds().await {
+    for guild_id in ctx.cache.guilds() {
         let guild_name = ctx
             .cache
             .guild_field(guild_id, |g| g.name.clone())
-            .await
             .unwrap_or_else(|| "Unknown guild".into());
 
         writeln!(s, "`{}` - {}", guild_id.0, guild_name)?;

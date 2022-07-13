@@ -28,11 +28,7 @@ impl EventHandler for Handler {
         // This is here instead of cache_ready as a single unavailable guild will
         // prevent any of it from starting
         tasks::start(&ctx).await;
-        bans::start(
-            &ctx,
-            ready.guilds.iter().map(|g| g.id()).collect::<Vec<_>>(),
-        )
-        .await;
+        bans::start(&ctx, ready.guilds.iter().map(|g| g.id).collect::<Vec<_>>()).await;
     }
 
     async fn cache_ready(&self, _ctx: Context, _guild_ids: Vec<GuildId>) {
@@ -118,13 +114,13 @@ impl EventHandler for Handler {
         mod_log::mute::guild_member_update(&ctx, &old_member, &new_member).await;
     }
 
-    async fn guild_member_addition(&self, ctx: Context, guild_id: GuildId, mut member: Member) {
+    async fn guild_member_addition(&self, ctx: Context, mut member: Member) {
         // TODO: Run these concurrently instead of one by one
-        mod_log::mute::guild_member_addition(&ctx, &guild_id, &mut member).await;
+        mod_log::mute::guild_member_addition(&ctx, &member.guild_id, &mut member).await;
 
         tokio::join!(
-            join_msg::guild_member_addition(&ctx, &guild_id, &member),
-            member_log::guild_member_addition(&ctx, &guild_id, &member),
+            join_msg::guild_member_addition(&ctx, &member.guild_id, &member),
+            member_log::guild_member_addition(&ctx, &member.guild_id, &member),
         );
     }
 

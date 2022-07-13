@@ -1,6 +1,6 @@
 use serenity::{
-    client::bridge::gateway::GatewayIntents, client::ClientBuilder, framework::StandardFramework,
-    http::HttpBuilder,
+    client::ClientBuilder, framework::StandardFramework, http::HttpBuilder,
+    model::gateway::GatewayIntents,
 };
 use sqlx::postgres::PgPoolOptions;
 use std::collections::HashSet;
@@ -65,8 +65,7 @@ async fn main() -> Result<()> {
         )?
         .ratelimiter_disabled(true)
         .application_id(sushii_conf.application_id)
-        .await
-        .expect("Error creating Http");
+        .build();
 
     let owners = match http.get_current_application_info().await {
         Ok(info) => {
@@ -127,21 +126,21 @@ async fn main() -> Result<()> {
         .bucket("rank", |b| b.delay(5))
         .await;
 
-    let mut client = ClientBuilder::new_with_http(http)
-        .intents(
-            GatewayIntents::GUILDS
-                | GatewayIntents::GUILD_MEMBERS
-                | GatewayIntents::GUILD_BANS
-                | GatewayIntents::GUILD_MESSAGES
-                | GatewayIntents::GUILD_MESSAGE_REACTIONS
-                | GatewayIntents::DIRECT_MESSAGES
-                | GatewayIntents::DIRECT_MESSAGE_REACTIONS,
-        )
-        .framework(framework)
-        .event_handler(handlers::Handler)
-        .raw_event_handler(handlers::RawHandler)
-        .await
-        .expect("Err creating client");
+    let mut client = ClientBuilder::new_with_http(
+        http,
+        GatewayIntents::GUILDS
+            | GatewayIntents::GUILD_MEMBERS
+            | GatewayIntents::GUILD_BANS
+            | GatewayIntents::GUILD_MESSAGES
+            | GatewayIntents::GUILD_MESSAGE_REACTIONS
+            | GatewayIntents::DIRECT_MESSAGES
+            | GatewayIntents::DIRECT_MESSAGE_REACTIONS,
+    )
+    .framework(framework)
+    .event_handler(handlers::Handler)
+    .raw_event_handler(handlers::RawHandler)
+    .await
+    .expect("Err creating client");
 
     // Add data to client
     {

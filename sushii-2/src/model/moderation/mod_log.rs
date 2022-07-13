@@ -196,7 +196,7 @@ impl<'a> ModLogReporter<'a> {
 async fn get_user_or_bot(ctx: &Context, id: Option<i64>) -> User {
     // No user provided, use bot
     if id.is_none() {
-        return ctx.cache.current_user().await.into();
+        return ctx.cache.current_user().into();
     }
 
     // Fetch from cache or http
@@ -205,5 +205,5 @@ async fn get_user_or_bot(ctx: &Context, id: Option<i64>) -> User {
     }
 
     // Still failed, use bot
-    ctx.cache.current_user().await.into()
+    ctx.cache.current_user().into()
 }

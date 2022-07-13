@@ -264,7 +264,7 @@ impl ModActionExecutor {
             .await?
             .ok_or_else(|| SushiiError::Sushii("No guild found".into()))?;
 
-        let guild = guild_id.to_guild_cached(ctx).await;
+        let guild = guild_id.to_guild_cached(ctx);
 
         let action_str = self.action.to_string();
         let action_past_str = self.action.to_past_tense();

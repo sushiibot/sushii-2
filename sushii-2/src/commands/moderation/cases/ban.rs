@@ -1,5 +1,6 @@
 use serenity::framework::standard::{macros::command, Args, CommandResult};
-use serenity::model::interactions::message_component::ButtonStyle;
+use serenity::model::application::component::ButtonStyle;
+use serenity::model::application::interaction::InteractionResponseType;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use std::time::Duration;

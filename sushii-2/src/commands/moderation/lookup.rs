@@ -71,7 +71,7 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     };
 
-    let member = if let Some(guild) = msg.guild(ctx).await {
+    let member = if let Some(guild) = msg.guild(ctx) {
         if let Ok(member) = guild.member(ctx, target_id).await {
             Some(member)
         } else {
@@ -145,7 +145,6 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             .guild_field(ban.guild_id as u64, |g| {
                 (g.name.clone(), g.member_count, g.features.clone())
             })
-            .await
         {
             Some(fields) => fields,
             None => ("Unknown".to_string(), 0, Vec::new()),

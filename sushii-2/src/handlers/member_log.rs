@@ -34,14 +34,14 @@ async fn _guild_member_addition(ctx: &Context, guild_id: &GuildId, member: &Memb
 
     write!(desc, "{} joined", member.user.mention())?;
 
-    if let Some(member_num) = guild_id.to_guild_cached(&ctx).await.map(|g| g.member_count) {
+    if let Some(member_num) = guild_id.to_guild_cached(&ctx).map(|g| g.member_count) {
         write!(desc, " (Member #{})", member_num)?;
     }
 
     let now = Utc::now();
     // Truncate to minutes
     let age = Duration::minutes(
-        now.signed_duration_since(member.user.id.created_at())
+        now.signed_duration_since(member.user.id.created_at().with_timezone(&Utc))
             .num_minutes(),
     );
 
@@ -142,8 +142,10 @@ async fn _guild_member_removal(
         if let Some(joined_at) = member.joined_at {
             let now = Utc::now();
             // Truncate to seconds
-            let joined_duration =
-                Duration::seconds(now.signed_duration_since(joined_at).num_seconds());
+            let joined_duration = Duration::seconds(
+                now.signed_duration_since(joined_at.with_timezone(&Utc))
+                    .num_seconds(),
+            );
 
             writeln!(desc)?;
             write!(

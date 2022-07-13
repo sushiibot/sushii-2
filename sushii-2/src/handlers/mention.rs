@@ -22,7 +22,7 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
         return Ok(());
     }
 
-    let bot_id = ctx.cache.current_user_id().await;
+    let bot_id = ctx.cache.current_user_id();
 
     // If mentioned **without** a command (since mention can be prefix)
     let trimmed_content = msg

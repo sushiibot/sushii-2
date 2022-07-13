@@ -39,7 +39,7 @@ async fn avatar(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         }
     };
 
-    let member = if let Some(guild) = msg.guild(ctx).await {
+    let member = if let Some(guild) = msg.guild(ctx) {
         if let Ok(member) = guild.member(ctx, target_id).await {
             Some(member)
         } else {

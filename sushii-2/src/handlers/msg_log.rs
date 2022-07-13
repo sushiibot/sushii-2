@@ -385,7 +385,7 @@ async fn _message_delete_bulk(
 
     let now = Utc::now().naive_utc();
 
-    let channel = ctx.cache.channel(channel_id).await;
+    let channel = ctx.cache.channel(channel_id);
     let channel_name = channel
         .and_then(|c| c.guild())
         .map(|c| c.name)

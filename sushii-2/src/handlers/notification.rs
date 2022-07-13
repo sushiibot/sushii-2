@@ -15,7 +15,7 @@ pub async fn message(ctx: &Context, msg: &Message) {
 #[tracing::instrument(skip(ctx))]
 async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
     // Notifications only in guilds
-    let guild = match msg.guild(ctx).await {
+    let guild = match msg.guild(ctx) {
         Some(g) => g,
         None => return Ok(()),
     };
@@ -30,7 +30,6 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
 
     let guild_name = msg
         .guild_field(ctx, |g| g.name.clone())
-        .await
         .unwrap_or_else(|| "Unknown guild".into());
 
     // Get notifications from db with start/end times
@@ -51,7 +50,7 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
             continue;
         }
 
-        let channel = match ctx.cache.guild_channel(msg.channel_id).await {
+        let channel = match ctx.cache.guild_channel(msg.channel_id) {
             Some(channel) => channel,
             None => {
                 tracing::warn!(?msg, "Notification trigger message channel not cached");
@@ -88,7 +87,7 @@ async fn _message(ctx: &Context, msg: &Message) -> Result<()> {
         match guild.user_permissions_in(&channel, &member) {
             Ok(permissions) => {
                 // User in guild but no permissions to read messages
-                if !permissions.read_messages() {
+                if !permissions.view_channel() {
                     continue;
                 }
             }

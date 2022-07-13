@@ -55,7 +55,6 @@ async fn disablechannel(ctx: &Context, msg: &Message, args: Args) -> CommandResu
         .guild_field(ctx, |g| {
             g.channels.keys().map(|id| id.0).collect::<HashSet<u64>>()
         })
-        .await
     {
         Some(c) => c,
         None => {
@@ -134,7 +133,6 @@ async fn enablechannel(ctx: &Context, msg: &Message, args: Args) -> CommandResul
         .guild_field(ctx, |g| {
             g.channels.keys().map(|id| id.0).collect::<HashSet<u64>>()
         })
-        .await
     {
         Some(c) => c,
         None => {

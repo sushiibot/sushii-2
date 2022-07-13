@@ -93,7 +93,7 @@ impl Metrics {
                 if !message.author.bot {
                     counter!("messages", 1, "user_type" => UserType::user.as_str());
                 // Sushii messages
-                } else if message.is_own(&ctx.cache).await {
+                } else if message.is_own(&ctx.cache) {
                     counter!("messages", 1, "user_type" => UserType::own.as_str());
                 // Other bot messages
                 } else {

@@ -1,7 +1,7 @@
 use num_traits::cast::ToPrimitive;
 use serde_json::json;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
-use serenity::http::AttachmentType;
+use serenity::model::channel::AttachmentType;
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 use std::borrow::Cow;
