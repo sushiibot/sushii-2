@@ -20,7 +20,7 @@ pub use self::{
         tags::Tag,
     },
     mod_log::ModLogEntry,
-    mute::{delete_mute, Mute, MuteAction},
+    mute::{delete_mute, Mute},
     // rules::gauge::{RuleGauge, RuleScope},
     stats::BotStat,
     user::{

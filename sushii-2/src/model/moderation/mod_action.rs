@@ -1,4 +1,4 @@
-use chrono::{Duration, Utc};
+use chrono::Duration;
 use lazy_static::lazy_static;
 use regex::Regex;
 use serenity::framework::standard::Args;
@@ -112,6 +112,13 @@ impl ModActionExecutor {
         }
     }
 
+    pub fn exclude_users<I: IntoIterator<Item = u64>>(mut self, exclude_users: I) -> Self {
+        exclude_users.into_iter().for_each(|id| {
+            self.exclude_users.insert(id);
+        });
+        self
+    }
+
     #[allow(clippy::too_many_arguments)]
     async fn execute_user(
         &self,
@@ -186,30 +193,30 @@ impl ModActionExecutor {
                 }
             }
             ModActionType::Mute => {
-                let mut member = guild_id.member(ctx, user).await?;
+                // Mute commands should check if mute role exists before running ::execute()
+                if let Some(role_id) = guild_conf.mute_role {
+                    let mut member = guild_id.member(ctx, user).await?;
 
-                // Check if member is already muted
-                if member.communication_disabled_until.is_some() {
-                    return Err(SushiiError::Sushii("User is already muted".into()));
+                    // Handle if already muted, respond with error
+                    if member.roles.contains(&RoleId(role_id as u64)) {
+                        return Err(SushiiError::Sushii("User is already muted".into()));
+                    }
+
+                    // Add a pending mute entry
+                    Mute::new(guild_id.0, user.id.0, *duration)
+                        .pending(true)
+                        .save(&ctx)
+                        .await?;
+
+                    member.add_role(&ctx.http, role_id as u64).await?;
                 }
-
-                // Checked already so ok to unwrap
-                let until = Utc::now() + duration.unwrap();
-
-                // Add a pending mute entry
-                Mute::new(guild_id.0, user.id.0, *duration)
-                    .pending(true)
-                    .save(&ctx)
-                    .await?;
-
-                // We don't need to save anything to db anymore
-                member
-                    .disable_communication_until_datetime(ctx, until)
-                    .await?;
             }
             ModActionType::Unmute => {
-                let mut member = guild_id.member(ctx, user).await?;
-                member.enable_communication(ctx).await?;
+                if let Some(role_id) = guild_conf.mute_role {
+                    let mut member = guild_id.member(ctx, user).await?;
+
+                    member.remove_role(&ctx.http, role_id as u64).await?;
+                }
             }
             ModActionType::Warn => {
                 // Warn does nothing other than make a mod log entry
@@ -298,18 +305,6 @@ impl ModActionExecutor {
             .map(|d| d.ok())
             .flatten()
             .or_else(|| guild_conf.mute_duration.map(Duration::seconds));
-
-        // Mutes must need a duration now since native mutes can't be indefinite
-        if self.action == ModActionType::Mute && duration.is_none() {
-            msg.channel_id
-                .say(
-                    &ctx,
-                    "No duration was provided, please either provide a duration or set a default duration.",
-                )
-                .await?;
-
-            return Ok(());
-        }
 
         let mut sent_msg = msg
             .channel_id
