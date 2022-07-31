@@ -260,7 +260,7 @@ impl ModActionExecutor {
     }
 
     pub async fn execute(mut self, ctx: &Context, msg: &Message, guild_id: &GuildId) -> Result<()> {
-        let mut guild_conf = GuildConfig::from_id(&ctx, guild_id)
+        let guild_conf = GuildConfig::from_id(&ctx, guild_id)
             .await?
             .ok_or_else(|| SushiiError::Sushii("No guild found".into()))?;
 
@@ -301,18 +301,14 @@ impl ModActionExecutor {
 
         // Mutes must need a duration now since native mutes can't be indefinite
         if self.action == ModActionType::Mute && duration.is_none() {
-            // Set default mute duration to 1 day if it's not set
-            guild_conf.mute_duration = Some(Duration::days(1).num_seconds());
-            guild_conf.save(&ctx).await?;
-
             msg.channel_id
                 .say(
                     &ctx,
-                    "Note: Mutes now use native Discord time outs which cannot be indefinite. \
-                    The default mute duration has been updated to 1 day. \
-                    You can change this with `settings mute defaultduration`",
+                    "No duration was provided, please either provide a duration or set a default duration.",
                 )
                 .await?;
+
+            return Ok(());
         }
 
         let mut sent_msg = msg

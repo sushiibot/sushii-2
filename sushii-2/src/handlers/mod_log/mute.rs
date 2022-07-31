@@ -75,21 +75,15 @@ async fn _guild_member_update(
     old_member: &Option<Member>,
     new_member: &Member,
 ) -> Result<()> {
-    if new_member.guild_id.0 != 167058919611564043 {
+    let old_member = match old_member {
+        Some(old_member) => old_member,
+        None => return Ok(()),
+    };
+
+    // No modification to mute/unmute/duration change
+    if old_member.communication_disabled_until == new_member.communication_disabled_until {
         return Ok(());
     }
-
-    if let Some(old_member) = old_member {
-        // No modification to mute/unmute/duration change
-        if old_member.communication_disabled_until == new_member.communication_disabled_until {
-            return Ok(());
-        }
-    }
-
-    tracing::debug!(
-        ?new_member.communication_disabled_until,
-        "guild_member_update mute",
-    );
 
     let duration = new_member
         .communication_disabled_until
@@ -108,55 +102,53 @@ async fn _guild_member_update(
         }
     };
 
+    let now = Utc::now();
+    let action = match (
+        old_member.communication_disabled_until,
+        new_member.communication_disabled_until,
+    ) {
+        // Timeout removed
+        (Some(_), None) => MuteAction::Unmute,
+        // If disabled_until has not changed but timestamp is in the past
+        (Some(_), Some(until)) if until < now => MuteAction::Unmute,
+        // Timeout newly added
+        (None, Some(_)) => MuteAction::Mute,
+        // Timeout changed and is still valid
+        (Some(_), Some(_)) => MuteAction::ChangeDuration,
+        // No timeout to no timeout
+        (None, None) => return Ok(()),
+    };
+
     let mute_entry =
         Mute::from_id_any_pending(ctx, new_member.guild_id.0, new_member.user.id.0).await?;
 
-    let now = Utc::now();
-    let new_is_muted = new_member
-        .communication_disabled_until
-        .map(|until| until < now) // Already ended
-        .unwrap_or(false); // Or none set
-
-    let (mute_entry, action) = match (mute_entry, new_is_muted) {
+    let mute_entry = match (mute_entry, action) {
         // Timed out manually: No mute entry and is timed out
-        (None, true) => {
+        (None, MuteAction::Mute) => {
             // If there isn't a pending OR there isn't an existing mute, it's a
             // NEW regular mute from manually adding timing out a user to a user
             // so just create a new one
-            (
-                Some(Mute::new(
-                    new_member.guild_id.0,
-                    new_member.user.id.0,
-                    duration,
-                )),
-                MuteAction::Mute,
-            )
+            Some(Mute::new(
+                new_member.guild_id.0,
+                new_member.user.id.0,
+                duration,
+            ))
         }
         // s!!mute command: Has pending mute entry, so use existing
-        (Some(entry), true) if entry.pending => {
+        (Some(entry), MuteAction::Mute) if entry.pending => {
             // If there's a pending one, update pending to false
             // Save it first in case other stuff fails, since if other stuff
             // fails we don't want this pending still, just throw it out I guess
-            (
-                Some(entry.pending(false).save(ctx).await?),
-                MuteAction::Mute,
-            )
+            Some(entry.pending(false).save(ctx).await?)
         }
         // Timeout removed: Has mute entry and is no longer muted
-        (Some(_), false) => {
+        (Some(_), MuteAction::Unmute) => {
             delete_mute(&ctx, new_member.guild_id.0, new_member.user.id.0).await?;
 
-            (None, MuteAction::Unmute)
+            None
         }
         // Timeout changed: Has mute entry and mute duration changed
-        // This is only when it is updated and mute is NOT pending
-        // Member time out time should be different from saved mute time
-        (Some(mut entry), true)
-            if entry.end_time
-                != new_member
-                    .communication_disabled_until
-                    .map(|d| d.naive_utc()) =>
-        {
+        (Some(mut entry), MuteAction::ChangeDuration) => {
             // Update end time to the new end time
             entry.end_time = new_member
                 .communication_disabled_until
@@ -164,13 +156,11 @@ async fn _guild_member_update(
 
             entry.save(ctx).await?;
 
-            (None, MuteAction::ChangeDuration)
+            None
         }
         // timeout added but no pending mute entry
         _ => return Ok(()),
     };
-
-    tracing::debug!(?action, ?duration, ?new_member.guild_id, ?new_member, "mute guild_member_update");
 
     // Add a mod log entry
     let entry = ModLogReporter::new(&new_member.guild_id, &new_member.user, &action.to_string())
