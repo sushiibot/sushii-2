@@ -1,80 +1,5 @@
 {
   "db": "PostgreSQL",
-  "061c3f1bedf35968eb8681f3402f9add0cb0309fd6d53b0e5aabe6c98f198873": {
-    "query": "\n            INSERT INTO app_public.rule_gauges (time, guild_id, scope, scope_id, name, value)\n                VALUES (NOW(), $1, $2, $3, $4,\n                    -- select the most recent record and increment\n                    coalesce((SELECT value + 1\n                      FROM app_public.rule_gauges\n                     WHERE guild_id = $1\n                       AND scope = $2\n                       AND scope_id = $3\n                       AND name = $4\n                     ORDER BY time DESC\n                     LIMIT 1),\n                     1\n                    )\n                )\n                RETURNING time, guild_id, scope as \"scope: RuleScope\",\n                          scope_id, name, value\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "time",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "scope: RuleScope",
-          "type_info": {
-            "Custom": {
-              "name": "rule_scope",
-              "kind": {
-                "Enum": [
-                  "GUILD",
-                  "CHANNEL",
-                  "USER"
-                ]
-              }
-            }
-          }
-        },
-        {
-          "ordinal": 3,
-          "name": "scope_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "value",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          {
-            "Custom": {
-              "name": "rule_scope",
-              "kind": {
-                "Enum": [
-                  "GUILD",
-                  "CHANNEL",
-                  "USER"
-                ]
-              }
-            }
-          },
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "06e8bf886ba37c24342ab8f651aeb37f5e285c1968200c2be21e1c2289ef8e61": {
     "query": "\n        INSERT INTO app_public.cached_guilds (id, name, icon, splash, banner, features)\n             VALUES ($1, $2, $3, $4, $5, $6)\n        ON CONFLICT (id)\n          DO UPDATE\n                SET name = $2,\n                    icon = $3,\n                    splash = $4,\n                    banner = $5,\n                    features = $6\n        ",
     "describe": {
@@ -204,6 +129,11 @@
           "ordinal": 5,
           "name": "created",
           "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 6,
+          "name": "attachment",
+          "type_info": "Text"
         }
       ],
       "parameters": {
@@ -222,7 +152,8 @@
         false,
         false,
         false,
-        false
+        false,
+        true
       ]
     }
   },
@@ -288,81 +219,6 @@
         ]
       },
       "nullable": []
-    }
-  },
-  "1395927c198d2e60399798dcce30c9bb6f78e230f9f1b73c804b9cf41e5e7a86": {
-    "query": "\n            INSERT INTO app_public.rule_gauges (time, guild_id, scope, scope_id, name, value)\n                VALUES (NOW(), $1, $2, $3, $4,\n                    -- select the most recent record and increment\n                    coalesce((SELECT value - 1\n                      FROM app_public.rule_gauges\n                     WHERE guild_id = $1\n                       AND scope = $2\n                       AND scope_id = $3\n                       AND name = $4\n                     ORDER BY time DESC\n                     LIMIT 1),\n                     0\n                    )\n                )\n                RETURNING time, guild_id, scope as \"scope: RuleScope\",\n                          scope_id, name, value\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "time",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "scope: RuleScope",
-          "type_info": {
-            "Custom": {
-              "name": "rule_scope",
-              "kind": {
-                "Enum": [
-                  "GUILD",
-                  "CHANNEL",
-                  "USER"
-                ]
-              }
-            }
-          }
-        },
-        {
-          "ordinal": 3,
-          "name": "scope_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "value",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          {
-            "Custom": {
-              "name": "rule_scope",
-              "kind": {
-                "Enum": [
-                  "GUILD",
-                  "CHANNEL",
-                  "USER"
-                ]
-              }
-            }
-          },
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
     }
   },
   "17bcdd2bfcea675c29e0904ff0d4cda55303d5462f24d22610ef0be59ed8f4ff": {
@@ -482,6 +338,11 @@
           "ordinal": 5,
           "name": "created",
           "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 6,
+          "name": "attachment",
+          "type_info": "Text"
         }
       ],
       "parameters": {
@@ -495,7 +356,8 @@
         false,
         false,
         false,
-        false
+        false,
+        true
       ]
     }
   },
@@ -742,6 +604,11 @@
           "ordinal": 5,
           "name": "created",
           "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 6,
+          "name": "attachment",
+          "type_info": "Text"
         }
       ],
       "parameters": {
@@ -758,7 +625,8 @@
         false,
         false,
         false,
-        false
+        false,
+        true
       ]
     }
   },
@@ -1210,6 +1078,11 @@
           "ordinal": 5,
           "name": "created",
           "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 6,
+          "name": "attachment",
+          "type_info": "Text"
         }
       ],
       "parameters": {
@@ -1224,7 +1097,8 @@
         false,
         false,
         false,
-        false
+        false,
+        true
       ]
     }
   },
@@ -1245,81 +1119,6 @@
       },
       "nullable": [
         null
-      ]
-    }
-  },
-  "54e6cfb6c35621298cd4a8125774e1f14987aca50ac464b1326e97fa529f0392": {
-    "query": "\n            INSERT INTO app_public.rule_gauges (time, guild_id, scope, scope_id, name, value)\n                VALUES (NOW(), $1, $2, $3, $4, 0)\n                RETURNING time, guild_id, scope as \"scope: RuleScope\",\n                          scope_id, name, value\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "time",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "scope: RuleScope",
-          "type_info": {
-            "Custom": {
-              "name": "rule_scope",
-              "kind": {
-                "Enum": [
-                  "GUILD",
-                  "CHANNEL",
-                  "USER"
-                ]
-              }
-            }
-          }
-        },
-        {
-          "ordinal": 3,
-          "name": "scope_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "value",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          {
-            "Custom": {
-              "name": "rule_scope",
-              "kind": {
-                "Enum": [
-                  "GUILD",
-                  "CHANNEL",
-                  "USER"
-                ]
-              }
-            }
-          },
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
       ]
     }
   },
@@ -1634,81 +1433,6 @@
       "nullable": []
     }
   },
-  "69e01c12a010511eb8280372425921a6a6d677d3f1e2e057536e7ac52f6a6855": {
-    "query": "\n                SELECT time, guild_id, scope as \"scope: RuleScope\",\n                       scope_id, name, value\n                  FROM app_public.rule_gauges\n                 WHERE guild_id = $1\n                   AND scope = $2\n                   AND scope_id = $3\n                   AND name = $4\n                 ORDER BY time DESC\n                 LIMIT 1\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "time",
-          "type_info": "Timestamptz"
-        },
-        {
-          "ordinal": 1,
-          "name": "guild_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 2,
-          "name": "scope: RuleScope",
-          "type_info": {
-            "Custom": {
-              "name": "rule_scope",
-              "kind": {
-                "Enum": [
-                  "GUILD",
-                  "CHANNEL",
-                  "USER"
-                ]
-              }
-            }
-          }
-        },
-        {
-          "ordinal": 3,
-          "name": "scope_id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 4,
-          "name": "name",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "value",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          {
-            "Custom": {
-              "name": "rule_scope",
-              "kind": {
-                "Enum": [
-                  "GUILD",
-                  "CHANNEL",
-                  "USER"
-                ]
-              }
-            }
-          },
-          "Int8",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "6a0d2d04a3d415ed526fb6b64b6821caa88194b7e7a4ed3bcc5c1f168a96f7c0": {
     "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM app_public.feeds\n             WHERE feed_id = $1\n            ",
     "describe": {
@@ -1867,6 +1591,11 @@
           "ordinal": 5,
           "name": "created",
           "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 6,
+          "name": "attachment",
+          "type_info": "Text"
         }
       ],
       "parameters": {
@@ -1881,7 +1610,8 @@
         false,
         false,
         false,
-        false
+        false,
+        true
       ]
     }
   },
@@ -2088,6 +1818,11 @@
           "ordinal": 5,
           "name": "created",
           "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 6,
+          "name": "attachment",
+          "type_info": "Text"
         }
       ],
       "parameters": {
@@ -2102,7 +1837,8 @@
         false,
         false,
         false,
-        false
+        false,
+        true
       ]
     }
   },
@@ -2278,6 +2014,11 @@
           "ordinal": 5,
           "name": "created",
           "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 6,
+          "name": "attachment",
+          "type_info": "Text"
         }
       ],
       "parameters": {
@@ -2293,7 +2034,8 @@
         false,
         false,
         false,
-        false
+        false,
+        true
       ]
     }
   },
@@ -2396,6 +2138,11 @@
           "ordinal": 5,
           "name": "created",
           "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 6,
+          "name": "attachment",
+          "type_info": "Text"
         }
       ],
       "parameters": {
@@ -2412,7 +2159,8 @@
         false,
         false,
         false,
-        false
+        false,
+        true
       ]
     }
   },
@@ -2729,41 +2477,6 @@
         false,
         false,
         false
-      ]
-    }
-  },
-  "cd3fe33b749fb11245b5b71807d8b9724bb57304eec0b68b3003593b72da16c4": {
-    "query": "\n                SELECT count(*) as \"count!\"\n                  FROM app_public.rule_gauges\n                 WHERE guild_id = $1\n                   AND scope = $2\n                   AND scope_id = $3\n                   AND name = $4\n                    -- only select the ones newer than duration\n                   AND time > NOW() - ($5)::interval\n                    -- select the ones since the last reset\n                   AND time > (SELECT time\n                                 FROM app_public.rule_gauges\n                                WHERE value = 0\n                             ORDER BY time DESC\n                                LIMIT 1)\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "count!",
-          "type_info": "Int8"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8",
-          {
-            "Custom": {
-              "name": "rule_scope",
-              "kind": {
-                "Enum": [
-                  "GUILD",
-                  "CHANNEL",
-                  "USER"
-                ]
-              }
-            }
-          },
-          "Int8",
-          "Text",
-          "Interval"
-        ]
-      },
-      "nullable": [
-        null
       ]
     }
   },
@@ -3314,6 +3027,11 @@
           "ordinal": 5,
           "name": "created",
           "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 6,
+          "name": "attachment",
+          "type_info": "Text"
         }
       ],
       "parameters": {
@@ -3329,7 +3047,8 @@
         false,
         false,
         false,
-        false
+        false,
+        true
       ]
     }
   },
@@ -3432,30 +3151,6 @@
       },
       "nullable": [
         null
-      ]
-    }
-  },
-  "0cb3bdc6ad59c788f3f8cc69698db83ceb46c0173bc236205b5b9ac64f469db8": {
-    "query": "\n            SELECT feed_id,\n                   metadata as \"metadata: Json<FeedMetadata>\"\n              FROM app_public.feeds\n             WHERE feed_id NOT LIKE 'vlive:%'\n            ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "feed_id",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "metadata: Json<FeedMetadata>",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": []
-      },
-      "nullable": [
-        false,
-        true
       ]
     }
   }
