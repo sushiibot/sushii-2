@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::Duration;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
@@ -23,6 +23,15 @@ async fn mute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
             return Ok(());
         }
     };
+
+    let conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
+    if conf.mute_role.is_none() {
+        msg.channel_id
+            .say(&ctx.http, "Error: There is no mute role set")
+            .await?;
+
+        return Ok(());
+    }
 
     if args.is_empty() {
         msg.channel_id
@@ -57,6 +66,15 @@ async fn unmute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         }
     };
 
+    let conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
+    if conf.mute_role.is_none() {
+        let _ = msg
+            .channel_id
+            .say(&ctx.http, "There is no mute command set");
+
+        return Ok(());
+    }
+
     ModActionExecutor::from_args(args, ModActionType::Unmute)
         .execute(&ctx, &msg, &guild_id)
         .await?;
@@ -67,6 +85,11 @@ async fn unmute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 enum DurationModifyAction {
     Set,
     Add,
+}
+
+enum DurationOption {
+    Duration(Duration),
+    Indefinite,
 }
 
 async fn modify_duration(
@@ -110,43 +133,32 @@ async fn modify_duration(
         }
     };
 
-    let mut member = match guild_id.member(ctx, user_id).await {
-        Ok(m) => m,
-        Err(_) => {
-            msg.channel_id
-                .say(ctx, "Error: Could not find member")
-                .await?;
-
-            return Ok(());
-        }
-    };
-
     // or is indefinite
     let duration_str = args.rest();
 
     if duration_str.is_empty() {
         msg.channel_id
-            .say(&ctx.http, "Error: Give a duration")
+            .say(&ctx.http, "Error: Give a duration or `indefinite`")
             .await?;
 
         return Ok(());
     }
 
-    let duration = match parse_duration(duration_str) {
-        Ok(d) => d,
-        Err(e) => {
-            msg.channel_id
-                .say(
-                    &ctx.http,
-                    format!(
-                        "Error: Failed to parse duration, give a duration or `indefinite` -- {}",
-                        e
-                    ),
-                )
-                .await?;
+    let duration_opt = match duration_str.to_lowercase().as_ref() {
+        "indefinite" | "indef" | "inf" | "none" => DurationOption::Indefinite,
+        _ => match parse_duration(duration_str) {
+            Ok(d) => DurationOption::Duration(d),
+            Err(e) => {
+                msg.channel_id
+                        .say(
+                            &ctx.http,
+                            format!("Error: Failed to parse duration, give a duration or `indefinite` -- {}", e),
+                        )
+                        .await?;
 
-            return Ok(());
-        }
+                return Ok(());
+            }
+        },
     };
 
     let mut mute = match Mute::from_id(&ctx, guild_id.0, user_id).await? {
@@ -180,45 +192,64 @@ async fn modify_duration(
 
     let s = match action {
         DurationModifyAction::Add => {
-            // End time = end + new duration
-            // or if indefinite / no end time
-            // End time = start + new duration
-            mute.end_time = mute
-                .end_time
-                .and_then(|t| t.checked_add_signed(duration))
-                .or_else(|| mute.start_time.checked_add_signed(duration));
+            match duration_opt {
+                DurationOption::Duration(duration) => {
+                    // End time = end + new duration
+                    // or if indefinite / no end time
+                    // End time = start + new duration
+                    mute.end_time = mute
+                        .end_time
+                        .and_then(|t| t.checked_add_signed(duration))
+                        .or_else(|| mute.start_time.checked_add_signed(duration));
 
-            format!(
-                "Mute duration for {} extended by `{}`, new duration is now `{}` (old duration: `{}`)",
-                user.tag(),
-                humantime::format_duration(duration.to_std().unwrap()),
-                mute.get_std_duration()
-                    .map(|d| humantime::format_duration(d).to_string())
-                    .unwrap_or_else(|| "N/A".to_string()),
-                old_duration
-            )
+                    format!(
+                        "Mute duration for {} extended by `{}`, new duration is now `{}` (old duration: `{}`)",
+                        user.tag(),
+                        humantime::format_duration(duration.to_std().unwrap()),
+                        mute.get_std_duration()
+                            .map(|d| humantime::format_duration(d).to_string())
+                            .unwrap_or_else(|| "N/A".to_string()),
+                        old_duration
+                    )
+                }
+                DurationOption::Indefinite => {
+                    mute.end_time = None;
+
+                    format!(
+                        "Mute for {} is now indefinite (old duration: `{}`)",
+                        user.tag(),
+                        old_duration
+                    )
+                }
+            }
         }
         DurationModifyAction::Set => {
-            // End time = start + new duration
-            mute.end_time = mute.start_time.checked_add_signed(duration);
+            match duration_opt {
+                DurationOption::Duration(duration) => {
+                    // End time = start + new duration
+                    mute.end_time = mute.start_time.checked_add_signed(duration);
 
-            format!(
-                "Mute duration for {} set to `{}` (old duration: `{}`)",
-                user.tag(),
-                mute.get_std_duration()
-                    .map(|d| humantime::format_duration(d).to_string())
-                    .unwrap_or_else(|| "N/A".to_string()),
-                old_duration
-            )
+                    format!(
+                        "Mute duration for {} set to `{}` (old duration: `{}`)",
+                        user.tag(),
+                        mute.get_std_duration()
+                            .map(|d| humantime::format_duration(d).to_string())
+                            .unwrap_or_else(|| "N/A".to_string()),
+                        old_duration
+                    )
+                }
+                DurationOption::Indefinite => {
+                    mute.end_time = None;
+
+                    format!(
+                        "Mute for {} is now indefinite (old duration: `{}`)",
+                        user.tag(),
+                        old_duration
+                    )
+                }
+            }
         }
     };
-
-    member
-        .disable_communication_until_datetime(
-            ctx,
-            DateTime::<Utc>::from_utc(mute.end_time.unwrap(), Utc),
-        )
-        .await?;
 
     mute.save(&ctx).await?;
 
