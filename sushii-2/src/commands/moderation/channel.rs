@@ -69,7 +69,7 @@ async fn slowmode(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
     }
 
     target_channel
-        .edit(ctx, |c| c.slow_mode_rate(slowmode_rate))
+        .edit(ctx, |c| c.rate_limit_per_user(slowmode_rate))
         .await?;
 
     msg.channel_id

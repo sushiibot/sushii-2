@@ -35,6 +35,7 @@ default-features = false
 features = [ "runtime-tokio-rustls", "macros", "postgres", "json", "chrono", "offline", "migrate", "decimal" ]
 
 [dependencies.serenity]
-git = "https://github.com/drklee3/serenity"
-rev = "b645b857020c4ee11b1c2d87e559a43a3fd750f4"
+# git = "https://github.com/drklee3/serenity"
+# rev = "b645b857020c4ee11b1c2d87e559a43a3fd750f4"
+version = "0.10.10"
 features = ["collector", "unstable_discord_api"]
