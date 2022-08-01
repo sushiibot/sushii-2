@@ -1,4 +1,6 @@
 [workspace]
 members = [
-    "sushii-*"
+    "sushii-2",
+    "sushii-model",
+    "sushii-feeds"
 ]

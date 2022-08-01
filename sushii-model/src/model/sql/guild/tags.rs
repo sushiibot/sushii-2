@@ -143,8 +143,7 @@ impl Tag {
     }
 
     pub async fn can_edit(&self, ctx: &Context, member: &Member) -> Result<bool> {
-        Ok(i64::from(member.user.id) == self.owner_id
-            || member.permissions(&ctx).await?.manage_guild())
+        Ok(i64::from(member.user.id) == self.owner_id || member.permissions(&ctx)?.manage_guild())
     }
 
     /// Renames this tag, returns false if there is already a tag with the desired name

@@ -2,6 +2,7 @@ use config::ConfigError;
 use dotenv::Error as DotenvError;
 use humantime::DurationError;
 use serde_json::Error as SerdeJsonError;
+use serenity::model::timestamp::InvalidTimestamp;
 use serenity::Error as SerenityError;
 use sqlx::migrate::MigrateError;
 use sqlx::Error as SqlxError;
@@ -42,4 +43,6 @@ pub enum Error {
     Duration(#[from] DurationError),
     #[error(transparent)]
     Config(#[from] ConfigError),
+    #[error(transparent)]
+    InvalidTimestamp(#[from] InvalidTimestamp),
 }

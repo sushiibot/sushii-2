@@ -29,7 +29,7 @@ impl CachedGuild {
         let pool = ctx.data.read().await.get::<DbPool>().cloned().unwrap();
 
         // update_guild dispatch runs after cache is updated, so this should include new info
-        if let Some(guild) = partial_guild.id.to_guild_cached(&ctx).await {
+        if let Some(guild) = partial_guild.id.to_guild_cached(&ctx) {
             update_query(&pool, &guild).await
         } else {
             tracing::warn!("Cached guild not found when updating");

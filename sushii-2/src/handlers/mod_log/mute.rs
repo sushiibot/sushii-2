@@ -110,7 +110,9 @@ async fn _guild_member_update(
         // Timeout removed
         (Some(_), None) => MuteAction::Unmute,
         // If disabled_until has not changed but timestamp is in the past
-        (Some(_), Some(until)) if until < now => MuteAction::Unmute,
+        (Some(_), Some(until)) if until < Timestamp::from_unix_timestamp(now.timestamp())? => {
+            MuteAction::Unmute
+        }
         // Timeout newly added
         (None, Some(_)) => MuteAction::Mute,
         // Timeout changed and is still valid

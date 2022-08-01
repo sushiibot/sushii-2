@@ -124,9 +124,9 @@ impl Metrics {
                     self.member_counts.remove(&guild.id);
                 }
             }
-            Event::GuildMemberAdd(GuildMemberAddEvent { guild_id, .. }) => {
+            Event::GuildMemberAdd(GuildMemberAddEvent { member, .. }) => {
                 {
-                    let mut entry = self.member_counts.entry(*guild_id).or_insert(0);
+                    let mut entry = self.member_counts.entry(member.guild_id).or_insert(0);
                     *entry += 1;
                 }
 
