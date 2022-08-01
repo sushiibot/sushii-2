@@ -116,7 +116,7 @@ impl EventHandler for Handler {
 
     async fn guild_member_addition(&self, ctx: Context, mut member: Member) {
         // TODO: Run these concurrently instead of one by one
-        mod_log::mute::guild_member_addition(&ctx, &member.guild_id, &mut member).await;
+        mod_log::mute::guild_member_addition(&ctx, member.guild_id, &mut member).await;
 
         tokio::join!(
             join_msg::guild_member_addition(&ctx, &member.guild_id, &member),

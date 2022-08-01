@@ -1,37 +1,9 @@
 use chrono::{naive::NaiveDateTime, offset::Utc, Duration};
 use serde::{Deserialize, Serialize};
 use serenity::prelude::*;
-use std::fmt;
 
 use crate::error::Result;
 use crate::keys::DbPool;
-
-#[derive(Deserialize, Serialize, Clone, Copy, Debug, PartialEq, Eq)]
-pub enum MuteAction {
-    Mute,
-    Unmute,
-    ChangeDuration,
-}
-
-impl MuteAction {
-    pub fn to_dm_message(&self) -> &'static str {
-        match self {
-            MuteAction::Mute => "You have been muted",
-            MuteAction::Unmute => "You have been unmuted",
-            MuteAction::ChangeDuration => "Your mute duration has been changed",
-        }
-    }
-}
-
-impl fmt::Display for MuteAction {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            MuteAction::Mute => write!(f, "mute"),
-            MuteAction::Unmute => write!(f, "unmute"),
-            MuteAction::ChangeDuration => write!(f, "mute duration change"),
-        }
-    }
-}
 
 #[derive(Deserialize, Serialize, sqlx::FromRow, Clone, Debug)]
 pub struct Mute {
