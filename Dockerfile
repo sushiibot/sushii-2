@@ -38,7 +38,7 @@ RUN cargo test --release --locked
 RUN cargo build --release --locked
 
 ## Final base image with only the built binary
-FROM debian:buster-slim
+FROM debian:bullseye-slim
 ARG TARGET
 ENV TARGET ${TARGET}
 

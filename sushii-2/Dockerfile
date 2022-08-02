@@ -35,8 +35,8 @@ RUN rm ../target/release/deps/*sushii_2*
 RUN cargo test --release --locked
 RUN cargo build --release --locked
 
-## Final base image with only the picatch binary
-FROM debian:buster-slim
+## Final base image with only the sushii binary
+FROM debian:bullseye-slim
 
 WORKDIR /config
 
