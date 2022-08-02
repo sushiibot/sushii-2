@@ -2,5 +2,5 @@
 members = [
     "sushii-2",
     "sushii-model",
-    "sushii-feeds"
+    # "sushii-feeds"
 ]
