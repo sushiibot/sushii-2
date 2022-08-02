@@ -1,7 +1,7 @@
 # Generic Dockerfile which can build any sushii-2 packages
 # docker build --build-arg TARGET=sushii-2 .
 
-FROM rust:1.52 as build
+FROM rust:1.62 as build
 
 # Which package to build
 ARG TARGET
