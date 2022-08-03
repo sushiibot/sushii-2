@@ -72,7 +72,7 @@ async fn profile(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult 
     writeln!(
         s,
         "**Registered:** {}",
-        user_info.registered.date.format("%Y-%m-%dT%H:%M:%S")
+        user_info.registered.date.format("%+")
     )?;
 
     if !user_info.country.is_empty() {

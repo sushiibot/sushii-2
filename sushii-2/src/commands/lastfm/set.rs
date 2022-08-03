@@ -57,13 +57,7 @@ async fn set(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 e.field("Total Tracks", &lastfm_user.scrobbles, true);
 
                 // Should be in ISO-8601
-                e.timestamp(
-                    lastfm_user
-                        .registered
-                        .date
-                        .format("%Y-%m-%dT%H:%M:%S")
-                        .to_string(),
-                );
+                e.timestamp(lastfm_user.registered.date.format("%+").to_string());
 
                 e.footer(|f| {
                     f.text("Registered");

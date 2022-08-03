@@ -135,7 +135,7 @@ async fn _message_update(
                     f
                 });
 
-                e.timestamp(now.format("%Y-%m-%dT%H:%M:%S").to_string());
+                e.timestamp(now.format("%+").to_string());
                 e.colour(0x9b59b6);
 
                 e
@@ -276,7 +276,7 @@ async fn _message_delete(
                     f
                 });
 
-                e.timestamp(now.format("%Y-%m-%dT%H:%M:%S").to_string());
+                e.timestamp(now.format("%+").to_string());
                 e.colour(0xe74c3c);
 
                 e
@@ -414,7 +414,7 @@ async fn _message_delete_bulk(
                         f
                     });
 
-                    e.timestamp(now.format("%Y-%m-%dT%H:%M:%S").to_string());
+                    e.timestamp(now.format("%+").to_string());
                     e.colour(0xe74c3c);
 
                     e

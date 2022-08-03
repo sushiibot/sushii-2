@@ -65,6 +65,8 @@ impl<'a> ModLogReporter<'a> {
             }
         };
 
+        tracing::debug!("ModLogEntry: {:?}", entry);
+
         // If this is an AUTOMATED unmute **only**, use the initial entry executor
         // though im not sure if it should even be also the muter?
         /*
@@ -106,8 +108,11 @@ impl<'a> ModLogReporter<'a> {
         entry.pending = false;
         entry.save(&ctx).await?;
 
+        tracing::debug!("saved entry with reason: {:?}", entry.reason);
+
         // Only send if mod log is enabled
         if !guild_conf.log_mod_enabled {
+            tracing::debug!("not sending, mod log disabled");
             return Ok(entry);
         }
 
@@ -130,6 +135,8 @@ impl<'a> ModLogReporter<'a> {
                 Err(e) => tracing::error!("Failed to send mod log entry message: {}", e),
             }
         }
+
+        tracing::debug!("mod log enabled but no channel set");
 
         Ok(entry)
     }
@@ -186,7 +193,7 @@ impl<'a> ModLogReporter<'a> {
                         f
                     });
 
-                    e.timestamp(entry.action_time.format("%Y-%m-%dT%H:%M:%S").to_string());
+                    e.timestamp(entry.action_time.format("%+").to_string());
 
                     e.color(entry.color());
 

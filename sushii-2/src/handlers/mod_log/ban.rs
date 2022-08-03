@@ -4,6 +4,8 @@ use crate::model::moderation::ModLogReporter;
 use crate::model::sql::delete_mute;
 
 pub async fn guild_ban_addition(ctx: &Context, guild_id: &GuildId, banned_user: &User) {
+    tracing::debug!("Guild ban addition: {}", banned_user.tag());
+
     if let Err(e) = ModLogReporter::new(guild_id, banned_user, "ban")
         .execute(&ctx)
         .await
