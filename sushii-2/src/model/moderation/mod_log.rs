@@ -193,7 +193,10 @@ impl<'a> ModLogReporter<'a> {
                         f
                     });
 
-                    e.timestamp(entry.action_time.format("%+").to_string());
+                    e.timestamp(
+                        Timestamp::from_unix_timestamp(entry.action_time.timestamp())
+                            .expect("invalid timestamp"),
+                    );
 
                     e.color(entry.color());
 

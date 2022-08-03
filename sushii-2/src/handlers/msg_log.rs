@@ -111,7 +111,7 @@ async fn _message_update(
         saved_msg.channel_id as u64, saved_msg.content, new_content,
     );
 
-    let now = Utc::now().naive_utc();
+    let now = Utc::now();
 
     let res = ChannelId(log_msg_channel as u64)
         .send_message(ctx, |m| {
@@ -135,7 +135,7 @@ async fn _message_update(
                     f
                 });
 
-                e.timestamp(now.format("%+").to_string());
+                e.timestamp(now);
                 e.colour(0x9b59b6);
 
                 e
@@ -251,7 +251,7 @@ async fn _message_delete(
         }
     }
 
-    let now = Utc::now().naive_utc();
+    let now = Utc::now();
 
     let res = ChannelId(log_msg_channel as u64)
         .send_message(ctx, |m| {
@@ -276,7 +276,7 @@ async fn _message_delete(
                     f
                 });
 
-                e.timestamp(now.format("%+").to_string());
+                e.timestamp(now);
                 e.colour(0xe74c3c);
 
                 e
@@ -383,7 +383,7 @@ async fn _message_delete_bulk(
         writeln!(s)?;
     }
 
-    let now = Utc::now().naive_utc();
+    let now = Utc::now();
 
     let channel = ctx.cache.channel(channel_id);
     let channel_name = channel
@@ -414,7 +414,7 @@ async fn _message_delete_bulk(
                         f
                     });
 
-                    e.timestamp(now.format("%+").to_string());
+                    e.timestamp(now);
                     e.colour(0xe74c3c);
 
                     e
