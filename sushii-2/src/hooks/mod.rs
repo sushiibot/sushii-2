@@ -80,6 +80,12 @@ pub async fn dispatch_error(
                 )
                 .await;
         }
+        DispatchError::OnlyForGuilds => {
+            let _ = msg
+                .channel_id
+                .say(&ctx, "This command can only be used in servers.")
+                .await;
+        }
         _ => tracing::warn!("Unhandled dispatch error: {:?}", error),
     }
 }

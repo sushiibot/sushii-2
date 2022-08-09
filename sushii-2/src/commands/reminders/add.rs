@@ -6,7 +6,6 @@ use serenity::prelude::*;
 use crate::model::sql::*;
 
 #[command]
-#[only_in("guild")]
 async fn add(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let reminder_and_dur = args.rest().trim();
 
