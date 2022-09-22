@@ -43,7 +43,8 @@ impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
         tokio::join!(
             roles::message(&ctx, &msg),
-            user_levels::message(&ctx, &msg),
+            // Disable user levels handler, now handled in sushii-ts-services
+            // user_levels::message(&ctx, &msg),
             msg_log::message(&ctx, &msg),
             mention::message(&ctx, &msg),
             cache::cache_user::message(&ctx, &msg),
