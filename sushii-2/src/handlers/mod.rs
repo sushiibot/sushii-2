@@ -45,7 +45,9 @@ impl EventHandler for Handler {
             roles::message(&ctx, &msg),
             // Disable user levels handler, now handled in sushii-ts-services
             // user_levels::message(&ctx, &msg),
-            msg_log::message(&ctx, &msg),
+
+            // Message logs handled in sushii-ts-services
+            // msg_log::message(&ctx, &msg),
             mention::message(&ctx, &msg),
             cache::cache_user::message(&ctx, &msg),
             notification::message(&ctx, &msg),
@@ -54,32 +56,35 @@ impl EventHandler for Handler {
 
     async fn message_delete(
         &self,
-        ctx: Context,
-        channel_id: ChannelId,
-        msg_id: MessageId,
-        guild_id: Option<GuildId>,
+        _ctx: Context,
+        _channel_id: ChannelId,
+        _msg_id: MessageId,
+        _guild_id: Option<GuildId>,
     ) {
-        msg_log::message_delete(&ctx, channel_id, msg_id, guild_id).await;
+        // Handled in sushii-ts-services
+        // msg_log::message_delete(&ctx, channel_id, msg_id, guild_id).await;
     }
 
     async fn message_delete_bulk(
         &self,
-        ctx: Context,
-        channel_id: ChannelId,
-        msg_ids: Vec<MessageId>,
-        guild_id: Option<GuildId>,
+        _ctx: Context,
+        _channel_id: ChannelId,
+        _msg_ids: Vec<MessageId>,
+        _guild_id: Option<GuildId>,
     ) {
-        msg_log::message_delete_bulk(&ctx, channel_id, msg_ids, guild_id).await;
+        // Handled in sushii-ts-services
+        // msg_log::message_delete_bulk(&ctx, channel_id, msg_ids, guild_id).await;
     }
 
     async fn message_update(
         &self,
-        ctx: Context,
-        old_msg: Option<Message>,
-        new_msg: Option<Message>,
-        event: MessageUpdateEvent,
+        _ctx: Context,
+        _old_msg: Option<Message>,
+        _new_msg: Option<Message>,
+        _event: MessageUpdateEvent,
     ) {
-        msg_log::message_update(&ctx, &old_msg, &new_msg, &event).await;
+        // Handled in sushii-ts-services
+        // msg_log::message_update(&ctx, &old_msg, &new_msg, &event).await;
     }
 
     async fn guild_ban_addition(&self, ctx: Context, guild_id: GuildId, banned_user: User) {
