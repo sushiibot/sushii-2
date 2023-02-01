@@ -6,6 +6,11 @@ use crate::model::sql::delete_mute;
 pub async fn guild_ban_addition(ctx: &Context, guild_id: &GuildId, banned_user: &User) {
     tracing::debug!("Guild ban addition: {}", banned_user.tag());
 
+    if guild_id.0 == 187450744427773963 {
+        // Don't log bans in initial deployed bp
+        return;
+    }
+
     if let Err(e) = ModLogReporter::new(guild_id, banned_user, "ban")
         .execute(&ctx)
         .await
@@ -20,6 +25,11 @@ pub async fn guild_ban_addition(ctx: &Context, guild_id: &GuildId, banned_user: 
 }
 
 pub async fn guild_ban_removal(ctx: &Context, guild_id: &GuildId, unbanned_user: &User) {
+    if guild_id.0 == 187450744427773963 {
+        // Don't log bans in initial deployed bp
+        return;
+    }
+
     if let Err(e) = ModLogReporter::new(guild_id, unbanned_user, "unban")
         .execute(&ctx)
         .await

@@ -25,6 +25,18 @@ async fn mute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         }
     };
 
+    // TODO: Delete when fully deployed
+    if guild_id == 187450744427773963 {
+        msg.channel_id
+            .say(
+                &ctx.http,
+                "Use right-click -> timeout or `/timeout` now noob",
+            )
+            .await?;
+
+        return Ok(());
+    }
+
     let conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
     if conf.mute_role.is_none() {
         msg.channel_id

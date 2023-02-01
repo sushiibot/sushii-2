@@ -8,6 +8,12 @@ use crate::model::moderation::ModLogReporter;
 use crate::model::sql::*;
 
 pub async fn guild_member_addition(ctx: &Context, guild_id: GuildId, mut member: &mut Member) {
+    // TODO: Delete when fully deployed
+    // Don't log legacy mutes in initial deployed bp
+    if guild_id.0 == 187450744427773963 {
+        return;
+    }
+
     if let Err(e) = _guild_member_addition(&ctx, &guild_id, &mut member).await {
         tracing::error!("Failed to handle mutes guild_member_addition: {}", e);
     }
@@ -66,6 +72,12 @@ async fn _guild_member_addition(
 }
 
 pub async fn guild_member_update(ctx: &Context, old_member: &Option<Member>, new_member: &Member) {
+    // TODO: Delete when fully deployed
+    // Don't log legacy mutes in initial deployed bp
+    if new_member.guild_id.0 == 187450744427773963 {
+        return;
+    }
+
     if let Err(e) = _guild_member_update(&ctx, &old_member, &new_member).await {
         tracing::error!("Failed to handle mutes member update: {}", e);
     }

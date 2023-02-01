@@ -35,6 +35,15 @@ async fn reason(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     };
 
+    // TODO: Delete when fully deployed
+    if guild_id == 187450744427773963 {
+        msg.channel_id
+            .say(&ctx.http, "Use `/reason` now noob")
+            .await?;
+
+        return Ok(());
+    }
+
     let range_str = match args.single::<String>() {
         Ok(s) => s,
         Err(_) => {
