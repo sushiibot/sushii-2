@@ -1,290 +1,67 @@
-use chrono::Duration;
-use serenity::framework::standard::{macros::command, Args, CommandResult};
+use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::prelude::*;
-use serenity::model::Timestamp;
 use serenity::prelude::*;
-use serenity::utils::parse_username;
 use std::fmt::Write;
 
-use crate::model::moderation::{ModActionExecutor, ModActionType};
 use crate::model::sql::*;
-use crate::utils::duration::parse_duration;
-use crate::utils::user::get_user;
 
 #[command]
 #[only_in("guild")]
 #[required_permissions("BAN_MEMBERS")]
 #[sub_commands(setduration, addduration)]
-async fn mute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    let guild_id = match msg.guild_id {
-        Some(id) => id,
-        None => {
-            msg.channel_id.say(&ctx.http, "No guild found").await?;
-
-            return Ok(());
-        }
-    };
-
-    // TODO: Delete when fully deployed
-    if guild_id == 187450744427773963 {
-        msg.channel_id
-            .say(
-                &ctx.http,
-                "Use right-click -> timeout or `/timeout` now noob",
-            )
-            .await?;
-
-        return Ok(());
-    }
-
-    let conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
-    if conf.mute_role.is_none() {
-        msg.channel_id
-            .say(&ctx.http, "Error: There is no mute role set")
-            .await?;
-
-        return Ok(());
-    }
-
-    if args.is_empty() {
-        msg.channel_id
-            .say(
-                &ctx.http,
-                "Error: Please provide IDs or mentions, \
-                reason, and an optional duration to mute users, or use `mute \
-                setduration` or `mute addduration` to modify an existing mute",
-            )
-            .await?;
-
-        return Ok(());
-    }
-
-    ModActionExecutor::from_args(args, ModActionType::Mute)
-        .execute(&ctx, &msg, &guild_id)
+async fn mute(ctx: &Context, msg: &Message) -> CommandResult {
+    msg.channel_id
+        .say(
+            &ctx.http,
+            "Please use </timeout:996259097202671645> now or right-click the user -> timeout :)",
+        )
         .await?;
 
-    Ok(())
+    return Ok(());
 }
 
 #[command]
 #[only_in("guild")]
 #[required_permissions("BAN_MEMBERS")]
-async fn unmute(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    let guild_id = match msg.guild_id {
-        Some(id) => id,
-        None => {
-            msg.channel_id.say(&ctx.http, "No guild found").await?;
-
-            return Ok(());
-        }
-    };
-
-    let conf = GuildConfig::from_msg_or_respond(&ctx, msg).await?;
-    if conf.mute_role.is_none() {
-        let _ = msg
-            .channel_id
-            .say(&ctx.http, "There is no mute command set");
-
-        return Ok(());
-    }
-
-    ModActionExecutor::from_args(args, ModActionType::Unmute)
-        .execute(&ctx, &msg, &guild_id)
+async fn unmute(ctx: &Context, msg: &Message) -> CommandResult {
+    msg.channel_id
+        .say(
+            &ctx.http,
+            "Please use </untimeout:1070531459229700147> now or right-click the user -> remove timeout :)",
+        )
         .await?;
 
-    Ok(())
-}
-
-enum DurationModifyAction {
-    Set,
-    Add,
-}
-
-enum DurationOption {
-    Duration(Duration),
-    Indefinite,
-}
-
-async fn modify_duration(
-    action: DurationModifyAction,
-    ctx: &Context,
-    msg: &Message,
-    mut args: Args,
-) -> CommandResult {
-    let guild_id = match msg.guild_id {
-        Some(id) => id,
-        None => {
-            msg.channel_id.say(&ctx.http, "No guild ID found").await?;
-
-            return Ok(());
-        }
-    };
-
-    let user_id_str = match args.single::<String>() {
-        Ok(s) => s,
-        Err(_) => {
-            msg.channel_id
-                .say(&ctx.http, "Please give a user ID")
-                .await?;
-
-            return Ok(());
-        }
-    };
-
-    let user_id = match user_id_str
-        .parse::<u64>()
-        .ok()
-        .or_else(|| parse_username(user_id_str))
-    {
-        Some(id) => id,
-        None => {
-            msg.channel_id
-                .say(&ctx.http, "Invalid user ID given")
-                .await?;
-
-            return Ok(());
-        }
-    };
-
-    // or is indefinite
-    let duration_str = args.rest();
-
-    if duration_str.is_empty() {
-        msg.channel_id
-            .say(&ctx.http, "Error: Give a duration or `indefinite`")
-            .await?;
-
-        return Ok(());
-    }
-
-    let duration_opt = match duration_str.to_lowercase().as_ref() {
-        "indefinite" | "indef" | "inf" | "none" => DurationOption::Indefinite,
-        _ => match parse_duration(duration_str) {
-            Ok(d) => DurationOption::Duration(d),
-            Err(e) => {
-                msg.channel_id
-                        .say(
-                            &ctx.http,
-                            format!("Error: Failed to parse duration, give a duration or `indefinite` -- {}", e),
-                        )
-                        .await?;
-
-                return Ok(());
-            }
-        },
-    };
-
-    let mut mute = match Mute::from_id(&ctx, guild_id.0, user_id).await? {
-        Some(m) => m,
-        None => {
-            msg.channel_id
-                .say(
-                    &ctx,
-                    "Error: This member is not muted, or a mute entry was not found",
-                )
-                .await?;
-
-            return Ok(());
-        }
-    };
-
-    let user = match get_user(&ctx, mute.user_id as u64).await {
-        Some(u) => u,
-        None => {
-            msg.channel_id
-                .say(&ctx, "Error: Failed to fetch user")
-                .await?;
-
-            return Ok(());
-        }
-    };
-
-    let old_duration = mute
-        .get_human_duration()
-        .unwrap_or_else(|| "Indefinite".into());
-
-    let s = match action {
-        DurationModifyAction::Add => {
-            match duration_opt {
-                DurationOption::Duration(duration) => {
-                    // End time = end + new duration
-                    // or if indefinite / no end time
-                    // End time = start + new duration
-                    mute.end_time = mute
-                        .end_time
-                        .and_then(|t| t.checked_add_signed(duration))
-                        .or_else(|| mute.start_time.checked_add_signed(duration));
-
-                    format!(
-                        "Mute duration for {} extended by `{}`, new duration is now `{}` (old duration: `{}`)",
-                        user.tag(),
-                        humantime::format_duration(duration.to_std().unwrap()),
-                        mute.get_std_duration()
-                            .map(|d| humantime::format_duration(d).to_string())
-                            .unwrap_or_else(|| "N/A".to_string()),
-                        old_duration
-                    )
-                }
-                DurationOption::Indefinite => {
-                    mute.end_time = None;
-
-                    format!(
-                        "Mute for {} is now indefinite (old duration: `{}`)",
-                        user.tag(),
-                        old_duration
-                    )
-                }
-            }
-        }
-        DurationModifyAction::Set => {
-            match duration_opt {
-                DurationOption::Duration(duration) => {
-                    // End time = start + new duration
-                    mute.end_time = mute.start_time.checked_add_signed(duration);
-
-                    format!(
-                        "Mute duration for {} set to `{}` (old duration: `{}`)",
-                        user.tag(),
-                        mute.get_std_duration()
-                            .map(|d| humantime::format_duration(d).to_string())
-                            .unwrap_or_else(|| "N/A".to_string()),
-                        old_duration
-                    )
-                }
-                DurationOption::Indefinite => {
-                    mute.end_time = None;
-
-                    format!(
-                        "Mute for {} is now indefinite (old duration: `{}`)",
-                        user.tag(),
-                        old_duration
-                    )
-                }
-            }
-        }
-    };
-
-    mute.save(&ctx).await?;
-
-    msg.channel_id.say(&ctx, s).await?;
-
-    Ok(())
+    return Ok(());
 }
 
 #[command]
 #[only_in("guild")]
 #[required_permissions("BAN_MEMBERS")]
 #[aliases("s", "set", "setd", "setdur", "settime")]
-async fn setduration(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    modify_duration(DurationModifyAction::Set, ctx, msg, args).await
+async fn setduration(ctx: &Context, msg: &Message) -> CommandResult {
+    msg.channel_id
+        .say(
+            &ctx.http,
+            "Please use </timeout:996259097202671645> to update the duration of a mute :)",
+        )
+        .await?;
+
+    return Ok(());
 }
 
 #[command]
 #[only_in("guild")]
 #[required_permissions("BAN_MEMBERS")]
 #[aliases("a", "add", "addd", "adddur", "addtime", "extend")]
-async fn addduration(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    modify_duration(DurationModifyAction::Add, ctx, msg, args).await
+async fn addduration(ctx: &Context, msg: &Message) -> CommandResult {
+    msg.channel_id
+        .say(
+            &ctx.http,
+            "Please use </timeout:996259097202671645> to update the duration of a mute :)",
+        )
+        .await?;
+
+    return Ok(());
 }
 
 #[command]

@@ -6,7 +6,6 @@ mod cache;
 mod join_msg;
 mod member_log;
 mod mention;
-mod mod_log;
 mod msg_log;
 mod notification;
 mod raw_event_handler;
@@ -88,12 +87,10 @@ impl EventHandler for Handler {
     }
 
     async fn guild_ban_addition(&self, ctx: Context, guild_id: GuildId, banned_user: User) {
-        mod_log::ban::guild_ban_addition(&ctx, &guild_id, &banned_user).await;
         bans::guild_ban_addition(&ctx, guild_id, &banned_user).await;
     }
 
     async fn guild_ban_removal(&self, ctx: Context, guild_id: GuildId, unbanned_user: User) {
-        mod_log::ban::guild_ban_removal(&ctx, &guild_id, &unbanned_user).await;
         bans::guild_ban_removal(&ctx, guild_id, &unbanned_user).await;
     }
 
@@ -117,13 +114,9 @@ impl EventHandler for Handler {
         old_member: Option<Member>,
         new_member: Member,
     ) {
-        mod_log::mute::guild_member_update(&ctx, &old_member, &new_member).await;
     }
 
     async fn guild_member_addition(&self, ctx: Context, mut member: Member) {
-        // TODO: Run these concurrently instead of one by one
-        mod_log::mute::guild_member_addition(&ctx, member.guild_id, &mut member).await;
-
         tokio::join!(
             join_msg::guild_member_addition(&ctx, &member.guild_id, &member),
             member_log::guild_member_addition(&ctx, &member.guild_id, &member),
