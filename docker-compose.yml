@@ -331,7 +331,7 @@ services:
             - "traefik.enable=true"
             - "traefik.http.routers.portainer-frontend.rule=Host(`portainer.sushii.xyz`)"
             - "traefik.http.routers.portainer-frontend.entrypoints=secure"
-            - "traefik.http.services.portainer-frontend.loadbalancer.server.port=8000"
+            - "traefik.http.services.portainer-frontend.loadbalancer.server.port=9000"
             - "traefik.http.routers.portainer-frontend.service=portainer-frontend"
             - "traefik.http.routers.portainer-frontend.tls.certresolver=acme"
     portainer_agent:
