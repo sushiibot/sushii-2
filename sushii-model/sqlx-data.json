@@ -361,6 +361,40 @@
       ]
     }
   },
+  "1d8a75a39a666f8030a6dc57cc86525efaa8192b45f19d8bba3137576d92c9ce": {
+    "query": "INSERT INTO app_public.guild_configs (\n    id,\n    prefix,\n    join_msg,\n    join_msg_enabled,\n    join_react,\n    leave_msg,\n    leave_msg_enabled,\n    msg_channel,\n    role_channel,\n    role_config,\n    role_enabled,\n    log_msg,\n    log_msg_enabled,\n    log_mod,\n    log_mod_enabled,\n    log_member,\n    log_member_enabled,\n    warn_dm_text,\n    warn_dm_enabled,\n    mute_dm_text,\n    mute_dm_enabled,\n    disabled_channels,\n    data\n  )\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10,\n    $11,\n    $12,\n    $13,\n    $14,\n    $15,\n    $16,\n    $17,\n    $18,\n    $19,\n    $20,\n    $21,\n    $22,\n    $23\n  ) ON CONFLICT (id) DO\nUPDATE\nSET -- id = $1, Don't need to update ID \n  prefix = $2,\n  join_msg = $3,\n  join_msg_enabled = $4,\n  join_react = $5,\n  leave_msg = $6,\n  leave_msg_enabled = $7,\n  msg_channel = $8,\n  role_channel = $9,\n  role_config = $10,\n  role_enabled = $11,\n  log_msg = $12,\n  log_msg_enabled = $13,\n  log_mod = $14,\n  log_mod_enabled = $15,\n  log_member = $16,\n  log_member_enabled = $17,\n  warn_dm_text = $18,\n  warn_dm_enabled = $19,\n  mute_dm_text = $20,\n  mute_dm_enabled = $21,\n  disabled_channels = $22,\n  data = $23\n",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Text",
+          "Text",
+          "Bool",
+          "Text",
+          "Text",
+          "Bool",
+          "Int8",
+          "Int8",
+          "Jsonb",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Int8",
+          "Bool",
+          "Text",
+          "Bool",
+          "Text",
+          "Bool",
+          "Int8Array",
+          "Jsonb"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "1e5e9b98915eabc3bc27b0d5278a7e7931881b74195f98274ca7b71c269b393a": {
     "query": "\n            SELECT *\n              FROM app_public.notifications\n             WHERE user_id = $1\n               AND guild_id = $2\n               AND keyword = LOWER($3)\n        ",
     "describe": {
@@ -869,182 +903,6 @@
       "nullable": []
     }
   },
-  "4846d1fa388464d140b49e7ed509eceaeda70dd90bbcb4070c548a2378ccc714": {
-    "query": "\n            SELECT id,\n                   prefix,\n                   join_msg,\n                   join_msg_enabled,\n                   join_react,\n                   leave_msg,\n                   leave_msg_enabled,\n                   msg_channel,\n                   role_channel,\n                   role_config,\n                   role_enabled,\n                   invite_guard,\n                   log_msg,\n                   log_msg_enabled,\n                   log_mod,\n                   log_mod_enabled,\n                   log_member,\n                   log_member_enabled,\n                   mute_role,\n                   mute_duration,\n                   warn_dm_text,\n                   warn_dm_enabled,\n                   mute_dm_text,\n                   mute_dm_enabled,\n                   max_mention,\n                   disabled_channels,\n                   data as \"data!: Json<GuildConfigData>\"\n              FROM app_public.guild_configs\n             WHERE id = $1\n        ",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 1,
-          "name": "prefix",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 2,
-          "name": "join_msg",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "join_msg_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 4,
-          "name": "join_react",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 5,
-          "name": "leave_msg",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 6,
-          "name": "leave_msg_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 7,
-          "name": "msg_channel",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 8,
-          "name": "role_channel",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 9,
-          "name": "role_config",
-          "type_info": "Jsonb"
-        },
-        {
-          "ordinal": 10,
-          "name": "role_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 11,
-          "name": "invite_guard",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 12,
-          "name": "log_msg",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 13,
-          "name": "log_msg_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 14,
-          "name": "log_mod",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 15,
-          "name": "log_mod_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 16,
-          "name": "log_member",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 17,
-          "name": "log_member_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 18,
-          "name": "mute_role",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 19,
-          "name": "mute_duration",
-          "type_info": "Int8"
-        },
-        {
-          "ordinal": 20,
-          "name": "warn_dm_text",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 21,
-          "name": "warn_dm_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 22,
-          "name": "mute_dm_text",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 23,
-          "name": "mute_dm_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 24,
-          "name": "max_mention",
-          "type_info": "Int4"
-        },
-        {
-          "ordinal": 25,
-          "name": "disabled_channels",
-          "type_info": "Int8Array"
-        },
-        {
-          "ordinal": 26,
-          "name": "data!: Json<GuildConfigData>",
-          "type_info": "Jsonb"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      },
-      "nullable": [
-        false,
-        true,
-        true,
-        false,
-        true,
-        true,
-        false,
-        true,
-        true,
-        true,
-        false,
-        false,
-        true,
-        false,
-        true,
-        false,
-        true,
-        false,
-        true,
-        true,
-        true,
-        false,
-        true,
-        false,
-        true,
-        true,
-        false
-      ]
-    }
-  },
   "4bdace98e85cd7de4b635cba23df42db23a4e661a6c8a22d536ca5903f8be671": {
     "query": "\n            SELECT *\n              FROM app_public.tags\n             WHERE tag_name = $1\n               AND guild_id = $2\n        ",
     "describe": {
@@ -1393,44 +1251,6 @@
         true,
         false
       ]
-    }
-  },
-  "6080ed6595af4196307653809d1dade8710981802d4673ee28e0d41d44d8b2ef": {
-    "query": "INSERT INTO app_public.guild_configs (\n    id,\n    prefix,\n    join_msg,\n    join_msg_enabled,\n    join_react,\n    leave_msg,\n    leave_msg_enabled,\n    msg_channel,\n    role_channel,\n    role_config,\n    role_enabled,\n    invite_guard,\n    log_msg,\n    log_msg_enabled,\n    log_mod,\n    log_mod_enabled,\n    log_member,\n    log_member_enabled,\n    mute_role,\n    mute_duration,\n    warn_dm_text,\n    warn_dm_enabled,\n    mute_dm_text,\n    mute_dm_enabled,\n    max_mention,\n    disabled_channels,\n    data\n  )\nVALUES (\n    $1,\n    $2,\n    $3,\n    $4,\n    $5,\n    $6,\n    $7,\n    $8,\n    $9,\n    $10,\n    $11,\n    $12,\n    $13,\n    $14,\n    $15,\n    $16,\n    $17,\n    $18,\n    $19,\n    $20,\n    $21,\n    $22,\n    $23,\n    $24,\n    $25,\n    $26,\n    $27\n  ) ON CONFLICT (id) DO\nUPDATE\nSET -- id = $1, Don't need to update ID \n  prefix = $2,\n  join_msg = $3,\n  join_msg_enabled = $4,\n  join_react = $5,\n  leave_msg = $6,\n  leave_msg_enabled = $7,\n  msg_channel = $8,\n  role_channel = $9,\n  role_config = $10,\n  role_enabled = $11,\n  invite_guard = $12,\n  log_msg = $13,\n  log_msg_enabled = $14,\n  log_mod = $15,\n  log_mod_enabled = $16,\n  log_member = $17,\n  log_member_enabled = $18,\n  mute_role = $19,\n  mute_duration = $20,\n  warn_dm_text = $21,\n  warn_dm_enabled = $22,\n  mute_dm_text = $23,\n  mute_dm_enabled = $24,\n  max_mention = $25,\n  disabled_channels = $26,\n  data = $27\n",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Text",
-          "Text",
-          "Bool",
-          "Text",
-          "Text",
-          "Bool",
-          "Int8",
-          "Int8",
-          "Jsonb",
-          "Bool",
-          "Bool",
-          "Int8",
-          "Bool",
-          "Int8",
-          "Bool",
-          "Int8",
-          "Bool",
-          "Int8",
-          "Int8",
-          "Text",
-          "Bool",
-          "Text",
-          "Bool",
-          "Int4",
-          "Int8Array",
-          "Jsonb"
-        ]
-      },
-      "nullable": []
     }
   },
   "6a0d2d04a3d415ed526fb6b64b6821caa88194b7e7a4ed3bcc5c1f168a96f7c0": {
@@ -3049,6 +2869,158 @@
         false,
         false,
         true
+      ]
+    }
+  },
+  "f3a60d39c861c4643cb79e78ca5a0d0c8a13223c9697e4c79d6df7c5ce8c7e25": {
+    "query": "\n            SELECT id,\n                   prefix,\n                   join_msg,\n                   join_msg_enabled,\n                   join_react,\n                   leave_msg,\n                   leave_msg_enabled,\n                   msg_channel,\n                   role_channel,\n                   role_config,\n                   role_enabled,\n                   log_msg,\n                   log_msg_enabled,\n                   log_mod,\n                   log_mod_enabled,\n                   log_member,\n                   log_member_enabled,\n                   warn_dm_text,\n                   warn_dm_enabled,\n                   mute_dm_text,\n                   mute_dm_enabled,\n                   disabled_channels,\n                   data as \"data!: Json<GuildConfigData>\"\n              FROM app_public.guild_configs\n             WHERE id = $1\n        ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 1,
+          "name": "prefix",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 2,
+          "name": "join_msg",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "join_msg_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 4,
+          "name": "join_react",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 5,
+          "name": "leave_msg",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 6,
+          "name": "leave_msg_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 7,
+          "name": "msg_channel",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 8,
+          "name": "role_channel",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 9,
+          "name": "role_config",
+          "type_info": "Jsonb"
+        },
+        {
+          "ordinal": 10,
+          "name": "role_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 11,
+          "name": "log_msg",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 12,
+          "name": "log_msg_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 13,
+          "name": "log_mod",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 14,
+          "name": "log_mod_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 15,
+          "name": "log_member",
+          "type_info": "Int8"
+        },
+        {
+          "ordinal": 16,
+          "name": "log_member_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 17,
+          "name": "warn_dm_text",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 18,
+          "name": "warn_dm_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 19,
+          "name": "mute_dm_text",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 20,
+          "name": "mute_dm_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 21,
+          "name": "disabled_channels",
+          "type_info": "Int8Array"
+        },
+        {
+          "ordinal": 22,
+          "name": "data!: Json<GuildConfigData>",
+          "type_info": "Jsonb"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false
       ]
     }
   },
