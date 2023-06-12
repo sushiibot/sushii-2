@@ -27,7 +27,9 @@ impl EventHandler for Handler {
         // This is here instead of cache_ready as a single unavailable guild will
         // prevent any of it from starting
         tasks::start(&ctx).await;
-        bans::start(&ctx, ready.guilds.iter().map(|g| g.id).collect::<Vec<_>>()).await;
+
+        // Disabled ban fetching, now handled in sushii-ts-services
+        // bans::start(&ctx, ready.guilds.iter().map(|g| g.id).collect::<Vec<_>>()).await;
     }
 
     async fn cache_ready(&self, _ctx: Context, _guild_ids: Vec<GuildId>) {
@@ -87,16 +89,18 @@ impl EventHandler for Handler {
     }
 
     async fn guild_ban_addition(&self, ctx: Context, guild_id: GuildId, banned_user: User) {
-        bans::guild_ban_addition(&ctx, guild_id, &banned_user).await;
+        // Disabled ban fetching, now handled in sushii-ts-services
+        // bans::guild_ban_addition(&ctx, guild_id, &banned_user).await;
     }
 
     async fn guild_ban_removal(&self, ctx: Context, guild_id: GuildId, unbanned_user: User) {
-        bans::guild_ban_removal(&ctx, guild_id, &unbanned_user).await;
+        // Disabled ban fetching, now handled in sushii-ts-services
+        // bans::guild_ban_removal(&ctx, guild_id, &unbanned_user).await;
     }
 
     async fn guild_create(&self, ctx: Context, guild: Guild, is_new: bool) {
         cache::cache_guild::guild_create(&ctx, &guild, is_new).await;
-        bans::guild_create(&ctx, &guild, is_new).await;
+        // bans::guild_create(&ctx, &guild, is_new).await;
     }
 
     async fn guild_update(
