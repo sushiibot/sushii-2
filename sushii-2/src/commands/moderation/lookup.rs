@@ -290,31 +290,9 @@ async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 #[only_in("guild")]
 #[required_permissions("BAN_MEMBERS")]
 async fn optin(ctx: &Context, msg: &Message) -> CommandResult {
-    let mut guild_config = GuildConfig::from_msg_or_respond(ctx, &msg).await?;
-
-    if guild_config.data.lookup_details_opt_in {
-        msg.channel_id
-            .say(
-                ctx,
-                "This server is already opted in! \
-                 Server name and ban reasons will be shared. \
-                 You can opt out with `lookup optout`.",
-            )
-            .await?;
-
-        return Ok(());
-    }
-
-    guild_config.data.lookup_details_opt_in = true;
-    guild_config.save(ctx).await?;
-
     msg.channel_id
-        .say(
-            ctx,
-            "Opted in! Server name and ban reasons will be shared. \
-             You can opt out with `lookup optout`.",
-        )
-        .await?;
+    .say(&ctx.http, "Please use </settings lookup:1116541236480856104> now :)")
+    .await?;
 
     Ok(())
 }
@@ -323,31 +301,9 @@ async fn optin(ctx: &Context, msg: &Message) -> CommandResult {
 #[only_in("guild")]
 #[required_permissions("BAN_MEMBERS")]
 async fn optout(ctx: &Context, msg: &Message) -> CommandResult {
-    let mut guild_config = GuildConfig::from_msg_or_respond(ctx, &msg).await?;
-
-    if !guild_config.data.lookup_details_opt_in {
-        msg.channel_id
-            .say(
-                ctx,
-                "This server is already opted out! \
-                 Server name and ban reasons will not be shared. \
-                 You can opt in with `lookup optin`.",
-            )
-            .await?;
-
-        return Ok(());
-    }
-
-    guild_config.data.lookup_details_opt_in = false;
-    guild_config.save(ctx).await?;
-
     msg.channel_id
-        .say(
-            ctx,
-            "Opted out! Server name and ban reasons will no longer be shared. \
-             You can opt in with `lookup optin`.",
-        )
-        .await?;
+    .say(&ctx.http, "Please use </settings lookup:1116541236480856104> now :)")
+    .await?;
 
     Ok(())
 }
