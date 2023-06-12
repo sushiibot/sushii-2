@@ -46,9 +46,6 @@ pub struct GuildConfig {
     pub role_config: Option<serde_json::Value>,
     pub role_enabled: bool,
 
-    /// Auto delete invite links
-    pub invite_guard: bool,
-
     /// Message deleted / edited log channel
     pub log_msg: Option<i64>,
     pub log_msg_enabled: bool,
@@ -61,11 +58,6 @@ pub struct GuildConfig {
     pub log_member: Option<i64>,
     pub log_member_enabled: bool,
 
-    /// Mute role ID
-    pub mute_role: Option<i64>,
-    /// Duration in seconds
-    pub mute_duration: Option<i64>,
-
     /// Should DM user on warn
     pub warn_dm_text: Option<String>,
     pub warn_dm_enabled: bool,
@@ -73,9 +65,6 @@ pub struct GuildConfig {
     /// Should DM user on mute
     pub mute_dm_text: Option<String>,
     pub mute_dm_enabled: bool,
-
-    /// Max number of unique mentions in a single message to auto mute
-    pub max_mention: Option<i32>,
 
     /// Channels where commands are ignored
     pub disabled_channels: Option<Vec<i64>>,
@@ -457,12 +446,6 @@ impl fmt::Display for GuildConfig {
                 Some(fmt_channel(self.log_member)),
                 Some(self.log_member_enabled),
             ),
-            ("Mute Role", Some(fmt_role(self.mute_role)), None),
-            (
-                "Mute Default Duration",
-                Some(fmt_duration(self.mute_duration)),
-                None,
-            ),
             (
                 "Warn DM",
                 Some(self.warn_dm_text.clone()),
@@ -478,8 +461,6 @@ impl fmt::Display for GuildConfig {
                 Some(fmt_channel(self.role_channel)),
                 Some(self.role_enabled),
             ),
-            ("Invite Guard", None, Some(self.invite_guard)),
-            ("Max Mentions", Some(fmt_num(self.max_mention)), None),
             // role_config: Option<serde_json::Value>,
         ];
 
@@ -526,20 +507,16 @@ async fn get_guild_config_query(pool: &sqlx::PgPool, guild_id: u64) -> Result<Op
                    role_channel,
                    role_config,
                    role_enabled,
-                   invite_guard,
                    log_msg,
                    log_msg_enabled,
                    log_mod,
                    log_mod_enabled,
                    log_member,
                    log_member_enabled,
-                   mute_role,
-                   mute_duration,
                    warn_dm_text,
                    warn_dm_enabled,
                    mute_dm_text,
                    mute_dm_enabled,
-                   max_mention,
                    disabled_channels,
                    data as "data!: Json<GuildConfigData>"
               FROM app_public.guild_configs
@@ -567,20 +544,16 @@ async fn upsert_config_query(conf: &GuildConfig, pool: &sqlx::PgPool) -> Result<
         conf.role_channel,
         conf.role_config,
         conf.role_enabled,
-        conf.invite_guard,
         conf.log_msg,
         conf.log_msg_enabled,
         conf.log_mod,
         conf.log_mod_enabled,
         conf.log_member,
         conf.log_member_enabled,
-        conf.mute_role,
-        conf.mute_duration,
         conf.warn_dm_text,
         conf.warn_dm_enabled,
         conf.mute_dm_text,
         conf.mute_dm_enabled,
-        conf.max_mention,
         conf.disabled_channels.as_deref(),
         conf.data as _,
     )

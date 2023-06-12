@@ -14,7 +14,7 @@ use self::{
 
 #[group]
 #[commands(
-    prune, history, ban, unban, kick, mute, listmutes, reason, unmute, warn, slowmode, deletecase,
+    prune, history, ban, unban, kick, reason, unmute, warn, slowmode, deletecase,
     note
 )]
 #[only_in("guild")]

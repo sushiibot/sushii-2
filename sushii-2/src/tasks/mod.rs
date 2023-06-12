@@ -26,9 +26,9 @@ async fn ten_seconds(ctx: Context) {
         interval.tick().await;
         tracing::debug!("Checking for expired mute entries...");
 
-        if let Err(e) = mute::check_pending_unmutes(&ctx).await {
-            tracing::error!("Failed checking pending unmutes: {}", e);
-        }
+        // if let Err(e) = mute::check_pending_unmutes(&ctx).await {
+        //     tracing::error!("Failed checking pending unmutes: {}", e);
+        // }
 
         if let Err(e) = reminders::check_expired_reminders(&ctx).await {
             tracing::error!("Failed checking expired reminders: {}", e);
