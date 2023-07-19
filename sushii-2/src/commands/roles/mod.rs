@@ -12,7 +12,6 @@ use self::{
 };
 
 #[group]
-#[commands(set, get, setchannel, listids, sendinfo)]
 #[prefix = "roles"]
 #[only_in("guild")]
 #[default_command(default)]
