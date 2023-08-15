@@ -209,6 +209,10 @@ services:
         labels:
             - "traefik.enable=false"
     twilight-http-proxy:
+        logging:
+            options:
+                max-size: "10m"
+                max-file: "3"
         image: ghcr.io/twilight-rs/http-proxy:metrics
         container_name: twilight-http-proxy
         restart: unless-stopped
