@@ -49,9 +49,9 @@ impl EventHandler for Handler {
 
             // Message logs handled in sushii-ts-services
             // msg_log::message(&ctx, &msg),
-            mention::message(&ctx, &msg),
+            // mention::message(&ctx, &msg),
             cache::cache_user::message(&ctx, &msg),
-            notification::message(&ctx, &msg),
+            // notification::message(&ctx, &msg),
         );
     }
 
@@ -122,8 +122,8 @@ impl EventHandler for Handler {
 
     async fn guild_member_addition(&self, ctx: Context, mut member: Member) {
         tokio::join!(
-            join_msg::guild_member_addition(&ctx, &member.guild_id, &member),
-            member_log::guild_member_addition(&ctx, &member.guild_id, &member),
+            // join_msg::guild_member_addition(&ctx, &member.guild_id, &member),
+            // member_log::guild_member_addition(&ctx, &member.guild_id, &member),
         );
     }
 
@@ -134,7 +134,7 @@ impl EventHandler for Handler {
         user: User,
         member: Option<Member>,
     ) {
-        member_log::guild_member_removal(&ctx, &guild_id, &user, &member).await;
+        // member_log::guild_member_removal(&ctx, &guild_id, &user, &member).await;
     }
 
     async fn interaction_create(&self, _ctx: Context, interaction: Interaction) {

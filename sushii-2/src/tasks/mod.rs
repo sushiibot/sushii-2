@@ -13,7 +13,7 @@ mod stats;
 
 pub async fn start(ctx: &Context) {
     START.call_once(|| {
-        task::spawn(ten_seconds(ctx.clone()));
+        // task::spawn(ten_seconds(ctx.clone()));
         task::spawn(five_minutes(ctx.clone()));
     });
 }
@@ -30,9 +30,9 @@ async fn ten_seconds(ctx: Context) {
         //     tracing::error!("Failed checking pending unmutes: {}", e);
         // }
 
-        if let Err(e) = reminders::check_expired_reminders(&ctx).await {
-            tracing::error!("Failed checking expired reminders: {}", e);
-        }
+        // if let Err(e) = reminders::check_expired_reminders(&ctx).await {
+        //     tracing::error!("Failed checking expired reminders: {}", e);
+        // }
     }
 }
 
