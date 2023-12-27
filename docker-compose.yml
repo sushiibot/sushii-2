@@ -192,22 +192,6 @@ services:
             - "traefik.http.routers.sushii-web-staging.rule=Host(`staging.sushii.xyz`)"
             - "traefik.http.routers.sushii-web-staging.entrypoints=secure"
             - "traefik.http.routers.sushii-web-staging.tls.certresolver=acme"
-    sushii-feeds:
-        image: ghcr.io/sushiibot/sushii-feeds:latest
-        container_name: sushii-feeds
-        restart: unless-stopped
-        expose:
-            - "50051"
-        env_file:
-            - .env
-        environment:
-            - RUST_LOG=sushii_feeds=debug,info
-            # different from sushii, should not include http://
-            - TWILIGHT_API_PROXY_URL=twilight-http-proxy:80
-        networks:
-            - sushii_net
-        labels:
-            - "traefik.enable=false"
     twilight-http-proxy:
         logging:
             options:
@@ -270,7 +254,7 @@ services:
         env_file:
             - .env
         environment:
-            - TWILIGHT_API_PROXY_URL=http://twilight-http-proxy:80
+            - TWILIGHT_API_PROXY_URL=http://discord_api_proxy:8080
         networks:
             - sushii_net
         labels:
@@ -282,7 +266,7 @@ services:
         expose:
             - "8080"
         environment:
-            - TWILIGHT_API_PROXY_URL=twilight-http-proxy:80
+            - TWILIGHT_API_PROXY_URL=discord_api_proxy:8080
             - TOP_GG_AUTH=${TOP_GG_AUTH}
             - PUBLIC_LOG_CHANNEL=${PUBLIC_LOG_CHANNEL}
         networks:
