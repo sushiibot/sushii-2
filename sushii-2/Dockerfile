@@ -1,5 +1,5 @@
 ## Compile sushii
-FROM rust:1.62 as build
+FROM rust:1.74 as build
 
 RUN rustup component add rustfmt
 
