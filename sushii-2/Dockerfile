@@ -36,7 +36,7 @@ RUN cargo test --release --locked
 RUN cargo build --release --locked
 
 ## Final base image with only the sushii binary
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 WORKDIR /config
 
