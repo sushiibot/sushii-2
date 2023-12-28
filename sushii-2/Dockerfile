@@ -42,7 +42,7 @@ WORKDIR /config
 
 # Fix sentry HTTPS calls with ca-certificates:
 # https://github.com/getsentry/sentry-rust/issues/239
-RUN apt-get update && apt-get install -y libssl-dev ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y openssl libssl-dev ca-certificates && rm -rf /var/lib/apt/lists/*
 
 # target dir is still in workspace root
 COPY --from=build /usr/src/sushii/target/release/sushii-2 /usr/local/bin/sushii-2
