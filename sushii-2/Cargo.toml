@@ -80,7 +80,7 @@ features = [
 [dependencies.serenity]
 # git = "https://github.com/serenity-rs/serenity"
 #rev = "11918e74ab2eba7d61f94d5b5776d5546913adcd"
-version = "0.11.5"
+version = "0.11.7"
 # path = "../../serenity"
 features = ["collector", "unstable_discord_api", "chrono"]
 
