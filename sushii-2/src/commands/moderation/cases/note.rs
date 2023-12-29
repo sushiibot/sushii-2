@@ -10,5 +10,5 @@ async fn note(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         .say(&ctx.http, "Please use </note:1017270490634670110> now :)")
         .await?;
 
-return Ok(());
+    return Ok(());
 }
