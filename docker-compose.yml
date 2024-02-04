@@ -1,337 +1,337 @@
 version: "3.8"
 services:
-    traefik:
-        container_name: traefik
-        image: traefik:v2.3
-        restart: unless-stopped
-        ports:
-            - 80:80
-            - 443:443
-        expose:
-            - "8080"
-            - "8082"
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
-            - ./traefik:/etc/traefik
-        networks:
-            - web
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.api.rule=Host(`traefik.sushii.xyz`)"
-            - "traefik.http.routers.api.service=api@internal"
-            - "traefik.http.routers.api.middlewares=auth@file"
-            - "traefik.http.routers.api.entrypoints=secure"
-            - "traefik.http.routers.api.tls.certresolver=acme"
-    grafana:
-        image: grafana/grafana:7.1.5
-        container_name: grafana
-        expose:
-            - "3000"
-        volumes:
-            - ~/docker/grafana:/var/lib/grafana
-        networks:
-            - web
-        env_file:
-            - .env.grafana
-        labels:
-            - "traefik.http.routers.grafana.rule=Host(`grafana.sushii.xyz`)"
-            - "traefik.http.routers.grafana.entrypoints=secure"
-            - "traefik.http.routers.grafana.tls.certresolver=acme"
-    prometheus:
-        image: prom/prometheus:v2.20.1
-        container_name: prometheus
-        expose:
-            - "9090"
-        volumes:
-            - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-        networks:
-            - sushii_net
-            - web
-        labels:
-            - "traefik.docker.network=sushii-2_web"
-            - "traefik.http.routers.prometheus.rule=Host(`prometheus.sushii.xyz`)"
-            - "traefik.http.routers.prometheus.entrypoints=secure"
-            - "traefik.http.routers.prometheus.tls.certresolver=acme"
-            - "traefik.http.routers.prometheus.middlewares=auth@file"
-    cadvisor:
-        image: gcr.io/google-containers/cadvisor:latest
-        container_name: cadvisor
-        privileged: true
-        devices:
-            - /dev/kmsg
-        expose:
-            - "8080"
-        volumes:
-            - /:/rootfs:ro
-            - /var/run:/var/run:rw
-            - /sys:/sys:ro
-            - /var/lib/docker/:/var/lib/docker:ro
-            - /dev/disk/:/dev/disk:ro
-        networks:
-            - web
-        labels:
-            - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.sushii.xyz`)"
-            - "traefik.http.routers.cadvisor.entrypoints=secure"
-            - "traefik.http.routers.cadvisor.tls.certresolver=acme"
-            - "traefik.http.routers.cadvisor.middlewares=auth@file"
-    node_exporter:
-        image: quay.io/prometheus/node-exporter
-        container_name: node_exporter
-        pid: "host"
-        command: "--path.rootfs=/host"
-        expose:
-            - "9100"
-        volumes:
-            - /:/host:ro,rslave
-        networks:
-            - web
-        labels:
-            - "traefik.enable=false"
-    postgres_exporter:
-        image: wrouesnel/postgres_exporter
-        container_name: postgres_exporter
-        expose:
-            - "9187"
-        env_file:
-            - .env_postgres
-        networks:
-            - sushii_net
-            - web
-        labels:
-            - "traefik.enable=false"
-    postgres:
-        image: timescale/timescaledb:latest-pg12
-        container_name: postgres
-        restart: unless-stopped
-        command: postgres -c 'config_file=/etc/postgresql/data/postgresql.conf'
-        shm_size: 512mb
-        env_file:
-            - .env
-        volumes:
-            - ~/docker/postgres/12:/var/lib/postgresql/data
-            - ./postgres.conf:/etc/postgresql/data/postgresql.conf
-            - ~/docker/postgres_root:/root
-        networks:
-            - sushii_net
-        labels:
-            - traefik.enable=false
-    postgres_14:
-        image: timescale/timescaledb:latest-pg14
-        container_name: postgres_14
-        restart: unless-stopped
-        command: postgres -c 'config_file=/etc/postgresql/data/postgresql.conf'
-        shm_size: 512mb
-        env_file:
-            - .env
-        volumes:
-            - ~/docker/postgres/14:/var/lib/postgresql/data
-            - ./postgres.conf:/etc/postgresql/data/postgresql.conf
-            - ~/docker/postgres_root:/root
-        networks:
-            - sushii_net
-        labels:
-            - traefik.enable=false
-    postgres_backups:
-        image: prodrigestivill/postgres-backup-local
-        restart: unless-stopped
-        user: postgres:postgres
-        volumes:
-            - ~/pgbackups:/backups
-        depends_on:
-            - postgres
-        env_file:
-            - .env_postgres
-        environment:
-            - POSTGRES_EXTRA_OPTS=-Z9 --schema=app_public --schema=app_private --schema=app_hidden --blobs
-            - SCHEDULE=@daily
-            - BACKUP_KEEP_DAYS=7
-            - BACKUP_KEEP_WEEKS=4
-            - BACKUP_KEEP_MONTHS=6
-            - HEALTHCHECK_PORT=8080
-        networks:
-            - sushii_net
-        labels:
-            - traefik.enable=false
-    sushii-web:
-        image: ghcr.io/sushiibot/sushii-web:latest
-        container_name: sushii-web
-        restart: unless-stopped
-        depends_on:
-            - postgres
-        expose:
-            - "3000"
-        env_file:
-            - .sushii-web.env
-        networks:
-            - sushii_net
-            - web
-        labels:
-            - "traefik.docker.network=sushii-2_web"
-            - "traefik.http.services.sushii-web.loadbalancer.server.port=3000"
-            - "traefik.http.routers.sushii-web.rule=Host(`sushii.xyz`)"
-            - "traefik.http.routers.sushii-web.entrypoints=secure"
-            - "traefik.http.routers.sushii-web.tls.certresolver=acme"
-    sushii-web-staging:
-        image: ghcr.io/sushiibot/sushii-web:latest
-        container_name: sushii-web-staging
-        restart: unless-stopped
-        depends_on:
-            - postgres
-        expose:
-            - "3000"
-        env_file:
-            - .sushii-web.env
-        environment:
-            - ROOT_URL=https://staging.sushii.xyz
-        networks:
-            - sushii_net
-            - web
-        labels:
-            - "traefik.docker.network=sushii-2_web"
-            - "traefik.http.services.sushii-web-staging.loadbalancer.server.port=3000"
-            - "traefik.http.routers.sushii-web-staging.rule=Host(`staging.sushii.xyz`)"
-            - "traefik.http.routers.sushii-web-staging.entrypoints=secure"
-            - "traefik.http.routers.sushii-web-staging.tls.certresolver=acme"
-    twilight-http-proxy:
-        logging:
-            options:
-                max-size: "10m"
-                max-file: "3"
-        image: ghcr.io/twilight-rs/http-proxy:metrics
-        container_name: twilight-http-proxy
-        restart: unless-stopped
-        expose:
-            - "80"
-        environment:
-            - DISCORD_TOKEN=$DISCORD_TOKEN
-            - RUST_LOG=trace
-        networks:
-            - sushii_net
-        labels:
-            - "traefik.enable=false"
-    rabbitmq:
-        image: rabbitmq:3-management
-        container_name: rabbitmq
-        restart: unless-stopped
-        expose:
-            - "5672"
-            - "15672"
-        networks:
-            - sushii_net
-        labels:
-            - "traefik.docker.network=sushii-2_web"
-            - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
-            - "traefik.http.routers.rabbitmq.rule=Host(`rabbit.sushii.xyz`)"
-            - "traefik.http.routers.rabbitmq.entrypoints=secure"
-            - "traefik.http.routers.rabbitmq.tls.certresolver=acme"
-            - "traefik.http.routers.rabbitmq.middlewares=auth@file"
-    redis:
-        image: redis:6
-        container_name: sushii-redis
-        restart: unless-stopped
-        expose:
-            - "6379"
-        networks:
-            - sushii_net
-        labels:
-            - "traefik.enable=false"
-    sushii:
-        image: ghcr.io/sushiibot/sushii-2:latest
-        container_name: sushii
-        restart: unless-stopped
-        depends_on:
-            - postgres
-            - redis
-        expose:
-            - "9888"
-        logging:
-            driver: json-file
-            options:
-                max-size: "10m"
-                max-file: "3"
-                mode: non-blocking
-                max-buffer-size: 4m
-        env_file:
-            - .env
-        environment:
-            - TWILIGHT_API_PROXY_URL=http://discord_api_proxy:8080
-        networks:
-            - sushii_net
-        labels:
-            - "traefik.enable=false"
-    sushii-webhooks:
-        image: ghcr.io/sushiibot/sushii-webhooks:latest
-        container_name: sushii-webhooks
-        restart: unless-stopped
-        expose:
-            - "8080"
-        environment:
-            - TWILIGHT_API_PROXY_URL=discord_api_proxy:8080
-            - TOP_GG_AUTH=${TOP_GG_AUTH}
-            - PUBLIC_LOG_CHANNEL=${PUBLIC_LOG_CHANNEL}
-        networks:
-            - sushii_net
-            - web
-        labels:
-            - "traefik.docker.network=sushii-2_web"
-            - "traefik.http.routers.sushii-webhooks.rule=Host(`webhooks.sushii.xyz`)"
-            - "traefik.http.routers.sushii-webhooks.entrypoints=secure"
-            - "traefik.http.routers.sushii-webhooks.tls.certresolver=acme"
-    sushii-image-server:
-        image: ghcr.io/sushiibot/sushii-image-server:latest
-        container_name: sushii-image-server
-        restart: unless-stopped
-        init: true
-        cap_add:
-            - SYS_ADMIN
-        expose:
-            - "3000"
-        volumes:
-            - ~/sushii-image-server/static:/app/static:ro
-            - ~/sushii-image-server/templates:/app/templates:ro
-        networks:
-            - sushii_net
-        labels:
-            - "traefik.enable=false"
-    rss-bridge:
-        image: rssbridge/rss-bridge:latest
-        container_name: rss-bridge
-        restart: unless-stopped
-        expose:
-            - "80"
-        volumes:
-            - ~/docker/rss-bridge/whitelist.txt:/app/whitelist.txt
-        networks:
-            - sushii_net
-        labels:
-            - "traefik.enable=false"
-    portainer:
-        image: portainer/portainer-ce:latest
-        container_name: portainer
-        restart: always
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
-            - ~/docker/portainer_data:/data
-        networks:
-            - web
-        labels:
-            # Frontend
-            - "traefik.enable=true"
-            - "traefik.http.routers.portainer-frontend.rule=Host(`portainer.sushii.xyz`)"
-            - "traefik.http.routers.portainer-frontend.entrypoints=secure"
-            - "traefik.http.services.portainer-frontend.loadbalancer.server.port=9000"
-            - "traefik.http.routers.portainer-frontend.service=portainer-frontend"
-            - "traefik.http.routers.portainer-frontend.tls.certresolver=acme"
-    portainer_agent:
-        image: portainer/agent
-        container_name: portainer_agent
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
-            - /var/lib/docker/volumes:/var/lib/docker/volumes
-        labels:
-            - "traefik.enable=false"
+  traefik:
+    container_name: traefik
+    image: traefik:v2.3
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    expose:
+      - "8080"
+      - "8082"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./traefik:/etc/traefik
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`traefik.sushii.xyz`)"
+      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.api.middlewares=auth@file"
+      - "traefik.http.routers.api.entrypoints=secure"
+      - "traefik.http.routers.api.tls.certresolver=acme"
+  grafana:
+    image: grafana/grafana:7.1.5
+    container_name: grafana
+    expose:
+      - "3000"
+    volumes:
+      - ~/docker/grafana:/var/lib/grafana
+    networks:
+      - web
+    env_file:
+      - .env.grafana
+    labels:
+      - "traefik.http.routers.grafana.rule=Host(`grafana.sushii.xyz`)"
+      - "traefik.http.routers.grafana.entrypoints=secure"
+      - "traefik.http.routers.grafana.tls.certresolver=acme"
+  prometheus:
+    image: prom/prometheus:v2.20.1
+    container_name: prometheus
+    expose:
+      - "9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - sushii_net
+      - web
+    labels:
+      - "traefik.docker.network=sushii-2_web"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.sushii.xyz`)"
+      - "traefik.http.routers.prometheus.entrypoints=secure"
+      - "traefik.http.routers.prometheus.tls.certresolver=acme"
+      - "traefik.http.routers.prometheus.middlewares=auth@file"
+  cadvisor:
+    image: gcr.io/google-containers/cadvisor:latest
+    container_name: cadvisor
+    privileged: true
+    devices:
+      - /dev/kmsg
+    expose:
+      - "8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - web
+    labels:
+      - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.sushii.xyz`)"
+      - "traefik.http.routers.cadvisor.entrypoints=secure"
+      - "traefik.http.routers.cadvisor.tls.certresolver=acme"
+      - "traefik.http.routers.cadvisor.middlewares=auth@file"
+  node_exporter:
+    image: quay.io/prometheus/node-exporter
+    container_name: node_exporter
+    pid: "host"
+    command: "--path.rootfs=/host"
+    expose:
+      - "9100"
+    volumes:
+      - /:/host:ro,rslave
+    networks:
+      - web
+    labels:
+      - "traefik.enable=false"
+  postgres_exporter:
+    image: wrouesnel/postgres_exporter
+    container_name: postgres_exporter
+    expose:
+      - "9187"
+    env_file:
+      - .env_postgres
+    networks:
+      - sushii_net
+      - web
+    labels:
+      - "traefik.enable=false"
+  postgres:
+    image: timescale/timescaledb:latest-pg12
+    container_name: postgres
+    restart: unless-stopped
+    command: postgres -c 'config_file=/etc/postgresql/data/postgresql.conf'
+    shm_size: 512mb
+    env_file:
+      - .env
+    volumes:
+      - ~/docker/postgres:/var/lib/postgresql/data
+      - ./postgres.conf:/etc/postgresql/data/postgresql.conf
+      - ~/docker/postgres_root:/root
+    networks:
+      - sushii_net
+    labels:
+      - traefik.enable=false
+  postgres_14:
+    image: timescale/timescaledb:latest-pg14
+    container_name: postgres_14
+    restart: unless-stopped
+    command: postgres -c 'config_file=/etc/postgresql/data/postgresql.conf'
+    shm_size: 512mb
+    env_file:
+      - .env
+    volumes:
+      - ~/docker/postgres/14:/var/lib/postgresql/data
+      - ./postgres.conf:/etc/postgresql/data/postgresql.conf
+      - ~/docker/postgres_root:/root
+    networks:
+      - sushii_net
+    labels:
+      - traefik.enable=false
+  postgres_backups:
+    image: prodrigestivill/postgres-backup-local
+    restart: unless-stopped
+    user: postgres:postgres
+    volumes:
+      - ~/pgbackups:/backups
+    depends_on:
+      - postgres
+    env_file:
+      - .env_postgres
+    environment:
+      - POSTGRES_EXTRA_OPTS=-Z9 --schema=app_public --schema=app_private --schema=app_hidden --blobs
+      - SCHEDULE=@daily
+      - BACKUP_KEEP_DAYS=7
+      - BACKUP_KEEP_WEEKS=4
+      - BACKUP_KEEP_MONTHS=6
+      - HEALTHCHECK_PORT=8080
+    networks:
+      - sushii_net
+    labels:
+      - traefik.enable=false
+  sushii-web:
+    image: ghcr.io/sushiibot/sushii-web:latest
+    container_name: sushii-web
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    expose:
+      - "3000"
+    env_file:
+      - .sushii-web.env
+    networks:
+      - sushii_net
+      - web
+    labels:
+      - "traefik.docker.network=sushii-2_web"
+      - "traefik.http.services.sushii-web.loadbalancer.server.port=3000"
+      - "traefik.http.routers.sushii-web.rule=Host(`sushii.xyz`)"
+      - "traefik.http.routers.sushii-web.entrypoints=secure"
+      - "traefik.http.routers.sushii-web.tls.certresolver=acme"
+  sushii-web-staging:
+    image: ghcr.io/sushiibot/sushii-web:latest
+    container_name: sushii-web-staging
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    expose:
+      - "3000"
+    env_file:
+      - .sushii-web.env
+    environment:
+      - ROOT_URL=https://staging.sushii.xyz
+    networks:
+      - sushii_net
+      - web
+    labels:
+      - "traefik.docker.network=sushii-2_web"
+      - "traefik.http.services.sushii-web-staging.loadbalancer.server.port=3000"
+      - "traefik.http.routers.sushii-web-staging.rule=Host(`staging.sushii.xyz`)"
+      - "traefik.http.routers.sushii-web-staging.entrypoints=secure"
+      - "traefik.http.routers.sushii-web-staging.tls.certresolver=acme"
+  twilight-http-proxy:
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    image: ghcr.io/twilight-rs/http-proxy:metrics
+    container_name: twilight-http-proxy
+    restart: unless-stopped
+    expose:
+      - "80"
+    environment:
+      - DISCORD_TOKEN=$DISCORD_TOKEN
+      - RUST_LOG=trace
+    networks:
+      - sushii_net
+    labels:
+      - "traefik.enable=false"
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: unless-stopped
+    expose:
+      - "5672"
+      - "15672"
+    networks:
+      - sushii_net
+    labels:
+      - "traefik.docker.network=sushii-2_web"
+      - "traefik.http.services.rabbitmq.loadbalancer.server.port=15672"
+      - "traefik.http.routers.rabbitmq.rule=Host(`rabbit.sushii.xyz`)"
+      - "traefik.http.routers.rabbitmq.entrypoints=secure"
+      - "traefik.http.routers.rabbitmq.tls.certresolver=acme"
+      - "traefik.http.routers.rabbitmq.middlewares=auth@file"
+  redis:
+    image: redis:6
+    container_name: sushii-redis
+    restart: unless-stopped
+    expose:
+      - "6379"
+    networks:
+      - sushii_net
+    labels:
+      - "traefik.enable=false"
+  sushii:
+    image: ghcr.io/sushiibot/sushii-2:latest
+    container_name: sushii
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - redis
+    expose:
+      - "9888"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+        mode: non-blocking
+        max-buffer-size: 4m
+    env_file:
+      - .env
+    environment:
+      - TWILIGHT_API_PROXY_URL=http://discord_api_proxy:8080
+    networks:
+      - sushii_net
+    labels:
+      - "traefik.enable=false"
+  sushii-webhooks:
+    image: ghcr.io/sushiibot/sushii-webhooks:latest
+    container_name: sushii-webhooks
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      - TWILIGHT_API_PROXY_URL=discord_api_proxy:8080
+      - TOP_GG_AUTH=${TOP_GG_AUTH}
+      - PUBLIC_LOG_CHANNEL=${PUBLIC_LOG_CHANNEL}
+    networks:
+      - sushii_net
+      - web
+    labels:
+      - "traefik.docker.network=sushii-2_web"
+      - "traefik.http.routers.sushii-webhooks.rule=Host(`webhooks.sushii.xyz`)"
+      - "traefik.http.routers.sushii-webhooks.entrypoints=secure"
+      - "traefik.http.routers.sushii-webhooks.tls.certresolver=acme"
+  sushii-image-server:
+    image: ghcr.io/sushiibot/sushii-image-server:latest
+    container_name: sushii-image-server
+    restart: unless-stopped
+    init: true
+    cap_add:
+      - SYS_ADMIN
+    expose:
+      - "3000"
+    volumes:
+      - ~/sushii-image-server/static:/app/static:ro
+      - ~/sushii-image-server/templates:/app/templates:ro
+    networks:
+      - sushii_net
+    labels:
+      - "traefik.enable=false"
+  rss-bridge:
+    image: rssbridge/rss-bridge:latest
+    container_name: rss-bridge
+    restart: unless-stopped
+    expose:
+      - "80"
+    volumes:
+      - ~/docker/rss-bridge/whitelist.txt:/app/whitelist.txt
+    networks:
+      - sushii_net
+    labels:
+      - "traefik.enable=false"
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/docker/portainer_data:/data
+    networks:
+      - web
+    labels:
+      # Frontend
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer-frontend.rule=Host(`portainer.sushii.xyz`)"
+      - "traefik.http.routers.portainer-frontend.entrypoints=secure"
+      - "traefik.http.services.portainer-frontend.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer-frontend.service=portainer-frontend"
+      - "traefik.http.routers.portainer-frontend.tls.certresolver=acme"
+  portainer_agent:
+    image: portainer/agent
+    container_name: portainer_agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    labels:
+      - "traefik.enable=false"
 networks:
-    web:
-        internal: false
-    sushii_net:
-        external: false
+  web:
+    internal: false
+  sushii_net:
+    external: false
