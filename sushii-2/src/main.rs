@@ -17,7 +17,6 @@ mod hooks;
 mod keys;
 mod model;
 mod prelude;
-mod tasks;
 
 use crate::error::Result;
 use crate::keys::{ReqwestContainer, ShardManagerContainer};
@@ -111,10 +110,9 @@ async fn main() -> Result<()> {
         .on_dispatch_error(hooks::dispatch_error)
         .group(&commands::META_GROUP)
         .group(&commands::tags::TAGS_GROUP)
-        // .group(&commands::feeds::FEEDS_GROUP)
         .group(&commands::guild::GUILD_GROUP)
         // .group(&commands::notifications::NOTIFICATIONS_GROUP)
-        // .group(&commands::reminders::REMINDERS_GROUP)
+        .group(&commands::reminders::REMINDERS_GROUP)
         .group(&commands::lastfm::LASTFM_GROUP)
         .group(&commands::users::USERS_GROUP)
         .group(&commands::moderation::MODERATION_GROUP)
@@ -139,7 +137,6 @@ async fn main() -> Result<()> {
     )
     .framework(framework)
     .event_handler(handlers::Handler)
-    .raw_event_handler(handlers::RawHandler)
     .await
     .expect("Err creating client");
 

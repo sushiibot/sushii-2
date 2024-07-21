@@ -1,9 +1,9 @@
 use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use std::fmt::Write;
 
-use crate::model::sql::*;
+
+
 
 #[command]
 async fn list(ctx: &Context, msg: &Message) -> CommandResult {

@@ -5,7 +5,7 @@ use serenity::prelude::*;
 #[command]
 #[only_in("guild")]
 #[required_permissions("BAN_MEMBERS")]
-async fn lookup(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+async fn lookup(ctx: &Context, msg: &Message, _args: Args) -> CommandResult {
     msg.channel_id
         .say(&ctx.http, "Please use </lookup:1117669298442338334> now :)")
         .await?;

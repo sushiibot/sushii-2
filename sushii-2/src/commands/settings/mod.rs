@@ -3,9 +3,8 @@ use serenity::framework::standard::macros::group;
 mod default;
 mod disable_channel;
 mod list;
-mod mute;
 
-use self::{default::*, disable_channel::*, list::*, mute::*};
+use self::{default::*, disable_channel::*, list::*};
 
 #[group]
 #[commands(list, disablechannel, enablechannel, disabledchannels)]

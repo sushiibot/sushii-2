@@ -1,12 +1,11 @@
 use serenity::framework::standard::macros::group;
 
 mod add;
-mod list;
 
-use self::{add::*, list::*};
+use self::{add::*};
 
 #[group]
-#[commands(add, list)]
+#[commands(add)]
 #[default_command(add)]
 #[prefixes("reminder", "remindme", "remind", "remi")]
 pub struct Reminders;

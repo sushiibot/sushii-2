@@ -47,7 +47,7 @@ pub async fn dispatch_error(
     ctx: &Context,
     msg: &Message,
     error: DispatchError,
-    command_name: &str,
+    _command_name: &str,
 ) {
     match error {
         DispatchError::NotEnoughArguments { min, given } => {

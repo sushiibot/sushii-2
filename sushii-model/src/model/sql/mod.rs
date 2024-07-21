@@ -1,7 +1,6 @@
 pub mod failure;
 pub mod feeds;
 pub mod guild;
-pub mod mod_log;
 pub mod mute;
 // pub mod rules;
 pub mod stats;
@@ -19,7 +18,6 @@ pub use self::{
         messages::SavedMessage,
         tags::Tag,
     },
-    mod_log::ModLogEntry,
     mute::{delete_mute, Mute},
     // rules::gauge::{RuleGauge, RuleScope},
     stats::BotStat,
@@ -27,7 +25,6 @@ pub use self::{
         cached_user::CachedUser,
         fishies::FishyType,
         notification::Notification,
-        reminder::Reminder,
         user_data::{UserData, UserProfileData},
         user_level::UserLevel,
         user_level_global::UserLevelGlobal,
