@@ -30,8 +30,7 @@
   storage = "/etc/traefik/acme/acme.json"
   caServer = "https://acme-v02.api.letsencrypt.org/directory"
 
-  [certificatesResolvers.acme.acme.httpChallenge]
-    entryPoint = "insecure"
+  [certificatesResolvers.acme.acme.tlsChallenge]
 
 [api]
   dashboard = true
