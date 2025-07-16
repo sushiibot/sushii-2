@@ -105,6 +105,8 @@ services:
     restart: unless-stopped
     command: postgres -c 'config_file=/etc/postgresql/data/postgresql.conf'
     shm_size: 512mb
+    ports:
+      - "10.0.0.2:5432:5432"
     env_file:
       - .env
     volumes:
