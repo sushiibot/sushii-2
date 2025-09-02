@@ -170,7 +170,7 @@ services:
     labels:
       - "traefik.docker.network=sushii-2_web"
       - "traefik.http.services.sushii-web.loadbalancer.server.port=3000"
-      - "traefik.http.routers.sushii-web.rule=Host(`sushii.xyz`) || Host(`sushii.bot`)"
+      - "traefik.http.routers.sushii-web.rule=Host(`sushii.xyz`)"
       - "traefik.http.routers.sushii-web.entrypoints=secure"
       - "traefik.http.routers.sushii-web.tls.certresolver=acme"
   sushii-web-staging:
